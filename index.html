@@ -260,7 +260,10 @@ function loadData(){
   return Promise.all([
     sbGet('departments?select=*&order=created_at'),
     sbGet('employees?select=*&order=name'),
-    sbGet('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,monthly_plan,monthly_fact,subscription_status,subscription_name,subscription_end,is_hidden&is_archived=eq.false&responsible_platform_user_id=not.is.null&order=company_name&limit=3000'),
+    // Убрали is_archived=eq.false — теперь показываем всех с ответственным.
+    // Истёкшие подписки (isArchived=true на платформе) — это не архивные клиенты, просто без активной подписки.
+    // Реально архивированные орги (скрытые через «В архив» в платформе) исключаем через platform_status или руками через is_hidden.
+    sbGet('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,monthly_plan,monthly_fact,subscription_status,subscription_name,subscription_end,is_hidden,is_archived&responsible_platform_user_id=not.is.null&order=company_name&limit=3000'),
     sbGet('clients?select=platform_org_id,company_name,responsible_platform_user_id,is_archived,is_hidden&responsible_platform_user_id=not.is.null&order=company_name&limit=5000')
   ]).then(function(res){
     RAW.depts=res[0];RAW.employees=res[1];RAW.clients=res[2];RAW.allClients=res[3]||[];
