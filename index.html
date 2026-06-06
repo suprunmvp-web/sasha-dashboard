@@ -3,6 +3,7 @@
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
 <title>SashaAI · Аналитика продаж</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 [data-theme="dark"]{--bg:#0B0E14;--surface:#11151F;--surface-2:#161B27;--surface-3:#1C2230;--border:#232a3a;--border-soft:#1a2030;--text:#E8ECF4;--text-2:#9AA4B8;--text-3:#5E6781;--accent:#4D7CFE;--accent-bg:rgba(77,124,254,.12);--green:#2ED3A7;--amber:#F5B544;--red:#FB6E5B;--green-bg:rgba(46,211,167,.12);--amber-bg:rgba(245,181,68,.12);--red-bg:rgba(251,110,91,.12);--shadow:0 24px 64px rgba(0,0,0,.5);}
 [data-theme="light"]{--bg:#F4F6FA;--surface:#FFFFFF;--surface-2:#F0F2F7;--surface-3:#E6E9F0;--border:#DCE1EB;--border-soft:#E8ECF3;--text:#1A1F2E;--text-2:#5A6478;--text-3:#98A1B3;--accent:#3D6BF5;--accent-bg:rgba(61,107,245,.10);--green:#16A97F;--amber:#D89318;--red:#E25540;--green-bg:rgba(22,169,127,.12);--amber-bg:rgba(216,147,24,.12);--red-bg:rgba(226,85,64,.12);--shadow:0 16px 48px rgba(30,40,80,.16);}
@@ -223,6 +224,9 @@ var S={role:'cd',theme:'dark',loading:true,loadErr:null,
   ropShowFired:false,ropShowArchivedDepts:false,
   // v3 additions
   deptFunnelMgr:'all',
+  // v4: deals / targets / payroll
+  dealsRaw:[],dealsByEmp:{},dealsByOrg:{},targetsByEmp:{},
+  payDept:'all',payEmp:'all',
 };
 
 /* ═══ UTILS ═══ */
@@ -254,17 +258,26 @@ function loadData(){
   return Promise.all([
     sbGet('departments?select=*&order=created_at'),
     sbGet('employees?select=*&order=name'),
-    sbGet('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,monthly_plan,monthly_fact,subscription_status,subscription_name,subscription_end,is_hidden&is_archived=eq.false&responsible_platform_user_id=not.is.null&order=company_name&limit=3000')
+    sbGet('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,monthly_plan,monthly_fact,subscription_status,subscription_name,subscription_end,is_hidden&is_archived=eq.false&responsible_platform_user_id=not.is.null&order=company_name&limit=3000'),
+    sbGet('clients?select=platform_org_id,company_name,responsible_platform_user_id,is_archived,is_hidden&responsible_platform_user_id=not.is.null&order=company_name&limit=5000')
   ]).then(function(res){
-    RAW.depts=res[0];RAW.employees=res[1];RAW.clients=res[2];
+    RAW.depts=res[0];RAW.employees=res[1];RAW.clients=res[2];RAW.allClients=res[3]||[];
     if(!RAW.depts.length&&!RAW.employees.length)
       S.loadErr='Supabase вернул пустые данные. Запусти migration_v2.sql и нажми ↻ Обновить.';
     buildDB();S.loading=false;
     if(!S.ropDept&&DB.depts.length)S.ropDept=DB.depts[0].id;
     if(!S.mgrAs){DB.depts.forEach(function(d){if(!S.mgrAs&&d.staff.length)S.mgrAs=d.staff[0].id;});}
     render();
-    loadPeriodStats();
+    refreshPeriod();
   }).catch(function(e){S.loading=false;S.loadErr=e.message;render();});
+}
+
+// v4: единый перерасчёт за период — минуты + сделки + планы
+function refreshPeriod(){
+  S.periodReady=false;
+  return Promise.all([loadPeriodStatsRaw(),loadDeals(),loadTargets()]).then(function(){
+    buildDB();S.periodReady=true;render();
+  }).catch(function(e){console.error(e);S.periodReady=true;render();});
 }
 
 function buildDB(){
@@ -283,10 +296,11 @@ function buildDB(){
     var lead=RAW.employees.find(function(e){return e.id===d.lead_employee_id;});
     var staff=emps.map(function(e){
       var ec=cBU[e.platform_user_id]||[];
+      var dealAgg=S.dealsByEmp[e.id]||{fact:0,comm:0,count:0};
+      var planAmt=S.targetsByEmp[e.id]||0;
       return{id:e.platform_user_id,supaId:e.id,name:e.name,
         role:e.role==='lead'?'Тимлид':'Менеджер',hired:e.hired_at||'2025-01-01',
-        fact:ec.reduce(function(a,c){return a+(c.monthly_fact||0);},0),
-        plan:ec.reduce(function(a,c){return a+(c.monthly_plan||0);},0),
+        fact:dealAgg.fact,plan:planAmt,comm:dealAgg.comm,deals:dealAgg.count,
         clients:ec.length};
     });
     staff.sort(function(a,b){return(b.role==='Тимлид')-(a.role==='Тимлид');});
@@ -300,7 +314,9 @@ function buildDB(){
       fired:firedEmps.filter(function(e){return e.dept_id===d.id;}),
       clients:dc.map(function(c){return{platform_org_id:c.platform_org_id,
         name:(c.company_name||'').substring(0,45),mgr:c.responsible_platform_user_id,
-        url:c.platform_url||'#',plan:c.monthly_plan||0,fact:c.monthly_fact||0,
+        url:c.platform_url||'#',
+        plan:c.monthly_plan||0,
+        fact:(S.dealsByOrg[c.platform_org_id]||{fact:0}).fact,
         minSpent:Math.max(0,(c.minutes_total||0)-(c.minutes_left||0)),
         minLeft:c.minutes_left||0,expiry:c.subscription_end||null};})};
   });
@@ -320,8 +336,8 @@ function buildDB(){
 }
 
 /* ═══ PERIOD STATS (МИН ИСП.) ═══ */
-function loadPeriodStats(){
-  S.periodStats={};S.periodLoading=true;S.periodReady=false;
+function loadPeriodStatsRaw(){
+  S.periodStats={};S.periodLoading=true;
   var from=S.rangeFrom,to=S.rangeTo;
   var curMonthStart=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
   var months=[],cur=new Date(from.getFullYear(),from.getMonth(),1);
@@ -339,7 +355,36 @@ function loadPeriodStats(){
     var q2='client_stats?select=platform_org_id,used_minutes&period_type=eq.day&stat_date=gte.'+mStart+'&stat_date=lte.'+todayISO()+'&limit=500000';
     promises.push(sbGet(q2).then(function(rows){rows.forEach(function(row){S.periodStats[row.platform_org_id]=(S.periodStats[row.platform_org_id]||0)+(row.used_minutes||0);});}));
   }
-  Promise.all(promises).then(function(){S.periodLoading=false;S.periodReady=true;render();}).catch(function(){S.periodLoading=false;S.periodReady=true;render();});
+  return Promise.all(promises).then(function(){S.periodLoading=false;}).catch(function(){S.periodLoading=false;});
+}
+
+/* ═══ DEALS (факт за период) ═══ */
+function loadDeals(){
+  S.dealsRaw=[];S.dealsByEmp={};S.dealsByOrg={};
+  var from=dateISO(S.rangeFrom),to=dateISO(S.rangeTo);
+  return sbGet('deals?select=*&deal_date=gte.'+from+'&deal_date=lte.'+to+'&order=deal_date.desc&limit=100000').then(function(rows){
+    S.dealsRaw=rows||[];
+    S.dealsRaw.forEach(function(d){
+      var sign=d.event_type==='refund'?-1:1;
+      var amt=sign*(Number(d.amount)||0);
+      var comm=amt*(Number(d.motivation_pct)||0)/100;
+      if(d.employee_id){var e=S.dealsByEmp[d.employee_id]||(S.dealsByEmp[d.employee_id]={fact:0,comm:0,count:0});e.fact+=amt;e.comm+=comm;e.count++;}
+      if(d.platform_org_id){var o=S.dealsByOrg[d.platform_org_id]||(S.dealsByOrg[d.platform_org_id]={fact:0});o.fact+=amt;}
+    });
+  });
+}
+
+/* ═══ TARGETS (план за период) ═══ */
+function loadTargets(){
+  S.targetsByEmp={};
+  var months=[],cur=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);
+  while(cur<=S.rangeTo){months.push({y:cur.getFullYear(),m:cur.getMonth()+1});cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);}
+  if(!months.length)return Promise.resolve();
+  var orParts=months.map(function(mm){return'and(year.eq.'+mm.y+',month.eq.'+mm.m+')';}).join(',');
+  var q='monthly_targets?select=employee_id,plan_amount,year,month&or=('+orParts+')&limit=100000';
+  return sbGet(q).then(function(rows){
+    (rows||[]).forEach(function(t){S.targetsByEmp[t.employee_id]=(S.targetsByEmp[t.employee_id]||0)+(Number(t.plan_amount)||0);});
+  });
 }
 
 /* ═══ SAVE ═══ */
@@ -389,8 +434,8 @@ function buildMonth(base){var y=base.getFullYear(),m=base.getMonth(),first=new D
 function renderCalMonth(base){var days=buildMonth(base);var cells=DOW.map(function(d){return'<div class="cal-dow">'+d+'</div>';}).join('');days.forEach(function(o){var isDisabled=o.d<MIN_DATE;var cls='cal-day'+(o.other?' other':'')+(isDisabled?' disabled':'');var t=o.d.getTime(),f=S.rangeFrom.getTime(),tt=S.rangeTo.getTime();if(!isDisabled){if(sameDay(o.d,S.rangeFrom)&&sameDay(o.d,S.rangeTo))cls+=' range-single';else if(sameDay(o.d,S.rangeFrom))cls+=' range-start';else if(sameDay(o.d,S.rangeTo))cls+=' range-end';else if(t>f&&t<tt)cls+=' in-range';}cells+='<div class="'+cls+'" '+(isDisabled?'':'onclick="pickDay('+o.d.getFullYear()+','+o.d.getMonth()+','+o.d.getDate()+')"')+'>'+o.d.getDate()+'</div>';});return'<div class="cal-grid">'+cells+'</div>';}
 function renderCal(){var L=S.calLeft,R=new Date(L.getFullYear(),L.getMonth()+1,1);var ph=['7 дней','30 дней','Этот месяц','Квартал'].map(function(p,i){return'<button class="cal-preset" onclick="applyPreset('+i+')">'+p+'</button>';}).join('');return'<div class="cal-presets">'+ph+'</div><div class="cal-months"><div><div class="cal-mhead"><button class="cal-nav" onclick="calShift(-1)">‹</button><span class="cal-mtitle">'+MN[L.getMonth()]+' '+L.getFullYear()+'</span><span style="width:28px"></span></div>'+renderCalMonth(L)+'</div><div><div class="cal-mhead"><span style="width:28px"></span><span class="cal-mtitle">'+MN[R.getMonth()]+' '+R.getFullYear()+'</span><button class="cal-nav" onclick="calShift(1)">›</button></div>'+renderCalMonth(R)+'</div></div>';}
 window.calShift=function(d){S.calLeft=new Date(S.calLeft.getFullYear(),S.calLeft.getMonth()+d,1);render();};
-window.pickDay=function(y,m,d){var p=new Date(y,m,d);if(p<MIN_DATE)return;if(S.pick===0){S.rangeFrom=p;S.rangeTo=p;S.pick=1;}else{if(p<S.rangeFrom){S.rangeTo=S.rangeFrom;S.rangeFrom=p;}else S.rangeTo=p;S.pick=0;loadPeriodStats();}render();};
-window.applyPreset=function(i){var p=[{days:7},{days:30},{tm:1},{days:90}][i];if(p.tm){S.rangeFrom=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);S.rangeTo=new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0);}else{S.rangeTo=new Date(TODAY);S.rangeFrom=new Date(Math.max(S.rangeTo.getTime()-(p.days-1)*864e5,MIN_DATE.getTime()));}S.calLeft=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);S.pick=0;loadPeriodStats();render();};
+window.pickDay=function(y,m,d){var p=new Date(y,m,d);if(p<MIN_DATE)return;if(S.pick===0){S.rangeFrom=p;S.rangeTo=p;S.pick=1;}else{if(p<S.rangeFrom){S.rangeTo=S.rangeFrom;S.rangeFrom=p;}else S.rangeTo=p;S.pick=0;refreshPeriod();}render();};
+window.applyPreset=function(i){var p=[{days:7},{days:30},{tm:1},{days:90}][i];if(p.tm){S.rangeFrom=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);S.rangeTo=new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0);}else{S.rangeTo=new Date(TODAY);S.rangeFrom=new Date(Math.max(S.rangeTo.getTime()-(p.days-1)*864e5,MIN_DATE.getTime()));}S.calLeft=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);S.pick=0;refreshPeriod();render();};
 window.toggleCal=function(e){e.stopPropagation();S.calOpen=!S.calOpen;render();};
 document.addEventListener('click',function(e){var ch=false;if(S.calOpen&&!e.target.closest('.cal-wrap')){S.calOpen=false;ch=true;}if(S.mgrDropOpen&&!e.target.closest('#ms-c')){S.mgrDropOpen=false;ch=true;}if(ch)render();});
 function calTrigger(){return'<div class="cal-wrap"><div class="cal-trigger" onclick="toggleCal(event)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>'+calLabel()+'</div><div class="cal-pop'+(S.calOpen?' open':'')+'">'+renderCal()+'</div></div>';}
@@ -400,8 +445,8 @@ window.setRole=function(rl){S.role=rl;S.dept=null;S.calOpen=false;render();};
 window.toggleTheme=function(){S.theme=S.theme==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',S.theme);render();};
 window.doRefresh=function(){loadData();};
 function roleBar(){
-  var roles=[['cd','Коммдир'],['rop','РОП'],['mgr','Менеджер']];
-  var meta={cd:'видит все отделы',rop:'управляет отделами и людьми',mgr:'клиенты, план и факт'}[S.role];
+  var roles=[['cd','Коммдир'],['rop','РОП'],['mgr','Менеджер'],['pay','Зарплаты']];
+  var meta={cd:'видит все отделы',rop:'управляет отделами и людьми',mgr:'клиенты, план и факт',pay:'сделки и начисления'}[S.role];
   var seg=roles.map(function(x){return'<button class="role-btn'+(S.role===x[0]?' on':'')+'" onclick="setRole(\''+x[0]+'\')">'+x[1]+'</button>';}).join('');
   return'<div class="rolebar"><div style="display:flex;align-items:center;gap:10px"><div class="role-seg">'+seg+'</div><span class="role-meta">'+meta+'</span></div><div class="bar-right"><button class="refresh-btn" onclick="doRefresh()">↻ Обновить</button><button class="icon-btn" onclick="toggleTheme()">'+(S.theme==='dark'?'☀':'☾')+'</button></div></div>';
 }
@@ -481,7 +526,8 @@ function renderDept(){
       '</div></div>';
   }
   var archBtn='<button class="btn btn-sm btn-ghost" onclick="archiveDept(\''+d.id+'\')" title="Убрать отдел в архив" style="margin-left:8px">В архив</button>';
-  setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUp()">‹ Все отделы</button><span class="crumb-title">'+d.name+'</span>'+archBtn+'</div>'+calTrigger()+'</div><div class="dept-kpi">'+kH+'</div>'+tabs+ct);
+  var dealBtn='<button class="btn btn-sm btn-primary" onclick="addDeal(null,\''+d.id+'\')" style="margin-left:8px">+ Сделка</button>';
+  setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUp()">‹ Все отделы</button><span class="crumb-title">'+d.name+'</span>'+dealBtn+archBtn+'</div>'+calTrigger()+'</div><div class="dept-kpi">'+kH+'</div>'+tabs+ct);
 }
 window.setDeptFunnelMgr=function(id){S.deptFunnelMgr=id;render();};
 window.toggleMgrDrop=function(e){e.stopPropagation();S.mgrDropOpen=!S.mgrDropOpen;render();};
@@ -589,32 +635,31 @@ function renderMgr(){
   if(!d){S.mgrAs=allMgrs[0].id;d=DB.depts.find(function(x){return x.staff.some(function(m){return m.id===S.mgrAs;});});}
   var myClients=d?d.clients.filter(function(c){return c.mgr===S.mgrAs;}):[];
   var asSel='<select style="padding:6px 10px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:12px" onchange="setMgrAs(this.value)">'+allMgrs.map(function(m){return'<option value="'+m.id+'"'+(m.id===S.mgrAs?' selected':'')+'>'+m.name+'</option>';}).join('')+'</select>';
-  var totalPlan=myClients.reduce(function(a,c){return a+c.plan;},0);
-  var totalFact=myClients.reduce(function(a,c){return a+c.fact;},0);
-  var mp=pct(totalFact,totalPlan),api=S.factMode==='api';
+  var me=d?d.staff.find(function(m){return m.id===S.mgrAs;}):null;
+  var meSupaId=me?me.supaId:null;
+  var totalFact=me?me.fact:0;
+  var totalPlan=me?me.plan:0;
+  var myDeals=me?me.deals:0;
+  var mp=pct(totalFact,totalPlan);
+  var singleMonth=(S.rangeFrom.getMonth()===S.rangeTo.getMonth()&&S.rangeFrom.getFullYear()===S.rangeTo.getFullYear());
+  var planEdit=singleMonth?'<span style="font-size:10px;color:var(--accent);cursor:pointer;margin-left:6px" onclick="editTarget(\''+meSupaId+'\')">изменить</span>':'<span style="font-size:10px;color:var(--text-3);margin-left:6px">сумма за период</span>';
   var kH=[
-    '<div class="kcard"><div class="kl">Мой план</div><div class="kv num">'+fmt(totalPlan)+'</div><div class="ks"><span class="neu">факт '+fmt(totalFact)+' · '+mp+'%</span></div><div class="pbar"><div class="pfill" style="width:'+Math.min(mp,100)+'%;background:'+grad(mp)+'"></div></div></div>',
-    '<div class="kcard"><div class="kl">Клиентов</div><div class="kv num">'+myClients.length+'</div><div class="ks"><span class="neu">в портфеле</span></div></div>',
-    '<div class="kcard"><div class="kl">Ранрейт</div><div class="kv num">'+rr(totalFact,totalPlan)+'%</div><div class="ks"><span class="neu">по моим клиентам</span></div></div>'
+    '<div class="kcard"><div class="kl">Мой план '+planEdit+'</div><div class="kv num">'+fmt(totalPlan)+'</div><div class="ks"><span class="neu">факт '+fmt(totalFact)+' · '+mp+'%</span></div><div class="pbar"><div class="pfill" style="width:'+Math.min(mp,100)+'%;background:'+grad(mp)+'"></div></div></div>',
+    '<div class="kcard"><div class="kl">Сделок за период</div><div class="kv num">'+myDeals+'</div><div class="ks"><span class="neu">'+myClients.length+' клиентов в портфеле</span></div></div>',
+    '<div class="kcard"><div class="kl">Ранрейт</div><div class="kv num">'+rr(totalFact,totalPlan)+'%</div><div class="ks"><span class="neu">по моему плану</span></div></div>'
   ].join('');
-  // Tabs
   var tabs='<div class="tab-row">'+[['clients','Клиенты'],['funnel','Воронка']].map(function(t){return'<button class="tab'+(S.mgrTab===t[0]?' on':'')+'" onclick="setMgrTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>';
   var content='';
   if(S.mgrTab==='clients'){
-    // МИН ИСП. period header
     var periodLabel=MN[S.rangeFrom.getMonth()];
     if(S.rangeFrom.getMonth()!==S.rangeTo.getMonth())periodLabel=MN[S.rangeFrom.getMonth()]+' — '+MN[S.rangeTo.getMonth()];
-    var minCol='Мин исп. ('+periodLabel+')'+(S.periodLoading?' ···':'');
     var rows=myClients.map(function(c){
-      var cp=pct(c.fact,c.plan);
       var minUsed=S.periodStats[c.platform_org_id];
       var minCell=S.periodLoading?'<span style="color:var(--text-3);font-size:11px">···</span>':(minUsed!=null?fmtMin(minUsed):'<span style="color:var(--text-3)">—</span>');
-      var fCell=api?'<td class="r strong num" style="color:'+grad(cp)+'">'+fmt(c.fact)+'</td>':'<td class="r"><input class="inline-input" type="number" value="'+c.fact+'" onchange="setFact(\''+c.platform_org_id+'\',this.value)"></td>';
+      var factColor=c.fact>0?grad(100):(c.fact<0?'var(--red)':'var(--text-3)');
       return'<tr>'+
         '<td><a class="ext-link" href="'+c.url+'" target="_blank">'+c.name+' <span class="lk">↗</span></a></td>'+
-        '<td class="r"><input class="inline-input" type="number" value="'+c.plan+'" onchange="setPlan(\''+c.platform_org_id+'\',this.value)"></td>'+
-        fCell+
-        '<td class="r"><span style="color:'+grad(cp)+';font-size:11px;font-weight:600" class="num">'+cp+'%</span></td>'+
+        '<td class="r strong num" style="color:'+factColor+'">'+fmt(c.fact)+'</td>'+
         '<td class="r muted num">'+minCell+'</td>'+
         '<td class="r muted num">'+fmtMin(c.minLeft)+'</td>'+
         '<td class="r">'+daysBadge(daysTo(c.expiry))+'</td>'+
@@ -622,9 +667,8 @@ function renderMgr(){
       '</tr>';
     }).join('');
     var table=myClients.length?
-      '<table class="tbl"><thead><tr><th>Компания</th><th class="r">План</th><th class="r">Факт'+(api?' (API)':'')+'</th><th class="r">%</th><th class="r">'+minCol+'</th><th class="r">Мин ост.</th><th class="r">До прод.</th><th class="r"></th></tr></thead><tbody>'+rows+'</tbody></table>':
+      '<table class="tbl"><thead><tr><th>Компания</th><th class="r">Факт за период</th><th class="r">Мин исп. ('+periodLabel+')</th><th class="r">Мин ост.</th><th class="r">До прод.</th><th class="r"></th></tr></thead><tbody>'+rows+'</tbody></table>':
       '<div class="empty-state">Нет клиентов в портфеле.<br>Клиенты привязываются по ответственному в платформе.</div>';
-    // Archived clients toggle
     var myHiddenClients=DB.hiddenClients?DB.hiddenClients.filter(function(c){return c.responsible_platform_user_id===S.mgrAs;}):[];
     var archCliBlock='';
     if(myHiddenClients.length){
@@ -632,20 +676,145 @@ function renderMgr(){
       var archRows=myHiddenClients.map(function(c){return'<tr><td class="muted">'+c.company_name+'</td><td class="r"><button class="btn btn-sm" onclick="unhideClient(\''+c.platform_org_id+'\')">Вернуть</button></td></tr>';}).join('');
       archCliBlock='<div class="arch-toggle'+(isOpen?' open':'')+'" onclick="toggleArchClients()"><span class="arr">›</span>Архив клиентов ('+myHiddenClients.length+')</div><div class="arch-block'+(isOpen?' open':'')+'"><table class="tbl" style="margin-top:8px"><tbody>'+archRows+'</tbody></table></div>';
     }
-    var hint=api?'Факт из API — редактируй только план':'Вбивай план и факт по каждому клиенту';
-    content='<div class="panel"><div class="panel-title">'+hint+'</div>'+table+archCliBlock+'</div>';
+    content='<div class="panel"><div class="panel-title">Факт по клиентам считается из проведённых сделок за выбранный период</div>'+table+archCliBlock+'</div>';
   }
   if(S.mgrTab==='funnel'){
     content='<div class="panel"><div class="funnel-stub"><div class="funnel-stub-icon">🔗</div><div class="funnel-stub-title">Воронка из amoCRM</div><div class="funnel-stub-text">Данные появятся после подключения amoCRM.<br>Готовый скрипт: <code>amoCRM.gs</code> → запиши в таблицу <code>amo_leads</code> → воронка оживёт автоматически.</div></div></div>';
   }
-  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Кабинет менеджера</span>'+asSel+'<span class="save-hint'+(S.saveHint?' show':'')+'">✓ сохранено</span></div>'+calTrigger()+'</div><div class="dept-kpi" style="grid-template-columns:repeat(3,1fr)">'+kH+'</div>'+tabs+content);
+  var dealBtn=meSupaId?'<button class="btn btn-sm btn-primary" onclick="addDeal(\''+meSupaId+'\',null)" style="margin-left:8px">+ Сделка</button>':'';
+  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Кабинет менеджера</span>'+asSel+dealBtn+'<span class="save-hint'+(S.saveHint?' show':'')+'">✓ сохранено</span></div>'+calTrigger()+'</div><div class="dept-kpi" style="grid-template-columns:repeat(3,1fr)">'+kH+'</div>'+tabs+content);
 }
 window.setMgrAs=function(id){S.mgrAs=id;render();};
 window.setMgrTab=function(t){S.mgrTab=t;render();};
 window.toggleArchClients=function(){S.showArchivedClients=!S.showArchivedClients;render();};
-window.setPlan=function(id,v){saveClient(id,'monthly_plan',v);flashSave();};
-window.setFact=function(id,v){saveClient(id,'monthly_fact',v);flashSave();};
+window.editTarget=function(supaId){
+  var y=S.rangeFrom.getFullYear(),m=S.rangeFrom.getMonth()+1;
+  var cur=S.targetsByEmp[supaId]||0;
+  openModal('План на '+MN[m-1]+' '+y,
+    '<div class="field"><label>План (₽)</label><input id="tg-plan" type="number" value="'+cur+'"></div><p style="font-size:11px;color:var(--text-3)">Цель на месяц. Факт собирается из сделок автоматически.</p>',
+    function(){var v=Number(document.getElementById('tg-plan').value)||0;saveTarget(supaId,y,m,v);closeModal();});
+};
+function saveTarget(supaId,y,m,v){
+  fetch(SB_URL+'/rest/v1/monthly_targets?on_conflict=employee_id,year,month',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({employee_id:supaId,year:y,month:m,plan_amount:v})}).then(function(){refreshPeriod();flashSave();});
+}
 function flashSave(){S.saveHint=true;render();setTimeout(function(){S.saveHint=false;render();},1500);}
+
+/* ═══ СДЕЛКИ (deal modal) ═══ */
+window.addDeal=function(preEmpId,preDeptId){
+  var emps=RAW.employees.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
+  var empOpts=emps.map(function(e){var arch=(e.fired_at||e.is_archived)?' (архив)':'';return'<option value="'+e.id+'"'+(e.id===preEmpId?' selected':'')+'>'+e.name+arch+'</option>';}).join('');
+  var initEmp=preEmpId||(emps[0]&&emps[0].id);
+  var body=
+    '<div class="field"><label>Событие</label><select id="dl-type"><option value="payment">Оплата</option><option value="refund">Возврат</option></select></div>'+
+    '<div class="field"><label>Сотрудник</label><select id="dl-emp" onchange="dealEmpChanged()">'+empOpts+'</select></div>'+
+    '<div class="field"><label>Клиент</label><select id="dl-client"></select></div>'+
+    '<div class="form-row" style="display:flex;gap:10px"><div class="field" style="flex:1"><label>Сумма ₽</label><input id="dl-amount" type="number" placeholder="0"></div><div class="field" style="flex:1"><label>Мотивация %</label><input id="dl-pct" type="number" placeholder="10" step="0.5"></div></div>'+
+    '<div class="field"><label>Дата сделки</label><input id="dl-date" type="date" value="'+todayISO()+'"></div>'+
+    '<div class="field"><label>Комментарий (необязательно)</label><input id="dl-note" placeholder="—"></div>';
+  openModal('Добавить сделку',body,function(){saveDeal(preDeptId);});
+  setTimeout(function(){var es=document.getElementById('dl-emp');if(es){es.value=initEmp;dealEmpChanged();}},0);
+};
+window.dealEmpChanged=function(){
+  var empSel=document.getElementById('dl-emp');var clientSel=document.getElementById('dl-client');
+  if(!empSel||!clientSel)return;
+  var emp=RAW.employees.find(function(e){return e.id===empSel.value;});
+  var puid=emp?emp.platform_user_id:null;
+  var cls=(RAW.allClients||[]).filter(function(c){return c.responsible_platform_user_id===puid;});
+  if(!cls.length){clientSel.innerHTML='<option value="">— нет клиентов —</option>';return;}
+  clientSel.innerHTML=cls.map(function(c){var arch=(c.is_archived||c.is_hidden)?' (архив)':'';return'<option value="'+c.platform_org_id+'" data-name="'+(c.company_name||'').replace(/"/g,'')+'">'+(c.company_name||'')+arch+'</option>';}).join('');
+};
+function saveDeal(preDeptId){
+  var type=document.getElementById('dl-type').value;
+  var empId=document.getElementById('dl-emp').value;
+  var clientSel=document.getElementById('dl-client');
+  var orgId=clientSel.value||null;
+  var clientName=clientSel.selectedOptions[0]?clientSel.selectedOptions[0].getAttribute('data-name'):'';
+  var amount=Number(document.getElementById('dl-amount').value)||0;
+  var pct2=Number(document.getElementById('dl-pct').value)||0;
+  var date=document.getElementById('dl-date').value||todayISO();
+  var note=document.getElementById('dl-note').value||null;
+  if(amount<=0){alert('Введи сумму больше нуля');return;}
+  var emp=RAW.employees.find(function(e){return e.id===empId;});
+  var deptId=emp?emp.dept_id:(preDeptId||null);
+  var dept=RAW.depts.find(function(x){return x.id===deptId;});
+  var row={event_type:type,employee_id:empId,employee_name:emp?emp.name:'',
+    platform_org_id:orgId,client_name:clientName,
+    dept_id:deptId,dept_name:dept?dept.name:'',
+    amount:amount,motivation_pct:pct2,deal_date:date,note:note};
+  sbPost('deals',row).then(function(){closeModal();refreshPeriod();flashSave();});
+}
+
+/* ═══ ЗАРПЛАТЫ (payroll) ═══ */
+function renderPayroll(){
+  // агрегируем S.dealsRaw по сотрудникам, с фильтрами
+  var deptOpts='<option value="all">Все отделы</option>'+DB.depts.concat(DB.archivedDepts.map(function(d){return{id:d.id,name:d.name+' (архив)'};})).map(function(d){return'<option value="'+d.id+'"'+(S.payDept===d.id?' selected':'')+'>'+d.name+'</option>';}).join('');
+  var allEmps=RAW.employees.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
+  var empOpts='<option value="all">Все сотрудники</option>'+allEmps.map(function(e){var arch=(e.fired_at||e.is_archived)?' (архив)':'';return'<option value="'+e.id+'"'+(S.payEmp===e.id?' selected':'')+'>'+e.name+arch+'</option>';}).join('');
+
+  var filtered=S.dealsRaw.filter(function(d){
+    if(S.payDept!=='all'&&d.dept_id!==S.payDept)return false;
+    if(S.payEmp!=='all'&&d.employee_id!==S.payEmp)return false;
+    return true;
+  });
+
+  // агрегат по сотруднику
+  var byEmp={};
+  filtered.forEach(function(d){
+    var sign=d.event_type==='refund'?-1:1;
+    var amt=sign*(Number(d.amount)||0);
+    var comm=amt*(Number(d.motivation_pct)||0)/100;
+    var key=d.employee_id||'—';
+    var e=byEmp[key]||(byEmp[key]={name:d.employee_name||'—',dept:d.dept_name||'—',fact:0,comm:0,count:0});
+    e.fact+=amt;e.comm+=comm;e.count++;
+  });
+  var rowsArr=Object.keys(byEmp).map(function(k){return byEmp[k];}).sort(function(a,b){return b.comm-a.comm;});
+  var totFact=rowsArr.reduce(function(a,e){return a+e.fact;},0);
+  var totComm=rowsArr.reduce(function(a,e){return a+e.comm;},0);
+  var totCount=rowsArr.reduce(function(a,e){return a+e.count;},0);
+
+  var kH=[
+    '<div class="ck"><div class="ck-l">Выручка за период</div><div class="ck-v num">'+fmt(totFact)+'</div><div class="ck-s">по выбранным фильтрам</div></div>',
+    '<div class="ck"><div class="ck-l">Сделок</div><div class="ck-v num">'+totCount+'</div><div class="ck-s">оплат и возвратов</div></div>',
+    '<div class="ck"><div class="ck-l">Начислено мотивации</div><div class="ck-v num">'+fmt(totComm)+'</div><div class="ck-s">сумма по сотрудникам</div></div>',
+    '<div class="ck"><div class="ck-l">Сотрудников</div><div class="ck-v num">'+rowsArr.length+'</div><div class="ck-s">со сделками</div></div>'
+  ].join('');
+
+  var body=rowsArr.length?rowsArr.map(function(e){var avgPct=e.fact!==0?r(e.comm/e.fact*100):0;return'<tr><td><span class="strong">'+e.name+'</span></td><td class="muted">'+e.dept+'</td><td class="r muted num">'+e.count+'</td><td class="r strong num">'+fmt(e.fact)+'</td><td class="r muted num">'+avgPct+'%</td><td class="r strong num" style="color:var(--green)">'+fmt(e.comm)+'</td></tr>';}).join(''):'<tr><td colspan="6"><div class="empty-state">Нет сделок за выбранный период и фильтры.<br>Добавь сделки через Коммдир → отдел → «+ Сделка» или в кабинете менеджера.</div></td></tr>';
+
+  var filters='<div class="adm-head"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
+    '<select style="padding:7px 11px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:12px" onchange="setPayDept(this.value)">'+deptOpts+'</select>'+
+    '<select style="padding:7px 11px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:12px" onchange="setPayEmp(this.value)">'+empOpts+'</select>'+
+    '</div><button class="btn btn-primary" onclick="exportPayroll()">↓ Выгрузить xlsx</button></div>';
+
+  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Зарплатные листы</span></div>'+calTrigger()+'</div>'+
+    '<div class="ckpi">'+kH+'</div>'+
+    '<div class="panel">'+filters+
+    '<table class="tbl"><thead><tr><th>Сотрудник</th><th>Отдел</th><th class="r">Сделок</th><th class="r">Выручка</th><th class="r">Ср. %</th><th class="r">Начислено</th></tr></thead><tbody>'+body+'</tbody></table></div>');
+}
+window.setPayDept=function(v){S.payDept=v;render();};
+window.setPayEmp=function(v){S.payEmp=v;render();};
+window.exportPayroll=function(){
+  var filtered=S.dealsRaw.filter(function(d){
+    if(S.payDept!=='all'&&d.dept_id!==S.payDept)return false;
+    if(S.payEmp!=='all'&&d.employee_id!==S.payEmp)return false;
+    return true;
+  });
+  if(!filtered.length){alert('Нет сделок для выгрузки');return;}
+  // Лист 1: детально по сделкам
+  var deals=filtered.map(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);return{
+    'Дата':d.deal_date,'Событие':d.event_type==='refund'?'Возврат':'Оплата','Сотрудник':d.employee_name,
+    'Отдел':d.dept_name,'Клиент':d.client_name,'Сумма':amt,'Мотивация %':d.motivation_pct,
+    'Начислено':amt*(Number(d.motivation_pct)||0)/100,'Комментарий':d.note||''};});
+  // Лист 2: свод по сотрудникам
+  var byEmp={};
+  filtered.forEach(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);var key=d.employee_id||'—';var e=byEmp[key]||(byEmp[key]={'Сотрудник':d.employee_name,'Отдел':d.dept_name,'Сделок':0,'Выручка':0,'Начислено':0});e['Сделок']++;e['Выручка']+=amt;e['Начислено']+=amt*(Number(d.motivation_pct)||0)/100;});
+  var summary=Object.keys(byEmp).map(function(k){return byEmp[k];}).sort(function(a,b){return b['Начислено']-a['Начислено'];});
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(summary),'Свод');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(deals),'Сделки');
+  var fname='Зарплаты_'+dateISO(S.rangeFrom)+'_'+dateISO(S.rangeTo)+'.xlsx';
+  XLSX.writeFile(wb,fname);
+};
 
 /* ═══ MODAL ═══ */
 function openModal(title,body,onSave){
@@ -661,6 +830,7 @@ function render(){
   if(S.loading){document.getElementById('app').innerHTML='<div class="loading"><div class="spinner"></div><div>Загружаю из Supabase…</div></div>';return;}
   if(S.role==='rop'){renderRop();return;}
   if(S.role==='mgr'){renderMgr();return;}
+  if(S.role==='pay'){renderPayroll();return;}
   if(S.dept)renderDept();else renderCo();
 }
 loadData();
