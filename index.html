@@ -120,6 +120,8 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .adm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
 .btn{font-size:12px;padding:8px 14px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);cursor:pointer;font-weight:500;}
 .btn:hover{border-color:var(--accent);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn:disabled:hover{border-color:var(--border);}
 .btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;}
 .btn-primary:hover{opacity:.9;}
 .btn-sm{font-size:11px;padding:5px 10px;}
@@ -225,7 +227,7 @@ var S={role:'cd',theme:'dark',loading:true,loadErr:null,
   // v3 additions
   deptFunnelMgr:'all',
   // v4: deals / targets / payroll
-  dealsRaw:[],dealsByEmp:{},dealsByOrg:{},targetsByEmp:{},
+  dealsRaw:[],dealsByEmp:{},dealsByOrg:{},planByOrg:{},
   payDept:'all',payEmp:'all',
 };
 
@@ -275,7 +277,7 @@ function loadData(){
 // v4: единый перерасчёт за период — минуты + сделки + планы
 function refreshPeriod(){
   S.periodReady=false;
-  return Promise.all([loadPeriodStatsRaw(),loadDeals(),loadTargets()]).then(function(){
+  return Promise.all([loadPeriodStatsRaw(),loadDeals(),loadPlans()]).then(function(){
     buildDB();S.periodReady=true;render();
   }).catch(function(e){console.error(e);S.periodReady=true;render();});
 }
@@ -297,7 +299,7 @@ function buildDB(){
     var staff=emps.map(function(e){
       var ec=cBU[e.platform_user_id]||[];
       var dealAgg=S.dealsByEmp[e.id]||{fact:0,comm:0,count:0};
-      var planAmt=S.targetsByEmp[e.id]||0;
+      var planAmt=ec.reduce(function(a,c){return a+(S.planByOrg[c.platform_org_id]||0);},0);
       return{id:e.platform_user_id,supaId:e.id,name:e.name,
         role:e.role==='lead'?'Тимлид':'Менеджер',hired:e.hired_at||'2025-01-01',
         fact:dealAgg.fact,plan:planAmt,comm:dealAgg.comm,deals:dealAgg.count,
@@ -315,7 +317,7 @@ function buildDB(){
       clients:dc.map(function(c){return{platform_org_id:c.platform_org_id,
         name:(c.company_name||'').substring(0,45),mgr:c.responsible_platform_user_id,
         url:c.platform_url||'#',
-        plan:c.monthly_plan||0,
+        plan:S.planByOrg[c.platform_org_id]||0,
         fact:(S.dealsByOrg[c.platform_org_id]||{fact:0}).fact,
         minSpent:Math.max(0,(c.minutes_total||0)-(c.minutes_left||0)),
         minLeft:c.minutes_left||0,expiry:c.subscription_end||null};})};
@@ -374,16 +376,16 @@ function loadDeals(){
   });
 }
 
-/* ═══ TARGETS (план за период) ═══ */
-function loadTargets(){
-  S.targetsByEmp={};
+/* ═══ PLANS (план по клиентам за период) ═══ */
+function loadPlans(){
+  S.planByOrg={};
   var months=[],cur=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);
   while(cur<=S.rangeTo){months.push({y:cur.getFullYear(),m:cur.getMonth()+1});cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);}
   if(!months.length)return Promise.resolve();
   var orParts=months.map(function(mm){return'and(year.eq.'+mm.y+',month.eq.'+mm.m+')';}).join(',');
-  var q='monthly_targets?select=employee_id,plan_amount,year,month&or=('+orParts+')&limit=100000';
+  var q='client_monthly_records?select=platform_org_id,monthly_plan,year,month&or=('+orParts+')&limit=100000';
   return sbGet(q).then(function(rows){
-    (rows||[]).forEach(function(t){S.targetsByEmp[t.employee_id]=(S.targetsByEmp[t.employee_id]||0)+(Number(t.plan_amount)||0);});
+    (rows||[]).forEach(function(t){S.planByOrg[t.platform_org_id]=(S.planByOrg[t.platform_org_id]||0)+(Number(t.monthly_plan)||0);});
   });
 }
 
@@ -642,9 +644,9 @@ function renderMgr(){
   var myDeals=me?me.deals:0;
   var mp=pct(totalFact,totalPlan);
   var singleMonth=(S.rangeFrom.getMonth()===S.rangeTo.getMonth()&&S.rangeFrom.getFullYear()===S.rangeTo.getFullYear());
-  var planEdit=singleMonth?'<span style="font-size:10px;color:var(--accent);cursor:pointer;margin-left:6px" onclick="editTarget(\''+meSupaId+'\')">изменить</span>':'<span style="font-size:10px;color:var(--text-3);margin-left:6px">сумма за период</span>';
+  var planNote=singleMonth?'':'<span style="font-size:10px;color:var(--text-3);margin-left:6px">сумма за период</span>';
   var kH=[
-    '<div class="kcard"><div class="kl">Мой план '+planEdit+'</div><div class="kv num">'+fmt(totalPlan)+'</div><div class="ks"><span class="neu">факт '+fmt(totalFact)+' · '+mp+'%</span></div><div class="pbar"><div class="pfill" style="width:'+Math.min(mp,100)+'%;background:'+grad(mp)+'"></div></div></div>',
+    '<div class="kcard"><div class="kl">Мой план '+planNote+'</div><div class="kv num">'+fmt(totalPlan)+'</div><div class="ks"><span class="neu">факт '+fmt(totalFact)+' · '+mp+'%</span></div><div class="pbar"><div class="pfill" style="width:'+Math.min(mp,100)+'%;background:'+grad(mp)+'"></div></div></div>',
     '<div class="kcard"><div class="kl">Сделок за период</div><div class="kv num">'+myDeals+'</div><div class="ks"><span class="neu">'+myClients.length+' клиентов в портфеле</span></div></div>',
     '<div class="kcard"><div class="kl">Ранрейт</div><div class="kv num">'+rr(totalFact,totalPlan)+'%</div><div class="ks"><span class="neu">по моему плану</span></div></div>'
   ].join('');
@@ -653,21 +655,29 @@ function renderMgr(){
   if(S.mgrTab==='clients'){
     var periodLabel=MN[S.rangeFrom.getMonth()];
     if(S.rangeFrom.getMonth()!==S.rangeTo.getMonth())periodLabel=MN[S.rangeFrom.getMonth()]+' — '+MN[S.rangeTo.getMonth()];
+    var py=S.rangeFrom.getFullYear(),pm=S.rangeFrom.getMonth()+1;
     var rows=myClients.map(function(c){
+      var cp=pct(c.fact,c.plan);
       var minUsed=S.periodStats[c.platform_org_id];
       var minCell=S.periodLoading?'<span style="color:var(--text-3);font-size:11px">···</span>':(minUsed!=null?fmtMin(minUsed):'<span style="color:var(--text-3)">—</span>');
       var factColor=c.fact>0?grad(100):(c.fact<0?'var(--red)':'var(--text-3)');
+      var planCell=singleMonth?
+        '<td class="r"><input class="inline-input" type="number" value="'+c.plan+'" onchange="saveClientPlan(\''+c.platform_org_id+'\','+py+','+pm+',this.value)"></td>':
+        '<td class="r muted num">'+fmt(c.plan)+'</td>';
       return'<tr>'+
         '<td><a class="ext-link" href="'+c.url+'" target="_blank">'+c.name+' <span class="lk">↗</span></a></td>'+
+        planCell+
         '<td class="r strong num" style="color:'+factColor+'">'+fmt(c.fact)+'</td>'+
+        '<td class="r"><span style="color:'+grad(cp)+';font-size:11px;font-weight:600" class="num">'+cp+'%</span></td>'+
         '<td class="r muted num">'+minCell+'</td>'+
         '<td class="r muted num">'+fmtMin(c.minLeft)+'</td>'+
         '<td class="r">'+daysBadge(daysTo(c.expiry))+'</td>'+
         '<td class="r"><button class="btn btn-sm btn-ghost" onclick="hideClient(\''+c.platform_org_id+'\',\''+c.name.replace(/'/g,'')+'\')" title="В архив">⋯</button></td>'+
       '</tr>';
     }).join('');
+    var planHdr=singleMonth?'План ('+MN[pm-1]+')':'План';
     var table=myClients.length?
-      '<table class="tbl"><thead><tr><th>Компания</th><th class="r">Факт за период</th><th class="r">Мин исп. ('+periodLabel+')</th><th class="r">Мин ост.</th><th class="r">До прод.</th><th class="r"></th></tr></thead><tbody>'+rows+'</tbody></table>':
+      '<table class="tbl"><thead><tr><th>Компания</th><th class="r">'+planHdr+'</th><th class="r">Факт за период</th><th class="r">%</th><th class="r">Мин исп. ('+periodLabel+')</th><th class="r">Мин ост.</th><th class="r">До прод.</th><th class="r"></th></tr></thead><tbody>'+rows+'</tbody></table>':
       '<div class="empty-state">Нет клиентов в портфеле.<br>Клиенты привязываются по ответственному в платформе.</div>';
     var myHiddenClients=DB.hiddenClients?DB.hiddenClients.filter(function(c){return c.responsible_platform_user_id===S.mgrAs;}):[];
     var archCliBlock='';
@@ -676,7 +686,8 @@ function renderMgr(){
       var archRows=myHiddenClients.map(function(c){return'<tr><td class="muted">'+c.company_name+'</td><td class="r"><button class="btn btn-sm" onclick="unhideClient(\''+c.platform_org_id+'\')">Вернуть</button></td></tr>';}).join('');
       archCliBlock='<div class="arch-toggle'+(isOpen?' open':'')+'" onclick="toggleArchClients()"><span class="arr">›</span>Архив клиентов ('+myHiddenClients.length+')</div><div class="arch-block'+(isOpen?' open':'')+'"><table class="tbl" style="margin-top:8px"><tbody>'+archRows+'</tbody></table></div>';
     }
-    content='<div class="panel"><div class="panel-title">Факт по клиентам считается из проведённых сделок за выбранный период</div>'+table+archCliBlock+'</div>';
+    var planHint=singleMonth?'Выставь план по каждому клиенту — сумма складывается в твой план за '+MN[pm-1]:'Выбран период из нескольких месяцев — план в режиме просмотра. Для редактирования выбери один месяц';
+    content='<div class="panel"><div class="panel-title">'+planHint+'. Факт считается из сделок</div>'+table+archCliBlock+'</div>';
   }
   if(S.mgrTab==='funnel'){
     content='<div class="panel"><div class="funnel-stub"><div class="funnel-stub-icon">🔗</div><div class="funnel-stub-title">Воронка из amoCRM</div><div class="funnel-stub-text">Данные появятся после подключения amoCRM.<br>Готовый скрипт: <code>amoCRM.gs</code> → запиши в таблицу <code>amo_leads</code> → воронка оживёт автоматически.</div></div></div>';
@@ -687,43 +698,63 @@ function renderMgr(){
 window.setMgrAs=function(id){S.mgrAs=id;render();};
 window.setMgrTab=function(t){S.mgrTab=t;render();};
 window.toggleArchClients=function(){S.showArchivedClients=!S.showArchivedClients;render();};
-window.editTarget=function(supaId){
-  var y=S.rangeFrom.getFullYear(),m=S.rangeFrom.getMonth()+1;
-  var cur=S.targetsByEmp[supaId]||0;
-  openModal('План на '+MN[m-1]+' '+y,
-    '<div class="field"><label>План (₽)</label><input id="tg-plan" type="number" value="'+cur+'"></div><p style="font-size:11px;color:var(--text-3)">Цель на месяц. Факт собирается из сделок автоматически.</p>',
-    function(){var v=Number(document.getElementById('tg-plan').value)||0;saveTarget(supaId,y,m,v);closeModal();});
+window.saveClientPlan=function(orgId,y,m,v){
+  fetch(SB_URL+'/rest/v1/client_monthly_records?on_conflict=platform_org_id,year,month',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({platform_org_id:orgId,year:y,month:m,monthly_plan:Number(v)||0})}).then(function(){refreshPeriod();flashSave();});
 };
-function saveTarget(supaId,y,m,v){
-  fetch(SB_URL+'/rest/v1/monthly_targets?on_conflict=employee_id,year,month',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({employee_id:supaId,year:y,month:m,plan_amount:v})}).then(function(){refreshPeriod();flashSave();});
-}
 function flashSave(){S.saveHint=true;render();setTimeout(function(){S.saveHint=false;render();},1500);}
 
 /* ═══ СДЕЛКИ (deal modal) ═══ */
-window.addDeal=function(preEmpId,preDeptId){
+window.addDeal=function(preEmpId,preDeptId){openDealModal(null,preEmpId,preDeptId);};
+window.editDeal=function(dealId){var dl=S.dealsRaw.find(function(d){return d.id===dealId;});if(dl)openDealModal(dl,null,null);};
+function openDealModal(existing,preEmpId,preDeptId){
   var emps=RAW.employees.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
-  var empOpts=emps.map(function(e){var arch=(e.fired_at||e.is_archived)?' (архив)':'';return'<option value="'+e.id+'"'+(e.id===preEmpId?' selected':'')+'>'+e.name+arch+'</option>';}).join('');
-  var initEmp=preEmpId||(emps[0]&&emps[0].id);
+  var empOpts=emps.map(function(e){var arch=(e.fired_at||e.is_archived)?' (архив)':'';return'<option value="'+e.id+'">'+e.name+arch+'</option>';}).join('');
+  var initEmp=existing?existing.employee_id:(preEmpId||(emps[0]&&emps[0].id));
   var body=
-    '<div class="field"><label>Событие</label><select id="dl-type"><option value="payment">Оплата</option><option value="refund">Возврат</option></select></div>'+
-    '<div class="field"><label>Сотрудник</label><select id="dl-emp" onchange="dealEmpChanged()">'+empOpts+'</select></div>'+
-    '<div class="field"><label>Клиент</label><select id="dl-client"></select></div>'+
-    '<div class="form-row" style="display:flex;gap:10px"><div class="field" style="flex:1"><label>Сумма ₽</label><input id="dl-amount" type="number" placeholder="0"></div><div class="field" style="flex:1"><label>Мотивация %</label><input id="dl-pct" type="number" placeholder="10" step="0.5"></div></div>'+
-    '<div class="field"><label>Дата сделки</label><input id="dl-date" type="date" value="'+todayISO()+'"></div>'+
+    '<div class="field"><label>Событие *</label><select id="dl-type"><option value="payment">Оплата</option><option value="refund">Возврат</option></select></div>'+
+    '<div class="field"><label>Сотрудник *</label><select id="dl-emp" onchange="dealEmpChanged()">'+empOpts+'</select></div>'+
+    '<div class="field"><label>Клиент *</label><select id="dl-client"></select></div>'+
+    '<div class="form-row" style="display:flex;gap:10px"><div class="field" style="flex:1"><label>Сумма ₽ *</label><input id="dl-amount" type="number" placeholder="0"></div><div class="field" style="flex:1"><label>Мотивация % *</label><input id="dl-pct" type="number" placeholder="10" step="0.5"></div></div>'+
+    '<div class="field"><label>Дата сделки *</label><input id="dl-date" type="date" value="'+todayISO()+'"></div>'+
     '<div class="field"><label>Комментарий (необязательно)</label><input id="dl-note" placeholder="—"></div>';
-  openModal('Добавить сделку',body,function(){saveDeal(preDeptId);});
-  setTimeout(function(){var es=document.getElementById('dl-emp');if(es){es.value=initEmp;dealEmpChanged();}},0);
-};
-window.dealEmpChanged=function(){
+  openModal(existing?'Редактировать сделку':'Добавить сделку',body,function(){saveDeal(existing,preDeptId);});
+  setTimeout(function(){
+    var es=document.getElementById('dl-emp');if(es)es.value=initEmp;
+    if(existing){
+      document.getElementById('dl-type').value=existing.event_type||'payment';
+      document.getElementById('dl-amount').value=existing.amount;
+      document.getElementById('dl-pct').value=existing.motivation_pct;
+      document.getElementById('dl-date').value=(existing.deal_date||'').substring(0,10);
+      document.getElementById('dl-note').value=existing.note||'';
+    }
+    dealEmpChanged(existing?existing.platform_org_id:null);
+    setupDealValidation();
+  },0);
+}
+window.dealEmpChanged=function(preselectOrg){
   var empSel=document.getElementById('dl-emp');var clientSel=document.getElementById('dl-client');
   if(!empSel||!clientSel)return;
   var emp=RAW.employees.find(function(e){return e.id===empSel.value;});
   var puid=emp?emp.platform_user_id:null;
   var cls=(RAW.allClients||[]).filter(function(c){return c.responsible_platform_user_id===puid;});
-  if(!cls.length){clientSel.innerHTML='<option value="">— нет клиентов —</option>';return;}
+  if(!cls.length){clientSel.innerHTML='<option value="">— нет клиентов —</option>';validateDeal();return;}
   clientSel.innerHTML=cls.map(function(c){var arch=(c.is_archived||c.is_hidden)?' (архив)':'';return'<option value="'+c.platform_org_id+'" data-name="'+(c.company_name||'').replace(/"/g,'')+'">'+(c.company_name||'')+arch+'</option>';}).join('');
+  if(preselectOrg&&typeof preselectOrg==='string')clientSel.value=preselectOrg;
+  validateDeal();
 };
-function saveDeal(preDeptId){
+function setupDealValidation(){
+  ['dl-type','dl-client','dl-amount','dl-pct','dl-date'].forEach(function(id){var el=document.getElementById(id);if(el){el.oninput=validateDeal;el.onchange=validateDeal;}});
+  validateDeal();
+}
+function validateDeal(){
+  var btn=document.getElementById('msave');if(!btn)return;
+  function v(id){var el=document.getElementById(id);return el?el.value:'';}
+  var amount=parseFloat(v('dl-amount'));
+  var pctRaw=v('dl-pct');
+  var ok = v('dl-type') && v('dl-emp') && v('dl-client') && amount>0 && pctRaw!=='' && !isNaN(parseFloat(pctRaw)) && v('dl-date');
+  btn.disabled=!ok;
+}
+function saveDeal(existing,preDeptId){
   var type=document.getElementById('dl-type').value;
   var empId=document.getElementById('dl-emp').value;
   var clientSel=document.getElementById('dl-client');
@@ -733,7 +764,7 @@ function saveDeal(preDeptId){
   var pct2=Number(document.getElementById('dl-pct').value)||0;
   var date=document.getElementById('dl-date').value||todayISO();
   var note=document.getElementById('dl-note').value||null;
-  if(amount<=0){alert('Введи сумму больше нуля');return;}
+  if(amount<=0||!orgId){return;}
   var emp=RAW.employees.find(function(e){return e.id===empId;});
   var deptId=emp?emp.dept_id:(preDeptId||null);
   var dept=RAW.depts.find(function(x){return x.id===deptId;});
@@ -741,8 +772,17 @@ function saveDeal(preDeptId){
     platform_org_id:orgId,client_name:clientName,
     dept_id:deptId,dept_name:dept?dept.name:'',
     amount:amount,motivation_pct:pct2,deal_date:date,note:note};
-  sbPost('deals',row).then(function(){closeModal();refreshPeriod();flashSave();});
+  if(existing){
+    sbPatch('deals','id=eq.'+existing.id,row).then(function(){closeModal();refreshPeriod();flashSave();});
+  }else{
+    sbPost('deals',row).then(function(){closeModal();refreshPeriod();flashSave();});
+  }
 }
+window.deleteDeal=function(dealId){
+  var dl=S.dealsRaw.find(function(d){return d.id===dealId;});
+  openModal('Удалить сделку?','<p style="font-size:13px;color:var(--text-2);line-height:1.7">'+(dl?(dl.client_name||'—')+' · '+fmt(dl.amount):'')+'<br>Это действие нельзя отменить.</p>',
+    function(){fetch(SB_URL+'/rest/v1/deals?id=eq.'+dealId,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'}}).then(function(){closeModal();refreshPeriod();});});
+};
 
 /* ═══ ЗАРПЛАТЫ (payroll) ═══ */
 function renderPayroll(){
@@ -779,17 +819,40 @@ function renderPayroll(){
     '<div class="ck"><div class="ck-l">Сотрудников</div><div class="ck-v num">'+rowsArr.length+'</div><div class="ck-s">со сделками</div></div>'
   ].join('');
 
-  var body=rowsArr.length?rowsArr.map(function(e){var avgPct=e.fact!==0?r(e.comm/e.fact*100):0;return'<tr><td><span class="strong">'+e.name+'</span></td><td class="muted">'+e.dept+'</td><td class="r muted num">'+e.count+'</td><td class="r strong num">'+fmt(e.fact)+'</td><td class="r muted num">'+avgPct+'%</td><td class="r strong num" style="color:var(--green)">'+fmt(e.comm)+'</td></tr>';}).join(''):'<tr><td colspan="6"><div class="empty-state">Нет сделок за выбранный период и фильтры.<br>Добавь сделки через Коммдир → отдел → «+ Сделка» или в кабинете менеджера.</div></td></tr>';
+  var body=rowsArr.length?rowsArr.map(function(e){var avgPct=e.fact!==0?r(e.comm/e.fact*100):0;return'<tr><td><span class="strong">'+e.name+'</span></td><td class="muted">'+e.dept+'</td><td class="r muted num">'+e.count+'</td><td class="r strong num">'+fmt(e.fact)+'</td><td class="r muted num">'+avgPct+'%</td><td class="r strong num" style="color:var(--green)">'+fmt(e.comm)+'</td></tr>';}).join(''):'<tr><td colspan="6"><div class="empty-state">Нет сделок</div></td></tr>';
+
+  // построчная таблица сделок (для редактирования/удаления)
+  var dealRows=filtered.slice().sort(function(a,b){return(b.deal_date||'').localeCompare(a.deal_date||'');}).map(function(d){
+    var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);var comm=amt*(Number(d.motivation_pct)||0)/100;
+    return'<tr>'+
+      '<td class="muted num">'+fmtD(d.deal_date)+'</td>'+
+      '<td><span class="strong">'+(d.employee_name||'—')+'</span></td>'+
+      '<td class="muted">'+(d.dept_name||'—')+'</td>'+
+      '<td>'+(d.client_name||'—')+(d.event_type==='refund'?' <span style="color:var(--red);font-size:10px">возврат</span>':'')+'</td>'+
+      '<td class="r strong num"'+(amt<0?' style="color:var(--red)"':'')+'>'+fmt(amt)+'</td>'+
+      '<td class="r muted num">'+(d.motivation_pct||0)+'%</td>'+
+      '<td class="r strong num" style="color:var(--green)">'+fmt(comm)+'</td>'+
+      '<td class="muted" style="font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(d.note||'')+'</td>'+
+      '<td class="r" style="white-space:nowrap"><button class="btn btn-sm btn-ghost" onclick="editDeal(\''+d.id+'\')" title="Редактировать">✎</button> <button class="btn btn-sm btn-danger" onclick="deleteDeal(\''+d.id+'\')" title="Удалить">✕</button></td>'+
+    '</tr>';
+  }).join('');
+  var dealTable=filtered.length?
+    '<table class="tbl"><thead><tr><th>Дата</th><th>Сотрудник</th><th>Отдел</th><th>Компания</th><th class="r">Сумма</th><th class="r">%</th><th class="r">Начислено</th><th>Комментарий</th><th class="r"></th></tr></thead><tbody>'+dealRows+'</tbody></table>':
+    '<div class="empty-state">Нет сделок за выбранный период и фильтры.<br>Добавь сделку через Коммдир → отдел → «+ Сделка» или в кабинете менеджера.</div>';
 
   var filters='<div class="adm-head"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
     '<select style="padding:7px 11px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:12px" onchange="setPayDept(this.value)">'+deptOpts+'</select>'+
     '<select style="padding:7px 11px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:12px" onchange="setPayEmp(this.value)">'+empOpts+'</select>'+
     '</div><button class="btn btn-primary" onclick="exportPayroll()">↓ Выгрузить xlsx</button></div>';
 
+  // свод по сотрудникам (компактный, под детальной таблицей)
+  var summaryRows=rowsArr.length?rowsArr.map(function(e){var avgPct=e.fact!==0?r(e.comm/e.fact*100):0;return'<tr><td><span class="strong">'+e.name+'</span></td><td class="muted">'+e.dept+'</td><td class="r muted num">'+e.count+'</td><td class="r strong num">'+fmt(e.fact)+'</td><td class="r muted num">'+avgPct+'%</td><td class="r strong num" style="color:var(--green)">'+fmt(e.comm)+'</td></tr>';}).join(''):'';
+  var summaryBlock=rowsArr.length?'<div class="panel"><div class="panel-title">Свод по сотрудникам</div><table class="tbl"><thead><tr><th>Сотрудник</th><th>Отдел</th><th class="r">Сделок</th><th class="r">Выручка</th><th class="r">Ср. %</th><th class="r">Начислено</th></tr></thead><tbody>'+summaryRows+'</tbody></table></div>':'';
+
   setApp('<div class="topbar"><div class="nav-left"><span class="brand">Зарплатные листы</span></div>'+calTrigger()+'</div>'+
     '<div class="ckpi">'+kH+'</div>'+
-    '<div class="panel">'+filters+
-    '<table class="tbl"><thead><tr><th>Сотрудник</th><th>Отдел</th><th class="r">Сделок</th><th class="r">Выручка</th><th class="r">Ср. %</th><th class="r">Начислено</th></tr></thead><tbody>'+body+'</tbody></table></div>');
+    '<div class="panel">'+filters+dealTable+'</div>'+
+    summaryBlock);
 }
 window.setPayDept=function(v){S.payDept=v;render();};
 window.setPayEmp=function(v){S.payEmp=v;render();};
