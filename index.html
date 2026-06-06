@@ -172,6 +172,22 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 /* fired row */
 .fired-row{opacity:.5;}
 .fired-row td{font-style:italic;}
+/* locked funnel (dept view) */
+.fn-lock-wrap{position:relative;}
+.fn-lock-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;filter:blur(.6px);opacity:.5;}
+.tag-chip-lock{font-size:11px;padding:6px 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-3);}
+.fn-lock-bars{display:flex;flex-direction:column;gap:12px;filter:blur(1.5px);opacity:.4;pointer-events:none;}
+.fn-lock-row{display:grid;grid-template-columns:160px 1fr 40px;gap:14px;align-items:center;}
+.fn-lock-label{font-size:12px;color:var(--text-2);}
+.fn-lock-bar{height:26px;background:var(--surface-3);border-radius:7px;overflow:hidden;}
+.fn-lock-fill{height:100%;background:var(--accent);border-radius:7px;}
+.fn-lock-val{font-size:12px;color:var(--text-3);text-align:right;}
+.fn-lock-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(11,14,20,.35);border-radius:12px;}
+[data-theme="light"] .fn-lock-overlay{background:rgba(244,246,250,.55);}
+.fn-lock-icon{font-size:30px;opacity:.7;}
+.fn-lock-title{font-size:14px;font-weight:600;color:var(--text);}
+.fn-lock-text{font-size:12px;color:var(--text-2);text-align:center;line-height:1.7;max-width:380px;}
+.fn-lock-text code{background:var(--surface-3);padding:1px 6px;border-radius:5px;font-size:11px;}
 </style>
 </head>
 <body>
@@ -201,10 +217,12 @@ var S={role:'cd',theme:'dark',loading:true,loadErr:null,
   cliSortKey:'minLeft',cliSortDir:1,staffSortKey:'fact',staffSortDir:-1,
   ropDept:null,mgrAs:null,saveHint:false,factMode:'manual',
   // v2 additions
-  periodStats:{},periodLoading:false,
+  periodStats:{},periodLoading:false,periodReady:false,
   showArchivedDepts:false,showArchivedClients:false,
   mgrTab:'clients',
   ropShowFired:false,ropShowArchivedDepts:false,
+  // v3 additions
+  deptFunnelMgr:'all',
 };
 
 /* ═══ UTILS ═══ */
@@ -225,6 +243,8 @@ function rr(fact,plan){var f=S.rangeFrom,t=S.rangeTo,el=Math.max(1,r((Math.min(T
 function calLabel(){var f=S.rangeFrom,t=S.rangeTo;return MN[f.getMonth()]+' '+String(f.getDate()).padStart(2,'0')+', '+f.getFullYear()+' — '+MN[t.getMonth()]+' '+String(t.getDate()).padStart(2,'0')+', '+t.getFullYear();}
 function daysBadge(dn){if(dn===null)return'<span class="days-badge db-neu">—</span>';if(dn<=3)return'<span class="days-badge db-red">'+dn+'д</span>';if(dn<=7)return'<span class="days-badge db-amb">'+dn+'д</span>';if(dn<=14)return'<span class="days-badge db-neu">'+dn+'д</span>';return'<span class="days-badge db-grn">'+dn+'д</span>';}
 function si(a,d){return a?'<span class="sort">'+(d>0?'▲':'▼')+'</span>':'<span class="sort">↕</span>';}
+// v3: платящих за период = орги с минутами > 0. null = ещё грузится → fallback на снимок
+function payingInPeriod(clients){if(!S.periodReady)return null;return clients.filter(function(c){return(S.periodStats[c.platform_org_id]||0)>0;}).length;}
 function todayISO(){return TODAY.toISOString().substring(0,10);}
 function dateISO(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
@@ -301,7 +321,7 @@ function buildDB(){
 
 /* ═══ PERIOD STATS (МИН ИСП.) ═══ */
 function loadPeriodStats(){
-  S.periodStats={};S.periodLoading=true;
+  S.periodStats={};S.periodLoading=true;S.periodReady=false;
   var from=S.rangeFrom,to=S.rangeTo;
   var curMonthStart=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
   var months=[],cur=new Date(from.getFullYear(),from.getMonth(),1);
@@ -319,7 +339,7 @@ function loadPeriodStats(){
     var q2='client_stats?select=platform_org_id,used_minutes&period_type=eq.day&stat_date=gte.'+mStart+'&stat_date=lte.'+todayISO()+'&limit=500000';
     promises.push(sbGet(q2).then(function(rows){rows.forEach(function(row){S.periodStats[row.platform_org_id]=(S.periodStats[row.platform_org_id]||0)+(row.used_minutes||0);});}));
   }
-  Promise.all(promises).then(function(){S.periodLoading=false;render();}).catch(function(){S.periodLoading=false;render();});
+  Promise.all(promises).then(function(){S.periodLoading=false;S.periodReady=true;render();}).catch(function(){S.periodLoading=false;S.periodReady=true;render();});
 }
 
 /* ═══ SAVE ═══ */
@@ -391,14 +411,17 @@ function renderCo(){
   var c=DB.company,cp=pct(c.fact,c.plan),rrv=rr(c.fact,c.plan);
   var isCurrentMonth=sameDay(S.rangeFrom,new Date(TODAY.getFullYear(),TODAY.getMonth(),1));
   var snapBadge='<span class="snap-badge">снимок сегодня</span>';
+  var allClients=DB.depts.reduce(function(a,d){return a.concat(d.clients);},[]);
+  var coPaying=payingInPeriod(allClients);if(coPaying===null)coPaying=c.paying;
   var kH=[
     '<div class="ck"><div class="ck-l">Выручка'+(isCurrentMonth?'':' '+snapBadge)+'</div><div class="ck-v num">'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div></div>',
     '<div class="ck"><div class="ck-l">Ранрейт</div><div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="'+(rrv>=100?'pos':rrv>=80?'neu':'neg')+'">'+(rrv>=100?'опережаем темп':'отстаём от темпа')+'</span></div></div>',
-    '<div class="ck"><div class="ck-l">Платящих клиентов'+(isCurrentMonth?'':' '+snapBadge)+'</div><div class="ck-v num">'+c.paying+'</div><div class="ck-s">из '+c.clients+' в работе</div></div>',
+    '<div class="ck"><div class="ck-l">Платящих за период</div><div class="ck-v num">'+coPaying+'</div><div class="ck-s">из '+c.clients+' в портфеле</div></div>',
     '<div class="ck"><div class="ck-l">Отделов</div><div class="ck-v num">'+DB.depts.length+'</div><div class="ck-s">активных · '+DB.archivedDepts.length+' в архиве</div></div>'
   ].join('');
   var cards=DB.depts.length?DB.depts.map(function(d){var p2=pct(d.fact,d.plan),rr2=rr(d.fact,d.plan),c2=grad(p2);var bT=d.plan>0?(rr2>=100?'В темпе':rr2>=80?'Отстаём':'Критично'):'Нет плана',bC=d.plan>0?(rr2>=100?'bg':rr2>=80?'ba':'br'):'br';
-    return'<div class="dept-card" onclick="drill(\''+d.id+'\')"><div class="dc-top"><div><div class="dc-name">'+d.name+'</div><div class="dc-meta">'+d.tl+' · '+d.staff.length+' чел. · '+d.clients.length+' клиентов</div></div><span class="dc-badge '+bC+'">'+bT+'</span></div><div class="dc-fact num">'+fmt(d.fact)+'</div><div class="dc-plan">из '+fmt(d.plan)+' плана</div><div class="progress"><div class="progress-fill" style="width:'+Math.min(p2,100)+'%;background:'+c2+'"></div></div><div class="dc-stats"><div><div class="dc-stat-l">Выполнено</div><div class="dc-stat-v num" style="color:'+c2+'">'+p2+'%</div></div><div><div class="dc-stat-l">Ранрейт</div><div class="dc-stat-v num" style="color:'+grad(rr2)+'">'+rr2+'%</div></div><div><div class="dc-stat-l">Платящих</div><div class="dc-stat-v num">'+d.paying+'</div></div></div></div>';}).join(''):
+    var dPaying=payingInPeriod(d.clients);if(dPaying===null)dPaying=d.paying;
+    return'<div class="dept-card" onclick="drill(\''+d.id+'\')"><div class="dc-top"><div><div class="dc-name">'+d.name+'</div><div class="dc-meta">'+d.tl+' · '+d.staff.length+' чел. · '+d.clients.length+' клиентов</div></div><span class="dc-badge '+bC+'">'+bT+'</span></div><div class="dc-fact num">'+fmt(d.fact)+'</div><div class="dc-plan">из '+fmt(d.plan)+' плана</div><div class="progress"><div class="progress-fill" style="width:'+Math.min(p2,100)+'%;background:'+c2+'"></div></div><div class="dc-stats"><div><div class="dc-stat-l">Выполнено</div><div class="dc-stat-v num" style="color:'+c2+'">'+p2+'%</div></div><div><div class="dc-stat-l">Ранрейт</div><div class="dc-stat-v num" style="color:'+grad(rr2)+'">'+rr2+'%</div></div><div><div class="dc-stat-l">Платящих</div><div class="dc-stat-v num">'+dPaying+'</div></div></div></div>';}).join(''):
     '<div class="empty-state">Нет отделов.<br>Зайди в <b>РОП</b> → Создать отдел.</div>';
   // Archive section
   var archHtml='';
@@ -418,9 +441,10 @@ function renderDept(){
   var d=DB.depts.find(function(x){return x.id===S.dept;});
   if(!d){S.dept=null;render();return;}
   var p2=pct(d.fact,d.plan),rrv=rr(d.fact,d.plan);
-  var kpis=[{l:'Выручка',v:fmt(d.fact),s:'из '+fmt(d.plan)+' · '+p2+'%',bar:p2,bc:grad(p2)},{l:'Ранрейт',v:rrv+'%',s:'<span class="'+(rrv>=100?'pos':rrv>=80?'neu':'neg')+'">'+(rrv>=100?'опережаем':'отстаём')+'</span>',raw:true},{l:'ARPU',v:fmt(d.arpu),s:'средний на клиента'},{l:'Клиентов',v:d.clients.length,s:d.paying+' платящих'},{l:'В команде',v:d.staff.length,s:'сотрудников'}];
+  var dPaying=payingInPeriod(d.clients);if(dPaying===null)dPaying=d.paying;
+  var kpis=[{l:'Выручка',v:fmt(d.fact),s:'из '+fmt(d.plan)+' · '+p2+'%',bar:p2,bc:grad(p2)},{l:'Ранрейт',v:rrv+'%',s:'<span class="'+(rrv>=100?'pos':rrv>=80?'neu':'neg')+'">'+(rrv>=100?'опережаем':'отстаём')+'</span>',raw:true},{l:'ARPU',v:fmt(d.arpu),s:'средний на клиента'},{l:'Платящих за период',v:dPaying,s:'из '+d.clients.length+' в портфеле'},{l:'В команде',v:d.staff.length,s:'сотрудников'}];
   var kH=kpis.map(function(k){var b=k.bar!=null?'<div class="pbar"><div class="pfill" style="width:'+Math.min(k.bar,100)+'%;background:'+k.bc+'"></div></div>':'';return'<div class="kcard"><div class="kl">'+k.l+'</div><div class="kv num">'+k.v+'</div><div class="ks">'+(k.raw?k.s:'<span class="neu">'+k.s+'</span>')+'</div>'+b+'</div>';}).join('');
-  var tabs='<div class="tab-row">'+[['staff','Сотрудники'],['clients','Клиенты']].map(function(t){return'<button class="tab'+(S.tab===t[0]?' on':'')+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>';
+  var tabs='<div class="tab-row">'+[['staff','Сотрудники'],['clients','Клиенты'],['funnel','Воронка']].map(function(t){return'<button class="tab'+(S.tab===t[0]?' on':'')+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>';
   var ct='';
   if(S.tab==='staff'){
     var staff=[].concat(d.staff);staff.forEach(function(m){m._p=pct(m.fact,m.plan);m._r=rr(m.fact,m.plan);});
@@ -442,8 +466,24 @@ function renderDept(){
     var body=list.length?list.map(function(c){var c3=grad(c._p);return'<tr><td><a class="ext-link" href="'+c.url+'" target="_blank">'+c.name+' <span class="lk">↗</span></a></td><td class="r muted num">'+fmt(c.plan)+'</td><td class="r strong num" style="color:'+c3+'">'+fmt(c.fact)+'</td><td class="r"><span style="color:'+c3+';font-size:11px;font-weight:600" class="num">'+c._p+'%</span></td><td class="r muted num">'+fmtMin(c.minLeft)+'</td><td class="r">'+daysBadge(c._d)+'</td></tr>';}).join(''):'<tr><td colspan="6"><div class="empty-state">Нет клиентов</div></td></tr>';
     ct='<div class="panel">'+msCtrl+'<table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+body+'</tbody></table></div>';
   }
-  setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUp()">‹ Все отделы</button><span class="crumb-title">'+d.name+'</span></div>'+calTrigger()+'</div><div class="dept-kpi">'+kH+'</div>'+tabs+ct);
+  if(S.tab==='funnel'){
+    var fmgrs=[{id:'all',name:'Все менеджеры'}].concat(d.staff.map(function(m){return{id:m.id,name:m.name};}));
+    var fmgrSel='<select style="padding:7px 11px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:12px" onchange="setDeptFunnelMgr(this.value)">'+fmgrs.map(function(m){return'<option value="'+m.id+'"'+(m.id===S.deptFunnelMgr?' selected':'')+'>'+m.name+'</option>';}).join('')+'</select>';
+    var stages=['Лиды в работе','Квалифицировано','Встречи назначено','Встречи проведено','Счета выставлено','Оплаты получено'];
+    var tagChips=['холодка','Заявка с сайта','лидгенилья','Входящее обращение','beeline','Конференция'].map(function(t){return'<span class="tag-chip-lock">'+t+'</span>';}).join('');
+    var fakeW=[100,62,44,33,22,13];
+    var bars=stages.map(function(s,i){return'<div class="fn-lock-row"><span class="fn-lock-label">'+s+'</span><div class="fn-lock-bar"><div class="fn-lock-fill" style="width:'+fakeW[i]+'%"></div></div><span class="fn-lock-val">—</span></div>';}).join('');
+    ct='<div class="panel"><div class="adm-head" style="margin-bottom:18px"><div class="panel-title" style="margin:0">Воронка первички</div>'+fmgrSel+'</div>'+
+      '<div class="fn-lock-wrap">'+
+        '<div class="fn-lock-tags">'+tagChips+'</div>'+
+        '<div class="fn-lock-bars">'+bars+'</div>'+
+        '<div class="fn-lock-overlay"><div class="fn-lock-icon">🔒</div><div class="fn-lock-title">Воронка подключается</div><div class="fn-lock-text">Данные тянутся из amoCRM. Запусти синк <code>amoCRM.gs</code> → таблица <code>amo_leads</code> → воронка с разбивкой по тегам и менеджерам оживёт здесь.</div></div>'+
+      '</div></div>';
+  }
+  var archBtn='<button class="btn btn-sm btn-ghost" onclick="archiveDept(\''+d.id+'\')" title="Убрать отдел в архив" style="margin-left:8px">В архив</button>';
+  setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUp()">‹ Все отделы</button><span class="crumb-title">'+d.name+'</span>'+archBtn+'</div>'+calTrigger()+'</div><div class="dept-kpi">'+kH+'</div>'+tabs+ct);
 }
+window.setDeptFunnelMgr=function(id){S.deptFunnelMgr=id;render();};
 window.toggleMgrDrop=function(e){e.stopPropagation();S.mgrDropOpen=!S.mgrDropOpen;render();};
 window.toggleMgr=function(e,id){e.stopPropagation();var i=S.clientMgrs.indexOf(id);if(i>=0)S.clientMgrs.splice(i,1);else S.clientMgrs.push(id);render();};
 window.removeMgr=function(e,id){e.stopPropagation();var i=S.clientMgrs.indexOf(id);if(i>=0)S.clientMgrs.splice(i,1);render();};
