@@ -263,7 +263,7 @@ function buildDB(){
     var deptFact=staff.reduce(function(a,m){return a+m.fact;},0);
     var paying=deptClients.filter(function(c){return c.subscription_status==='active';}).length;
     return {id:d.id,name:d.name,tl:lead?lead.name:'—',leadId:d.lead_employee_id,
-      fact:deptFact,plan:d.monthly_plan||0,
+      fact:deptFact,plan:staff.reduce(function(a,m){return a+m.plan;},0),
       arpu:deptClients.length?r(deptFact/deptClients.length):0,ltv:0,ret:0,paying:paying,
       staff:staff,former:[],
       funnels:{'Все':[{s:'Лидов взято в работу',f:0,p:0},{s:'Квалифицировано',f:0,p:0},{s:'Встреч назначено',f:0,p:0},{s:'Встреч проведено',f:0,p:0},{s:'Счетов выставлено',f:0,p:0},{s:'Оплат получено',f:0,p:0}]},
@@ -430,14 +430,15 @@ window.reassignEmp=function(supaId){
 window.editDept=function(id){var x=DB.depts.find(function(z){return z.id===id;});openModal('Настройка отдела','<div class="field" style="margin-bottom:12px"><label>Название</label><input id="d-name" value="'+x.name+'"></div><div class="field"><label>План отдела, ₽</label><input id="d-plan" type="number" value="'+x.plan+'"></div>',function(){var nm=document.getElementById('d-name').value;var pl=Number(document.getElementById('d-plan').value)||x.plan;sbPatch('departments','id=eq.'+id,{name:nm,monthly_plan:pl});RAW.depts.forEach(function(dd){if(dd.id===id){dd.name=nm;dd.monthly_plan=pl;}});buildDB();closeModal();render();});};
 window.createDept=function(){
   var leadOpts='<option value="">— без тимлида —</option>'+RAW.employees.map(function(e){return'<option value="'+e.id+'">'+e.name+'</option>';}).join('');
-  openModal('Новый отдел','<div class="field" style="margin-bottom:12px"><label>Название отдела</label><input id="nd-name" placeholder="Отдел Иванцова"></div><div class="field" style="margin-bottom:12px"><label>Тимлид</label><select id="nd-lead">'+leadOpts+'</select></div><div class="field"><label>План отдела, ₽</label><input id="nd-plan" type="number" value="3000000"></div>',
-  function(){var nm=document.getElementById('nd-name').value.trim();if(!nm)return;var lead=document.getElementById('nd-lead').value||null;var plan=Number(document.getElementById('nd-plan').value)||0;
-    sbPost('departments',{name:nm,lead_employee_id:lead,monthly_plan:plan}).then(function(res){
-      var newDept=res&&res[0];RAW.depts.push(newDept);
-      if(lead&&newDept){sbPatch('employees','id=eq.'+lead,{dept_id:newDept.id,role:'lead'});RAW.employees.forEach(function(e){if(e.id===lead){e.dept_id=newDept.id;e.role='lead';}});}
-      buildDB();closeModal();render();
+  openModal('Новый отдел',
+    '<div class="field" style="margin-bottom:12px"><label>Название отдела</label><input id="nd-name" placeholder="Отдел Иванцова"></div><div class="field"><label>Тимлид</label><select id="nd-lead">'+leadOpts+'</select></div>',
+    function(){var nm=document.getElementById('nd-name').value.trim();if(!nm)return;var lead=document.getElementById('nd-lead').value||null;
+      sbPost('departments',{name:nm,lead_employee_id:lead,monthly_plan:0}).then(function(res){
+        var newDept=res&&res[0];if(!newDept)return;RAW.depts.push(newDept);
+        if(lead){sbPatch('employees','id=eq.'+lead,{dept_id:newDept.id,role:'lead'});RAW.employees.forEach(function(e){if(e.id===lead){e.dept_id=newDept.id;e.role='lead';}});}
+        buildDB();closeModal();S.ropDept=newDept.id;render();
+      });
     });
-  });
 };
 
 /* ═══════════════════════ МЕНЕДЖЕР ═══════════════════════ */
