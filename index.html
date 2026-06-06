@@ -191,7 +191,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 <script>
 /* ═══ SUPABASE ═══ */
 var SB_URL='https://qhpyrlhugpqgojwmarrw.supabase.co';
-var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocHlybGh1Z3BxZ29qd21hcnJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NTI4OTAsImV4cCI6MjA5NjIyODg5MH0.wlEY_Nm2T6Oe-WbH4lHJxdv_1-RjqgpNtBziTTGX2OQ';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocHlybGh1Z3BxZ29qd21hcnJ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDY1Mjg5MCwiZXhwIjoyMDk2MjI4ODkwfQ.J1KvnwrxAbfEINT4ntxz_nWQJx7ZNgD4iPC2pPdGIV4';
 function sbGet(p){return fetch(SB_URL+'/rest/v1/'+p,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).then(function(d){if(d&&d.code){console.error('SB error',p,d.message);return[];}return Array.isArray(d)?d:[];}).catch(function(e){console.error(e);return[];});}
 function sbPatch(t,f,d){return fetch(SB_URL+'/rest/v1/'+t+'?'+f,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(d)}).then(function(r){return r.status;});}
 function sbPost(t,d){return fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(d)}).then(function(r){return r.json();});}
