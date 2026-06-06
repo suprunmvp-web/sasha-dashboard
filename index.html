@@ -4,31 +4,13 @@
 <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
 <title>SashaAI · Аналитика продаж</title>
 <style>
-[data-theme="dark"]{
-  --bg:#0B0E14;--surface:#11151F;--surface-2:#161B27;--surface-3:#1C2230;
-  --border:#232a3a;--border-soft:#1a2030;
-  --text:#E8ECF4;--text-2:#9AA4B8;--text-3:#5E6781;
-  --accent:#4D7CFE;--accent-bg:rgba(77,124,254,.12);
-  --green:#2ED3A7;--amber:#F5B544;--red:#FB6E5B;
-  --green-bg:rgba(46,211,167,.12);--amber-bg:rgba(245,181,68,.12);--red-bg:rgba(251,110,91,.12);
-  --shadow:0 24px 64px rgba(0,0,0,.5);
-}
-[data-theme="light"]{
-  --bg:#F4F6FA;--surface:#FFFFFF;--surface-2:#F0F2F7;--surface-3:#E6E9F0;
-  --border:#DCE1EB;--border-soft:#E8ECF3;
-  --text:#1A1F2E;--text-2:#5A6478;--text-3:#98A1B3;
-  --accent:#3D6BF5;--accent-bg:rgba(61,107,245,.10);
-  --green:#16A97F;--amber:#D89318;--red:#E25540;
-  --green-bg:rgba(22,169,127,.12);--amber-bg:rgba(216,147,24,.12);--red-bg:rgba(226,85,64,.12);
-  --shadow:0 16px 48px rgba(30,40,80,.16);
-}
+[data-theme="dark"]{--bg:#0B0E14;--surface:#11151F;--surface-2:#161B27;--surface-3:#1C2230;--border:#232a3a;--border-soft:#1a2030;--text:#E8ECF4;--text-2:#9AA4B8;--text-3:#5E6781;--accent:#4D7CFE;--accent-bg:rgba(77,124,254,.12);--green:#2ED3A7;--amber:#F5B544;--red:#FB6E5B;--green-bg:rgba(46,211,167,.12);--amber-bg:rgba(245,181,68,.12);--red-bg:rgba(251,110,91,.12);--shadow:0 24px 64px rgba(0,0,0,.5);}
+[data-theme="light"]{--bg:#F4F6FA;--surface:#FFFFFF;--surface-2:#F0F2F7;--surface-3:#E6E9F0;--border:#DCE1EB;--border-soft:#E8ECF3;--text:#1A1F2E;--text-2:#5A6478;--text-3:#98A1B3;--accent:#3D6BF5;--accent-bg:rgba(61,107,245,.10);--green:#16A97F;--amber:#D89318;--red:#E25540;--green-bg:rgba(22,169,127,.12);--amber-bg:rgba(216,147,24,.12);--red-bg:rgba(226,85,64,.12);--shadow:0 16px 48px rgba(30,40,80,.16);}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);padding:1.5rem;-webkit-font-smoothing:antialiased;}
-.app{max-width:1040px;margin:0 auto;}
+.app{max-width:1060px;margin:0 auto;}
 .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
 .pos{color:var(--green);}.neg{color:var(--red);}.neu{color:var(--text-2);}
-
-/* ROLEBAR */
 .rolebar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;gap:12px;flex-wrap:wrap;}
 .role-seg{display:flex;gap:3px;background:var(--surface-2);border:1px solid var(--border-soft);border-radius:11px;padding:3px;}
 .role-btn{font-size:12px;padding:7px 14px;border-radius:8px;border:none;background:transparent;color:var(--text-2);cursor:pointer;font-weight:500;}
@@ -40,16 +22,12 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .icon-btn:hover{border-color:var(--accent);color:var(--accent);}
 .refresh-btn{font-size:12px;padding:6px 13px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);cursor:pointer;}
 .refresh-btn:hover{border-color:var(--accent);color:var(--accent);}
-
-/* TOPBAR */
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;gap:12px;flex-wrap:wrap;}
 .nav-left{display:flex;align-items:center;gap:10px;}
 .back-btn{font-size:13px;color:var(--accent);cursor:pointer;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);}
 .brand{font-size:18px;font-weight:600;letter-spacing:-.01em;}
 .brand .accent{color:var(--accent);}
 .crumb-title{font-size:18px;font-weight:600;}
-
-/* CALENDAR */
 .cal-trigger{display:flex;align-items:center;gap:8px;font-size:13px;padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);cursor:pointer;color:var(--text);}
 .cal-trigger svg{opacity:.6;}
 .cal-pop{position:absolute;right:0;top:48px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;z-index:50;box-shadow:var(--shadow);display:none;}
@@ -66,16 +44,15 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .cal-day{font-size:12px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px;color:var(--text);}
 .cal-day:hover{background:var(--surface-3);}
 .cal-day.other{color:var(--text-3);}
+.cal-day.disabled{opacity:.25;pointer-events:none;cursor:default;}
 .cal-day.in-range{background:var(--accent-bg);border-radius:0;}
 .cal-day.range-start{background:var(--accent);color:#fff;border-radius:8px 0 0 8px;}
 .cal-day.range-end{background:var(--accent);color:#fff;border-radius:0 8px 8px 0;}
 .cal-day.range-single{background:var(--accent);color:#fff;border-radius:8px;}
-
-/* KPI CARDS */
 .ckpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem;}
 .ck{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:16px 18px;}
-.ck-l{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:500;}
-.ck-v{font-size:26px;font-weight:600;letter-spacing:-.02em;line-height:1;}
+.ck-l{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:500;display:flex;align-items:center;gap:6px;}
+.ck-v{font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1;}
 .ck-s{font-size:12px;margin-top:8px;color:var(--text-2);}
 .dept-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .dept-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:16px;padding:22px;cursor:pointer;transition:.18s;}
@@ -85,7 +62,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .dc-meta{font-size:11px;color:var(--text-3);margin-top:4px;}
 .dc-badge{font-size:10px;padding:4px 10px;border-radius:20px;font-weight:600;}
 .bg{background:var(--green-bg);color:var(--green);}.ba{background:var(--amber-bg);color:var(--amber);}.br{background:var(--red-bg);color:var(--red);}
-.dc-fact{font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1;margin-bottom:4px;}
+.dc-fact{font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1;margin-bottom:4px;}
 .dc-plan{font-size:12px;color:var(--text-3);margin-bottom:14px;}
 .progress{height:6px;background:var(--surface-3);border-radius:6px;overflow:hidden;margin-bottom:14px;}
 .progress-fill{height:100%;border-radius:6px;transition:width .5s;}
@@ -95,34 +72,28 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .dept-kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.5rem;}
 .kcard{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;padding:14px 16px;}
 .kl{font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;font-weight:500;}
-.kv{font-size:20px;font-weight:600;line-height:1;}
+.kv{font-size:18px;font-weight:600;line-height:1;}
 .ks{font-size:11px;margin-top:6px;}
 .pbar{height:3px;background:var(--surface-3);border-radius:2px;margin-top:9px;overflow:hidden;}
 .pfill{height:100%;border-radius:2px;}
-
-/* TABS / PANELS */
 .tab-row{display:flex;gap:4px;margin-bottom:1.5rem;background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;padding:4px;width:fit-content;}
 .tab{font-size:13px;padding:8px 18px;border-radius:9px;border:none;background:transparent;color:var(--text-2);cursor:pointer;font-weight:500;}
 .tab.on{background:var(--accent);color:#fff;}
 .tab:not(.on):hover{color:var(--text);}
 .panel{background:var(--surface);border:1px solid var(--border-soft);border-radius:16px;padding:20px 22px;margin-bottom:14px;}
 .panel-title{font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:16px;}
-
-/* TABLE */
 .tbl{width:100%;border-collapse:collapse;font-size:13px;}
-.tbl th{text-align:left;font-size:10px;font-weight:500;color:var(--text-3);padding:0 12px 12px 0;border-bottom:1px solid var(--border-soft);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;cursor:pointer;user-select:none;}
+.tbl th{text-align:left;font-size:10px;font-weight:500;color:var(--text-3);padding:0 10px 12px 0;border-bottom:1px solid var(--border-soft);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;cursor:pointer;user-select:none;}
 .tbl th:hover{color:var(--text-2);}
 .tbl th .sort{opacity:.4;font-size:9px;margin-left:2px;}
 .tbl th.sorted{color:var(--accent);}.tbl th.sorted .sort{opacity:1;}
 .tbl th.r,.tbl td.r{text-align:right;}
-.tbl td{padding:11px 12px 11px 0;border-bottom:1px solid var(--border-soft);vertical-align:middle;}
+.tbl td{padding:11px 10px 11px 0;border-bottom:1px solid var(--border-soft);vertical-align:middle;}
 .tbl tr:last-child td{border-bottom:none;}
 .tbl tbody tr:hover td{background:var(--surface-2);}
 .tbl .muted{color:var(--text-2);}.tbl .strong{font-weight:600;}
 .inbar{height:4px;width:60px;background:var(--surface-3);border-radius:2px;overflow:hidden;margin-left:auto;margin-top:5px;}
 .inbar-f{height:100%;border-radius:2px;}
-
-/* MULTI-SELECT */
 .ms-wrap{position:relative;margin-bottom:12px;}
 .ms-control{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface-2);border:1px solid var(--border-soft);border-radius:30px;padding:7px 10px;min-height:44px;cursor:text;}
 .ms-add{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -138,8 +109,6 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .ms-opt:hover{background:var(--surface-3);}
 .ms-opt .check{width:16px;height:16px;border-radius:4px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
 .ms-opt.sel .check{background:var(--accent);border-color:var(--accent);color:#fff;}
-
-/* MISC */
 .ext-link{color:var(--text);text-decoration:none;display:inline-flex;align-items:center;gap:5px;font-weight:600;}
 .ext-link:hover{color:var(--accent);}
 .lk{font-size:10px;opacity:.5;}
@@ -147,26 +116,29 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .db-red{background:var(--red-bg);color:var(--red);}.db-amb{background:var(--amber-bg);color:var(--amber);}
 .db-grn{background:var(--green-bg);color:var(--green);}.db-neu{background:var(--surface-3);color:var(--text-2);}
 .empty-state{text-align:center;padding:40px 20px;color:var(--text-3);font-size:13px;line-height:1.7;}
-
-/* ADMIN */
 .adm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
 .btn{font-size:12px;padding:8px 14px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);cursor:pointer;font-weight:500;}
 .btn:hover{border-color:var(--accent);}
 .btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;}
 .btn-primary:hover{opacity:.9;}
 .btn-sm{font-size:11px;padding:5px 10px;}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--text-3);}
+.btn-ghost:hover{color:var(--text);border-color:var(--border);}
+.btn-danger{color:var(--red);border-color:transparent;}
+.btn-danger:hover{background:var(--red-bg);border-color:var(--red-bg);}
 .field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
 .field label{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;font-weight:500;}
 .field input,.field select{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit;}
 .field input:focus,.field select:focus{outline:none;border-color:var(--accent);}
-.inline-input{background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:6px 9px;color:var(--text);font-size:13px;width:110px;text-align:right;font-family:inherit;font-variant-numeric:tabular-nums;}
+.inline-input{background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:6px 9px;color:var(--text);font-size:13px;width:130px;text-align:right;font-family:inherit;font-variant-numeric:tabular-nums;}
 .inline-input:focus{outline:none;border-color:var(--accent);}
 .role-select{background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:4px 8px;color:var(--text);font-size:11px;font-family:inherit;cursor:pointer;}
 .role-select:focus{outline:none;border-color:var(--accent);}
 .role-select.lead{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);}
 .status-dot{display:inline-flex;align-items:center;gap:6px;font-size:12px;}
 .status-dot .d{width:7px;height:7px;border-radius:50%;}
-.dept-edit-card{background:var(--surface-2);border:1px solid var(--border-soft);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.dept-edit-card{background:var(--surface-2);border:1px solid var(--border-soft);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.dept-edit-card.archived{opacity:.55;}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:center;justify-content:center;}
 .modal-bg.open{display:flex;}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;width:440px;max-width:92vw;box-shadow:var(--shadow);}
@@ -183,6 +155,23 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .toggle.on{background:var(--accent);border-color:var(--accent);}
 .toggle .knob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;}
 .toggle.on .knob{left:21px;}
+/* archive section */
+.arch-toggle{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-3);cursor:pointer;padding:10px 0 2px;user-select:none;}
+.arch-toggle:hover{color:var(--text-2);}
+.arch-toggle .arr{transition:transform .2s;display:inline-block;}
+.arch-toggle.open .arr{transform:rotate(90deg);}
+.arch-block{display:none;margin-top:12px;}
+.arch-block.open{display:block;}
+/* snapshot badge */
+.snap-badge{font-size:9px;padding:2px 7px;border-radius:8px;background:var(--surface-3);color:var(--text-3);font-weight:500;letter-spacing:.03em;white-space:nowrap;}
+/* funnel stub */
+.funnel-stub{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 20px;gap:12px;color:var(--text-3);}
+.funnel-stub-icon{font-size:36px;opacity:.4;}
+.funnel-stub-title{font-size:14px;font-weight:600;color:var(--text-2);}
+.funnel-stub-text{font-size:12px;text-align:center;line-height:1.7;max-width:320px;}
+/* fired row */
+.fired-row{opacity:.5;}
+.fired-row td{font-style:italic;}
 </style>
 </head>
 <body>
@@ -192,14 +181,17 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 /* ═══ SUPABASE ═══ */
 var SB_URL='https://qhpyrlhugpqgojwmarrw.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocHlybGh1Z3BxZ29qd21hcnJ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDY1Mjg5MCwiZXhwIjoyMDk2MjI4ODkwfQ.J1KvnwrxAbfEINT4ntxz_nWQJx7ZNgD4iPC2pPdGIV4';
-function sbGet(p){return fetch(SB_URL+'/rest/v1/'+p,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).then(function(d){if(d&&d.code){console.error('SB error',p,d.message);return[];}return Array.isArray(d)?d:[];}).catch(function(e){console.error(e);return[];});}
+function sbGet(p){return fetch(SB_URL+'/rest/v1/'+p,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).then(function(d){if(d&&d.code){console.error('SB',p,d.message);return[];}return Array.isArray(d)?d:[];}).catch(function(e){console.error(e);return[];});}
 function sbPatch(t,f,d){return fetch(SB_URL+'/rest/v1/'+t+'?'+f,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(d)}).then(function(r){return r.status;});}
 function sbPost(t,d){return fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(d)}).then(function(r){return r.json();});}
 
-/* ═══ STATE ═══ */
+/* ═══ CONSTANTS ═══ */
 var TODAY=new Date();
+var MIN_DATE=new Date(2026,2,1); // 1 марта 2026 — минимальная дата истории
 var MN=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 var DOW=['пн','вт','ср','чт','пт','сб','вс'];
+
+/* ═══ STATE ═══ */
 var DB=null,RAW={depts:[],employees:[],clients:[]};
 var S={role:'cd',theme:'dark',loading:true,loadErr:null,
   rangeFrom:new Date(TODAY.getFullYear(),TODAY.getMonth(),1),
@@ -207,11 +199,23 @@ var S={role:'cd',theme:'dark',loading:true,loadErr:null,
   calLeft:new Date(TODAY.getFullYear(),TODAY.getMonth(),1),calOpen:false,pick:0,
   dept:null,tab:'staff',clientMgrs:[],mgrDropOpen:false,
   cliSortKey:'minLeft',cliSortDir:1,staffSortKey:'fact',staffSortDir:-1,
-  ropDept:null,mgrAs:null,saveHint:false,factMode:'manual'};
+  ropDept:null,mgrAs:null,saveHint:false,factMode:'manual',
+  // v2 additions
+  periodStats:{},periodLoading:false,
+  showArchivedDepts:false,showArchivedClients:false,
+  mgrTab:'clients',
+  ropShowFired:false,ropShowArchivedDepts:false,
+};
 
 /* ═══ UTILS ═══ */
 function r(n){return Math.round(n||0);}
-function fmt(n){n=n||0;if(n>=1e6)return(n/1e6).toFixed(1)+' млн';if(n>=1e3)return r(n/1e3)+'к';return String(r(n));}
+function fmtNum(n){
+  n=r(n);var s=String(Math.abs(n)),res='';
+  for(var i=0;i<s.length;i++){if(i>0&&(s.length-i)%3===0)res+='\u00A0';res+=s[i];}
+  return(n<0?'-':'')+res;
+}
+function fmt(n){return fmtNum(n)+'\u00A0руб.';}
+function fmtMin(n){return fmtNum(r(n))+'\u00A0мин';}
 function pct(f,p){return p>0?r(f/p*100):0;}
 function grad(p){p=Math.max(0,Math.min(100,p))/100;var s=[[251,110,91],[245,181,68],[46,211,167]];var g=p<.5?0:1,t=p<.5?p/.5:(p-.5)/.5,a=s[g],b=s[g+1];return'rgb('+r(a[0]+(b[0]-a[0])*t)+','+r(a[1]+(b[1]-a[1])*t)+','+r(a[2]+(b[2]-a[2])*t)+')';}
 function daysTo(ds){if(!ds)return null;return Math.max(0,r((new Date(ds)-TODAY)/86400e3));}
@@ -221,32 +225,40 @@ function rr(fact,plan){var f=S.rangeFrom,t=S.rangeTo,el=Math.max(1,r((Math.min(T
 function calLabel(){var f=S.rangeFrom,t=S.rangeTo;return MN[f.getMonth()]+' '+String(f.getDate()).padStart(2,'0')+', '+f.getFullYear()+' — '+MN[t.getMonth()]+' '+String(t.getDate()).padStart(2,'0')+', '+t.getFullYear();}
 function daysBadge(dn){if(dn===null)return'<span class="days-badge db-neu">—</span>';if(dn<=3)return'<span class="days-badge db-red">'+dn+'д</span>';if(dn<=7)return'<span class="days-badge db-amb">'+dn+'д</span>';if(dn<=14)return'<span class="days-badge db-neu">'+dn+'д</span>';return'<span class="days-badge db-grn">'+dn+'д</span>';}
 function si(a,d){return a?'<span class="sort">'+(d>0?'▲':'▼')+'</span>':'<span class="sort">↕</span>';}
+function todayISO(){return TODAY.toISOString().substring(0,10);}
+function dateISO(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
-/* ═══ DATA ═══ */
+/* ═══ DATA LOADING ═══ */
 function loadData(){
   S.loading=true;S.loadErr=null;render();
   return Promise.all([
     sbGet('departments?select=*&order=created_at'),
-    sbGet('employees?select=*&status=eq.active&order=name'),
-    sbGet('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,monthly_plan,monthly_fact,subscription_status,subscription_name,subscription_end&is_archived=eq.false&responsible_platform_user_id=not.is.null&order=company_name&limit=3000')
+    sbGet('employees?select=*&order=name'),
+    sbGet('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,monthly_plan,monthly_fact,subscription_status,subscription_name,subscription_end,is_hidden&is_archived=eq.false&responsible_platform_user_id=not.is.null&order=company_name&limit=3000')
   ]).then(function(res){
     RAW.depts=res[0];RAW.employees=res[1];RAW.clients=res[2];
     if(!RAW.depts.length&&!RAW.employees.length)
-      S.loadErr='Supabase вернул пустые данные. Выполни master.sql и нажми Cmd+Shift+R.';
+      S.loadErr='Supabase вернул пустые данные. Запусти migration_v2.sql и нажми ↻ Обновить.';
     buildDB();S.loading=false;
     if(!S.ropDept&&DB.depts.length)S.ropDept=DB.depts[0].id;
     if(!S.mgrAs){DB.depts.forEach(function(d){if(!S.mgrAs&&d.staff.length)S.mgrAs=d.staff[0].id;});}
     render();
+    loadPeriodStats();
   }).catch(function(e){S.loading=false;S.loadErr=e.message;render();});
 }
 
 function buildDB(){
-  var eBP={},eBD={},cBU={};
-  RAW.employees.forEach(function(e){if(e.platform_user_id)eBP[e.platform_user_id]=e;});
-  RAW.employees.forEach(function(e){if(e.dept_id)(eBD[e.dept_id]=eBD[e.dept_id]||[]).push(e);});
-  RAW.clients.forEach(function(c){var u=c.responsible_platform_user_id;if(u)(cBU[u]=cBU[u]||[]).push(c);});
+  var activeDepts=RAW.depts.filter(function(d){return!d.is_archived;});
+  var firedEmps=RAW.employees.filter(function(e){return e.fired_at||e.is_archived;});
+  var activeEmps=RAW.employees.filter(function(e){return!e.fired_at&&!e.is_archived;});
 
-  var depts=RAW.depts.map(function(d){
+  var eBP={},eBD={},cBU={};
+  activeEmps.forEach(function(e){if(e.platform_user_id)eBP[e.platform_user_id]=e;});
+  activeEmps.forEach(function(e){if(e.dept_id)(eBD[e.dept_id]=eBD[e.dept_id]||[]).push(e);});
+  var visibleClients=RAW.clients.filter(function(c){return!c.is_hidden;});
+  visibleClients.forEach(function(c){var u=c.responsible_platform_user_id;if(u)(cBU[u]=cBU[u]||[]).push(c);});
+
+  var depts=activeDepts.map(function(d){
     var emps=eBD[d.id]||[];
     var lead=RAW.employees.find(function(e){return e.id===d.lead_employee_id;});
     var staff=emps.map(function(e){
@@ -262,8 +274,10 @@ function buildDB(){
     var dFact=staff.reduce(function(a,m){return a+m.fact;},0);
     var dPlan=staff.reduce(function(a,m){return a+m.plan;},0);
     return{id:d.id,name:d.name,tl:lead?lead.name:'—',leadId:d.lead_employee_id,
-      fact:dFact,plan:dPlan,paying:dc.filter(function(c){return c.subscription_status==='active';}).length,
-      arpu:dc.length?r(dFact/dc.length):0,staff:staff,former:[],
+      fact:dFact,plan:dPlan,
+      paying:dc.filter(function(c){return c.subscription_status==='active';}).length,
+      arpu:dc.length?r(dFact/dc.length):0,staff:staff,
+      fired:firedEmps.filter(function(e){return e.dept_id===d.id;}),
       clients:dc.map(function(c){return{platform_org_id:c.platform_org_id,
         name:(c.company_name||'').substring(0,45),mgr:c.responsible_platform_user_id,
         url:c.platform_url||'#',plan:c.monthly_plan||0,fact:c.monthly_fact||0,
@@ -271,10 +285,41 @@ function buildDB(){
         minLeft:c.minutes_left||0,expiry:c.subscription_end||null};})};
   });
 
-  DB={company:{fact:depts.reduce(function(a,d){return a+d.fact;},0),
-    plan:depts.reduce(function(a,d){return a+d.plan;},0),
-    clients:depts.reduce(function(a,d){return a+d.clients.length;},0),
-    paying:depts.reduce(function(a,d){return a+d.paying;},0)},depts:depts};
+  DB={
+    company:{
+      fact:depts.reduce(function(a,d){return a+d.fact;},0),
+      plan:depts.reduce(function(a,d){return a+d.plan;},0),
+      clients:depts.reduce(function(a,d){return a+d.clients.length;},0),
+      paying:depts.reduce(function(a,d){return a+d.paying;},0)
+    },
+    depts:depts,
+    archivedDepts:RAW.depts.filter(function(d){return d.is_archived;}),
+    firedEmps:firedEmps,
+    hiddenClients:RAW.clients.filter(function(c){return c.is_hidden;})
+  };
+}
+
+/* ═══ PERIOD STATS (МИН ИСП.) ═══ */
+function loadPeriodStats(){
+  S.periodStats={};S.periodLoading=true;
+  var from=S.rangeFrom,to=S.rangeTo;
+  var curMonthStart=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
+  var months=[],cur=new Date(from.getFullYear(),from.getMonth(),1);
+  while(cur<=to){months.push(new Date(cur.getTime()));cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);}
+  var pastMonths=months.filter(function(m){return m<curMonthStart;});
+  var hasCurrent=months.some(function(m){return m.getTime()===curMonthStart.getTime();});
+  var promises=[];
+  if(pastMonths.length){
+    var dates=pastMonths.map(function(m){return m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-01';});
+    var q='client_stats?select=platform_org_id,used_minutes&period_type=eq.month&stat_date=in.('+dates.join(',')+')'+'&limit=50000';
+    promises.push(sbGet(q).then(function(rows){rows.forEach(function(row){S.periodStats[row.platform_org_id]=(S.periodStats[row.platform_org_id]||0)+(row.used_minutes||0);});}));
+  }
+  if(hasCurrent){
+    var mStart=curMonthStart.getFullYear()+'-'+String(curMonthStart.getMonth()+1).padStart(2,'0')+'-01';
+    var q2='client_stats?select=platform_org_id,used_minutes&period_type=eq.day&stat_date=gte.'+mStart+'&stat_date=lte.'+todayISO()+'&limit=500000';
+    promises.push(sbGet(q2).then(function(rows){rows.forEach(function(row){S.periodStats[row.platform_org_id]=(S.periodStats[row.platform_org_id]||0)+(row.used_minutes||0);});}));
+  }
+  Promise.all(promises).then(function(){S.periodLoading=false;render();}).catch(function(){S.periodLoading=false;render();});
 }
 
 /* ═══ SAVE ═══ */
@@ -290,13 +335,42 @@ function assignDept(supaId,deptId){
   buildDB();
 }
 
+/* ═══ ARCHIVE ACTIONS ═══ */
+window.archiveDept=function(id){
+  openModal('В архив отдел?','<p style="font-size:13px;color:var(--text-2);line-height:1.7">Отдел исчезнет с главного экрана. Всю статистику можно посмотреть через «Архив отделов». Разархивировать можно в любой момент.</p>',
+    function(){sbPatch('departments','id=eq.'+id,{is_archived:true});RAW.depts.forEach(function(d){if(d.id===id)d.is_archived=true;});buildDB();closeModal();render();});
+};
+window.unarchiveDept=function(id){
+  sbPatch('departments','id=eq.'+id,{is_archived:false});
+  RAW.depts.forEach(function(d){if(d.id===id)d.is_archived=false;});
+  buildDB();render();
+};
+window.fireEmp=function(supaId){
+  openModal('Уволить сотрудника',
+    '<div class="field"><label>Дата увольнения</label><input id="f-date" type="date" value="'+todayISO()+'"></div><p style="font-size:12px;color:var(--text-2);margin-top:4px;line-height:1.6">История выручки и клиентов сохранится. Сотрудник уйдёт в архив РОП — разархивировать можно в любой момент.</p>',
+    function(){var dt=document.getElementById('f-date').value||todayISO();sbPatch('employees','id=eq.'+supaId,{fired_at:dt,is_archived:true});RAW.employees.forEach(function(e){if(e.id===supaId){e.fired_at=dt;e.is_archived=true;}});buildDB();closeModal();render();});
+};
+window.rehireEmp=function(supaId){
+  openModal('Вернуть сотрудника?','<p style="font-size:13px;color:var(--text-2)">Сотрудник вернётся в активный список отдела.</p>',
+    function(){sbPatch('employees','id=eq.'+supaId,{fired_at:null,is_archived:false});RAW.employees.forEach(function(e){if(e.id===supaId){e.fired_at=null;e.is_archived=false;}});buildDB();closeModal();render();});
+};
+window.hideClient=function(orgId,name){
+  openModal('Убрать клиента в архив?','<p style="font-size:13px;color:var(--text-2);line-height:1.7"><b>'+name+'</b> исчезнет из портфеля. Вернуть можно через «Архив» внизу списка.</p>',
+    function(){sbPatch('clients','platform_org_id=eq.'+orgId,{is_hidden:true});RAW.clients.forEach(function(c){if(c.platform_org_id===orgId)c.is_hidden=true;});buildDB();closeModal();render();});
+};
+window.unhideClient=function(orgId){
+  sbPatch('clients','platform_org_id=eq.'+orgId,{is_hidden:false});
+  RAW.clients.forEach(function(c){if(c.platform_org_id===orgId)c.is_hidden=false;});
+  buildDB();render();
+};
+
 /* ═══ CALENDAR ═══ */
 function buildMonth(base){var y=base.getFullYear(),m=base.getMonth(),first=new Date(y,m,1),sd=(first.getDay()+6)%7,days=[];for(var i=0;i<sd;i++)days.push({d:new Date(y,m,1-(sd-i)),other:true});var dim=new Date(y,m+1,0).getDate();for(var k=1;k<=dim;k++)days.push({d:new Date(y,m,k),other:false});while(days.length%7){var l=days[days.length-1].d;days.push({d:new Date(l.getFullYear(),l.getMonth(),l.getDate()+1),other:true});}return days;}
-function renderCalMonth(base){var days=buildMonth(base);var cells=DOW.map(function(d){return'<div class="cal-dow">'+d+'</div>';}).join('');days.forEach(function(o){var cls='cal-day'+(o.other?' other':'');var t=o.d.getTime(),f=S.rangeFrom.getTime(),tt=S.rangeTo.getTime();if(sameDay(o.d,S.rangeFrom)&&sameDay(o.d,S.rangeTo))cls+=' range-single';else if(sameDay(o.d,S.rangeFrom))cls+=' range-start';else if(sameDay(o.d,S.rangeTo))cls+=' range-end';else if(t>f&&t<tt)cls+=' in-range';cells+='<div class="'+cls+'" onclick="pickDay('+o.d.getFullYear()+','+o.d.getMonth()+','+o.d.getDate()+')">'+o.d.getDate()+'</div>';});return'<div class="cal-grid">'+cells+'</div>';}
+function renderCalMonth(base){var days=buildMonth(base);var cells=DOW.map(function(d){return'<div class="cal-dow">'+d+'</div>';}).join('');days.forEach(function(o){var isDisabled=o.d<MIN_DATE;var cls='cal-day'+(o.other?' other':'')+(isDisabled?' disabled':'');var t=o.d.getTime(),f=S.rangeFrom.getTime(),tt=S.rangeTo.getTime();if(!isDisabled){if(sameDay(o.d,S.rangeFrom)&&sameDay(o.d,S.rangeTo))cls+=' range-single';else if(sameDay(o.d,S.rangeFrom))cls+=' range-start';else if(sameDay(o.d,S.rangeTo))cls+=' range-end';else if(t>f&&t<tt)cls+=' in-range';}cells+='<div class="'+cls+'" '+(isDisabled?'':'onclick="pickDay('+o.d.getFullYear()+','+o.d.getMonth()+','+o.d.getDate()+')"')+'>'+o.d.getDate()+'</div>';});return'<div class="cal-grid">'+cells+'</div>';}
 function renderCal(){var L=S.calLeft,R=new Date(L.getFullYear(),L.getMonth()+1,1);var ph=['7 дней','30 дней','Этот месяц','Квартал'].map(function(p,i){return'<button class="cal-preset" onclick="applyPreset('+i+')">'+p+'</button>';}).join('');return'<div class="cal-presets">'+ph+'</div><div class="cal-months"><div><div class="cal-mhead"><button class="cal-nav" onclick="calShift(-1)">‹</button><span class="cal-mtitle">'+MN[L.getMonth()]+' '+L.getFullYear()+'</span><span style="width:28px"></span></div>'+renderCalMonth(L)+'</div><div><div class="cal-mhead"><span style="width:28px"></span><span class="cal-mtitle">'+MN[R.getMonth()]+' '+R.getFullYear()+'</span><button class="cal-nav" onclick="calShift(1)">›</button></div>'+renderCalMonth(R)+'</div></div>';}
 window.calShift=function(d){S.calLeft=new Date(S.calLeft.getFullYear(),S.calLeft.getMonth()+d,1);render();};
-window.pickDay=function(y,m,d){var p=new Date(y,m,d);if(S.pick===0){S.rangeFrom=p;S.rangeTo=p;S.pick=1;}else{if(p<S.rangeFrom){S.rangeTo=S.rangeFrom;S.rangeFrom=p;}else S.rangeTo=p;S.pick=0;}render();};
-window.applyPreset=function(i){var p=[{days:7},{days:30},{tm:1},{days:90}][i];if(p.tm){S.rangeFrom=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);S.rangeTo=new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0);}else{S.rangeTo=new Date(TODAY);S.rangeFrom=new Date(TODAY.getTime()-(p.days-1)*864e5);}S.calLeft=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);S.pick=0;render();};
+window.pickDay=function(y,m,d){var p=new Date(y,m,d);if(p<MIN_DATE)return;if(S.pick===0){S.rangeFrom=p;S.rangeTo=p;S.pick=1;}else{if(p<S.rangeFrom){S.rangeTo=S.rangeFrom;S.rangeFrom=p;}else S.rangeTo=p;S.pick=0;loadPeriodStats();}render();};
+window.applyPreset=function(i){var p=[{days:7},{days:30},{tm:1},{days:90}][i];if(p.tm){S.rangeFrom=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);S.rangeTo=new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0);}else{S.rangeTo=new Date(TODAY);S.rangeFrom=new Date(Math.max(S.rangeTo.getTime()-(p.days-1)*864e5,MIN_DATE.getTime()));}S.calLeft=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);S.pick=0;loadPeriodStats();render();};
 window.toggleCal=function(e){e.stopPropagation();S.calOpen=!S.calOpen;render();};
 document.addEventListener('click',function(e){var ch=false;if(S.calOpen&&!e.target.closest('.cal-wrap')){S.calOpen=false;ch=true;}if(S.mgrDropOpen&&!e.target.closest('#ms-c')){S.mgrDropOpen=false;ch=true;}if(ch)render();});
 function calTrigger(){return'<div class="cal-wrap"><div class="cal-trigger" onclick="toggleCal(event)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>'+calLabel()+'</div><div class="cal-pop'+(S.calOpen?' open':'')+'">'+renderCal()+'</div></div>';}
@@ -315,15 +389,26 @@ function roleBar(){
 /* ═══ КОММДИР ═══ */
 function renderCo(){
   var c=DB.company,cp=pct(c.fact,c.plan),rrv=rr(c.fact,c.plan);
-  var kH=['<div class="ck"><div class="ck-l">Выручка</div><div class="ck-v num">'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div></div>',
+  var isCurrentMonth=sameDay(S.rangeFrom,new Date(TODAY.getFullYear(),TODAY.getMonth(),1));
+  var snapBadge='<span class="snap-badge">снимок сегодня</span>';
+  var kH=[
+    '<div class="ck"><div class="ck-l">Выручка'+(isCurrentMonth?'':' '+snapBadge)+'</div><div class="ck-v num">'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div></div>',
     '<div class="ck"><div class="ck-l">Ранрейт</div><div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="'+(rrv>=100?'pos':rrv>=80?'neu':'neg')+'">'+(rrv>=100?'опережаем темп':'отстаём от темпа')+'</span></div></div>',
-    '<div class="ck"><div class="ck-l">Платящих клиентов</div><div class="ck-v num">'+c.paying+'</div><div class="ck-s">из '+c.clients+' в работе</div></div>',
-    '<div class="ck"><div class="ck-l">Отделов</div><div class="ck-v num">'+DB.depts.length+'</div><div class="ck-s">в компании</div></div>'].join('');
-  var cards=DB.depts.length?DB.depts.map(function(d){var p2=pct(d.fact,d.plan),rr2=rr(d.fact,d.plan),c2=grad(p2);var bT=rr2>=100?'В темпе':rr2>=80?'Отстаём':'Нет плана',bC=rr2>=100?'bg':rr2>=80?'ba':'br';
+    '<div class="ck"><div class="ck-l">Платящих клиентов'+(isCurrentMonth?'':' '+snapBadge)+'</div><div class="ck-v num">'+c.paying+'</div><div class="ck-s">из '+c.clients+' в работе</div></div>',
+    '<div class="ck"><div class="ck-l">Отделов</div><div class="ck-v num">'+DB.depts.length+'</div><div class="ck-s">активных · '+DB.archivedDepts.length+' в архиве</div></div>'
+  ].join('');
+  var cards=DB.depts.length?DB.depts.map(function(d){var p2=pct(d.fact,d.plan),rr2=rr(d.fact,d.plan),c2=grad(p2);var bT=d.plan>0?(rr2>=100?'В темпе':rr2>=80?'Отстаём':'Критично'):'Нет плана',bC=d.plan>0?(rr2>=100?'bg':rr2>=80?'ba':'br'):'br';
     return'<div class="dept-card" onclick="drill(\''+d.id+'\')"><div class="dc-top"><div><div class="dc-name">'+d.name+'</div><div class="dc-meta">'+d.tl+' · '+d.staff.length+' чел. · '+d.clients.length+' клиентов</div></div><span class="dc-badge '+bC+'">'+bT+'</span></div><div class="dc-fact num">'+fmt(d.fact)+'</div><div class="dc-plan">из '+fmt(d.plan)+' плана</div><div class="progress"><div class="progress-fill" style="width:'+Math.min(p2,100)+'%;background:'+c2+'"></div></div><div class="dc-stats"><div><div class="dc-stat-l">Выполнено</div><div class="dc-stat-v num" style="color:'+c2+'">'+p2+'%</div></div><div><div class="dc-stat-l">Ранрейт</div><div class="dc-stat-v num" style="color:'+grad(rr2)+'">'+rr2+'%</div></div><div><div class="dc-stat-l">Платящих</div><div class="dc-stat-v num">'+d.paying+'</div></div></div></div>';}).join(''):
     '<div class="empty-state">Нет отделов.<br>Зайди в <b>РОП</b> → Создать отдел.</div>';
-  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="accent">AI</span> · Продажи</span></div>'+calTrigger()+'</div>'+(S.loadErr?'<div class="err-banner">⚠ '+S.loadErr+'</div>':'')+'<div class="ckpi">'+kH+'</div><div class="dept-grid">'+cards+'</div>');
+  // Archive section
+  var archHtml='';
+  if(DB.archivedDepts.length){
+    var archList=DB.archivedDepts.map(function(d){return'<div class="dept-edit-card archived"><div><div class="strong">'+d.name+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">Архив</div></div><button class="btn btn-sm" onclick="unarchiveDept(\''+d.id+'\')">Разархивировать</button></div>';}).join('');
+    archHtml='<div class="arch-toggle'+(S.showArchivedDepts?' open':'')+'" onclick="toggleArchDepts()"><span class="arr">›</span>Архив отделов ('+DB.archivedDepts.length+')</div><div class="arch-block'+(S.showArchivedDepts?' open':'')+'">'+archList+'</div>';
+  }
+  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="accent">AI</span> · Продажи</span></div>'+calTrigger()+'</div>'+(S.loadErr?'<div class="err-banner">⚠ '+S.loadErr+'</div>':'')+'<div class="ckpi">'+kH+'</div><div class="dept-grid">'+cards+'</div>'+archHtml);
 }
+window.toggleArchDepts=function(){S.showArchivedDepts=!S.showArchivedDepts;render();};
 window.drill=function(id){S.dept=id;S.tab='staff';S.calOpen=false;S.clientMgrs=[];render();};
 window.goUp=function(){S.dept=null;S.calOpen=false;render();};
 window.setTab=function(t){S.tab=t;render();};
@@ -333,40 +418,28 @@ function renderDept(){
   var d=DB.depts.find(function(x){return x.id===S.dept;});
   if(!d){S.dept=null;render();return;}
   var p2=pct(d.fact,d.plan),rrv=rr(d.fact,d.plan);
-  var kpis=[
-    {l:'Выручка',v:fmt(d.fact),s:'из '+fmt(d.plan)+' · '+p2+'%',bar:p2,bc:grad(p2)},
-    {l:'Ранрейт',v:rrv+'%',s:'<span class="'+(rrv>=100?'pos':rrv>=80?'neu':'neg')+'">'+(rrv>=100?'опережаем':'отстаём')+'</span>',raw:true},
-    {l:'ARPU',v:fmt(d.arpu),s:'средний на клиента'},
-    {l:'Клиентов',v:d.clients.length,s:d.paying+' платящих'},
-    {l:'В команде',v:d.staff.length,s:'сотрудников'},
-  ];
+  var kpis=[{l:'Выручка',v:fmt(d.fact),s:'из '+fmt(d.plan)+' · '+p2+'%',bar:p2,bc:grad(p2)},{l:'Ранрейт',v:rrv+'%',s:'<span class="'+(rrv>=100?'pos':rrv>=80?'neu':'neg')+'">'+(rrv>=100?'опережаем':'отстаём')+'</span>',raw:true},{l:'ARPU',v:fmt(d.arpu),s:'средний на клиента'},{l:'Клиентов',v:d.clients.length,s:d.paying+' платящих'},{l:'В команде',v:d.staff.length,s:'сотрудников'}];
   var kH=kpis.map(function(k){var b=k.bar!=null?'<div class="pbar"><div class="pfill" style="width:'+Math.min(k.bar,100)+'%;background:'+k.bc+'"></div></div>':'';return'<div class="kcard"><div class="kl">'+k.l+'</div><div class="kv num">'+k.v+'</div><div class="ks">'+(k.raw?k.s:'<span class="neu">'+k.s+'</span>')+'</div>'+b+'</div>';}).join('');
   var tabs='<div class="tab-row">'+[['staff','Сотрудники'],['clients','Клиенты']].map(function(t){return'<button class="tab'+(S.tab===t[0]?' on':'')+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>';
   var ct='';
-
   if(S.tab==='staff'){
     var staff=[].concat(d.staff);staff.forEach(function(m){m._p=pct(m.fact,m.plan);m._r=rr(m.fact,m.plan);});
     staff.sort(function(a,b){var k=S.staffSortKey,va=k==='name'?a.name:(a[k]!==undefined?a[k]:a['_'+k.replace(/^_/,'')]),vb=k==='name'?b.name:(b[k]!==undefined?b[k]:b['_'+k.replace(/^_/,'')]);if(typeof va==='string')return S.staffSortDir*va.localeCompare(vb);return S.staffSortDir*(va-vb);});
     var cols=[['name','Сотрудник',''],['fact','Факт','r'],['plan','План','r'],['pct','%','r'],['rr','Ранрейт','r'],['clients','Клиентов','r']];
     var th=cols.map(function(c){var a=S.staffSortKey===c[0];return'<th class="'+c[2]+(a?' sorted':'')+'" onclick="sortStaff(\''+c[0]+'\')">'+c[1]+si(a,S.staffSortDir)+'</th>';}).join('');
-    var rows=staff.length?staff.map(function(m){var c3=grad(m._p);return'<tr><td><span class="strong">'+m.name+'</span></td><td class="r strong num">'+fmt(m.fact)+'</td><td class="r muted num">'+fmt(m.plan)+'</td><td class="r"><span style="color:'+c3+';font-weight:600" class="num">'+m._p+'%</span><div class="inbar"><div class="inbar-f" style="width:'+Math.min(m._p,100)+'%;background:'+c3+'"></div></div></td><td class="r"><span style="color:'+grad(m._r)+';font-weight:600" class="num">'+m._r+'%</span></td><td class="r muted num">'+m.clients+'</td></tr>';}).join(''):'<tr><td colspan="6"><div class="empty-state">Нет сотрудников — назначь из РОП</div></td></tr>';
+    var rows=staff.length?staff.map(function(m){var c3=grad(m._p);return'<tr><td><span class="strong">'+m.name+'</span></td><td class="r strong num">'+fmt(m.fact)+'</td><td class="r muted num">'+fmt(m.plan)+'</td><td class="r"><span style="color:'+c3+';font-weight:600" class="num">'+m._p+'%</span><div class="inbar"><div class="inbar-f" style="width:'+Math.min(m._p,100)+'%;background:'+c3+'"></div></div></td><td class="r"><span style="color:'+grad(m._r)+';font-weight:600" class="num">'+m._r+'%</span></td><td class="r muted num">'+m.clients+'</td></tr>';}).join(''):'<tr><td colspan="6"><div class="empty-state">Нет сотрудников</div></td></tr>';
     ct='<div class="panel"><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
   }
   if(S.tab==='clients'){
     var sel=S.clientMgrs;
     var mgrNames=d.staff.reduce(function(m,x){m[x.id]=x.name.split(' ')[1]||x.name;return m;},{});
-    var msCtrl='<div id="ms-c" class="ms-wrap">'+(function(){
-      var chips=sel.map(function(id){return'<span class="ms-chip">'+(mgrNames[id]||id)+'<span class="x" onclick="removeMgr(event,\''+id+'\')">×</span></span>';}).join('');
-      var ctrl='<div class="ms-control" onclick="toggleMgrDrop(event)"><button class="ms-add" onclick="toggleMgrDrop(event)">+</button>'+(sel.length?chips:'<span class="ms-hint">Все менеджеры</span>')+'</div>';
-      var opts=d.staff.map(function(m){var on=sel.indexOf(m.id)>=0;return'<div class="ms-opt'+(on?' sel':'')+'" onclick="toggleMgr(event,\''+m.id+'\')"><span class="check">'+(on?'✓':'')+'</span>'+m.name+'</div>';}).join('');
-      return ctrl+'<div class="ms-drop'+(S.mgrDropOpen?' open':'')+'"><div class="ms-sect">Менеджеры</div>'+opts+'</div>';
-    }())+'</div>';
+    var msCtrl='<div id="ms-c" class="ms-wrap">'+(function(){var chips=sel.map(function(id){return'<span class="ms-chip">'+(mgrNames[id]||id)+'<span class="x" onclick="removeMgr(event,\''+id+'\')">×</span></span>';}).join('');var ctrl='<div class="ms-control" onclick="toggleMgrDrop(event)"><button class="ms-add" onclick="toggleMgrDrop(event)">+</button>'+(sel.length?chips:'<span class="ms-hint">Все менеджеры</span>')+'</div>';var opts=d.staff.map(function(m){var on=sel.indexOf(m.id)>=0;return'<div class="ms-opt'+(on?' sel':'')+'" onclick="toggleMgr(event,\''+m.id+'\')"><span class="check">'+(on?'✓':'')+'</span>'+m.name+'</div>';}).join('');return ctrl+'<div class="ms-drop'+(S.mgrDropOpen?' open':'')+'"><div class="ms-sect">Менеджеры</div>'+opts+'</div>';})()+'</div>';
     var list=d.clients.filter(function(c){return!sel.length||sel.indexOf(c.mgr)>=0;});
     list.forEach(function(c){c._p=pct(c.fact,c.plan);c._d=daysTo(c.expiry);});
     list.sort(function(a,b){var k=S.cliSortKey,va=a[k],vb=b[k];if(k==='pct'){va=a._p;vb=b._p;}if(typeof va==='string')return S.cliSortDir*va.localeCompare(vb);return S.cliSortDir*((va||0)-(vb||0));});
     var cols=[['name','Компания',''],['plan','План','r'],['fact','Факт','r'],['pct','%','r'],['minLeft','Мин ост.','r'],['expiry','До прод.','r']];
     var th=cols.map(function(c){var a=S.cliSortKey===c[0];return'<th class="'+c[2]+(a?' sorted':'')+'" onclick="sortCli(\''+c[0]+'\')">'+c[1]+si(a,S.cliSortDir)+'</th>';}).join('');
-    var body=list.length?list.map(function(c){var c3=grad(c._p);return'<tr><td><a class="ext-link" href="'+c.url+'" target="_blank">'+c.name+' <span class="lk">↗</span></a></td><td class="r muted num">'+fmt(c.plan)+'</td><td class="r strong num" style="color:'+c3+'">'+fmt(c.fact)+'</td><td class="r"><span style="color:'+c3+';font-size:11px;font-weight:600" class="num">'+c._p+'%</span></td><td class="r muted num">'+c.minLeft.toLocaleString('ru')+'</td><td class="r">'+daysBadge(c._d)+'</td></tr>';}).join(''):'<tr><td colspan="6"><div class="empty-state">Нет клиентов</div></td></tr>';
+    var body=list.length?list.map(function(c){var c3=grad(c._p);return'<tr><td><a class="ext-link" href="'+c.url+'" target="_blank">'+c.name+' <span class="lk">↗</span></a></td><td class="r muted num">'+fmt(c.plan)+'</td><td class="r strong num" style="color:'+c3+'">'+fmt(c.fact)+'</td><td class="r"><span style="color:'+c3+';font-size:11px;font-weight:600" class="num">'+c._p+'%</span></td><td class="r muted num">'+fmtMin(c.minLeft)+'</td><td class="r">'+daysBadge(c._d)+'</td></tr>';}).join(''):'<tr><td colspan="6"><div class="empty-state">Нет клиентов</div></td></tr>';
     ct='<div class="panel">'+msCtrl+'<table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+body+'</tbody></table></div>';
   }
   setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUp()">‹ Все отделы</button><span class="crumb-title">'+d.name+'</span></div>'+calTrigger()+'</div><div class="dept-kpi">'+kH+'</div>'+tabs+ct);
@@ -386,135 +459,150 @@ function renderRop(){
   var d=DB.depts.find(function(x){return x.id===S.ropDept;})||DB.depts[0];
   if(d&&!S.ropDept)S.ropDept=d.id;
   var deptOpts=DB.depts.map(function(x){return'<option value="'+x.id+'"'+(x.id===S.ropDept?' selected':'')+'>'+x.name+'</option>';}).join('');
-
-  /* ── staff таблица: роль редактируется инлайн ── */
   var staffRows=d&&d.staff.length?d.staff.map(function(m){
     var isLead=m.role==='Тимлид';
     return'<tr>'+
       '<td><span class="strong">'+m.name+'</span></td>'+
-      '<td>'+
-        '<select class="role-select'+(isLead?' lead':'')+'" onchange="changeEmpRole(\''+m.supaId+'\',this.value)">'+
-          '<option value="manager"'+(isLead?'':' selected')+'>Менеджер</option>'+
-          '<option value="lead"'+(isLead?' selected':'')+'>Тимлид</option>'+
-        '</select>'+
-      '</td>'+
+      '<td><select class="role-select'+(isLead?' lead':'')+'" onchange="changeEmpRole(\''+m.supaId+'\',this.value)"><option value="manager"'+(isLead?'':' selected')+'>Менеджер</option><option value="lead"'+(isLead?' selected':'')+'>Тимлид</option></select></td>'+
       '<td class="muted num">'+fmtD(m.hired)+'</td>'+
       '<td><span class="status-dot"><span class="d" style="background:var(--green)"></span>работает</span></td>'+
       '<td class="r muted num">'+m.clients+'</td>'+
-      '<td class="r"><button class="btn btn-sm" onclick="reassignEmp(\''+m.supaId+'\')">Перевести</button></td>'+
+      '<td class="r" style="display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-sm" onclick="reassignEmp(\''+m.supaId+'\')">Перевести</button><button class="btn btn-sm btn-danger" onclick="fireEmp(\''+m.supaId+'\')">Уволить</button></td>'+
     '</tr>';}).join(''):
-    '<tr><td colspan="6"><div class="empty-state">Нет сотрудников — назначь из пула ниже</div></td></tr>';
-
-  /* ── без отдела ── */
-  var unassigned=RAW.employees.filter(function(e){return!e.dept_id;});
+    '<tr><td colspan="6"><div class="empty-state">Нет сотрудников</div></td></tr>';
+  // Уволенные
+  var firedInDept=(d.fired||[]);
+  var firedBlock='';
+  if(firedInDept.length){
+    var firedRows=firedInDept.map(function(e){return'<tr class="fired-row"><td>'+e.name+'</td><td><span style="font-size:11px;color:var(--text-3)">'+(e.role==='lead'?'Тимлид':'Менеджер')+'</span></td><td class="muted num">'+fmtD(e.hired_at)+'</td><td class="muted num">'+fmtD(e.fired_at)+'</td><td class="r"><button class="btn btn-sm" onclick="rehireEmp(\''+e.id+'\')">Вернуть</button></td></tr>';}).join('');
+    var isOpen=S.ropShowFired;
+    firedBlock='<div style="margin-top:4px"><div class="arch-toggle'+(isOpen?' open':'')+'" onclick="toggleRopFired()"><span class="arr">›</span>Уволенные ('+firedInDept.length+')</div><div class="arch-block'+(isOpen?' open':'')+'"><table class="tbl" style="margin-top:4px"><thead><tr><th>Имя</th><th>Роль</th><th>Нанят</th><th>Уволен</th><th class="r">Действие</th></tr></thead><tbody>'+firedRows+'</tbody></table></div></div>';
+  }
+  // Без отдела
+  var unassigned=RAW.employees.filter(function(e){return!e.dept_id&&!e.fired_at&&!e.is_archived;});
   var unaBlock=unassigned.length?'<div class="panel"><div class="panel-title">Без отдела ('+unassigned.length+')</div><table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th class="r">Действие</th></tr></thead><tbody>'+
-    unassigned.map(function(e){return'<tr><td>'+e.name+'</td><td><span style="font-size:11px;color:var(--text-3)">'+(e.role==='lead'?'Тимлид':'Менеджер')+'</span></td><td class="r"><button class="btn btn-sm btn-primary" onclick="reassignEmp(\''+e.id+'\')">→ В отдел</button></td></tr>';}).join('') +
+    unassigned.map(function(e){return'<tr><td>'+e.name+'</td><td><span style="font-size:11px;color:var(--text-3)">'+(e.role==='lead'?'Тимлид':'Менеджер')+'</span></td><td class="r"><button class="btn btn-sm btn-primary" onclick="reassignEmp(\''+e.id+'\')">→ В отдел</button></td></tr>';}).join('')+
   '</tbody></table></div>':'';
-
-  /* ── toggle ── */
-  var tog='<div class="panel"><div class="adm-head" style="margin:0"><div><div style="font-weight:600;font-size:13px">Источник факта выручки</div><div style="font-size:11px;color:var(--text-3);margin-top:3px">'+(S.factMode==='api'?'Тянется из API — менеджеры не редактируют':'Менеджеры вбивают вручную')+'</div></div><div class="toggle'+(S.factMode==='api'?' on':'')+'" onclick="toggleFM()"><div class="knob"></div></div></div></div>';
-
-  /* ── все отделы ── */
-  var deptCards=DB.depts.map(function(x){return'<div class="dept-edit-card"><div><div class="strong">'+x.name+'</div><div class="muted" style="font-size:11px;margin-top:2px">'+x.tl+' · '+x.staff.length+' чел. · план '+fmt(x.plan)+'</div></div><button class="btn btn-sm" onclick="editDept(\''+x.id+'\')">Настроить</button></div>';}).join('');
-
+  // Toggle
+  var tog='<div class="panel" style="margin-bottom:14px"><div class="adm-head" style="margin:0"><div><div style="font-weight:600;font-size:13px">Источник факта выручки</div><div style="font-size:11px;color:var(--text-3);margin-top:3px">'+(S.factMode==='api'?'Тянется из API':'Менеджеры вбивают вручную')+'</div></div><div class="toggle'+(S.factMode==='api'?' on':'')+'" onclick="toggleFM()"><div class="knob"></div></div></div></div>';
+  // Все отделы
+  var deptCards=DB.depts.map(function(x){return'<div class="dept-edit-card"><div><div class="strong">'+x.name+'</div><div class="muted" style="font-size:11px;margin-top:2px">'+x.tl+' · '+x.staff.length+' чел. · план '+fmt(x.plan)+'</div></div><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="editDept(\''+x.id+'\')">Настроить</button><button class="btn btn-sm btn-ghost" onclick="archiveDept(\''+x.id+'\')" title="В архив">▾</button></div></div>';}).join('');
+  // Архив отделов в РОП
+  var archDeptBlock='';
+  if(DB.archivedDepts.length){
+    var isOpen2=S.ropShowArchivedDepts;
+    var archList=DB.archivedDepts.map(function(x){return'<div class="dept-edit-card archived"><div><div class="strong">'+x.name+'</div><div style="font-size:11px;color:var(--text-3)">В архиве</div></div><button class="btn btn-sm" onclick="unarchiveDept(\''+x.id+'\')">Разархивировать</button></div>';}).join('');
+    archDeptBlock='<div class="arch-toggle'+(isOpen2?' open':'')+'" onclick="toggleRopArchDepts()"><span class="arr">›</span>Архив отделов ('+DB.archivedDepts.length+')</div><div class="arch-block'+(isOpen2?' open':'')+'">'+archList+'</div>';
+  }
   setApp(
     '<div class="topbar"><div class="nav-left"><span class="brand">Управление отделами</span></div></div>'+
     tog+
     '<div class="panel" style="margin-bottom:0">'+
       '<div class="adm-head"><div style="display:flex;align-items:center;gap:12px"><div class="panel-title" style="margin:0">Состав отдела</div>'+
         '<select style="padding:6px 10px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:12px" onchange="setRopDept(this.value)">'+deptOpts+'</select>'+
-      '</div></div>'+
+      '</div><button class="btn btn-primary" onclick="addEmpModal()">+ Сотрудник</button></div>'+
       '<table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th>Нанят</th><th>Статус</th><th class="r">Клиентов</th><th class="r">Действие</th></tr></thead><tbody>'+staffRows+'</tbody></table>'+
+      firedBlock+
     '</div>'+
     unaBlock+
-    '<div class="panel"><div class="adm-head"><div class="panel-title" style="margin:0">Все отделы</div><button class="btn btn-primary" onclick="createDept()">+ Создать отдел</button></div>'+deptCards+'</div>'
+    '<div class="panel"><div class="adm-head"><div class="panel-title" style="margin:0">Все отделы</div><button class="btn btn-primary" onclick="createDept()">+ Создать отдел</button></div>'+deptCards+archDeptBlock+'</div>'
   );
 }
 window.setRopDept=function(id){S.ropDept=id;render();};
 window.toggleFM=function(){S.factMode=S.factMode==='manual'?'api':'manual';render();};
-
-/* смена роли инлайн */
-window.changeEmpRole=function(supaId,role){
-  sbPatch('employees','id=eq.'+supaId,{role:role});
-  RAW.employees.forEach(function(e){if(e.id===supaId)e.role=role;});
-  buildDB();render();
-};
-
+window.toggleRopFired=function(){S.ropShowFired=!S.ropShowFired;render();};
+window.toggleRopArchDepts=function(){S.ropShowArchivedDepts=!S.ropShowArchivedDepts;render();};
+window.changeEmpRole=function(supaId,role){sbPatch('employees','id=eq.'+supaId,{role:role});RAW.employees.forEach(function(e){if(e.id===supaId)e.role=role;});buildDB();render();};
 window.reassignEmp=function(supaId){
   var emp=RAW.employees.find(function(e){return e.id===supaId;});
   var opts='<option value="">— убрать из всех отделов —</option>'+DB.depts.map(function(x){return'<option value="'+x.id+'"'+(emp&&emp.dept_id===x.id?' selected':'')+'>'+x.name+'</option>';}).join('');
-  openModal('Назначить в отдел',
-    '<p style="font-size:13px;color:var(--text-2);margin-bottom:14px">'+(emp?emp.name:'')+'</p>'+
-    '<div class="field"><label>Отдел</label><select id="re-dept">'+opts+'</select></div>',
-    function(){var dept=document.getElementById('re-dept').value||null;assignDept(supaId,dept);closeModal();render();});
+  openModal('Назначить в отдел','<p style="font-size:13px;color:var(--text-2);margin-bottom:14px">'+(emp?emp.name:'')+'</p><div class="field"><label>Отдел</label><select id="re-dept">'+opts+'</select></div>',function(){var dept=document.getElementById('re-dept').value||null;assignDept(supaId,dept);closeModal();render();});
 };
-
+window.addEmpModal=function(){
+  openModal('Добавить сотрудника вручную','<p style="font-size:12px;color:var(--text-3);margin-bottom:14px;line-height:1.6">Сотрудники появляются автоматически после синка (GAS syncAll). Ручное добавление — для тестирования.</p><div class="field"><label>Имя</label><input id="ae-name" placeholder="Иван Иванов"></div>',function(){closeModal();});
+};
 window.editDept=function(id){
   var x=DB.depts.find(function(z){return z.id===id;});
-  /* только тимлиды в списке */
   var leads=RAW.employees.filter(function(e){return e.role==='lead';});
   var leadOpts='<option value="">— без тимлида —</option>'+leads.map(function(e){return'<option value="'+e.id+'"'+(x.leadId===e.id?' selected':'')+'>'+e.name+'</option>';}).join('');
   openModal('Настройка отдела',
     '<div class="field"><label>Название</label><input id="d-name" value="'+x.name+'"></div>'+
-    '<div class="field"><label>Тимлид (только сотрудники с ролью Тимлид)</label><select id="d-lead">'+leadOpts+'</select></div>',
-    function(){var nm=document.getElementById('d-name').value.trim()||x.name;var lead=document.getElementById('d-lead').value||null;
-      sbPatch('departments','id=eq.'+id,{name:nm,lead_employee_id:lead});
-      RAW.depts.forEach(function(dd){if(dd.id===id){dd.name=nm;dd.lead_employee_id=lead;}});
-      if(lead){sbPatch('employees','id=eq.'+lead,{dept_id:id,role:'lead'});RAW.employees.forEach(function(e){if(e.id===lead){e.dept_id=id;e.role='lead';}});}
-      buildDB();closeModal();render();});
+    '<div class="field"><label>Тимлид</label><select id="d-lead">'+leadOpts+'</select></div>',
+    function(){var nm=document.getElementById('d-name').value.trim()||x.name;var lead=document.getElementById('d-lead').value||null;sbPatch('departments','id=eq.'+id,{name:nm,lead_employee_id:lead});RAW.depts.forEach(function(dd){if(dd.id===id){dd.name=nm;dd.lead_employee_id=lead;}});if(lead){sbPatch('employees','id=eq.'+lead,{dept_id:id,role:'lead'});RAW.employees.forEach(function(e){if(e.id===lead){e.dept_id=id;e.role='lead';}});}buildDB();closeModal();render();});
 };
-
 window.createDept=function(){
-  /* только тимлиды */
   var leads=RAW.employees.filter(function(e){return e.role==='lead';});
   var leadOpts='<option value="">— без тимлида —</option>'+leads.map(function(e){return'<option value="'+e.id+'">'+e.name+'</option>';}).join('');
-  var noLeadHint=leads.length?'':'<div style="font-size:11px;color:var(--amber);margin-top:6px">Нет тимлидов. Сначала назначь роль «Тимлид» нужному сотруднику в списке отдела.</div>';
+  var hint=leads.length?'':'<div style="font-size:11px;color:var(--amber);margin-top:6px">Нет тимлидов — сначала назначь роль Тимлид в списке отдела.</div>';
   openModal('Новый отдел',
-    '<div class="field"><label>Название отдела</label><input id="nd-name" placeholder="Отдел Иванцова"></div>'+
-    '<div class="field"><label>Тимлид</label><select id="nd-lead">'+leadOpts+'</select>'+noLeadHint+'</div>',
-    function(){var nm=document.getElementById('nd-name').value.trim();if(!nm)return;var lead=document.getElementById('nd-lead').value||null;
-      sbPost('departments',{name:nm,lead_employee_id:lead,monthly_plan:0}).then(function(res){
-        var nd=Array.isArray(res)?res[0]:res;if(!nd||!nd.id)return;
-        RAW.depts.push(nd);
-        if(lead){sbPatch('employees','id=eq.'+lead,{dept_id:nd.id,role:'lead'});RAW.employees.forEach(function(e){if(e.id===lead){e.dept_id=nd.id;e.role='lead';}});}
-        buildDB();closeModal();S.ropDept=nd.id;render();
-      });
-    });
+    '<div class="field"><label>Название</label><input id="nd-name" placeholder="Отдел Иванцова"></div>'+
+    '<div class="field"><label>Тимлид</label><select id="nd-lead">'+leadOpts+'</select>'+hint+'</div>',
+    function(){var nm=document.getElementById('nd-name').value.trim();if(!nm)return;var lead=document.getElementById('nd-lead').value||null;sbPost('departments',{name:nm,lead_employee_id:lead,monthly_plan:0,is_archived:false}).then(function(res){var nd=Array.isArray(res)?res[0]:res;if(!nd||!nd.id)return;RAW.depts.push(nd);if(lead){sbPatch('employees','id=eq.'+lead,{dept_id:nd.id,role:'lead'});RAW.employees.forEach(function(e){if(e.id===lead){e.dept_id=nd.id;e.role='lead';}});}buildDB();closeModal();S.ropDept=nd.id;render();});});
 };
 
 /* ═══ МЕНЕДЖЕР ═══ */
 function renderMgr(){
   var allMgrs=[];DB.depts.forEach(function(dd){dd.staff.forEach(function(m){allMgrs.push({id:m.id,name:m.name,dept:dd.name});});});
-  if(!allMgrs.length){setApp('<div class="topbar"><div class="nav-left"><span class="brand">Кабинет менеджера</span></div></div><div class="empty-state">Нет менеджеров.<br>Зайди в <b>РОП</b> и назначь людей в отделы.</div>');return;}
+  if(!allMgrs.length){setApp('<div class="topbar"><div class="nav-left"><span class="brand">Кабинет менеджера</span></div></div><div class="empty-state">Нет менеджеров.<br>Зайди в <b>РОП</b> → назначь людей в отделы.</div>');return;}
   if(!S.mgrAs||!allMgrs.find(function(m){return m.id===S.mgrAs;}))S.mgrAs=allMgrs[0].id;
   var d=DB.depts.find(function(x){return x.staff.some(function(m){return m.id===S.mgrAs;});});
   if(!d){S.mgrAs=allMgrs[0].id;d=DB.depts.find(function(x){return x.staff.some(function(m){return m.id===S.mgrAs;});});}
   var myClients=d?d.clients.filter(function(c){return c.mgr===S.mgrAs;}):[];
   var asSel='<select style="padding:6px 10px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:12px" onchange="setMgrAs(this.value)">'+allMgrs.map(function(m){return'<option value="'+m.id+'"'+(m.id===S.mgrAs?' selected':'')+'>'+m.name+'</option>';}).join('')+'</select>';
-
   var totalPlan=myClients.reduce(function(a,c){return a+c.plan;},0);
   var totalFact=myClients.reduce(function(a,c){return a+c.fact;},0);
   var mp=pct(totalFact,totalPlan),api=S.factMode==='api';
-  var kH=['<div class="kcard"><div class="kl">Мой план</div><div class="kv num">'+fmt(totalPlan)+'</div><div class="ks"><span class="neu">факт '+fmt(totalFact)+' · '+mp+'%</span></div><div class="pbar"><div class="pfill" style="width:'+Math.min(mp,100)+'%;background:'+grad(mp)+'"></div></div></div>',
+  var kH=[
+    '<div class="kcard"><div class="kl">Мой план</div><div class="kv num">'+fmt(totalPlan)+'</div><div class="ks"><span class="neu">факт '+fmt(totalFact)+' · '+mp+'%</span></div><div class="pbar"><div class="pfill" style="width:'+Math.min(mp,100)+'%;background:'+grad(mp)+'"></div></div></div>',
     '<div class="kcard"><div class="kl">Клиентов</div><div class="kv num">'+myClients.length+'</div><div class="ks"><span class="neu">в портфеле</span></div></div>',
-    '<div class="kcard"><div class="kl">Ранрейт</div><div class="kv num">'+rr(totalFact,totalPlan)+'%</div><div class="ks"><span class="neu">по моим клиентам</span></div></div>'].join('');
-
-  var rows=myClients.map(function(c){var cp=pct(c.fact,c.plan);
-    var fCell=api?'<td class="r strong num" style="color:'+grad(cp)+'">'+fmt(c.fact)+'</td>':'<td class="r"><input class="inline-input" type="number" value="'+c.fact+'" onchange="setFact(\''+c.platform_org_id+'\',this.value)"></td>';
-    return'<tr><td><a class="ext-link" href="'+c.url+'" target="_blank">'+c.name+' <span class="lk">↗</span></a></td>'+
-      '<td class="r"><input class="inline-input" type="number" value="'+c.plan+'" onchange="setPlan(\''+c.platform_org_id+'\',this.value)"></td>'+
-      fCell+
-      '<td class="r"><span style="color:'+grad(cp)+';font-size:11px;font-weight:600" class="num">'+cp+'%</span></td>'+
-      '<td class="r muted num">'+c.minLeft.toLocaleString('ru')+'</td>'+
-      '<td class="r">'+daysBadge(daysTo(c.expiry))+'</td></tr>';
-  }).join('');
-
-  var table=myClients.length?'<table class="tbl"><thead><tr><th>Компания</th><th class="r">План ₽</th><th class="r">Факт'+(api?' (API)':'')+'</th><th class="r">%</th><th class="r">Мин ост.</th><th class="r">До прод.</th></tr></thead><tbody>'+rows+'</tbody></table>':'<div class="empty-state">Нет клиентов в портфеле.<br>Клиенты привязываются автоматически по ответственному в платформе.</div>';
-  var hint=api?'Факт из API — редактируй только план':'Вбивай план и факт по каждому клиенту — цифры сразу в базе';
-
-  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Кабинет менеджера</span>'+asSel+'<span class="save-hint'+(S.saveHint?' show':'')+'">✓ сохранено</span></div></div><div class="dept-kpi" style="grid-template-columns:repeat(3,1fr)">'+kH+'</div><div class="panel"><div class="panel-title">'+hint+'</div>'+table+'</div>');
+    '<div class="kcard"><div class="kl">Ранрейт</div><div class="kv num">'+rr(totalFact,totalPlan)+'%</div><div class="ks"><span class="neu">по моим клиентам</span></div></div>'
+  ].join('');
+  // Tabs
+  var tabs='<div class="tab-row">'+[['clients','Клиенты'],['funnel','Воронка']].map(function(t){return'<button class="tab'+(S.mgrTab===t[0]?' on':'')+'" onclick="setMgrTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>';
+  var content='';
+  if(S.mgrTab==='clients'){
+    // МИН ИСП. period header
+    var periodLabel=MN[S.rangeFrom.getMonth()];
+    if(S.rangeFrom.getMonth()!==S.rangeTo.getMonth())periodLabel=MN[S.rangeFrom.getMonth()]+' — '+MN[S.rangeTo.getMonth()];
+    var minCol='Мин исп. ('+periodLabel+')'+(S.periodLoading?' ···':'');
+    var rows=myClients.map(function(c){
+      var cp=pct(c.fact,c.plan);
+      var minUsed=S.periodStats[c.platform_org_id];
+      var minCell=S.periodLoading?'<span style="color:var(--text-3);font-size:11px">···</span>':(minUsed!=null?fmtMin(minUsed):'<span style="color:var(--text-3)">—</span>');
+      var fCell=api?'<td class="r strong num" style="color:'+grad(cp)+'">'+fmt(c.fact)+'</td>':'<td class="r"><input class="inline-input" type="number" value="'+c.fact+'" onchange="setFact(\''+c.platform_org_id+'\',this.value)"></td>';
+      return'<tr>'+
+        '<td><a class="ext-link" href="'+c.url+'" target="_blank">'+c.name+' <span class="lk">↗</span></a></td>'+
+        '<td class="r"><input class="inline-input" type="number" value="'+c.plan+'" onchange="setPlan(\''+c.platform_org_id+'\',this.value)"></td>'+
+        fCell+
+        '<td class="r"><span style="color:'+grad(cp)+';font-size:11px;font-weight:600" class="num">'+cp+'%</span></td>'+
+        '<td class="r muted num">'+minCell+'</td>'+
+        '<td class="r muted num">'+fmtMin(c.minLeft)+'</td>'+
+        '<td class="r">'+daysBadge(daysTo(c.expiry))+'</td>'+
+        '<td class="r"><button class="btn btn-sm btn-ghost" onclick="hideClient(\''+c.platform_org_id+'\',\''+c.name.replace(/'/g,'')+'\')" title="В архив">⋯</button></td>'+
+      '</tr>';
+    }).join('');
+    var table=myClients.length?
+      '<table class="tbl"><thead><tr><th>Компания</th><th class="r">План</th><th class="r">Факт'+(api?' (API)':'')+'</th><th class="r">%</th><th class="r">'+minCol+'</th><th class="r">Мин ост.</th><th class="r">До прод.</th><th class="r"></th></tr></thead><tbody>'+rows+'</tbody></table>':
+      '<div class="empty-state">Нет клиентов в портфеле.<br>Клиенты привязываются по ответственному в платформе.</div>';
+    // Archived clients toggle
+    var myHiddenClients=DB.hiddenClients?DB.hiddenClients.filter(function(c){return c.responsible_platform_user_id===S.mgrAs;}):[];
+    var archCliBlock='';
+    if(myHiddenClients.length){
+      var isOpen=S.showArchivedClients;
+      var archRows=myHiddenClients.map(function(c){return'<tr><td class="muted">'+c.company_name+'</td><td class="r"><button class="btn btn-sm" onclick="unhideClient(\''+c.platform_org_id+'\')">Вернуть</button></td></tr>';}).join('');
+      archCliBlock='<div class="arch-toggle'+(isOpen?' open':'')+'" onclick="toggleArchClients()"><span class="arr">›</span>Архив клиентов ('+myHiddenClients.length+')</div><div class="arch-block'+(isOpen?' open':'')+'"><table class="tbl" style="margin-top:8px"><tbody>'+archRows+'</tbody></table></div>';
+    }
+    var hint=api?'Факт из API — редактируй только план':'Вбивай план и факт по каждому клиенту';
+    content='<div class="panel"><div class="panel-title">'+hint+'</div>'+table+archCliBlock+'</div>';
+  }
+  if(S.mgrTab==='funnel'){
+    content='<div class="panel"><div class="funnel-stub"><div class="funnel-stub-icon">🔗</div><div class="funnel-stub-title">Воронка из amoCRM</div><div class="funnel-stub-text">Данные появятся после подключения amoCRM.<br>Готовый скрипт: <code>amoCRM.gs</code> → запиши в таблицу <code>amo_leads</code> → воронка оживёт автоматически.</div></div></div>';
+  }
+  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Кабинет менеджера</span>'+asSel+'<span class="save-hint'+(S.saveHint?' show':'')+'">✓ сохранено</span></div>'+calTrigger()+'</div><div class="dept-kpi" style="grid-template-columns:repeat(3,1fr)">'+kH+'</div>'+tabs+content);
 }
 window.setMgrAs=function(id){S.mgrAs=id;render();};
+window.setMgrTab=function(t){S.mgrTab=t;render();};
+window.toggleArchClients=function(){S.showArchivedClients=!S.showArchivedClients;render();};
 window.setPlan=function(id,v){saveClient(id,'monthly_plan',v);flashSave();};
 window.setFact=function(id,v){saveClient(id,'monthly_fact',v);flashSave();};
 function flashSave(){S.saveHint=true;render();setTimeout(function(){S.saveHint=false;render();},1500);}
