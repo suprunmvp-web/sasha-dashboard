@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru" data-theme="dark">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
 <title>SashaAI · Аналитика продаж</title>
 <style>
 [data-theme="dark"]{
@@ -10,7 +11,7 @@
   --accent:#4D7CFE;--accent-bg:rgba(77,124,254,.12);
   --green:#2ED3A7;--amber:#F5B544;--red:#FB6E5B;
   --green-bg:rgba(46,211,167,.12);--amber-bg:rgba(245,181,68,.12);--red-bg:rgba(251,110,91,.12);
-  --shadow:0 24px 64px rgba(0,0,0,.5);--label-dark:#0B0E14;
+  --shadow:0 24px 64px rgba(0,0,0,.5);
 }
 [data-theme="light"]{
   --bg:#F4F6FA;--surface:#FFFFFF;--surface-2:#F0F2F7;--surface-3:#E6E9F0;
@@ -19,42 +20,47 @@
   --accent:#3D6BF5;--accent-bg:rgba(61,107,245,.10);
   --green:#16A97F;--amber:#D89318;--red:#E25540;
   --green-bg:rgba(22,169,127,.12);--amber-bg:rgba(216,147,24,.12);--red-bg:rgba(226,85,64,.12);
-  --shadow:0 16px 48px rgba(30,40,80,.16);--label-dark:#FFFFFF;
+  --shadow:0 16px 48px rgba(30,40,80,.16);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);padding:1.5rem;font-variant-numeric:tabular-nums;font-feature-settings:"tnum";-webkit-font-smoothing:antialiased;transition:background .2s;}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);padding:1.5rem;-webkit-font-smoothing:antialiased;}
 .app{max-width:1040px;margin:0 auto;}
 .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
 .pos{color:var(--green);}.neg{color:var(--red);}.neu{color:var(--text-2);}
+
+/* ROLEBAR */
 .rolebar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;gap:12px;flex-wrap:wrap;}
 .role-seg{display:flex;gap:3px;background:var(--surface-2);border:1px solid var(--border-soft);border-radius:11px;padding:3px;}
-.role-btn{font-size:12px;padding:7px 14px;border-radius:8px;border:none;background:transparent;color:var(--text-2);cursor:pointer;transition:.15s;font-weight:500;display:flex;align-items:center;gap:6px;}
+.role-btn{font-size:12px;padding:7px 14px;border-radius:8px;border:none;background:transparent;color:var(--text-2);cursor:pointer;font-weight:500;}
 .role-btn.on{background:var(--accent);color:#fff;}
 .role-btn:not(.on):hover{color:var(--text);}
 .role-meta{font-size:11px;color:var(--text-3);}
-.theme-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;}
-.theme-btn:hover{border-color:var(--accent);color:var(--accent);}
+.bar-right{display:flex;align-items:center;gap:8px;}
+.icon-btn{width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent);}
+.refresh-btn{font-size:12px;padding:6px 13px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);cursor:pointer;}
+.refresh-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* TOPBAR */
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;gap:12px;flex-wrap:wrap;}
-.nav-left{display:flex;align-items:center;gap:12px;}
-.back-btn{font-size:13px;color:var(--accent);cursor:pointer;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);transition:.15s;}
-.back-btn:hover{background:var(--surface-3);}
+.nav-left{display:flex;align-items:center;gap:10px;}
+.back-btn{font-size:13px;color:var(--accent);cursor:pointer;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);}
 .brand{font-size:18px;font-weight:600;letter-spacing:-.01em;}
 .brand .accent{color:var(--accent);}
-.crumb-title{font-size:18px;font-weight:600;letter-spacing:-.01em;}
-.cal-trigger{display:flex;align-items:center;gap:8px;font-size:13px;padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);cursor:pointer;color:var(--text);transition:.15s;}
-.cal-trigger:hover{border-color:var(--accent);}
+.crumb-title{font-size:18px;font-weight:600;}
+
+/* CALENDAR */
+.cal-trigger{display:flex;align-items:center;gap:8px;font-size:13px;padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);cursor:pointer;color:var(--text);}
 .cal-trigger svg{opacity:.6;}
 .cal-pop{position:absolute;right:0;top:48px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;z-index:50;box-shadow:var(--shadow);display:none;}
 .cal-pop.open{display:block;}
 .cal-wrap{position:relative;}
 .cal-presets{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
 .cal-preset{font-size:11px;padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;}
-.cal-preset:hover{border-color:var(--accent);color:var(--text);}
 .cal-months{display:flex;gap:28px;}
 .cal-mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .cal-mtitle{font-size:13px;font-weight:600;}
 .cal-nav{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.cal-nav:hover{background:var(--surface-3);color:var(--text);}
 .cal-grid{display:grid;grid-template-columns:repeat(7,30px);gap:2px;}
 .cal-dow{font-size:10px;color:var(--text-3);text-align:center;height:24px;display:flex;align-items:center;justify-content:center;text-transform:uppercase;}
 .cal-day{font-size:12px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px;color:var(--text);}
@@ -64,13 +70,15 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .cal-day.range-start{background:var(--accent);color:#fff;border-radius:8px 0 0 8px;}
 .cal-day.range-end{background:var(--accent);color:#fff;border-radius:0 8px 8px 0;}
 .cal-day.range-single{background:var(--accent);color:#fff;border-radius:8px;}
+
+/* KPI CARDS */
 .ckpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem;}
 .ck{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:16px 18px;}
 .ck-l{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:500;}
 .ck-v{font-size:26px;font-weight:600;letter-spacing:-.02em;line-height:1;}
 .ck-s{font-size:12px;margin-top:8px;color:var(--text-2);}
 .dept-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.dept-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:16px;padding:22px;cursor:pointer;transition:.18s;position:relative;overflow:hidden;}
+.dept-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:16px;padding:22px;cursor:pointer;transition:.18s;}
 .dept-card:hover{border-color:var(--accent);transform:translateY(-1px);}
 .dc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;}
 .dc-name{font-size:16px;font-weight:600;}
@@ -80,7 +88,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .dc-fact{font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1;margin-bottom:4px;}
 .dc-plan{font-size:12px;color:var(--text-3);margin-bottom:14px;}
 .progress{height:6px;background:var(--surface-3);border-radius:6px;overflow:hidden;margin-bottom:14px;}
-.progress-fill{height:100%;border-radius:6px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.progress-fill{height:100%;border-radius:6px;transition:width .5s;}
 .dc-stats{display:flex;justify-content:space-between;}
 .dc-stat-l{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;}
 .dc-stat-v{font-size:15px;font-weight:600;margin-top:2px;}
@@ -91,409 +99,438 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .ks{font-size:11px;margin-top:6px;}
 .pbar{height:3px;background:var(--surface-3);border-radius:2px;margin-top:9px;overflow:hidden;}
 .pfill{height:100%;border-radius:2px;}
+
+/* TABS / PANELS */
 .tab-row{display:flex;gap:4px;margin-bottom:1.5rem;background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;padding:4px;width:fit-content;}
 .tab{font-size:13px;padding:8px 18px;border-radius:9px;border:none;background:transparent;color:var(--text-2);cursor:pointer;font-weight:500;}
 .tab.on{background:var(--accent);color:#fff;}
 .tab:not(.on):hover{color:var(--text);}
-.panel{background:var(--surface);border:1px solid var(--border-soft);border-radius:16px;padding:20px 22px;}
+.panel{background:var(--surface);border:1px solid var(--border-soft);border-radius:16px;padding:20px 22px;margin-bottom:14px;}
 .panel-title{font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:16px;}
+
+/* TABLE */
 .tbl{width:100%;border-collapse:collapse;font-size:13px;}
 .tbl th{text-align:left;font-size:10px;font-weight:500;color:var(--text-3);padding:0 12px 12px 0;border-bottom:1px solid var(--border-soft);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;cursor:pointer;user-select:none;}
 .tbl th:hover{color:var(--text-2);}
 .tbl th .sort{opacity:.4;font-size:9px;margin-left:2px;}
 .tbl th.sorted{color:var(--accent);}.tbl th.sorted .sort{opacity:1;}
 .tbl th.r,.tbl td.r{text-align:right;}
-.tbl td{padding:13px 12px 13px 0;border-bottom:1px solid var(--border-soft);vertical-align:middle;}
+.tbl td{padding:11px 12px 11px 0;border-bottom:1px solid var(--border-soft);vertical-align:middle;}
 .tbl tr:last-child td{border-bottom:none;}
 .tbl tbody tr:hover td{background:var(--surface-2);}
 .tbl .muted{color:var(--text-2);}.tbl .strong{font-weight:600;}
-.inbar{height:4px;width:70px;background:var(--surface-3);border-radius:2px;overflow:hidden;margin-left:auto;margin-top:5px;}
+.inbar{height:4px;width:60px;background:var(--surface-3);border-radius:2px;overflow:hidden;margin-left:auto;margin-top:5px;}
 .inbar-f{height:100%;border-radius:2px;}
+
+/* MULTI-SELECT */
 .ms-wrap{position:relative;margin-bottom:12px;}
 .ms-control{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface-2);border:1px solid var(--border-soft);border-radius:30px;padding:7px 10px;min-height:44px;cursor:text;}
-.ms-add{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ms-add{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .ms-add:hover{border-color:var(--accent);color:var(--accent);}
-.ms-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 8px 5px 11px;border-radius:20px;background:var(--accent-bg);color:var(--text);border:1px solid var(--border);}
-.ms-chip.fired{background:var(--surface-3);color:var(--text-2);}
-.ms-chip .x{cursor:pointer;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:.6;}
-.ms-chip .x:hover{opacity:1;background:var(--surface-3);}
+.ms-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 8px 5px 11px;border-radius:20px;background:var(--accent-bg);border:1px solid var(--border);}
+.ms-chip .x{cursor:pointer;opacity:.6;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.ms-chip .x:hover{opacity:1;}
 .ms-hint{font-size:13px;color:var(--text-3);padding-left:4px;}
-.ms-drop{position:absolute;left:0;top:52px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:8px;z-index:40;box-shadow:var(--shadow);min-width:280px;display:none;max-height:340px;overflow-y:auto;}
+.ms-drop{position:absolute;left:0;top:52px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:8px;z-index:40;box-shadow:var(--shadow);min-width:260px;display:none;max-height:320px;overflow-y:auto;}
 .ms-drop.open{display:block;}
 .ms-sect{font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;padding:8px 10px 6px;font-weight:600;}
 .ms-opt{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px;}
 .ms-opt:hover{background:var(--surface-3);}
 .ms-opt .check{width:16px;height:16px;border-radius:4px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
 .ms-opt.sel .check{background:var(--accent);border-color:var(--accent);color:#fff;}
-.ms-opt.fired{color:var(--text-3);}
-.ms-opt.fired .fired-tag{font-size:10px;color:var(--text-3);margin-left:auto;background:var(--surface-3);padding:2px 7px;border-radius:10px;}
-.mgr-cell{font-size:12px;color:var(--text-2);cursor:pointer;border-radius:6px;padding:3px 8px;display:inline-block;}
-.mgr-cell:hover{background:var(--accent-bg);color:var(--accent);}
-.mgr-cell.fired{color:var(--text-3);font-style:italic;}
+
+/* MISC */
 .ext-link{color:var(--text);text-decoration:none;display:inline-flex;align-items:center;gap:5px;font-weight:600;}
 .ext-link:hover{color:var(--accent);}
 .lk{font-size:10px;opacity:.5;}
 .days-badge{font-size:11px;padding:3px 9px;border-radius:6px;font-weight:600;display:inline-block;}
 .db-red{background:var(--red-bg);color:var(--red);}.db-amb{background:var(--amber-bg);color:var(--amber);}
 .db-grn{background:var(--green-bg);color:var(--green);}.db-neu{background:var(--surface-3);color:var(--text-2);}
-.empty-state{text-align:center;padding:40px;color:var(--text-3);font-size:13px;}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-3);font-size:13px;line-height:1.7;}
+
+/* ADMIN */
 .adm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
-.btn{font-size:12px;padding:8px 14px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);cursor:pointer;transition:.15s;font-weight:500;}
+.btn{font-size:12px;padding:8px 14px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);cursor:pointer;font-weight:500;}
 .btn:hover{border-color:var(--accent);}
 .btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;}
 .btn-primary:hover{opacity:.9;}
-.btn-danger{color:var(--red);border-color:var(--red-bg);}
-.btn-danger:hover{background:var(--red-bg);}
 .btn-sm{font-size:11px;padding:5px 10px;}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
-.field{display:flex;flex-direction:column;gap:5px;}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
 .field label{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;font-weight:500;}
 .field input,.field select{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit;}
 .field input:focus,.field select:focus{outline:none;border-color:var(--accent);}
 .inline-input{background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:6px 9px;color:var(--text);font-size:13px;width:110px;text-align:right;font-family:inherit;font-variant-numeric:tabular-nums;}
 .inline-input:focus{outline:none;border-color:var(--accent);}
+.role-select{background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:4px 8px;color:var(--text);font-size:11px;font-family:inherit;cursor:pointer;}
+.role-select:focus{outline:none;border-color:var(--accent);}
+.role-select.lead{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);}
 .status-dot{display:inline-flex;align-items:center;gap:6px;font-size:12px;}
 .status-dot .d{width:7px;height:7px;border-radius:50%;}
+.dept-edit-card{background:var(--surface-2);border:1px solid var(--border-soft);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:center;justify-content:center;}
 .modal-bg.open{display:flex;}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;width:440px;max-width:92vw;box-shadow:var(--shadow);}
 .modal-title{font-size:16px;font-weight:600;margin-bottom:18px;}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px;}
-.role-pill{font-size:10px;padding:2px 8px;border-radius:10px;background:var(--surface-3);color:var(--text-2);}
-.role-pill.tl{background:var(--accent-bg);color:var(--accent);}
-.save-hint{font-size:11px;color:var(--green);margin-left:10px;opacity:0;transition:opacity .3s;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;}
+.save-hint{font-size:11px;color:var(--green);margin-left:8px;opacity:0;transition:opacity .3s;}
 .save-hint.show{opacity:1;}
-.dept-edit-card{background:var(--surface-2);border:1px solid var(--border-soft);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
 .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px;color:var(--text-3);}
 .spinner{width:38px;height:38px;border:3px solid var(--surface-3);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.toggle-wrap{display:flex;align-items:center;gap:10px;}
+.err-banner{background:var(--red-bg);border:1px solid var(--red);border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:var(--red);}
+.toggle-wrap{display:flex;align-items:center;gap:12px;}
 .toggle{width:42px;height:24px;border-radius:14px;background:var(--surface-3);border:1px solid var(--border);position:relative;cursor:pointer;transition:.2s;flex-shrink:0;}
 .toggle.on{background:var(--accent);border-color:var(--accent);}
 .toggle .knob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;}
 .toggle.on .knob{left:21px;}
-.toggle-label{font-size:13px;color:var(--text);}
-.toggle-sub{font-size:11px;color:var(--text-3);margin-top:2px;}
 </style>
 </head>
 <body>
 <div class="app" id="app"></div>
 <div class="modal-bg" id="modal"></div>
 <script>
-/* ═══════════════════════ SUPABASE ═══════════════════════ */
+/* ═══ SUPABASE ═══ */
 var SB_URL='https://qhpyrlhugpqgojwmarrw.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocHlybGh1Z3BxZ29qd21hcnJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NTI4OTAsImV4cCI6MjA5NjIyODg5MH0.wlEY_Nm2T6Oe-WbH4lHJxdv_1-RjqgpNtBziTTGX2OQ';
-function sbGet(path){return fetch(SB_URL+'/rest/v1/'+path,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();});}
-function sbPatch(table,filter,data){return fetch(SB_URL+'/rest/v1/'+table+'?'+filter,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(data)}).then(function(r){return r.status;});}
-function sbPost(table,data){return fetch(SB_URL+'/rest/v1/'+table,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(data)}).then(function(r){return r.json();});}
+function sbGet(p){return fetch(SB_URL+'/rest/v1/'+p,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).then(function(d){if(d&&d.code){console.error('SB error',p,d.message);return[];}return Array.isArray(d)?d:[];}).catch(function(e){console.error(e);return[];});}
+function sbPatch(t,f,d){return fetch(SB_URL+'/rest/v1/'+t+'?'+f,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(d)}).then(function(r){return r.status;});}
+function sbPost(t,d){return fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(d)}).then(function(r){return r.json();});}
 
-/* ═══════════════════════ STATE ═══════════════════════ */
+/* ═══ STATE ═══ */
 var TODAY=new Date();
-var MONTHS_N=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+var MN=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 var DOW=['пн','вт','ср','чт','пт','сб','вс'];
-var DB=null;
-var RAW={depts:[],employees:[],clients:[]};
-
-var S={
-  role:'cd',theme:'dark',loading:true,
+var DB=null,RAW={depts:[],employees:[],clients:[]};
+var S={role:'cd',theme:'dark',loading:true,loadErr:null,
   rangeFrom:new Date(TODAY.getFullYear(),TODAY.getMonth(),1),
   rangeTo:new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0),
   calLeft:new Date(TODAY.getFullYear(),TODAY.getMonth(),1),calOpen:false,pick:0,
-  dept:null,tab:'staff',
-  clientMgrs:[],mgrDropOpen:false,
-  cliSortKey:'minLeft',cliSortDir:1,
-  staffSortKey:'fact',staffSortDir:-1,
-  funnelMgrs:[],funnelMgrDrop:false,funnelTag:'Все',
-  ropDept:null,mgrAs:null,saveHint:false,
-  factMode:'manual'
-};
-function r(n){return Math.round(n);}
-function fmt(n){n=n||0;if(n>=1000000)return(n/1000000).toFixed(1)+' млн';if(n>=1000)return r(n/1000)+'к';return String(r(n));}
-function pct(f,p){return p>0?r(f/p*100):0;}
-function gradColor(p){p=Math.max(0,Math.min(100,p))/100;var s=[[251,110,91],[245,181,68],[46,211,167]];var seg=p<.5?0:1,t=p<.5?p/.5:(p-.5)/.5;var a=s[seg],b=s[seg+1];return'rgb('+r(a[0]+(b[0]-a[0])*t)+','+r(a[1]+(b[1]-a[1])*t)+','+r(a[2]+(b[2]-a[2])*t)+')';}
-function daysTo(ds){if(!ds)return null;return Math.max(0,r((new Date(ds)-TODAY)/86400000));}
-function fmtCalLabel(){var f=S.rangeFrom,t=S.rangeTo;return MONTHS_N[f.getMonth()]+' '+String(f.getDate()).padStart(2,'0')+', '+f.getFullYear()+' — '+MONTHS_N[t.getMonth()]+' '+String(t.getDate()).padStart(2,'0')+', '+t.getFullYear();}
-function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
-function runratePct(fact,plan){var from=S.rangeFrom,to=S.rangeTo;var elapsed=Math.max(1,r((Math.min(TODAY,to)-from)/86400000)+1);var total=Math.max(1,r((to-from)/86400000)+1);var expected=plan*(elapsed/total);return expected>0?r(fact/expected*100):0;}
-function fmtRu(ds){if(!ds)return'—';var p=ds.split('-');return p[2]+'.'+p[1]+'.'+p[0];}
+  dept:null,tab:'staff',clientMgrs:[],mgrDropOpen:false,
+  cliSortKey:'minLeft',cliSortDir:1,staffSortKey:'fact',staffSortDir:-1,
+  ropDept:null,mgrAs:null,saveHint:false,factMode:'manual'};
 
-/* ═══════════════════════ DATA LOAD ═══════════════════════ */
+/* ═══ UTILS ═══ */
+function r(n){return Math.round(n||0);}
+function fmt(n){n=n||0;if(n>=1e6)return(n/1e6).toFixed(1)+' млн';if(n>=1e3)return r(n/1e3)+'к';return String(r(n));}
+function pct(f,p){return p>0?r(f/p*100):0;}
+function grad(p){p=Math.max(0,Math.min(100,p))/100;var s=[[251,110,91],[245,181,68],[46,211,167]];var g=p<.5?0:1,t=p<.5?p/.5:(p-.5)/.5,a=s[g],b=s[g+1];return'rgb('+r(a[0]+(b[0]-a[0])*t)+','+r(a[1]+(b[1]-a[1])*t)+','+r(a[2]+(b[2]-a[2])*t)+')';}
+function daysTo(ds){if(!ds)return null;return Math.max(0,r((new Date(ds)-TODAY)/86400e3));}
+function fmtD(ds){if(!ds)return'—';var p=ds.substring(0,10).split('-');return p[2]+'.'+p[1]+'.'+p[0];}
+function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
+function rr(fact,plan){var f=S.rangeFrom,t=S.rangeTo,el=Math.max(1,r((Math.min(TODAY,t)-f)/864e5)+1),tot=Math.max(1,r((t-f)/864e5)+1);var ex=plan*(el/tot);return ex>0?r(fact/ex*100):0;}
+function calLabel(){var f=S.rangeFrom,t=S.rangeTo;return MN[f.getMonth()]+' '+String(f.getDate()).padStart(2,'0')+', '+f.getFullYear()+' — '+MN[t.getMonth()]+' '+String(t.getDate()).padStart(2,'0')+', '+t.getFullYear();}
+function daysBadge(dn){if(dn===null)return'<span class="days-badge db-neu">—</span>';if(dn<=3)return'<span class="days-badge db-red">'+dn+'д</span>';if(dn<=7)return'<span class="days-badge db-amb">'+dn+'д</span>';if(dn<=14)return'<span class="days-badge db-neu">'+dn+'д</span>';return'<span class="days-badge db-grn">'+dn+'д</span>';}
+function si(a,d){return a?'<span class="sort">'+(d>0?'▲':'▼')+'</span>':'<span class="sort">↕</span>';}
+
+/* ═══ DATA ═══ */
 function loadData(){
-  S.loading=true;render();
+  S.loading=true;S.loadErr=null;render();
   return Promise.all([
     sbGet('departments?select=*&order=created_at'),
     sbGet('employees?select=*&status=eq.active&order=name'),
-    sbGet('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,monthly_plan,monthly_fact,subscription_status,subscription_name&is_archived=eq.false&responsible_platform_user_id=not.is.null&order=company_name&limit=3000')
+    sbGet('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,monthly_plan,monthly_fact,subscription_status,subscription_name,subscription_end&is_archived=eq.false&responsible_platform_user_id=not.is.null&order=company_name&limit=3000')
   ]).then(function(res){
-    RAW.depts=res[0]||[];RAW.employees=res[1]||[];RAW.clients=res[2]||[];
+    RAW.depts=res[0];RAW.employees=res[1];RAW.clients=res[2];
+    if(!RAW.depts.length&&!RAW.employees.length)
+      S.loadErr='Supabase вернул пустые данные. Выполни master.sql и нажми Cmd+Shift+R.';
     buildDB();S.loading=false;
-    if(S.ropDept===null&&DB.depts.length)S.ropDept=DB.depts[0].id;
-    if(S.mgrAs===null){for(var i=0;i<DB.depts.length;i++){if(DB.depts[i].staff.length){S.mgrAs=DB.depts[i].staff[0].id;break;}}}
+    if(!S.ropDept&&DB.depts.length)S.ropDept=DB.depts[0].id;
+    if(!S.mgrAs){DB.depts.forEach(function(d){if(!S.mgrAs&&d.staff.length)S.mgrAs=d.staff[0].id;});}
     render();
-  }).catch(function(e){
-    S.loading=false;
-    document.getElementById('app').innerHTML='<div class="loading"><div style="color:var(--red)">Ошибка загрузки: '+e.message+'</div></div>';
-  });
+  }).catch(function(e){S.loading=false;S.loadErr=e.message;render();});
 }
 
 function buildDB(){
-  var empByPlat={},empByDept={},clientsByUser={};
-  RAW.employees.forEach(function(e){if(e.platform_user_id)empByPlat[e.platform_user_id]=e;});
-  RAW.employees.forEach(function(e){if(!e.dept_id)return;(empByDept[e.dept_id]=empByDept[e.dept_id]||[]).push(e);});
-  RAW.clients.forEach(function(c){var u=c.responsible_platform_user_id;if(!u)return;(clientsByUser[u]=clientsByUser[u]||[]).push(c);});
+  var eBP={},eBD={},cBU={};
+  RAW.employees.forEach(function(e){if(e.platform_user_id)eBP[e.platform_user_id]=e;});
+  RAW.employees.forEach(function(e){if(e.dept_id)(eBD[e.dept_id]=eBD[e.dept_id]||[]).push(e);});
+  RAW.clients.forEach(function(c){var u=c.responsible_platform_user_id;if(u)(cBU[u]=cBU[u]||[]).push(c);});
 
   var depts=RAW.depts.map(function(d){
-    var emps=empByDept[d.id]||[];
+    var emps=eBD[d.id]||[];
     var lead=RAW.employees.find(function(e){return e.id===d.lead_employee_id;});
     var staff=emps.map(function(e){
-      var ec=clientsByUser[e.platform_user_id]||[];
-      return {id:e.platform_user_id,supaId:e.id,name:e.name,role:e.role==='lead'?'Тимлид':'Менеджер',hired:e.hired_at||'2025-01-01',
+      var ec=cBU[e.platform_user_id]||[];
+      return{id:e.platform_user_id,supaId:e.id,name:e.name,
+        role:e.role==='lead'?'Тимлид':'Менеджер',hired:e.hired_at||'2025-01-01',
         fact:ec.reduce(function(a,c){return a+(c.monthly_fact||0);},0),
         plan:ec.reduce(function(a,c){return a+(c.monthly_plan||0);},0),
         clients:ec.length};
     });
-    staff.sort(function(a,b){return (b.role==='Тимлид')-(a.role==='Тимлид');});
-    var deptClients=emps.reduce(function(a,e){return a.concat(clientsByUser[e.platform_user_id]||[]);},[]);
-    var clientsList=deptClients.map(function(c){
-      return {platform_org_id:c.platform_org_id,name:c.company_name||'—',mgr:c.responsible_platform_user_id,
+    staff.sort(function(a,b){return(b.role==='Тимлид')-(a.role==='Тимлид');});
+    var dc=emps.reduce(function(a,e){return a.concat(cBU[e.platform_user_id]||[]);},[]);
+    var dFact=staff.reduce(function(a,m){return a+m.fact;},0);
+    var dPlan=staff.reduce(function(a,m){return a+m.plan;},0);
+    return{id:d.id,name:d.name,tl:lead?lead.name:'—',leadId:d.lead_employee_id,
+      fact:dFact,plan:dPlan,paying:dc.filter(function(c){return c.subscription_status==='active';}).length,
+      arpu:dc.length?r(dFact/dc.length):0,staff:staff,former:[],
+      clients:dc.map(function(c){return{platform_org_id:c.platform_org_id,
+        name:(c.company_name||'').substring(0,45),mgr:c.responsible_platform_user_id,
         url:c.platform_url||'#',plan:c.monthly_plan||0,fact:c.monthly_fact||0,
-        minSpent:Math.max(0,(c.minutes_total||0)-(c.minutes_left||0)),minLeft:c.minutes_left||0,
-        expiry:null,sub:c.subscription_name||'free'};
-    });
-    var deptFact=staff.reduce(function(a,m){return a+m.fact;},0);
-    var paying=deptClients.filter(function(c){return c.subscription_status==='active';}).length;
-    return {id:d.id,name:d.name,tl:lead?lead.name:'—',leadId:d.lead_employee_id,
-      fact:deptFact,plan:staff.reduce(function(a,m){return a+m.plan;},0),
-      arpu:deptClients.length?r(deptFact/deptClients.length):0,ltv:0,ret:0,paying:paying,
-      staff:staff,former:[],
-      funnels:{'Все':[{s:'Лидов взято в работу',f:0,p:0},{s:'Квалифицировано',f:0,p:0},{s:'Встреч назначено',f:0,p:0},{s:'Встреч проведено',f:0,p:0},{s:'Счетов выставлено',f:0,p:0},{s:'Оплат получено',f:0,p:0}]},
-      tagStats:{},clients:clientsList};
+        minSpent:Math.max(0,(c.minutes_total||0)-(c.minutes_left||0)),
+        minLeft:c.minutes_left||0,expiry:c.subscription_end||null};})};
   });
 
-  DB={company:{
-    fact:depts.reduce(function(a,d){return a+d.fact;},0),
+  DB={company:{fact:depts.reduce(function(a,d){return a+d.fact;},0),
     plan:depts.reduce(function(a,d){return a+d.plan;},0),
     clients:depts.reduce(function(a,d){return a+d.clients.length;},0),
-    paying:depts.reduce(function(a,d){return a+d.paying;},0),
-    newC:0,churnC:0,potential:0},depts:depts};
+    paying:depts.reduce(function(a,d){return a+d.paying;},0)},depts:depts};
 }
 
-/* ═══════════════════════ SAVE ═══════════════════════ */
-function saveClientField(orgId,field,val){
-  var d={};d[field]=val;
+/* ═══ SAVE ═══ */
+function saveClient(orgId,field,val){
+  var d={};d[field]=Number(val)||0;
   sbPatch('clients','platform_org_id=eq.'+orgId,d);
-  RAW.clients.forEach(function(c){if(c.platform_org_id===orgId)c[field]=val;});
+  RAW.clients.forEach(function(c){if(c.platform_org_id===orgId)c[field]=Number(val)||0;});
   buildDB();
 }
-function saveDeptPlan(deptId,val){sbPatch('departments','id=eq.'+deptId,{monthly_plan:val});RAW.depts.forEach(function(d){if(d.id===deptId)d.monthly_plan=val;});buildDB();}
-function assignEmpDept(supaId,deptId){sbPatch('employees','id=eq.'+supaId,{dept_id:deptId});RAW.employees.forEach(function(e){if(e.id===supaId)e.dept_id=deptId;});buildDB();}
+function assignDept(supaId,deptId){
+  sbPatch('employees','id=eq.'+supaId,{dept_id:deptId||null});
+  RAW.employees.forEach(function(e){if(e.id===supaId)e.dept_id=deptId||null;});
+  buildDB();
+}
 
-/* ═══════════════════════ HELPERS ═══════════════════════ */
-function allPeople(d){return d.staff.concat((d.former||[]).map(function(f){return{id:f.id,name:f.name,role:f.role,fired:true,firedDate:f.firedDate};}));}
-function person(d,id){return allPeople(d).find(function(x){return x.id===id;});}
-function mgrShort(d,id){var p=person(d,id);if(!p)return id;var pr=p.name.split(' ');return pr.length>1?pr[1]:p.name;}
-function isFired(d,id){var p=person(d,id);return p&&p.fired;}
-function daysBadge(dn){if(dn===null)return'<span class="days-badge db-neu">—</span>';if(dn<=3)return'<span class="days-badge db-red">'+dn+' дн</span>';if(dn<=7)return'<span class="days-badge db-amb">'+dn+' дн</span>';if(dn<=14)return'<span class="days-badge db-neu">'+dn+' дн</span>';return'<span class="days-badge db-grn">'+dn+' дн</span>';}
-
-/* ═══════════════════════ CALENDAR ═══════════════════════ */
-function buildMonth(base){var y=base.getFullYear(),m=base.getMonth();var first=new Date(y,m,1);var sd=(first.getDay()+6)%7;var days=[];for(var i=0;i<sd;i++)days.push({d:new Date(y,m,1-(sd-i)),other:true});var dim=new Date(y,m+1,0).getDate();for(var k=1;k<=dim;k++)days.push({d:new Date(y,m,k),other:false});while(days.length%7!==0){var l=days[days.length-1].d;days.push({d:new Date(l.getFullYear(),l.getMonth(),l.getDate()+1),other:true});}return days;}
+/* ═══ CALENDAR ═══ */
+function buildMonth(base){var y=base.getFullYear(),m=base.getMonth(),first=new Date(y,m,1),sd=(first.getDay()+6)%7,days=[];for(var i=0;i<sd;i++)days.push({d:new Date(y,m,1-(sd-i)),other:true});var dim=new Date(y,m+1,0).getDate();for(var k=1;k<=dim;k++)days.push({d:new Date(y,m,k),other:false});while(days.length%7){var l=days[days.length-1].d;days.push({d:new Date(l.getFullYear(),l.getMonth(),l.getDate()+1),other:true});}return days;}
 function renderCalMonth(base){var days=buildMonth(base);var cells=DOW.map(function(d){return'<div class="cal-dow">'+d+'</div>';}).join('');days.forEach(function(o){var cls='cal-day'+(o.other?' other':'');var t=o.d.getTime(),f=S.rangeFrom.getTime(),tt=S.rangeTo.getTime();if(sameDay(o.d,S.rangeFrom)&&sameDay(o.d,S.rangeTo))cls+=' range-single';else if(sameDay(o.d,S.rangeFrom))cls+=' range-start';else if(sameDay(o.d,S.rangeTo))cls+=' range-end';else if(t>f&&t<tt)cls+=' in-range';cells+='<div class="'+cls+'" onclick="pickDay('+o.d.getFullYear()+','+o.d.getMonth()+','+o.d.getDate()+')">'+o.d.getDate()+'</div>';});return'<div class="cal-grid">'+cells+'</div>';}
-function renderCal(){var left=S.calLeft;var pr=['7 дней','30 дней','Этот месяц','Квартал'];var ph=pr.map(function(p,i){return'<button class="cal-preset" onclick="applyPreset('+i+')">'+p+'</button>';}).join('');var right=new Date(left.getFullYear(),left.getMonth()+1,1);return'<div class="cal-presets">'+ph+'</div><div class="cal-months"><div class="cal-month"><div class="cal-mhead"><button class="cal-nav" onclick="calShift(-1)">‹</button><span class="cal-mtitle">'+MONTHS_N[left.getMonth()]+' '+left.getFullYear()+'</span><span style="width:28px"></span></div>'+renderCalMonth(left)+'</div><div class="cal-month"><div class="cal-mhead"><span style="width:28px"></span><span class="cal-mtitle">'+MONTHS_N[right.getMonth()]+' '+right.getFullYear()+'</span><button class="cal-nav" onclick="calShift(1)">›</button></div>'+renderCalMonth(right)+'</div></div>';}
-window.calShift=function(dir){S.calLeft=new Date(S.calLeft.getFullYear(),S.calLeft.getMonth()+dir,1);render();};
-window.pickDay=function(y,m,d){var p=new Date(y,m,d);if(S.pick===0){S.rangeFrom=p;S.rangeTo=p;S.pick=1;}else{if(p.getTime()<S.rangeFrom.getTime()){S.rangeTo=S.rangeFrom;S.rangeFrom=p;}else S.rangeTo=p;S.pick=0;}render();};
-window.applyPreset=function(i){var p=[{days:7},{days:30},{tm:1},{days:90}][i];if(p.tm){S.rangeFrom=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);S.rangeTo=new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0);}else{S.rangeTo=new Date(TODAY);S.rangeFrom=new Date(TODAY.getTime()-(p.days-1)*86400000);}S.calLeft=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);S.pick=0;render();};
+function renderCal(){var L=S.calLeft,R=new Date(L.getFullYear(),L.getMonth()+1,1);var ph=['7 дней','30 дней','Этот месяц','Квартал'].map(function(p,i){return'<button class="cal-preset" onclick="applyPreset('+i+')">'+p+'</button>';}).join('');return'<div class="cal-presets">'+ph+'</div><div class="cal-months"><div><div class="cal-mhead"><button class="cal-nav" onclick="calShift(-1)">‹</button><span class="cal-mtitle">'+MN[L.getMonth()]+' '+L.getFullYear()+'</span><span style="width:28px"></span></div>'+renderCalMonth(L)+'</div><div><div class="cal-mhead"><span style="width:28px"></span><span class="cal-mtitle">'+MN[R.getMonth()]+' '+R.getFullYear()+'</span><button class="cal-nav" onclick="calShift(1)">›</button></div>'+renderCalMonth(R)+'</div></div>';}
+window.calShift=function(d){S.calLeft=new Date(S.calLeft.getFullYear(),S.calLeft.getMonth()+d,1);render();};
+window.pickDay=function(y,m,d){var p=new Date(y,m,d);if(S.pick===0){S.rangeFrom=p;S.rangeTo=p;S.pick=1;}else{if(p<S.rangeFrom){S.rangeTo=S.rangeFrom;S.rangeFrom=p;}else S.rangeTo=p;S.pick=0;}render();};
+window.applyPreset=function(i){var p=[{days:7},{days:30},{tm:1},{days:90}][i];if(p.tm){S.rangeFrom=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);S.rangeTo=new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0);}else{S.rangeTo=new Date(TODAY);S.rangeFrom=new Date(TODAY.getTime()-(p.days-1)*864e5);}S.calLeft=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);S.pick=0;render();};
 window.toggleCal=function(e){e.stopPropagation();S.calOpen=!S.calOpen;render();};
-document.addEventListener('click',function(e){var ch=false;if(S.calOpen&&!e.target.closest('.cal-wrap')){S.calOpen=false;ch=true;}if(S.mgrDropOpen&&!e.target.closest('#ms-clients')){S.mgrDropOpen=false;ch=true;}if(S.funnelMgrDrop&&!e.target.closest('#ms-funnel')){S.funnelMgrDrop=false;ch=true;}if(ch)render();});
-function calTrigger(){return'<div class="cal-wrap"><div class="cal-trigger" onclick="toggleCal(event)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>'+fmtCalLabel()+'</div><div class="cal-pop'+(S.calOpen?' open':'')+'">'+renderCal()+'</div></div>';}
-function themeBtn(){var ic=S.theme==='dark'?'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.2" y1="4.2" x2="5.6" y2="5.6"/><line x1="18.4" y1="18.4" x2="19.8" y2="19.8"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.2" y1="19.8" x2="5.6" y2="18.4"/><line x1="18.4" y1="5.6" x2="19.8" y2="4.2"/></svg>':'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>';return'<button class="theme-btn" onclick="toggleTheme()">'+ic+'</button>';}
-window.toggleTheme=function(){S.theme=S.theme==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',S.theme);render();};
+document.addEventListener('click',function(e){var ch=false;if(S.calOpen&&!e.target.closest('.cal-wrap')){S.calOpen=false;ch=true;}if(S.mgrDropOpen&&!e.target.closest('#ms-c')){S.mgrDropOpen=false;ch=true;}if(ch)render();});
+function calTrigger(){return'<div class="cal-wrap"><div class="cal-trigger" onclick="toggleCal(event)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>'+calLabel()+'</div><div class="cal-pop'+(S.calOpen?' open':'')+'">'+renderCal()+'</div></div>';}
 
+/* ═══ ROLE BAR ═══ */
+window.setRole=function(rl){S.role=rl;S.dept=null;S.calOpen=false;render();};
+window.toggleTheme=function(){S.theme=S.theme==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',S.theme);render();};
+window.doRefresh=function(){loadData();};
 function roleBar(){
   var roles=[['cd','Коммдир'],['rop','РОП'],['mgr','Менеджер']];
-  var seg=roles.map(function(rr){return'<button class="role-btn'+(S.role===rr[0]?' on':'')+'" onclick="setRole(\''+rr[0]+'\')">'+rr[1]+'</button>';}).join('');
-  var meta=S.role==='cd'?'видит все отделы, ставит планы отделам':S.role==='rop'?'управляет отделами и людьми':'свой кабинет: клиенты, план и факт';
-  return'<div class="rolebar"><div style="display:flex;align-items:center;gap:12px"><div class="role-seg">'+seg+'</div><span class="role-meta">'+meta+'</span></div>'+themeBtn()+'</div>';
+  var meta={cd:'видит все отделы',rop:'управляет отделами и людьми',mgr:'клиенты, план и факт'}[S.role];
+  var seg=roles.map(function(x){return'<button class="role-btn'+(S.role===x[0]?' on':'')+'" onclick="setRole(\''+x[0]+'\')">'+x[1]+'</button>';}).join('');
+  return'<div class="rolebar"><div style="display:flex;align-items:center;gap:10px"><div class="role-seg">'+seg+'</div><span class="role-meta">'+meta+'</span></div><div class="bar-right"><button class="refresh-btn" onclick="doRefresh()">↻ Обновить</button><button class="icon-btn" onclick="toggleTheme()">'+(S.theme==='dark'?'☀':'☾')+'</button></div></div>';
 }
-window.setRole=function(rl){S.role=rl;S.dept=null;S.calOpen=false;render();};
 
-/* ═══════════════════════ КОММДИР ═══════════════════════ */
+/* ═══ КОММДИР ═══ */
 function renderCo(){
-  var c=DB.company,cPct=pct(c.fact,c.plan),rr=runratePct(c.fact,c.plan);
-  var ck=[
-    {l:'Выручка',v:fmt(c.fact),s:'план '+fmt(c.plan)+' · '+cPct+'%'},
-    {l:'Ранрейт',v:rr+'%',s:'<span class="'+(rr>=100?'pos':rr>=80?'neu':'neg')+'">'+(rr>=100?'опережаем темп':'отстаём от темпа')+'</span>'},
-    {l:'Платящих клиентов',v:c.paying,s:'из '+c.clients+' в работе'},
-    {l:'Потенциал',v:fmt(c.potential),s:'подключим воронку'},
-  ];
-  var ckH=ck.map(function(k){return'<div class="ck"><div class="ck-l">'+k.l+'</div><div class="ck-v num">'+k.v+'</div><div class="ck-s">'+k.s+'</div></div>';}).join('');
-  var cards=DB.depts.map(function(d){var p2=pct(d.fact,d.plan),rr2=runratePct(d.fact,d.plan),c2=gradColor(p2);var bT=rr2>=100?'В темпе':rr2>=80?'Отстаём':'Критично',bC=rr2>=100?'bg':rr2>=80?'ba':'br';return'<div class="dept-card" onclick="drill(\''+d.id+'\')"><div class="dc-top"><div><div class="dc-name">'+d.name+'</div><div class="dc-meta">'+d.tl+' · '+d.staff.length+' в команде · '+d.clients.length+' клиентов</div></div><span class="dc-badge '+bC+'">'+bT+'</span></div><div class="dc-fact num">'+fmt(d.fact)+'</div><div class="dc-plan">из '+fmt(d.plan)+' плана</div><div class="progress"><div class="progress-fill" style="width:'+Math.min(p2,100)+'%;background:'+c2+'"></div></div><div class="dc-stats"><div><div class="dc-stat-l">Выполнено</div><div class="dc-stat-v num" style="color:'+c2+'">'+p2+'%</div></div><div><div class="dc-stat-l">Ранрейт</div><div class="dc-stat-v num" style="color:'+gradColor(rr2)+'">'+rr2+'%</div></div><div><div class="dc-stat-l">Платящих</div><div class="dc-stat-v num">'+d.paying+'</div></div></div></div>';}).join('');
-  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="accent">AI</span> · Продажи</span><button class="btn btn-sm" onclick="loadData()" style="font-size:11px">↻ Обновить</button></div>'+calTrigger()+'</div><div class="ckpi">'+ckH+'</div><div class="dept-grid">'+cards+'</div>');
-}
-function sortIcon(a,dir){return a?'<span class="sort">'+(dir>0?'▲':'▼')+'</span>':'<span class="sort">↕</span>';}
-
-function msManagers(d,id,selected,toggleFn,dropOpen,dropToggleFn,removeFn){
-  var chips=selected.map(function(mid){var fired=isFired(d,mid);return'<span class="ms-chip'+(fired?' fired':'')+'">'+mgrShort(d,mid)+(fired?' · уволен':'')+'<span class="x" onclick="'+removeFn+'(event,\''+mid+'\')">×</span></span>';}).join('');
-  var control='<div class="ms-control" onclick="'+dropToggleFn+'(event)"><button class="ms-add" onclick="'+dropToggleFn+'(event)">+</button>'+(selected.length>0?chips:'<span class="ms-hint">Выберите менеджеров — пусто значит все</span>')+'</div>';
-  var act=d.staff.map(function(m){var on=selected.indexOf(m.id)>=0;var cnt=d.clients.filter(function(c){return c.mgr===m.id;}).length;return'<div class="ms-opt'+(on?' sel':'')+'" onclick="'+toggleFn+'(event,\''+m.id+'\')"><span class="check">'+(on?'✓':'')+'</span>'+m.name+'<span style="margin-left:auto;color:var(--text-3);font-size:11px">'+cnt+' кл.</span></div>';}).join('');
-  return control+'<div class="ms-drop'+(dropOpen?' open':'')+'"><div class="ms-sect">Менеджеры отдела</div>'+act+'</div>';
-}
-
-function renderDept(){
-  var d=DB.depts.find(function(x){return x.id===S.dept;});
-  if(!d){S.dept=null;render();return;}
-  var p2=pct(d.fact,d.plan),rr=runratePct(d.fact,d.plan);
-  var kpis=[
-    {l:'Выручка',v:fmt(d.fact),s:'из '+fmt(d.plan)+' · '+p2+'%',bar:p2,bc:gradColor(p2)},
-    {l:'Ранрейт',v:rr+'%',s:'<span class="'+(rr>=100?'pos':rr>=80?'neu':'neg')+'">'+(rr>=100?'опережаем':'отстаём')+'</span>',raw:true},
-    {l:'ARPU',v:fmt(d.arpu),s:'средний на клиента'},
-    {l:'Клиентов',v:d.clients.length,s:d.paying+' платящих'},
-    {l:'В команде',v:d.staff.length,s:'сотрудников'},
-  ];
-  var kH=kpis.map(function(k){var b=k.bar!=null?'<div class="pbar"><div class="pfill" style="width:'+Math.min(k.bar,100)+'%;background:'+k.bc+'"></div></div>':'';var sH=k.raw?k.s:'<span class="neu">'+k.s+'</span>';return'<div class="kcard"><div class="kl">'+k.l+'</div><div class="kv num">'+k.v+'</div><div class="ks">'+sH+'</div>'+b+'</div>';}).join('');
-  var tabs='<div class="tab-row">'+[['staff','Сотрудники'],['funnel','Первичка'],['clients','Клиенты']].map(function(t){return'<button class="tab'+(S.tab===t[0]?' on':'')+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>';
-  var ct='';
-
-  if(S.tab==='staff'){
-    var staff=[].concat(d.staff);staff.forEach(function(m){m._pct=pct(m.fact,m.plan);m._rr=runratePct(m.fact,m.plan);});
-    staff.sort(function(a,b){var k=S.staffSortKey;var va=k==='name'?a.name:(a[k]!==undefined?a[k]:a['_'+k]);var vb=k==='name'?b.name:(b[k]!==undefined?b[k]:b['_'+k]);if(typeof va==='string')return S.staffSortDir*va.localeCompare(vb);return S.staffSortDir*(va-vb);});
-    var cols=[['name','Сотрудник',''],['fact','Факт','r'],['plan','План','r'],['pct','Выполнено','r'],['rr','Ранрейт','r'],['clients','Клиентов','r']];
-    var th=cols.map(function(c){var a=S.staffSortKey===c[0];return'<th class="'+c[2]+(a?' sorted':'')+'" onclick="sortStaff(\''+c[0]+'\')">'+c[1]+sortIcon(a,S.staffSortDir)+'</th>';}).join('');
-    var rows=staff.map(function(m){var c3=gradColor(m._pct);return'<tr><td><span class="strong">'+m.name+'</span> <span class="muted" style="font-size:11px">· '+m.role+'</span></td><td class="r strong num">'+fmt(m.fact)+'</td><td class="r muted num">'+fmt(m.plan)+'</td><td class="r"><span class="num" style="color:'+c3+';font-weight:600">'+m._pct+'%</span><div class="inbar"><div class="inbar-f" style="width:'+Math.min(m._pct,100)+'%;background:'+c3+'"></div></div></td><td class="r"><span class="num" style="color:'+gradColor(m._rr)+';font-weight:600">'+m._rr+'%</span></td><td class="r muted num">'+m.clients+'</td></tr>';}).join('');
-    ct='<div class="panel"><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
-  }
-
-  if(S.tab==='funnel'){
-    ct='<div class="panel"><div class="empty-state">Воронка первички подключится после интеграции amoCRM (следующий шаг).<br>Тут будет: лиды → квал → встречи → счета → оплаты по тегам и менеджерам.</div></div>';
-  }
-
-  if(S.tab==='clients'){
-    var sel=S.clientMgrs;
-    var msWrap='<div id="ms-clients" class="ms-wrap">'+msManagers(d,'clients',sel,'toggleMgr',S.mgrDropOpen,'toggleMgrDrop','removeMgr')+'</div>';
-    var list=d.clients.filter(function(c){return sel.length===0||sel.indexOf(c.mgr)>=0;});
-    list.forEach(function(c){c._pct=pct(c.fact,c.plan);c._days=daysTo(c.expiry);});
-    list.sort(function(a,b){var k=S.cliSortKey;var va,vb;if(k==='name'){va=a.name;vb=b.name;}else if(k==='mgr'){va=mgrShort(d,a.mgr);vb=mgrShort(d,b.mgr);}else if(k==='pct'){va=a._pct;vb=b._pct;}else{va=a[k];vb=b[k];}if(typeof va==='string')return S.cliSortDir*va.localeCompare(vb);return S.cliSortDir*(va-vb);});
-    var cols=[['name','Компания',''],['mgr','Менеджер',''],['plan','План','r'],['fact','Факт','r'],['pct','%','r'],['minSpent','Минут откр.','r'],['minLeft','Минут ост.','r']];
-    var th=cols.map(function(c){var a=S.cliSortKey===c[0];return'<th class="'+c[2]+(a?' sorted':'')+'" onclick="sortCli(\''+c[0]+'\')">'+c[1]+sortIcon(a,S.cliSortDir)+'</th>';}).join('');
-    var body=list.map(function(c){var c3=gradColor(c._pct);var fired=isFired(d,c.mgr);return'<tr><td><a class="ext-link" href="'+c.url+'" target="_blank">'+c.name+' <span class="lk">↗</span></a></td><td><span class="mgr-cell'+(fired?' fired':'')+'" onclick="setSingleMgr(\''+c.mgr+'\')">'+mgrShort(d,c.mgr)+'</span></td><td class="r muted num">'+fmt(c.plan)+'</td><td class="r strong num" style="color:'+c3+'">'+fmt(c.fact)+'</td><td class="r"><span class="num" style="color:'+c3+';font-size:11px;font-weight:600">'+c._pct+'%</span></td><td class="r muted num">'+c.minSpent.toLocaleString('ru')+'</td><td class="r muted num">'+c.minLeft.toLocaleString('ru')+'</td></tr>';}).join('');
-    var table=list.length>0?'<table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+body+'</tbody></table>':'<div class="empty-state">Нет клиентов по выбранным менеджерам</div>';
-    ct='<div class="panel">'+msWrap+table+'</div>';
-  }
-  setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUp()">‹ Все отделы</button><span class="crumb-title">'+d.name+'</span></div>'+calTrigger()+'</div><div class="dept-kpi">'+kH+'</div>'+tabs+'<div>'+ct+'</div>');
+  var c=DB.company,cp=pct(c.fact,c.plan),rrv=rr(c.fact,c.plan);
+  var kH=['<div class="ck"><div class="ck-l">Выручка</div><div class="ck-v num">'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div></div>',
+    '<div class="ck"><div class="ck-l">Ранрейт</div><div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="'+(rrv>=100?'pos':rrv>=80?'neu':'neg')+'">'+(rrv>=100?'опережаем темп':'отстаём от темпа')+'</span></div></div>',
+    '<div class="ck"><div class="ck-l">Платящих клиентов</div><div class="ck-v num">'+c.paying+'</div><div class="ck-s">из '+c.clients+' в работе</div></div>',
+    '<div class="ck"><div class="ck-l">Отделов</div><div class="ck-v num">'+DB.depts.length+'</div><div class="ck-s">в компании</div></div>'].join('');
+  var cards=DB.depts.length?DB.depts.map(function(d){var p2=pct(d.fact,d.plan),rr2=rr(d.fact,d.plan),c2=grad(p2);var bT=rr2>=100?'В темпе':rr2>=80?'Отстаём':'Нет плана',bC=rr2>=100?'bg':rr2>=80?'ba':'br';
+    return'<div class="dept-card" onclick="drill(\''+d.id+'\')"><div class="dc-top"><div><div class="dc-name">'+d.name+'</div><div class="dc-meta">'+d.tl+' · '+d.staff.length+' чел. · '+d.clients.length+' клиентов</div></div><span class="dc-badge '+bC+'">'+bT+'</span></div><div class="dc-fact num">'+fmt(d.fact)+'</div><div class="dc-plan">из '+fmt(d.plan)+' плана</div><div class="progress"><div class="progress-fill" style="width:'+Math.min(p2,100)+'%;background:'+c2+'"></div></div><div class="dc-stats"><div><div class="dc-stat-l">Выполнено</div><div class="dc-stat-v num" style="color:'+c2+'">'+p2+'%</div></div><div><div class="dc-stat-l">Ранрейт</div><div class="dc-stat-v num" style="color:'+grad(rr2)+'">'+rr2+'%</div></div><div><div class="dc-stat-l">Платящих</div><div class="dc-stat-v num">'+d.paying+'</div></div></div></div>';}).join(''):
+    '<div class="empty-state">Нет отделов.<br>Зайди в <b>РОП</b> → Создать отдел.</div>';
+  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="accent">AI</span> · Продажи</span></div>'+calTrigger()+'</div>'+(S.loadErr?'<div class="err-banner">⚠ '+S.loadErr+'</div>':'')+'<div class="ckpi">'+kH+'</div><div class="dept-grid">'+cards+'</div>');
 }
 window.drill=function(id){S.dept=id;S.tab='staff';S.calOpen=false;S.clientMgrs=[];render();};
 window.goUp=function(){S.dept=null;S.calOpen=false;render();};
 window.setTab=function(t){S.tab=t;render();};
+
+/* ═══ ОТДЕЛ ═══ */
+function renderDept(){
+  var d=DB.depts.find(function(x){return x.id===S.dept;});
+  if(!d){S.dept=null;render();return;}
+  var p2=pct(d.fact,d.plan),rrv=rr(d.fact,d.plan);
+  var kpis=[
+    {l:'Выручка',v:fmt(d.fact),s:'из '+fmt(d.plan)+' · '+p2+'%',bar:p2,bc:grad(p2)},
+    {l:'Ранрейт',v:rrv+'%',s:'<span class="'+(rrv>=100?'pos':rrv>=80?'neu':'neg')+'">'+(rrv>=100?'опережаем':'отстаём')+'</span>',raw:true},
+    {l:'ARPU',v:fmt(d.arpu),s:'средний на клиента'},
+    {l:'Клиентов',v:d.clients.length,s:d.paying+' платящих'},
+    {l:'В команде',v:d.staff.length,s:'сотрудников'},
+  ];
+  var kH=kpis.map(function(k){var b=k.bar!=null?'<div class="pbar"><div class="pfill" style="width:'+Math.min(k.bar,100)+'%;background:'+k.bc+'"></div></div>':'';return'<div class="kcard"><div class="kl">'+k.l+'</div><div class="kv num">'+k.v+'</div><div class="ks">'+(k.raw?k.s:'<span class="neu">'+k.s+'</span>')+'</div>'+b+'</div>';}).join('');
+  var tabs='<div class="tab-row">'+[['staff','Сотрудники'],['clients','Клиенты']].map(function(t){return'<button class="tab'+(S.tab===t[0]?' on':'')+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>';
+  var ct='';
+
+  if(S.tab==='staff'){
+    var staff=[].concat(d.staff);staff.forEach(function(m){m._p=pct(m.fact,m.plan);m._r=rr(m.fact,m.plan);});
+    staff.sort(function(a,b){var k=S.staffSortKey,va=k==='name'?a.name:(a[k]!==undefined?a[k]:a['_'+k.replace(/^_/,'')]),vb=k==='name'?b.name:(b[k]!==undefined?b[k]:b['_'+k.replace(/^_/,'')]);if(typeof va==='string')return S.staffSortDir*va.localeCompare(vb);return S.staffSortDir*(va-vb);});
+    var cols=[['name','Сотрудник',''],['fact','Факт','r'],['plan','План','r'],['pct','%','r'],['rr','Ранрейт','r'],['clients','Клиентов','r']];
+    var th=cols.map(function(c){var a=S.staffSortKey===c[0];return'<th class="'+c[2]+(a?' sorted':'')+'" onclick="sortStaff(\''+c[0]+'\')">'+c[1]+si(a,S.staffSortDir)+'</th>';}).join('');
+    var rows=staff.length?staff.map(function(m){var c3=grad(m._p);return'<tr><td><span class="strong">'+m.name+'</span></td><td class="r strong num">'+fmt(m.fact)+'</td><td class="r muted num">'+fmt(m.plan)+'</td><td class="r"><span style="color:'+c3+';font-weight:600" class="num">'+m._p+'%</span><div class="inbar"><div class="inbar-f" style="width:'+Math.min(m._p,100)+'%;background:'+c3+'"></div></div></td><td class="r"><span style="color:'+grad(m._r)+';font-weight:600" class="num">'+m._r+'%</span></td><td class="r muted num">'+m.clients+'</td></tr>';}).join(''):'<tr><td colspan="6"><div class="empty-state">Нет сотрудников — назначь из РОП</div></td></tr>';
+    ct='<div class="panel"><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+  if(S.tab==='clients'){
+    var sel=S.clientMgrs;
+    var mgrNames=d.staff.reduce(function(m,x){m[x.id]=x.name.split(' ')[1]||x.name;return m;},{});
+    var msCtrl='<div id="ms-c" class="ms-wrap">'+(function(){
+      var chips=sel.map(function(id){return'<span class="ms-chip">'+(mgrNames[id]||id)+'<span class="x" onclick="removeMgr(event,\''+id+'\')">×</span></span>';}).join('');
+      var ctrl='<div class="ms-control" onclick="toggleMgrDrop(event)"><button class="ms-add" onclick="toggleMgrDrop(event)">+</button>'+(sel.length?chips:'<span class="ms-hint">Все менеджеры</span>')+'</div>';
+      var opts=d.staff.map(function(m){var on=sel.indexOf(m.id)>=0;return'<div class="ms-opt'+(on?' sel':'')+'" onclick="toggleMgr(event,\''+m.id+'\')"><span class="check">'+(on?'✓':'')+'</span>'+m.name+'</div>';}).join('');
+      return ctrl+'<div class="ms-drop'+(S.mgrDropOpen?' open':'')+'"><div class="ms-sect">Менеджеры</div>'+opts+'</div>';
+    }())+'</div>';
+    var list=d.clients.filter(function(c){return!sel.length||sel.indexOf(c.mgr)>=0;});
+    list.forEach(function(c){c._p=pct(c.fact,c.plan);c._d=daysTo(c.expiry);});
+    list.sort(function(a,b){var k=S.cliSortKey,va=a[k],vb=b[k];if(k==='pct'){va=a._p;vb=b._p;}if(typeof va==='string')return S.cliSortDir*va.localeCompare(vb);return S.cliSortDir*((va||0)-(vb||0));});
+    var cols=[['name','Компания',''],['plan','План','r'],['fact','Факт','r'],['pct','%','r'],['minLeft','Мин ост.','r'],['expiry','До прод.','r']];
+    var th=cols.map(function(c){var a=S.cliSortKey===c[0];return'<th class="'+c[2]+(a?' sorted':'')+'" onclick="sortCli(\''+c[0]+'\')">'+c[1]+si(a,S.cliSortDir)+'</th>';}).join('');
+    var body=list.length?list.map(function(c){var c3=grad(c._p);return'<tr><td><a class="ext-link" href="'+c.url+'" target="_blank">'+c.name+' <span class="lk">↗</span></a></td><td class="r muted num">'+fmt(c.plan)+'</td><td class="r strong num" style="color:'+c3+'">'+fmt(c.fact)+'</td><td class="r"><span style="color:'+c3+';font-size:11px;font-weight:600" class="num">'+c._p+'%</span></td><td class="r muted num">'+c.minLeft.toLocaleString('ru')+'</td><td class="r">'+daysBadge(c._d)+'</td></tr>';}).join(''):'<tr><td colspan="6"><div class="empty-state">Нет клиентов</div></td></tr>';
+    ct='<div class="panel">'+msCtrl+'<table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+body+'</tbody></table></div>';
+  }
+  setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUp()">‹ Все отделы</button><span class="crumb-title">'+d.name+'</span></div>'+calTrigger()+'</div><div class="dept-kpi">'+kH+'</div>'+tabs+ct);
+}
 window.toggleMgrDrop=function(e){e.stopPropagation();S.mgrDropOpen=!S.mgrDropOpen;render();};
 window.toggleMgr=function(e,id){e.stopPropagation();var i=S.clientMgrs.indexOf(id);if(i>=0)S.clientMgrs.splice(i,1);else S.clientMgrs.push(id);render();};
 window.removeMgr=function(e,id){e.stopPropagation();var i=S.clientMgrs.indexOf(id);if(i>=0)S.clientMgrs.splice(i,1);render();};
-window.setSingleMgr=function(id){S.clientMgrs=[id];S.tab='clients';render();};
 window.sortCli=function(k){if(S.cliSortKey===k)S.cliSortDir*=-1;else{S.cliSortKey=k;S.cliSortDir=1;}render();};
 window.sortStaff=function(k){if(S.staffSortKey===k)S.staffSortDir*=-1;else{S.staffSortKey=k;S.staffSortDir=-1;}render();};
 
-/* ═══════════════════════ РОП ═══════════════════════ */
+/* ═══ РОП ═══ */
 function renderRop(){
-  var d=DB.depts.find(function(x){return x.id===S.ropDept;})||DB.depts[0];
-  var deptOpts=DB.depts.map(function(x){return'<option value="'+x.id+'"'+(x.id===S.ropDept?' selected':'')+'>'+x.name+'</option>';}).join('');
-  var staffRows=d?d.staff.map(function(m){return'<tr><td><span class="strong">'+m.name+'</span></td><td><span class="role-pill'+(m.role==='Тимлид'?' tl':'')+'">'+m.role+'</span></td><td class="muted num">'+fmtRu(m.hired)+'</td><td><span class="status-dot"><span class="d" style="background:var(--green)"></span>работает</span></td><td class="r muted num">'+m.clients+'</td><td class="r"><button class="btn btn-sm" onclick="reassignEmp(\''+m.supaId+'\')">Перевести</button></td></tr>';}).join(''):'';
-
-  /* unassigned employees */
-  var unassigned=RAW.employees.filter(function(e){return !e.dept_id;});
-  var unaBlock='';
-  if(unassigned.length){
-    var unaRows=unassigned.map(function(e){return'<tr style="opacity:.75"><td>'+e.name+'</td><td><span class="role-pill">'+(e.role==='lead'?'Тимлид':'Менеджер')+'</span></td><td class="r"><button class="btn btn-sm btn-primary" onclick="reassignEmp(\''+e.id+'\')">Назначить в отдел</button></td></tr>';}).join('');
-    unaBlock='<div class="panel" style="margin-bottom:14px"><div class="panel-title">Без отдела ('+unassigned.length+') — раскидай по отделам</div><table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th class="r">Действие</th></tr></thead><tbody>'+unaRows+'</tbody></table></div>';
+  if(!DB.depts.length){
+    setApp('<div class="topbar"><div class="nav-left"><span class="brand">Управление отделами</span></div></div><div class="empty-state">Нет отделов.</div><div style="text-align:center;margin-top:16px"><button class="btn btn-primary" onclick="createDept()">+ Создать отдел</button></div>');
+    return;
   }
+  var d=DB.depts.find(function(x){return x.id===S.ropDept;})||DB.depts[0];
+  if(d&&!S.ropDept)S.ropDept=d.id;
+  var deptOpts=DB.depts.map(function(x){return'<option value="'+x.id+'"'+(x.id===S.ropDept?' selected':'')+'>'+x.name+'</option>';}).join('');
 
-  /* fact mode toggle */
-  var toggleBlock='<div class="panel" style="margin-bottom:14px"><div class="panel-title">Источник факта выручки</div><div class="toggle-wrap"><div class="toggle'+(S.factMode==='api'?' on':'')+'" onclick="toggleFactMode()"><div class="knob"></div></div><div><div class="toggle-label">'+(S.factMode==='api'?'Автоматически (API)':'Менеджеры заполняют руками')+'</div><div class="toggle-sub">'+(S.factMode==='api'?'выручка тянется из интеграции — менеджеры не редактируют':'менеджеры вбивают факт по каждому клиенту вручную')+'</div></div></div></div>';
+  /* ── staff таблица: роль редактируется инлайн ── */
+  var staffRows=d&&d.staff.length?d.staff.map(function(m){
+    var isLead=m.role==='Тимлид';
+    return'<tr>'+
+      '<td><span class="strong">'+m.name+'</span></td>'+
+      '<td>'+
+        '<select class="role-select'+(isLead?' lead':'')+'" onchange="changeEmpRole(\''+m.supaId+'\',this.value)">'+
+          '<option value="manager"'+(isLead?'':' selected')+'>Менеджер</option>'+
+          '<option value="lead"'+(isLead?' selected':'')+'>Тимлид</option>'+
+        '</select>'+
+      '</td>'+
+      '<td class="muted num">'+fmtD(m.hired)+'</td>'+
+      '<td><span class="status-dot"><span class="d" style="background:var(--green)"></span>работает</span></td>'+
+      '<td class="r muted num">'+m.clients+'</td>'+
+      '<td class="r"><button class="btn btn-sm" onclick="reassignEmp(\''+m.supaId+'\')">Перевести</button></td>'+
+    '</tr>';}).join(''):
+    '<tr><td colspan="6"><div class="empty-state">Нет сотрудников — назначь из пула ниже</div></td></tr>';
 
-  var deptCards=DB.depts.map(function(x){return'<div class="dept-edit-card"><div><div class="strong">'+x.name+'</div><div class="muted" style="font-size:11px;margin-top:3px">'+x.tl+' · план '+fmt(x.plan)+' · '+x.staff.length+' чел.</div></div><button class="btn btn-sm" onclick="editDept(\''+x.id+'\')">Настроить</button></div>';}).join('');
+  /* ── без отдела ── */
+  var unassigned=RAW.employees.filter(function(e){return!e.dept_id;});
+  var unaBlock=unassigned.length?'<div class="panel"><div class="panel-title">Без отдела ('+unassigned.length+')</div><table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th class="r">Действие</th></tr></thead><tbody>'+
+    unassigned.map(function(e){return'<tr><td>'+e.name+'</td><td><span style="font-size:11px;color:var(--text-3)">'+(e.role==='lead'?'Тимлид':'Менеджер')+'</span></td><td class="r"><button class="btn btn-sm btn-primary" onclick="reassignEmp(\''+e.id+'\')">→ В отдел</button></td></tr>';}).join('') +
+  '</tbody></table></div>':'';
+
+  /* ── toggle ── */
+  var tog='<div class="panel"><div class="adm-head" style="margin:0"><div><div style="font-weight:600;font-size:13px">Источник факта выручки</div><div style="font-size:11px;color:var(--text-3);margin-top:3px">'+(S.factMode==='api'?'Тянется из API — менеджеры не редактируют':'Менеджеры вбивают вручную')+'</div></div><div class="toggle'+(S.factMode==='api'?' on':'')+'" onclick="toggleFM()"><div class="knob"></div></div></div></div>';
+
+  /* ── все отделы ── */
+  var deptCards=DB.depts.map(function(x){return'<div class="dept-edit-card"><div><div class="strong">'+x.name+'</div><div class="muted" style="font-size:11px;margin-top:2px">'+x.tl+' · '+x.staff.length+' чел. · план '+fmt(x.plan)+'</div></div><button class="btn btn-sm" onclick="editDept(\''+x.id+'\')">Настроить</button></div>';}).join('');
 
   setApp(
     '<div class="topbar"><div class="nav-left"><span class="brand">Управление отделами</span></div></div>'+
-    toggleBlock+
-    '<div class="panel" style="margin-bottom:14px"><div class="adm-head"><div style="display:flex;align-items:center;gap:12px"><div class="panel-title" style="margin:0">Сотрудники</div><select class="field" style="padding:6px 10px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:12px" onchange="setRopDept(this.value)">'+deptOpts+'</select></div></div>'+
-    (d&&d.staff.length?'<table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th>Дата найма</th><th>Статус</th><th class="r">Клиентов</th><th class="r">Действие</th></tr></thead><tbody>'+staffRows+'</tbody></table>':'<div class="empty-state">В отделе пока нет сотрудников — назначь из пула ниже</div>')+'</div>'+
+    tog+
+    '<div class="panel" style="margin-bottom:0">'+
+      '<div class="adm-head"><div style="display:flex;align-items:center;gap:12px"><div class="panel-title" style="margin:0">Состав отдела</div>'+
+        '<select style="padding:6px 10px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:12px" onchange="setRopDept(this.value)">'+deptOpts+'</select>'+
+      '</div></div>'+
+      '<table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th>Нанят</th><th>Статус</th><th class="r">Клиентов</th><th class="r">Действие</th></tr></thead><tbody>'+staffRows+'</tbody></table>'+
+    '</div>'+
     unaBlock+
-    '<div class="panel"><div class="adm-head"><div class="panel-title" style="margin:0">Отделы компании</div><button class="btn btn-primary" onclick="createDept()">+ Создать отдел</button></div>'+deptCards+'</div>'
+    '<div class="panel"><div class="adm-head"><div class="panel-title" style="margin:0">Все отделы</div><button class="btn btn-primary" onclick="createDept()">+ Создать отдел</button></div>'+deptCards+'</div>'
   );
 }
 window.setRopDept=function(id){S.ropDept=id;render();};
-window.toggleFactMode=function(){S.factMode=S.factMode==='manual'?'api':'manual';render();};
+window.toggleFM=function(){S.factMode=S.factMode==='manual'?'api':'manual';render();};
+
+/* смена роли инлайн */
+window.changeEmpRole=function(supaId,role){
+  sbPatch('employees','id=eq.'+supaId,{role:role});
+  RAW.employees.forEach(function(e){if(e.id===supaId)e.role=role;});
+  buildDB();render();
+};
 
 window.reassignEmp=function(supaId){
   var emp=RAW.employees.find(function(e){return e.id===supaId;});
-  var opts=DB.depts.map(function(x){return'<option value="'+x.id+'"'+(emp&&emp.dept_id===x.id?' selected':'')+'>'+x.name+'</option>';}).join('');
-  openModal('Перевести сотрудника','<p style="font-size:13px;color:var(--text-2);margin-bottom:14px">'+(emp?emp.name:'')+'</p><div class="field"><label>Отдел</label><select id="re-dept">'+opts+'</select></div>',
-  function(){var dept=document.getElementById('re-dept').value;assignEmpDept(supaId,dept);closeModal();render();});
+  var opts='<option value="">— убрать из всех отделов —</option>'+DB.depts.map(function(x){return'<option value="'+x.id+'"'+(emp&&emp.dept_id===x.id?' selected':'')+'>'+x.name+'</option>';}).join('');
+  openModal('Назначить в отдел',
+    '<p style="font-size:13px;color:var(--text-2);margin-bottom:14px">'+(emp?emp.name:'')+'</p>'+
+    '<div class="field"><label>Отдел</label><select id="re-dept">'+opts+'</select></div>',
+    function(){var dept=document.getElementById('re-dept').value||null;assignDept(supaId,dept);closeModal();render();});
 };
-window.editDept=function(id){var x=DB.depts.find(function(z){return z.id===id;});openModal('Настройка отдела','<div class="field" style="margin-bottom:12px"><label>Название</label><input id="d-name" value="'+x.name+'"></div><div class="field"><label>План отдела, ₽</label><input id="d-plan" type="number" value="'+x.plan+'"></div>',function(){var nm=document.getElementById('d-name').value;var pl=Number(document.getElementById('d-plan').value)||x.plan;sbPatch('departments','id=eq.'+id,{name:nm,monthly_plan:pl});RAW.depts.forEach(function(dd){if(dd.id===id){dd.name=nm;dd.monthly_plan=pl;}});buildDB();closeModal();render();});};
+
+window.editDept=function(id){
+  var x=DB.depts.find(function(z){return z.id===id;});
+  /* только тимлиды в списке */
+  var leads=RAW.employees.filter(function(e){return e.role==='lead';});
+  var leadOpts='<option value="">— без тимлида —</option>'+leads.map(function(e){return'<option value="'+e.id+'"'+(x.leadId===e.id?' selected':'')+'>'+e.name+'</option>';}).join('');
+  openModal('Настройка отдела',
+    '<div class="field"><label>Название</label><input id="d-name" value="'+x.name+'"></div>'+
+    '<div class="field"><label>Тимлид (только сотрудники с ролью Тимлид)</label><select id="d-lead">'+leadOpts+'</select></div>',
+    function(){var nm=document.getElementById('d-name').value.trim()||x.name;var lead=document.getElementById('d-lead').value||null;
+      sbPatch('departments','id=eq.'+id,{name:nm,lead_employee_id:lead});
+      RAW.depts.forEach(function(dd){if(dd.id===id){dd.name=nm;dd.lead_employee_id=lead;}});
+      if(lead){sbPatch('employees','id=eq.'+lead,{dept_id:id,role:'lead'});RAW.employees.forEach(function(e){if(e.id===lead){e.dept_id=id;e.role='lead';}});}
+      buildDB();closeModal();render();});
+};
+
 window.createDept=function(){
-  var leadOpts='<option value="">— без тимлида —</option>'+RAW.employees.map(function(e){return'<option value="'+e.id+'">'+e.name+'</option>';}).join('');
+  /* только тимлиды */
+  var leads=RAW.employees.filter(function(e){return e.role==='lead';});
+  var leadOpts='<option value="">— без тимлида —</option>'+leads.map(function(e){return'<option value="'+e.id+'">'+e.name+'</option>';}).join('');
+  var noLeadHint=leads.length?'':'<div style="font-size:11px;color:var(--amber);margin-top:6px">Нет тимлидов. Сначала назначь роль «Тимлид» нужному сотруднику в списке отдела.</div>';
   openModal('Новый отдел',
-    '<div class="field" style="margin-bottom:12px"><label>Название отдела</label><input id="nd-name" placeholder="Отдел Иванцова"></div><div class="field"><label>Тимлид</label><select id="nd-lead">'+leadOpts+'</select></div>',
+    '<div class="field"><label>Название отдела</label><input id="nd-name" placeholder="Отдел Иванцова"></div>'+
+    '<div class="field"><label>Тимлид</label><select id="nd-lead">'+leadOpts+'</select>'+noLeadHint+'</div>',
     function(){var nm=document.getElementById('nd-name').value.trim();if(!nm)return;var lead=document.getElementById('nd-lead').value||null;
       sbPost('departments',{name:nm,lead_employee_id:lead,monthly_plan:0}).then(function(res){
-        var newDept=res&&res[0];if(!newDept)return;RAW.depts.push(newDept);
-        if(lead){sbPatch('employees','id=eq.'+lead,{dept_id:newDept.id,role:'lead'});RAW.employees.forEach(function(e){if(e.id===lead){e.dept_id=newDept.id;e.role='lead';}});}
-        buildDB();closeModal();S.ropDept=newDept.id;render();
+        var nd=Array.isArray(res)?res[0]:res;if(!nd||!nd.id)return;
+        RAW.depts.push(nd);
+        if(lead){sbPatch('employees','id=eq.'+lead,{dept_id:nd.id,role:'lead'});RAW.employees.forEach(function(e){if(e.id===lead){e.dept_id=nd.id;e.role='lead';}});}
+        buildDB();closeModal();S.ropDept=nd.id;render();
       });
     });
 };
 
-/* ═══════════════════════ МЕНЕДЖЕР ═══════════════════════ */
+/* ═══ МЕНЕДЖЕР ═══ */
 function renderMgr(){
+  var allMgrs=[];DB.depts.forEach(function(dd){dd.staff.forEach(function(m){allMgrs.push({id:m.id,name:m.name,dept:dd.name});});});
+  if(!allMgrs.length){setApp('<div class="topbar"><div class="nav-left"><span class="brand">Кабинет менеджера</span></div></div><div class="empty-state">Нет менеджеров.<br>Зайди в <b>РОП</b> и назначь людей в отделы.</div>');return;}
+  if(!S.mgrAs||!allMgrs.find(function(m){return m.id===S.mgrAs;}))S.mgrAs=allMgrs[0].id;
   var d=DB.depts.find(function(x){return x.staff.some(function(m){return m.id===S.mgrAs;});});
-  if(!d){setApp('<div class="topbar"><div class="nav-left"><span class="brand">Кабинет менеджера</span></div></div><div class="empty-state">Нет назначенных менеджеров. Зайди в РОП и раскидай людей по отделам.</div>');return;}
-  var me=d.staff.find(function(m){return m.id===S.mgrAs;});
-  var myClients=d.clients.filter(function(c){return c.mgr===S.mgrAs;});
-  var allMgrs=[];DB.depts.forEach(function(dd){dd.staff.forEach(function(m){allMgrs.push({id:m.id,name:m.name});});});
-  var asSel='<select class="field" style="padding:6px 10px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:12px" onchange="setMgrAs(this.value)">'+allMgrs.map(function(m){return'<option value="'+m.id+'"'+(m.id===S.mgrAs?' selected':'')+'>'+m.name+'</option>';}).join('')+'</select>';
+  if(!d){S.mgrAs=allMgrs[0].id;d=DB.depts.find(function(x){return x.staff.some(function(m){return m.id===S.mgrAs;});});}
+  var myClients=d?d.clients.filter(function(c){return c.mgr===S.mgrAs;}):[];
+  var asSel='<select style="padding:6px 10px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:12px" onchange="setMgrAs(this.value)">'+allMgrs.map(function(m){return'<option value="'+m.id+'"'+(m.id===S.mgrAs?' selected':'')+'>'+m.name+'</option>';}).join('')+'</select>';
 
   var totalPlan=myClients.reduce(function(a,c){return a+c.plan;},0);
   var totalFact=myClients.reduce(function(a,c){return a+c.fact;},0);
-  var mp=pct(totalFact,totalPlan);
-  var apiMode=S.factMode==='api';
-  var kpis=[
-    {l:'Мой план',v:fmt(totalPlan),s:'факт '+fmt(totalFact)+' · '+mp+'%',bar:mp,bc:gradColor(mp)},
-    {l:'Клиентов',v:myClients.length,s:'в портфеле',raw:true},
-    {l:'Ранрейт',v:runratePct(totalFact,totalPlan)+'%',s:'<span class="neu">по моим клиентам</span>',raw:true},
-  ];
-  var kH=kpis.map(function(k){var b=k.bar!=null?'<div class="pbar"><div class="pfill" style="width:'+Math.min(k.bar,100)+'%;background:'+k.bc+'"></div></div>':'';return'<div class="kcard"><div class="kl">'+k.l+'</div><div class="kv num">'+k.v+'</div><div class="ks">'+(k.raw?k.s:'<span class="neu">'+k.s+'</span>')+'</div>'+b+'</div>';}).join('');
+  var mp=pct(totalFact,totalPlan),api=S.factMode==='api';
+  var kH=['<div class="kcard"><div class="kl">Мой план</div><div class="kv num">'+fmt(totalPlan)+'</div><div class="ks"><span class="neu">факт '+fmt(totalFact)+' · '+mp+'%</span></div><div class="pbar"><div class="pfill" style="width:'+Math.min(mp,100)+'%;background:'+grad(mp)+'"></div></div></div>',
+    '<div class="kcard"><div class="kl">Клиентов</div><div class="kv num">'+myClients.length+'</div><div class="ks"><span class="neu">в портфеле</span></div></div>',
+    '<div class="kcard"><div class="kl">Ранрейт</div><div class="kv num">'+rr(totalFact,totalPlan)+'%</div><div class="ks"><span class="neu">по моим клиентам</span></div></div>'].join('');
 
   var rows=myClients.map(function(c){var cp=pct(c.fact,c.plan);
-    var factCell=apiMode
-      ?'<td class="r strong num" style="color:'+gradColor(cp)+'">'+fmt(c.fact)+'</td>'
-      :'<td class="r"><input class="inline-input" type="number" value="'+c.fact+'" onchange="setClientFact(\''+c.platform_org_id+'\',this.value)"></td>';
-    return'<tr><td><a class="ext-link" href="'+c.url+'" target="_blank">'+c.name+' <span class="lk">↗</span></a></td><td class="r"><input class="inline-input" type="number" value="'+c.plan+'" onchange="setClientPlan(\''+c.platform_org_id+'\',this.value)"></td>'+factCell+'<td class="r"><span class="num" style="color:'+gradColor(cp)+';font-size:11px;font-weight:600">'+cp+'%</span></td><td class="r muted num">'+c.minLeft.toLocaleString('ru')+'</td></tr>';}).join('');
-  var table=myClients.length>0?'<table class="tbl"><thead><tr><th>Компания</th><th class="r">Мой план ₽</th><th class="r">Факт '+(apiMode?'(API)':'₽')+'</th><th class="r">%</th><th class="r">Минут ост.</th></tr></thead><tbody>'+rows+'</tbody></table>':'<div class="empty-state">Нет клиентов в портфеле</div>';
-  var hint=apiMode?'Факт тянется из API — редактируешь только план':'Вбивай план и факт по каждому клиенту — сумма = твой результат';
+    var fCell=api?'<td class="r strong num" style="color:'+grad(cp)+'">'+fmt(c.fact)+'</td>':'<td class="r"><input class="inline-input" type="number" value="'+c.fact+'" onchange="setFact(\''+c.platform_org_id+'\',this.value)"></td>';
+    return'<tr><td><a class="ext-link" href="'+c.url+'" target="_blank">'+c.name+' <span class="lk">↗</span></a></td>'+
+      '<td class="r"><input class="inline-input" type="number" value="'+c.plan+'" onchange="setPlan(\''+c.platform_org_id+'\',this.value)"></td>'+
+      fCell+
+      '<td class="r"><span style="color:'+grad(cp)+';font-size:11px;font-weight:600" class="num">'+cp+'%</span></td>'+
+      '<td class="r muted num">'+c.minLeft.toLocaleString('ru')+'</td>'+
+      '<td class="r">'+daysBadge(daysTo(c.expiry))+'</td></tr>';
+  }).join('');
 
-  setApp(
-    '<div class="topbar"><div class="nav-left"><span class="brand">Кабинет менеджера</span>'+asSel+'<span class="save-hint'+(S.saveHint?' show':'')+'">✓ сохранено</span></div></div>'+
-    '<div class="dept-kpi" style="grid-template-columns:repeat(3,1fr)">'+kH+'</div>'+
-    '<div class="panel"><div class="panel-title">Мои клиенты — '+hint+'</div>'+table+'</div>'
-  );
+  var table=myClients.length?'<table class="tbl"><thead><tr><th>Компания</th><th class="r">План ₽</th><th class="r">Факт'+(api?' (API)':'')+'</th><th class="r">%</th><th class="r">Мин ост.</th><th class="r">До прод.</th></tr></thead><tbody>'+rows+'</tbody></table>':'<div class="empty-state">Нет клиентов в портфеле.<br>Клиенты привязываются автоматически по ответственному в платформе.</div>';
+  var hint=api?'Факт из API — редактируй только план':'Вбивай план и факт по каждому клиенту — цифры сразу в базе';
+
+  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Кабинет менеджера</span>'+asSel+'<span class="save-hint'+(S.saveHint?' show':'')+'">✓ сохранено</span></div></div><div class="dept-kpi" style="grid-template-columns:repeat(3,1fr)">'+kH+'</div><div class="panel"><div class="panel-title">'+hint+'</div>'+table+'</div>');
 }
 window.setMgrAs=function(id){S.mgrAs=id;render();};
-window.setClientPlan=function(orgId,val){saveClientField(orgId,'monthly_plan',Number(val)||0);flashSave();};
-window.setClientFact=function(orgId,val){saveClientField(orgId,'monthly_fact',Number(val)||0);flashSave();};
+window.setPlan=function(id,v){saveClient(id,'monthly_plan',v);flashSave();};
+window.setFact=function(id,v){saveClient(id,'monthly_fact',v);flashSave();};
 function flashSave(){S.saveHint=true;render();setTimeout(function(){S.saveHint=false;render();},1500);}
 
-/* ═══════════════════════ MODAL ═══════════════════════ */
-function openModal(title,bodyHtml,onSave){
+/* ═══ MODAL ═══ */
+function openModal(title,body,onSave){
   var m=document.getElementById('modal');
-  m.innerHTML='<div class="modal"><div class="modal-title">'+title+'</div>'+bodyHtml+'<div class="modal-actions"><button class="btn" onclick="closeModal()">Отмена</button><button class="btn btn-primary" id="modal-save">Сохранить</button></div></div>';
-  m.classList.add('open');document.getElementById('modal-save').onclick=onSave;
+  m.innerHTML='<div class="modal"><div class="modal-title">'+title+'</div>'+body+'<div class="modal-actions"><button class="btn" onclick="closeModal()">Отмена</button><button class="btn btn-primary" id="msave">Сохранить</button></div></div>';
+  m.classList.add('open');document.getElementById('msave').onclick=onSave;
 }
 window.closeModal=function(){var m=document.getElementById('modal');m.classList.remove('open');m.innerHTML='';};
 
-/* ═══════════════════════ RENDER ═══════════════════════ */
-function _setApp(html){document.getElementById('app').innerHTML=html;}
-function setApp(html){_setApp(roleBar()+html);}
+/* ═══ RENDER ═══ */
+function setApp(html){document.getElementById('app').innerHTML=roleBar()+html;}
 function render(){
-  if(S.loading){document.getElementById('app').innerHTML='<div class="loading"><div class="spinner"></div><div>Загружаю данные из Supabase…</div></div>';return;}
-  if(!DB){return;}
+  if(S.loading){document.getElementById('app').innerHTML='<div class="loading"><div class="spinner"></div><div>Загружаю из Supabase…</div></div>';return;}
   if(S.role==='rop'){renderRop();return;}
   if(S.role==='mgr'){renderMgr();return;}
   if(S.dept)renderDept();else renderCo();
