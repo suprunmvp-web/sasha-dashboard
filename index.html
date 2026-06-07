@@ -216,17 +216,21 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 /* LEADERBOARD */
 .lb-title{font-size:20px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px;}
 .lb-sub{font-size:13px;color:var(--text-2);margin-bottom:22px;}
-.lb-mode{display:flex;gap:3px;background:var(--surface-2);border:1px solid var(--border-soft);border-radius:11px;padding:3px;width:fit-content;margin-bottom:20px;}
-.lb-mode-btn{font-size:12px;padding:6px 14px;border-radius:8px;border:none;background:transparent;color:var(--text-2);cursor:pointer;font-weight:500;}
-.lb-mode-btn.on{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.2);}
-.lb-row-1 td{background:linear-gradient(90deg,rgba(255,215,0,.07),transparent);}
-.lb-row-2 td{background:linear-gradient(90deg,rgba(192,192,192,.07),transparent);}
-.lb-row-3 td{background:linear-gradient(90deg,rgba(205,127,50,.07),transparent);}
+.lb-row-1 td,.lb-row-2 td,.lb-row-3 td{position:relative;}
+.lb-row-1 td:first-child,.lb-row-2 td:first-child,.lb-row-3 td:first-child{border-top-left-radius:10px;border-bottom-left-radius:10px;}
+.lb-row-1 td:last-child,.lb-row-2 td:last-child,.lb-row-3 td:last-child{border-top-right-radius:10px;border-bottom-right-radius:10px;}
+.lb-row-1 td{background-color:rgba(255,193,7,.10);}
+.lb-row-2 td{background-color:rgba(176,190,197,.12);}
+.lb-row-3 td{background-color:rgba(205,127,50,.10);}
+.lb-row-1 td:first-child{box-shadow:inset 3px 0 0 #FFC107;}
+.lb-row-2 td:first-child{box-shadow:inset 3px 0 0 #B0BEC5;}
+.lb-row-3 td:first-child{box-shadow:inset 3px 0 0 #CD7F32;}
 .med{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
 .med-g{background:linear-gradient(135deg,#FFD700,#FFA000);color:#5a3000;}
 .med-s{background:linear-gradient(135deg,#E8E8E8,#9E9E9E);color:#333;}
 .med-b{background:linear-gradient(135deg,#CD7F32,#8B4010);color:#fff;}
 .rank-n{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;font-size:11px;color:var(--text-3);font-weight:600;}
+.fired-soft td{opacity:.62;}.fired-soft:hover td{opacity:.8;}
 
 /* MODAL */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:center;justify-content:center;}
@@ -279,7 +283,7 @@ var S={
   payDept:'all',payEmp:'all',paySearch:'',payLimit:20,payPage:0,
   staffSortKey:'fact',staffSortDir:-1,
   cliSortKey:'minLeft',cliSortDir:1,
-  sumSort:'fact',sumSortDir:-1,sumMode:'fact',
+  sumSort:'fact',sumSortDir:-1,
 };
 
 /* ═══ UTILS ═══ */
@@ -331,20 +335,29 @@ function buildDB(){
   var activeDepts=RAW.depts.filter(function(d){return!d.is_archived;});
   var firedEmps=RAW.employees.filter(function(e){return e.fired_at||e.is_archived;});
   var activeEmps=RAW.employees.filter(function(e){return!e.fired_at&&!e.is_archived;});
-  var eBP={},eBD={},cBU={};
+  var eBP={},eBD={},cBU={},allBD={};
   activeEmps.forEach(function(e){if(e.platform_user_id)eBP[e.platform_user_id]=e;});
   activeEmps.forEach(function(e){if(e.dept_id)(eBD[e.dept_id]=eBD[e.dept_id]||[]).push(e);});
+  RAW.employees.forEach(function(e){if(e.dept_id)(allBD[e.dept_id]=allBD[e.dept_id]||[]).push(e);});
+  var _fromS=dateISO(S.rangeFrom),_toS=dateISO(S.rangeTo);
+  function inPeriod(e){
+    if(e.hired_at&&e.hired_at.substring(0,10)>_toS)return false;
+    if(e.fired_at&&e.fired_at.substring(0,10)<_fromS)return false;
+    return true;
+  }
   var visibleClients=RAW.clients.filter(function(c){return!c.is_hidden;});
   visibleClients.forEach(function(c){var u=c.responsible_platform_user_id;if(u)(cBU[u]=cBU[u]||[]).push(c);});
 
   var depts=activeDepts.map(function(d){
     var emps=eBD[d.id]||[];
     var lead=RAW.employees.find(function(e){return e.id===d.lead_employee_id;});
-    var staff=emps.map(function(e){
+    var staffEmps=(allBD[d.id]||[]).filter(inPeriod);
+    var staff=staffEmps.map(function(e){
       var dealAgg=S.dealsByEmp[e.id]||{fact:0,comm:0,count:0};
       var planAmt=S.planByEmp[e.id]||0;
       return{id:e.platform_user_id,supaId:e.id,name:e.name,
         role:e.role==='lead'?'Тимлид':'Менеджер',hired:e.hired_at||null,
+        fired:!!(e.fired_at||e.is_archived),firedAt:e.fired_at||null,
         fact:dealAgg.fact,plan:planAmt,comm:dealAgg.comm,deals:dealAgg.count,
         clients:(cBU[e.platform_user_id]||[]).length};
     });
@@ -487,7 +500,6 @@ function render(){
 
 /* ═══ СВОДКА ═══ */
 window.setSumSort=function(k){if(S.sumSort===k)S.sumSortDir*=-1;else{S.sumSort=k;S.sumSortDir=-1;}render();};
-window.setSumMode=function(m){S.sumMode=m;render();};
 function renderSum(){
   var all=[];
   DB.depts.forEach(function(d){d.staff.forEach(function(m){all.push({name:m.name,dept:d.name,fact:m.fact,plan:m.plan,pct:pct(m.fact,m.plan),clients:m.clients,tenure:tenure(m.hired)});});});
@@ -509,12 +521,10 @@ function renderSum(){
   }).join(''):'<tr><td colspan="7"><div class="empty-state">Нет менеджеров. Назначь людей в отделы через ⚙ Настройки.</div></td></tr>';
   var colDefs=[['','#'],['name','Сотрудник'],['fact','Факт','r'],['plan','План','r'],['pct','%','r'],['clients','Клиентов','r'],['tenure','Стаж','r']];
   var th=colDefs.map(function(c){if(!c[0])return'<th style="width:34px">#</th>';var a=S.sumSort===c[0];return'<th class="'+(c[2]||'')+(a?' sorted':'')+'" onclick="setSumSort(\''+c[0]+'\')">'+c[1]+si(a,S.sumSortDir)+'</th>';}).join('');
-  var modeHtml=['fact','pct'].map(function(m){return'<button class="lb-mode-btn'+(S.sumMode===m?' on':'')+'" onclick="setSumMode(\''+m+'\')">'+{fact:'По выручке',pct:'По % плана'}[m]+'</button>';}).join('');
   setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="a">AI</span> · Сводка</span></div>'+calTrigger()+'</div>'+
     (S.loadErr?'<div class="err-banner">⚠ '+esc(S.loadErr)+'</div>':'')+
-    '<div class="panel"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">'+
-      '<div><div class="lb-title">Лидерборд команды</div><div class="lb-sub">'+all.length+' менеджеров · '+calLabel()+'</div></div>'+
-      '<div class="lb-mode">'+modeHtml+'</div></div>'+
+    '<div class="panel"><div style="margin-bottom:18px">'+
+      '<div class="lb-title">Лидерборд команды</div><div class="lb-sub">'+all.length+' менеджеров · '+calLabel()+'</div></div>'+
       '<table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table></div>');
 }
 
@@ -587,8 +597,9 @@ function renderDept(){
     var th=cols.map(function(c){var a=S.staffSortKey===c[0];return'<th class="'+(c[2])+(a?' sorted':'')+'" onclick="sortStaff(\''+c[0]+'\')">'+c[1]+si(a,S.staffSortDir)+'</th>';}).join('');
     var rows=staff.length?staff.map(function(m){
       var c3=grad(m._p);
-      return'<tr class="clickable" onclick="drillEmp(\''+m.supaId+'\')">'+
-        '<td><span class="strong">'+esc(m.name)+'</span><div style="font-size:11px;color:var(--text-3)">'+m.role+'</div></td>'+
+      var subline=m.fired?'<span style="color:var(--red);font-size:11px">уволен от '+fmtD(m.firedAt)+'</span>':m.role;
+      return'<tr class="clickable'+(m.fired?' fired-soft':'')+'" onclick="drillEmp(\''+m.supaId+'\')">'+
+        '<td><span class="strong">'+esc(m.name)+'</span><div style="font-size:11px;color:var(--text-3)">'+subline+'</div></td>'+
         '<td class="r strong num" style="color:'+c3+'">'+fmt(m.fact)+'</td>'+
         '<td class="r muted num">'+fmt(m.plan)+'</td>'+
         '<td class="r"><span style="color:'+c3+';font-weight:600" class="num">'+m._p+'%</span><div class="inbar"><div class="inbar-f" style="width:'+Math.min(m._p,100)+'%;background:'+c3+'"></div></div></td>'+
