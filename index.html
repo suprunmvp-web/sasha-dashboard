@@ -211,19 +211,22 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .fn2-cmp-btn:hover,.fn2-cmp-btn.on{border-color:var(--accent);color:var(--accent);}
 .fn2-cmp-btn.on{background:var(--accent-bg);}
 .fn2-tbl{width:100%;border-collapse:collapse;}
-.fn2-tbl th{text-align:left;font-size:10px;font-weight:500;color:var(--text-3);padding:0 12px 10px 0;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+.fn2-tbl th{text-align:left;font-size:10px;font-weight:600;color:var(--text-3);padding:0 16px 14px 0;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
 .fn2-tbl th.r{text-align:right;}
-.fn2-tbl td{padding:2px 12px 2px 0;vertical-align:middle;}
+.fn2-tbl td{padding:9px 16px 9px 0;vertical-align:middle;}
 .fn2-tbl td.r{text-align:right;}
-.fn2-stage-name{font-size:13px;color:var(--text);font-weight:500;white-space:nowrap;}
-.fn2-bar-wrap{height:22px;background:var(--surface-3);border-radius:6px;overflow:hidden;}
-.fn2-bar-fill{height:100%;border-radius:6px;transition:width .4s ease;}
+.fn2-tbl tr.fn2-main td{border-top:1px solid var(--border-soft);}
+.fn2-tbl tr.fn2-main:first-child td{border-top:none;}
+.fn2-stage-name{font-size:14px;color:var(--text);font-weight:600;white-space:nowrap;}
+.fn2-bar-wrap{height:14px;background:var(--surface-3);border-radius:7px;overflow:hidden;}
+.fn2-bar-fill{height:100%;border-radius:7px;transition:width .4s ease;}
+.fn2-planpct{font-size:11px;color:var(--text-3);margin-top:5px;padding-left:1px;}
 .fn2-pct{font-size:13px;font-weight:700;min-width:44px;text-align:right;}
-.fn2-num{font-size:13px;color:var(--text-2);min-width:36px;text-align:right;font-variant-numeric:tabular-nums;}
-.fn2-plan-num{font-size:13px;color:var(--text-3);min-width:36px;text-align:right;font-variant-numeric:tabular-nums;}
-.fn2-conv-row td{padding:1px 12px 8px 0;}
-.fn2-conv{font-size:11px;color:var(--text-3);padding-left:4px;}
-.fn2-conv b{color:var(--text-2);}
+.fn2-num{font-size:15px;font-weight:600;color:var(--text);min-width:40px;text-align:right;font-variant-numeric:tabular-nums;}
+.fn2-plan-num{font-size:14px;color:var(--text-3);min-width:40px;text-align:right;font-variant-numeric:tabular-nums;}
+.fn2-conv-row td{padding:0 16px 9px 0;}
+.fn2-conv{font-size:11px;color:var(--text-3);display:inline-flex;align-items:center;gap:5px;}
+.fn2-conv b{color:var(--text-2);font-weight:600;}
 .fn2-stat-row{display:flex;gap:6px;margin-bottom:6px;align-items:center;font-size:12px;color:var(--text-3);}
 .fn2-stat-row b{color:var(--text);font-weight:600;}
 /* channel cards */
@@ -258,11 +261,16 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .ms-drop{position:absolute;left:0;top:100%;margin-top:6px;min-width:240px;max-width:340px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:8px;z-index:70;max-height:320px;overflow:auto;display:none;}
 .ms-drop.on{display:block;}
 .ms-search{width:100%;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);font-size:13px;padding:8px 10px;margin-bottom:6px;}
-.ms-opt{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:13px;color:var(--text);cursor:pointer;}
+.ms-opt{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;font-size:13px;color:var(--text);cursor:pointer;line-height:1.3;}
 .ms-opt:hover{background:var(--surface-2);}
-.ms-opt .ck{width:16px;height:16px;border-radius:5px;border:1.5px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-size:10px;color:#fff;flex-shrink:0;}
+.ms-opt.sel{background:var(--accent-bg);}
+.ms-opt .ck{width:18px;height:18px;min-width:18px;border-radius:6px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;flex-shrink:0;}
 .ms-opt.sel .ck{background:var(--accent);border-color:var(--accent);}
-.ms-opt .sub{font-size:11px;color:var(--text-3);margin-left:auto;}
+.ms-opt.sel .ms-nm{color:var(--accent);font-weight:600;}
+.ms-nm{flex:1;min-width:0;}
+.ms-opt .sub{font-size:11px;color:var(--amber);margin-left:auto;flex-shrink:0;}
+.ms-group{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;padding:10px 11px 5px;}
+.ms-empty{font-size:12px;color:var(--text-3);padding:12px 11px;}
 /* participant chips (in plan modal) */
 .pc-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;}
 .pc-chip{font-size:12px;padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;transition:.15s;}
@@ -375,7 +383,7 @@ var S={
   periodStats:{},periodLoading:false,periodReady:false,
   showArchivedDepts:false,showArchivedClients:false,
   ropDept:null,ropShowFired:false,ropShowArchivedDepts:false,
-  fnCompare:false,fnMgrs:[],fnMgrsB:[],fnTags:[],msOpen:null,empAmoMap:{},funnelParticipants:{},
+  fnCompare:false,fnMgrs:[],fnMgrsB:[],fnTags:[],msOpen:null,msSearch:'',empAmoMap:{},funnelParticipants:{},
   dealsRaw:[],dealsByEmp:{},dealsByOrg:{},dealsByDept:{},
   amoLeads:[],funnelTargets:{},amoUsers:[],
   planByEmp:{},
@@ -767,39 +775,59 @@ function funnelBarsHtml_(fc,plan){
     var pctPlan=pl>0?r(cnt/pl*100):null;
     var barW=fc.total>0?Math.min(100,r(cnt/fc.total*100)):0;
     var c3=pctPlan!==null?grad(pctPlan):'var(--accent)';
-    var convRow=i>0?('<tr class="fn2-conv-row"><td></td><td colspan="4"><span class="fn2-conv">\u21b3 \u043a\u043e\u043d\u0432\u0435\u0440\u0441\u0438\u044f <b>'+conv+'%</b></span></td></tr>'):'';
-    return convRow+'<tr>'+
-      '<td class="fn2-stage-name" style="padding-right:18px;white-space:nowrap">'+esc(st.label)+'</td>'+
-      '<td style="width:100%"><div class="fn2-bar-wrap"><div class="fn2-bar-fill" style="width:'+barW+'%;background:'+c3+'"></div></div>'+
-        (pctPlan!==null?'<div style="font-size:10px;color:var(--text-3);margin-top:2px;padding-left:2px">'+pctPlan+'% \u043f\u043b\u0430\u043d\u0430</div>':'')+'</td>'+
+    var convRow=i>0?('<tr class="fn2-conv-row"><td></td><td colspan="4"><span class="fn2-conv">\u21b3 \u043a\u043e\u043d\u0432\u0435\u0440\u0441\u0438\u044f \u0438\u0437 \u043f\u0440\u0435\u0434\u044b\u0434\u0443\u0449\u0435\u0433\u043e <b>'+conv+'%</b></span></td></tr>'):'';
+    return convRow+'<tr class="fn2-main">'+
+      '<td class="fn2-stage-name" style="padding-right:20px;white-space:nowrap">'+esc(st.label)+'</td>'+
+      '<td style="width:100%;min-width:140px"><div class="fn2-bar-wrap"><div class="fn2-bar-fill" style="width:'+barW+'%;background:'+c3+'"></div></div>'+
+        (pctPlan!==null?'<div class="fn2-planpct">'+pctPlan+'% \u043f\u043b\u0430\u043d\u0430</div>':'')+'</td>'+
       '<td class="fn2-num r">'+cnt+'</td>'+
       '<td class="fn2-plan-num r">'+(pl||'\u2014')+'</td>'+
-      '<td class="fn2-pct r" style="color:'+c3+'">'+cnt+'</td>'+
+      '<td class="fn2-pct r" style="color:'+c3+'">'+(pl>0?(pctPlan+'%'):'\u2014')+'</td>'+
     '</tr>';
   }).join('');
 }
 
+function msOptHtml_(stateKey,id,name,hasAmo){
+  var sl=S[stateKey].indexOf(id)>=0;
+  return'<div class="ms-opt'+(sl?' sel':'')+'" onclick="event.stopPropagation();fnToggleMgr(\''+stateKey+'\',\''+id+'\')"><span class="ck">'+(sl?'\u2713':'')+'</span><span class="ms-nm">'+esc(name)+'</span>'+(hasAmo?'':'<span class="sub">нет Amo</span>')+'</div>';
+}
 function renderFunnelContent_(d){
   var hasAmo=S.amoLeads.length>0;
   var planBtn='<button class="btn sm ghost" onclick="openFunnelPlanModal(\''+d.id+'\')">\ud83d\udccb \u041f\u043b\u0430\u043d</button>';
   var deptLeads=leadsForMgrs_([],d.staff);
 
-  /* ── TAG MULTISELECT ── */
+  /* ── TAG PILLS (inline, multi-select) ── */
   var allTagCounts=getTagCounts_(deptLeads);
-  var tagKeys=Object.keys(allTagCounts).sort(function(a,b){return allTagCounts[b]-allTagCounts[a];}).slice(0,30);
-  var tagChips=S.fnTags.length?S.fnTags.map(function(t){return'<span class="ms-chip">'+esc(t.length>18?t.slice(0,16)+'\u2026':t)+'<button onclick="event.stopPropagation();fnRemoveTag(\''+esc(t).replace(/'/g,"\\'")+'\')">\u00d7</button></span>';}).join(''):'<span class="ms-ph">\u0412\u0441\u0435 \u0442\u0435\u0433\u0438</span>';
-  var tagOpts=tagKeys.map(function(t){var sel=S.fnTags.indexOf(t)>=0;return'<div class="ms-opt'+(sel?' sel':'')+'" onclick="event.stopPropagation();fnToggleTag(\''+esc(t).replace(/'/g,"\\'")+'\')"><span class="ck">'+(sel?'\u2713':'')+'</span><span>'+esc(t)+'</span><span class="sub">'+allTagCounts[t]+'</span></div>';}).join('');
-  var tagMs='<div class="ms" style="min-width:240px"><div class="ms-trig'+(S.msOpen==='tags'?' open':'')+'" onclick="fnToggleMs(event,\'tags\')">'+tagChips+'<span class="ms-arrow">\u25be</span></div><div class="ms-drop'+(S.msOpen==='tags'?' on':'')+'">'+tagOpts+'</div></div>';
+  var tagKeys=Object.keys(allTagCounts).sort(function(a,b){return allTagCounts[b]-allTagCounts[a];}).slice(0,24);
+  var tagPills='<button class="fn2-tag'+(S.fnTags.length?'':' on')+'" onclick="fnClearTags()">\u0412\u0441\u0435 \u0442\u0435\u0433\u0438</button>'+
+    tagKeys.map(function(t){var sel=S.fnTags.indexOf(t)>=0;return'<button class="fn2-tag'+(sel?' on':'')+'" onclick="fnToggleTag(\''+esc(t).replace(/'/g,"\\'")+'\')" title="'+esc(t)+'">'+esc(t.length>24?t.slice(0,22)+'\u2026':t)+'<span class="tc">'+allTagCounts[t]+'</span></button>';}).join('');
+  var tagBlock='<div class="fn2-tags">'+tagPills+'</div>';
 
-  /* ── MANAGER MULTISELECTS ── */
-  function mgrMs(stateKey,msId,staffList){
+  /* ── MANAGER MULTISELECT (grouped by dept + search) ── */
+  function mgrMs(stateKey,msId,scope){
     var sel=S[stateKey];
-    var chips=sel.length?sel.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return'<span class="ms-chip">'+esc((e?e.name:'?').split(' ')[0])+'<button onclick="event.stopPropagation();fnRemoveMgr(\''+stateKey+'\',\''+id+'\')">\u00d7</button></span>';}).join(''):'<span class="ms-ph">\u0412\u0435\u0441\u044c \u043e\u0442\u0434\u0435\u043b</span>';
-    var opts=staffList.map(function(m){var sl=sel.indexOf(m.id)>=0;var has=empAmo_(m.id);return'<div class="ms-opt'+(sl?' sel':'')+'" onclick="event.stopPropagation();fnToggleMgr(\''+stateKey+'\',\''+m.id+'\')"><span class="ck">'+(sl?'\u2713':'')+'</span><span>'+esc(m.name)+'</span>'+(has?'':'<span class="sub" style="color:var(--amber)">нет Amo</span>')+'</div>';}).join('');
-    return'<div class="ms"><div class="ms-trig'+(S.msOpen===msId?' open':'')+'" onclick="fnToggleMs(event,\''+msId+'\')">'+chips+'<span class="ms-arrow">\u25be</span></div><div class="ms-drop'+(S.msOpen===msId?' on':'')+'">'+opts+'</div></div>';
+    var chips=sel.length?sel.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return'<span class="ms-chip">'+esc((e?e.name:'?').split(' ').slice(0,2).join(' '))+'<button onclick="event.stopPropagation();fnRemoveMgr(\''+stateKey+'\',\''+id+'\')">\u00d7</button></span>';}).join(''):'<span class="ms-ph">\u0412\u0435\u0441\u044c \u043e\u0442\u0434\u0435\u043b</span>';
+    var open=S.msOpen===msId;
+    var dropInner='';
+    if(open){
+      var q=(S.msSearch||'').toLowerCase();
+      var optHtml='';
+      if(scope==='dept'){
+        var list=d.staff.filter(function(m){return!q||m.name.toLowerCase().indexOf(q)>=0;});
+        optHtml=list.length?list.map(function(m){return msOptHtml_(stateKey,m.supaId,m.name,empAmo_(m.supaId));}).join(''):'<div class="ms-empty">\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e</div>';
+      } else {
+        /* grouped by dept */
+        DB.depts.forEach(function(dd){
+          var staff=dd.staff.filter(function(m){return!q||m.name.toLowerCase().indexOf(q)>=0;});
+          if(!staff.length)return;
+          optHtml+='<div class="ms-group">'+esc(dd.name)+'</div>'+staff.map(function(m){return msOptHtml_(stateKey,m.supaId,m.name,empAmo_(m.supaId));}).join('');
+        });
+        if(!optHtml)optHtml='<div class="ms-empty">\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e</div>';
+      }
+      dropInner='<input class="ms-search" id="ms-search-'+msId+'" placeholder="\u041f\u043e\u0438\u0441\u043a..." value="'+esc(S.msSearch||'')+'" oninput="fnMsSearch(this.value)" onclick="event.stopPropagation()">'+optHtml;
+    }
+    return'<div class="ms"><div class="ms-trig'+(open?' open':'')+'" onclick="fnToggleMs(event,\''+msId+'\')">'+chips+'<span class="ms-arrow">\u25be</span></div><div class="ms-drop'+(open?' on':'')+'">'+dropInner+'</div></div>';
   }
-  var deptStaffList=d.staff.map(function(m){return{id:m.supaId,name:m.name};});
-  var allStaffList=RAW.employees.filter(function(e){return!e.fired_at&&!e.is_archived;}).map(function(e){var dd=RAW.depts.find(function(x){return x.id===e.dept_id;});return{id:e.id,name:e.name+(dd?' \u00b7 '+dd.name:'')};});
 
   var cmpToggle='<button class="fn2-cmp-btn'+(S.fnCompare?' on':'')+'" onclick="toggleFnCompare()">\u21c4 \u0421\u0440\u0430\u0432\u043d\u0438\u0442\u044c</button>';
 
@@ -815,10 +843,10 @@ function renderFunnelContent_(d){
     var nameB=S.fnMgrsB.length?S.fnMgrsB.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return e?e.name.split(' ')[0]:'';}).join(', '):'\u0412\u0435\u0441\u044c \u043e\u0442\u0434\u0435\u043b';
     var thead='<thead><tr><th>\u042d\u0422\u0410\u041f</th><th>\u0412\u042b\u041f.</th><th class="r">\u0424\u0410\u041a\u0422</th><th class="r">\u041f\u041b\u0410\u041d</th><th class="r">%</th></tr></thead>';
     body='<div class="cmp-grid">'+
-      '<div><div class="cmp-head">'+esc(nameA)+'</div>'+mgrMs('fnMgrs','mgrA',deptStaffList)+
+      '<div><div class="cmp-head">'+esc(nameA)+'</div>'+mgrMs('fnMgrs','mgrA','dept')+
         '<div class="fn2-stat-row" style="margin-top:10px">\u041b\u0438\u0434\u043e\u0432: <b>'+fcA.total+'</b> \u00b7 \u041e\u043f\u043b\u0430\u0442: <b>'+(fcA.counts.paid||0)+'</b></div>'+
         '<table class="fn2-tbl" style="width:100%">'+thead+'<tbody>'+funnelBarsHtml_(fcA,planA)+'</tbody></table></div>'+
-      '<div><div class="cmp-head">'+esc(nameB)+'</div>'+mgrMs('fnMgrsB','mgrB',allStaffList)+
+      '<div><div class="cmp-head">'+esc(nameB)+'</div>'+mgrMs('fnMgrsB','mgrB','all')+
         '<div class="fn2-stat-row" style="margin-top:10px">\u041b\u0438\u0434\u043e\u0432: <b>'+fcB.total+'</b> \u00b7 \u041e\u043f\u043b\u0430\u0442: <b>'+(fcB.counts.paid||0)+'</b></div>'+
         '<table class="fn2-tbl" style="width:100%">'+thead+'<tbody>'+funnelBarsHtml_(fcB,planB)+'</tbody></table></div>'+
     '</div>';
@@ -827,7 +855,7 @@ function renderFunnelContent_(d){
     var fc1=buildFunnelCounts(leads1);
     var plan1=funnelPlanFor_(d,S.fnMgrs);
     var planNote=plan1._factor<1?'<span style="font-size:11px;color:var(--text-3);margin-left:8px">\u043f\u043b\u0430\u043d \u043e\u0442\u0434\u0435\u043b\u0430 \u00d7 '+plan1._selPart+'/'+plan1._nP+'</span>':'';
-    var statRow='<div class="fn2-stat-row">\u041b\u0438\u0434\u043e\u0432: <b>'+fc1.total+'</b> &nbsp;\u00b7&nbsp; \u041e\u0442\u043a\u0430\u0442\u043e\u0432: <b>'+fc1.rejected+'</b> &nbsp;\u00b7&nbsp; \u041e\u043f\u043b\u0430\u0442: <b>'+(fc1.counts.paid||0)+'</b>'+planNote+'</div>';
+    var statRow='<div class="fn2-stat-row">\u041b\u0438\u0434\u043e\u0432: <b>'+fc1.total+'</b> &nbsp;\u00b7&nbsp; \u041e\u0442\u043a\u0430\u0437\u043e\u0432: <b>'+fc1.rejected+'</b> &nbsp;\u00b7&nbsp; \u041e\u043f\u043b\u0430\u0442: <b>'+(fc1.counts.paid||0)+'</b>'+planNote+'</div>';
     var thead='<thead><tr><th>\u042d\u0422\u0410\u041f</th><th>\u0412\u042b\u041f\u041e\u041b\u041d\u0415\u041d\u0418\u0415</th><th class="r">\u0424\u0410\u041a\u0422</th><th class="r">\u041f\u041b\u0410\u041d</th><th class="r">%</th></tr></thead>';
     body=statRow+'<table class="fn2-tbl" style="width:100%;margin-top:10px">'+thead+'<tbody>'+funnelBarsHtml_(fc1,plan1)+'</tbody></table>';
   }
@@ -853,18 +881,20 @@ function renderFunnelContent_(d){
   }).join('');
   var channelSection=cards?'<div class="panel" style="margin-top:14px"><div class="panel-title" style="margin-bottom:12px">\u041a\u0430\u043d\u0430\u043b\u044b \u043f\u043e \u0442\u0435\u0433\u0430\u043c \u2014 \u0447\u0442\u043e \u043f\u0440\u0438\u043d\u043e\u0441\u0438\u0442 \u0434\u0435\u043d\u044c\u0433\u0438</div><div class="ch-grid">'+cards+'</div></div>':'';
 
-  var headerRight=S.fnCompare?(planBtn+cmpToggle):(planBtn+mgrMs('fnMgrs','mgrA',deptStaffList)+cmpToggle);
-  return'<div style="margin-bottom:14px">'+tagMs+'</div>'+
+  var headerRight=S.fnCompare?(planBtn+cmpToggle):(planBtn+mgrMs('fnMgrs','mgrA','dept')+cmpToggle);
+  return tagBlock+
     '<div class="panel"><div class="fn2-head"><div class="fn2-title">\u0412\u043e\u0440\u043e\u043d\u043a\u0430 \u043f\u0435\u0440\u0432\u0438\u0447\u043a\u0438</div>'+headerRight+'</div>'+body+'</div>'+
     channelSection;
 }
-window.fnToggleMs=function(e,id){e.stopPropagation();S.msOpen=S.msOpen===id?null:id;render();};
+window.fnToggleMs=function(e,id){e.stopPropagation();S.msOpen=S.msOpen===id?null:id;S.msSearch='';render();};
+window.fnClearTags=function(){S.fnTags=[];render();};
+window.fnMsSearch=function(v){S.msSearch=v;render();setTimeout(function(){var el=document.querySelector('.ms-drop.on .ms-search');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}},0);};
 window.fnToggleTag=function(t){var i=S.fnTags.indexOf(t);if(i>=0)S.fnTags.splice(i,1);else S.fnTags.push(t);render();};
 window.fnRemoveTag=function(t){var i=S.fnTags.indexOf(t);if(i>=0)S.fnTags.splice(i,1);render();};
 window.fnToggleMgr=function(key,id){var arr=S[key];var i=arr.indexOf(id);if(i>=0)arr.splice(i,1);else arr.push(id);render();};
 window.fnRemoveMgr=function(key,id){var arr=S[key];var i=arr.indexOf(id);if(i>=0)arr.splice(i,1);render();};
 window.toggleFnCompare=function(){S.fnCompare=!S.fnCompare;S.msOpen=null;render();};
-document.addEventListener('click',function(e){if(S.msOpen&&!e.target.closest('.ms')){S.msOpen=null;render();}});
+document.addEventListener('click',function(e){if(S.msOpen&&!e.target.closest('.ms')){S.msOpen=null;S.msSearch='';render();}});
 
 function renderDept(){
   var d=DB.depts.find(function(x){return x.id===S.dept;});
