@@ -239,6 +239,14 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .lb-tbl .med{width:30px;height:30px;font-size:12px;box-shadow:0 2px 6px rgba(0,0,0,.18);}
 .lb-tbl .rank-n{width:30px;height:30px;font-size:12px;}
 .fired-soft td{opacity:.62;}.fired-soft:hover td{opacity:.8;}
+/* FUNNEL GRID */
+.fn-grid{display:grid;grid-template-columns:1fr 260px;gap:14px;align-items:start;}
+@media(max-width:700px){.fn-grid{grid-template-columns:1fr;}}
+.src-list{display:flex;flex-direction:column;gap:2px;}
+.src-row{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:8px;font-size:13px;}
+.src-row:hover{background:var(--surface-2);}
+.src-name{color:var(--text-2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.src-cnt{font-weight:600;color:var(--accent);min-width:28px;text-align:right;font-variant-numeric:tabular-nums;}
 .rm-wrap{position:relative;display:inline-block;}
 .rm-dot{border:none;background:transparent;color:var(--text-3);cursor:pointer;font-size:18px;line-height:1;padding:4px 8px;border-radius:7px;transition:.15s;}
 .rm-dot:hover{background:var(--surface-3);color:var(--text);}
@@ -280,6 +288,19 @@ function sbUpsert(t,conflict,d){return fetch(SB_URL+'/rest/v1/'+t+'?on_conflict=
 /* ═══ CONSTANTS ═══ */
 var TODAY=new Date();
 var MIN_DATE=new Date(2026,2,1);
+/* ═══ AMO CONSTANTS ═══ */
+var AMO_PIPE_SALES=10139846;
+/* sort по status_id */
+var AMO_SORT={80336510:5,80940894:10,80336570:20,80494174:30,80336514:40,80429334:50,80336522:60,80376014:70,80336526:80,142:10000,143:11000};
+/* этапы воронки для дашборда */
+var AMO_STAGES=[
+  {key:'new',    label:'Новые лиды',        minSort:0,  sid:null},
+  {key:'work',   label:'Взят в работу',      minSort:30, sid:80494174},
+  {key:'mset',   label:'Встреча назначена',  minSort:40, sid:80336514},
+  {key:'mdone',  label:'Встреча проведена',  minSort:50, sid:80429334},
+  {key:'inv',    label:'Счёт выставлен',     minSort:80, sid:80336526},
+  {key:'paid',   label:'Оплачено',           minSort:10000,sid:142}
+];
 var MN=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 var DOW=['пн','вт','ср','чт','пт','сб','вс'];
 
@@ -298,6 +319,7 @@ var S={
   ropDept:null,ropShowFired:false,ropShowArchivedDepts:false,
   deptFunnelMgr:'all',
   dealsRaw:[],dealsByEmp:{},dealsByOrg:{},dealsByDept:{},
+  amoLeads:[],funnelTargets:{},amoUsers:[],
   planByEmp:{},
   payDept:'all',payEmp:'all',paySearch:'',payLimit:20,payPage:0,
   staffSortKey:'fact',staffSortDir:-1,
@@ -333,9 +355,10 @@ function loadData(){
     sbGet('departments?select=*&order=created_at'),
     sbGet('employees?select=*&order=name'),
     sbGet('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,subscription_status,subscription_end,is_hidden,is_archived&responsible_platform_user_id=not.is.null&order=company_name&limit=3000'),
-    sbGet('clients?select=platform_org_id,company_name,responsible_platform_user_id,is_archived,is_hidden&responsible_platform_user_id=not.is.null&order=company_name&limit=5000')
+    sbGet('clients?select=platform_org_id,company_name,responsible_platform_user_id,is_archived,is_hidden&responsible_platform_user_id=not.is.null&order=company_name&limit=5000'),
+    sbGet('amo_users?select=amo_user_id,name,email&order=name&limit=500')
   ]).then(function(res){
-    RAW.depts=res[0];RAW.employees=res[1];RAW.clients=res[2];RAW.allClients=res[3]||[];
+    RAW.depts=res[0];RAW.employees=res[1];RAW.clients=res[2];RAW.allClients=res[3]||[];S.amoUsers=res[4]||[];
     if(!RAW.depts.length&&!RAW.employees.length)S.loadErr='Supabase вернул пустые данные. Запусти migration_v2.sql и нажми ↻.';
     buildDB();S.loading=false;
     if(!S.ropDept&&DB.depts.length)S.ropDept=DB.depts[0].id;
@@ -346,7 +369,7 @@ function loadData(){
 
 function refreshPeriod(){
   S.periodReady=false;
-  return Promise.all([loadPeriodStats(),loadDeals(),loadPlans()]).then(function(){buildDB();S.periodReady=true;render();}).catch(function(e){console.error(e);S.periodReady=true;render();});
+  return Promise.all([loadPeriodStats(),loadDeals(),loadPlans(),loadAmoLeads(),loadFunnelTargets()]).then(function(){buildDB();S.periodReady=true;render();}).catch(function(e){console.error(e);S.periodReady=true;render();});
 }
 
 /* ═══ BUILD DB ═══ */
@@ -462,7 +485,50 @@ function loadPlans(){
   });
 }
 
+/* ═══ AMO LEADS ═══ */
+function loadAmoLeads(){
+  S.amoLeads=[];
+  var fromU=Math.floor(S.rangeFrom.getTime()/1000);
+  var toU=Math.floor(S.rangeTo.getTime()/1000)+86400;
+  return sbGet('amo_leads?select=id,price,responsible_user_id,status_id,pipeline_id,created_at_unix,source,package,tags&pipeline_id=eq.'+AMO_PIPE_SALES+'&created_at_unix=gte.'+fromU+'&created_at_unix=lte.'+toU+'&is_deleted=is.false&limit=5000').then(function(rows){
+    S.amoLeads=rows||[];
+  }).catch(function(){S.amoLeads=[];});
+}
+function loadFunnelTargets(){
+  S.funnelTargets={};
+  var months=[],cur=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);
+  while(cur<=S.rangeTo){months.push({y:cur.getFullYear(),m:cur.getMonth()+1});cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);}
+  if(!months.length)return Promise.resolve();
+  var orParts=months.map(function(mm){return'and(year.eq.'+mm.y+',month.eq.'+mm.m+')';}).join(',');
+  return sbGet('funnel_targets?select=dept_id,year,month,target_type,target_count&or=('+orParts+')&limit=10000').then(function(rows){
+    (rows||[]).forEach(function(t){
+      var k=t.dept_id;
+      if(!S.funnelTargets[k])S.funnelTargets[k]={};
+      S.funnelTargets[k][t.target_type]=(S.funnelTargets[k][t.target_type]||0)+(Number(t.target_count)||0);
+    });
+  }).catch(function(){S.funnelTargets={};});
+}
+/* Считает воронку по массиву лидов (с фильтром по amo_user_id если нужно) */
+function buildFunnelCounts(leads){
+  var sortById={};
+  Object.keys(AMO_SORT).forEach(function(sid){sortById[sid]=AMO_SORT[sid];});
+  var counts={};
+  AMO_STAGES.forEach(function(st){counts[st.key]=0;});
+  var total=0,rejected=0,revenue=0;
+  (leads||[]).forEach(function(l){
+    var s=sortById[l.status_id]||0;
+    if(l.status_id===143){rejected++;return;}
+    total++;
+    revenue+=(Number(l.price)||0);
+    AMO_STAGES.forEach(function(st){
+      if(st.minSort===0||s>=st.minSort)counts[st.key]++;
+    });
+  });
+  return{counts:counts,total:total,rejected:rejected,revenue:revenue};
+}
+
 /* ═══ CALENDAR ═══ */
+
 function buildMonth(base){var y=base.getFullYear(),m=base.getMonth(),first=new Date(y,m,1),sd=(first.getDay()+6)%7,days=[];for(var i=0;i<sd;i++)days.push({d:new Date(y,m,1-(sd-i)),other:true});var dim=new Date(y,m+1,0).getDate();for(var k=1;k<=dim;k++)days.push({d:new Date(y,m,k),other:false});while(days.length%7){var l=days[days.length-1].d;days.push({d:new Date(l.getFullYear(),l.getMonth(),l.getDate()+1),other:true});}return days;}
 function renderCalMonth(base){var days=buildMonth(base);var cells=DOW.map(function(d){return'<div class="cal-dow">'+d+'</div>';}).join('');days.forEach(function(o){var disabled=o.d<MIN_DATE;var cls='cal-day'+(o.other?' other':'')+(disabled?' disabled':'');var t=o.d.getTime(),f=S.rangeFrom.getTime(),tt=S.rangeTo.getTime();if(!disabled){if(sameDay(o.d,S.rangeFrom)&&sameDay(o.d,S.rangeTo))cls+=' range-single';else if(sameDay(o.d,S.rangeFrom))cls+=' range-start';else if(sameDay(o.d,S.rangeTo))cls+=' range-end';else if(t>f&&t<tt)cls+=' in-range';}cells+='<div class="'+cls+'"'+(disabled?'':' onclick="pickDay('+o.d.getFullYear()+','+o.d.getMonth()+','+o.d.getDate()+')"')+'>'+o.d.getDate()+'</div>';});return'<div class="cal-grid">'+cells+'</div>';}
 function calHtml(){var L=S.calLeft,R=new Date(L.getFullYear(),L.getMonth()+1,1);var prNames=['7 дней','30 дней','Этот месяц','Квартал','За всё время'];var ph=prNames.map(function(p,i){return'<button class="cal-preset" onclick="applyPreset('+i+')">'+p+'</button>';}).join('');return'<div class="cal-presets">'+ph+'</div><div class="cal-months"><div><div class="cal-mhead"><button class="cal-nav" onclick="calShift(-1)">‹</button><span class="cal-mtitle">'+MN[L.getMonth()]+' '+L.getFullYear()+'</span><span style="width:28px"></span></div>'+renderCalMonth(L)+'</div><div><div class="cal-mhead"><span style="width:28px"></span><span class="cal-mtitle">'+MN[R.getMonth()]+' '+R.getFullYear()+'</span><button class="cal-nav" onclick="calShift(1)">›</button></div>'+renderCalMonth(R)+'</div></div>';}
@@ -631,10 +697,52 @@ function renderDept(){
   if(S.tab==='funnel'){
     var fmgrs=[{id:'all',name:'Все менеджеры'}].concat(d.staff.map(function(m){return{id:m.id,name:m.name};}));
     var fmgrSel='<select class="sel" onchange="setDeptFunnelMgr(this.value)">'+fmgrs.map(function(m){return'<option value="'+m.id+'"'+(m.id===S.deptFunnelMgr?' selected':'')+'>'+esc(m.name)+'</option>';}).join('')+'</select>';
-    var stages=['Лиды в работе','Квалифицировано','Встречи назначено','Встречи проведено','Счета выставлено','Оплаты'];
-    var fw=[100,62,44,33,22,13];
-    var bars=stages.map(function(s,i){return'<div class="fn-row"><span class="fn-label">'+s+'</span><div class="fn-bar"><div class="fn-fill" style="width:'+fw[i]+'%"></div></div><span style="font-size:12px;color:var(--text-3);text-align:right">—</span></div>';}).join('');
-    ct='<div class="panel"><div class="adm-head" style="margin-bottom:18px"><div class="panel-title" style="margin:0">Воронка первички</div>'+fmgrSel+'</div><div class="fn-wrap"><div class="fn-bars">'+bars+'</div><div class="fn-overlay"><div class="fn-icon">🔒</div><div class="fn-ttl">Воронка подключается</div><div class="fn-txt">Данные из amoCRM. Запусти <code>amoCRM.gs</code> → таблица <code>amo_leads</code>.</div></div></div></div>';
+    /* Amo funnel — реальные данные */
+    var amoUserIdForMgr=function(supaId){var e=RAW.employees.find(function(x){return x.id===supaId;});return e?e.amo_user_id:null;};
+    var fLeads=S.amoLeads;
+    if(S.deptFunnelMgr!=='all'){
+      var auid=amoUserIdForMgr(S.deptFunnelMgr);
+      if(auid)fLeads=fLeads.filter(function(l){return l.responsible_user_id===auid;});
+      else fLeads=[];
+    }else{
+      /* показываем только лиды ответственных сотрудников этого отдела */
+      var deptAuids=d.staff.map(function(m){return amoUserIdForMgr(m.supaId);}).filter(Boolean);
+      if(deptAuids.length)fLeads=fLeads.filter(function(l){return deptAuids.indexOf(l.responsible_user_id)>=0;});
+    }
+    var fc=buildFunnelCounts(fLeads);
+    var ft=S.funnelTargets[d.id]||{};
+    var hasAmo=S.amoLeads.length>0;
+    var bars=AMO_STAGES.map(function(st,i){
+      var cnt=fc.counts[st.key]||0;
+      var plan=ft[st.key]||0;
+      var prev=i>0?(fc.counts[AMO_STAGES[i-1].key]||0):fc.total;
+      var conv=prev>0?r(cnt/prev*100):0;
+      var pctPlan=plan>0?r(cnt/plan*100):null;
+      var barW=fc.total>0?r(cnt/fc.total*100):0;
+      var c3=pctPlan!==null?grad(pctPlan):'var(--accent)';
+      var convHtml=i>0?'<span style="font-size:11px;color:var(--text-3)">'+conv+'%</span>':'';
+      var planHtml=plan?'<span style="font-size:11px;color:'+c3+'">'+cnt+'/'+plan+'</span>':'<span style="font-size:12px;color:var(--text-2)">'+cnt+'</span>';
+      return'<div class="fn-row">'+
+        '<span class="fn-label">'+st.label+'</span>'+
+        '<div class="fn-bar"><div class="fn-fill" style="width:'+barW+'%;background:var(--accent)"></div></div>'+
+        '<div style="display:flex;gap:8px;align-items:center;min-width:100px;justify-content:flex-end">'+planHtml+convHtml+'</div>'+
+      '</div>';
+    }).join('');
+    var sourceSel={}; fLeads.forEach(function(l){if(l.source)(sourceSel[l.source]=(sourceSel[l.source]||0)+1);});
+    var sourceRows=Object.keys(sourceSel).sort(function(a,b){return sourceSel[b]-sourceSel[a];}).map(function(s){
+      return'<div class="src-row"><span class="src-name">'+esc(s)+'</span><span class="src-cnt">'+sourceSel[s]+'</span></div>';
+    }).join('')||'<div class="src-row"><span class="src-name muted">—</span></div>';
+    var overlay=!hasAmo?'<div class="fn-overlay"><div class="fn-icon">🔒</div><div class="fn-ttl">Воронка подключается</div><div class="fn-txt">Запусти <code>amoSyncAll()</code> в GAS → данные появятся здесь.</div></div>':'';
+    var planBtn='<button class="btn sm" onclick="openFunnelPlanModal(\''+d.id+'\')" style="margin-left:8px">📋 Редактировать план</button>';
+    ct='<div class="fn-grid">'+
+      '<div class="panel"><div class="adm-head" style="margin-bottom:14px"><div class="panel-title" style="margin:0">Воронка первички'+planBtn+'</div>'+fmgrSel+'</div>'+
+        '<div style="display:flex;justify-content:space-between;margin-bottom:14px">'+
+          '<span style="font-size:12px;color:var(--text-2)">Лидов: <b>'+fc.total+'</b> &nbsp;·&nbsp; Откащено: <b>'+fc.rejected+'</b></span>'+
+        '</div>'+
+        '<div class="fn-wrap"><div class="fn-bars">'+bars+'</div>'+overlay+'</div></div>'+
+      '<div class="panel"><div class="panel-title" style="margin-bottom:12px">По источникам</div>'+
+        '<div class="src-list">'+sourceRows+'</div></div>'+
+    '</div>';
   }
   setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUp()">‹ Дашборд</button><span class="crumb-title">'+esc(d.name)+'</span><button class="btn sm ghost" onclick="archiveDept(\''+d.id+'\')" style="margin-left:4px">В архив</button></div>'+calTrigger()+'</div><div class="dept-kpi">'+kH+'</div>'+tabs+ct);
 }
@@ -700,6 +808,29 @@ function renderEmpView(){
 }
 
 /* ═══ РОП / НАСТРОЙКИ ═══ */
+function amoMappingBlock_(){
+  var users=S.amoUsers||[];
+  if(!users.length)return'<div class="panel"><div class="panel-title">AmoCRM · Маппинг сотрудников</div><p style="font-size:12px;color:var(--text-3)">Запусти <code>amoSyncAll()</code> — список пользователей загрузится автоматически.</p></div>';
+  var nonFired=RAW.employees.filter(function(e){return!e.fired_at&&!e.is_archived;});
+  var rows=nonFired.map(function(emp){
+    var opts='<option value="">— не выбран —</option>'+users.map(function(u){
+      return'<option value="'+u.amo_user_id+'"'+(emp.amo_user_id===u.amo_user_id?' selected':'')+'>'+esc(u.name)+'</option>';
+    }).join('');
+    return'<tr>'+
+      '<td><span class="strong">'+esc(emp.name)+'</span></td>'+
+      '<td><select class="sel" style="width:100%" onchange="saveAmoMapping(\''+emp.id+'\',this.value)">'+opts+'</select></td>'+
+    '</tr>';
+  }).join('');
+  return'<div class="panel"><div class="adm-head" style="margin-bottom:14px">'+
+    '<div class="panel-title" style="margin:0">AmoCRM · Маппинг сотрудников</div>'+
+    '<span style="font-size:11px;color:var(--text-3)">Выбери Amo-пользователя для каждого менеджера</span></div>'+
+    '<table class="tbl"><thead><tr><th>Сотрудник дашборда</th><th>Пользователь Amo</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+window.saveAmoMapping=function(supaId,amoId){
+  var val=amoId?Number(amoId):null;
+  sbPatch('employees','id=eq.'+supaId,{amo_user_id:val});
+  RAW.employees.forEach(function(e){if(e.id===supaId)e.amo_user_id=val;});
+};
 function renderRop(){
   if(!DB){setApp('<div class="topbar"><span class="brand">⚙ Настройки</span></div>');return;}
   var d=S.ropDept?DB.depts.find(function(x){return x.id===S.ropDept;}):DB.depts[0];
@@ -742,7 +873,8 @@ function renderRop(){
       '<table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th>Нанят</th><th>Статус</th><th class="r">Клиентов</th><th class="r">Действие</th></tr></thead><tbody>'+staffRows+'</tbody></table>'+
       firedBlock+'</div>'+
     unaBlock+
-    '<div class="panel"><div class="adm-head"><div class="panel-title" style="margin:0">Все отделы</div><button class="btn primary" onclick="createDept()">+ Создать отдел</button></div>'+deptCards+archDeptBlock+'</div>');
+    '<div class="panel"><div class="adm-head"><div class="panel-title" style="margin:0">Все отделы</div><button class="btn primary" onclick="createDept()">+ Создать отдел</button></div>'+deptCards+archDeptBlock+'</div>'+
+    amoMappingBlock_());
 }
 window.setRopDept=function(id){S.ropDept=id;render();};
 window.toggleRopFired=function(){S.ropShowFired=!S.ropShowFired;render();};
@@ -795,6 +927,30 @@ window.fireEmp=function(supaId){
     function(){var dt=document.getElementById('f-d').value||todayISO();sbPatch('employees','id=eq.'+supaId,{fired_at:dt,is_archived:true});RAW.employees.forEach(function(e){if(e.id===supaId){e.fired_at=dt;e.is_archived=true;}});buildDB();closeModal();render();});
 };
 window.rehireEmp=function(supaId){openModal('Вернуть сотрудника?','<p style="font-size:13px;color:var(--text-2)">Сотрудник вернётся в активный список.</p>',function(){sbPatch('employees','id=eq.'+supaId,{fired_at:null,is_archived:false});RAW.employees.forEach(function(e){if(e.id===supaId){e.fired_at=null;e.is_archived=false;}});buildDB();closeModal();render();});};
+
+/* ═══ ПЛАН ВОРОНКИ (funnel_targets) ═══ */
+window.openFunnelPlanModal=function(deptId){
+  var ft=S.funnelTargets[deptId]||{};
+  var months=[],cur=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);
+  while(cur<=S.rangeTo){months.push({y:cur.getFullYear(),m:cur.getMonth()+1});cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);}
+  var mLabel=months.length===1?('за '+MN[months[0].m-1]+' '+months[0].y):('за период (итого)');
+  var fields=AMO_STAGES.map(function(st){
+    return'<div class="field"><label>'+st.label+'</label>'+
+      '<input id="ft-'+st.key+'" type="number" min="0" value="'+(ft[st.key]||0)+'" placeholder="0"></div>';
+  }).join('');
+  openModal('Редактировать план воронки <span style="font-size:12px;color:var(--text-3);font-weight:400">'+mLabel+'</span>',fields,function(){
+    var rows=[];
+    AMO_STAGES.forEach(function(st){
+      var val=parseInt(document.getElementById('ft-'+st.key).value)||0;
+      months.forEach(function(mm){
+        rows.push({dept_id:deptId,year:mm.y,month:mm.m,target_type:st.key,target_count:Math.round(val/(months.length||1)),updated_at:new Date().toISOString()});
+      });
+    });
+    sbUpsert('funnel_targets','dept_id,year,month,target_type',rows).then(function(){
+      closeModal();refreshPeriod();flashSave();
+    });
+  });
+};
 window.hideClient=function(orgId,name){
   openModal('Убрать в архив?','<p style="font-size:13px;color:var(--text-2);line-height:1.7"><b>'+esc(name)+'</b> исчезнет из портфеля. Вернуть можно через «Архив».</p>',
     function(){sbPatch('clients','platform_org_id=eq.'+orgId,{is_hidden:true});RAW.clients.forEach(function(c){if(c.platform_org_id===orgId)c.is_hidden=true;});buildDB();closeModal();render();});
