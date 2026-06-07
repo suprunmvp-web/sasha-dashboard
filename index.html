@@ -230,7 +230,26 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .med-s{background:linear-gradient(135deg,#E8E8E8,#9E9E9E);color:#333;}
 .med-b{background:linear-gradient(135deg,#CD7F32,#8B4010);color:#fff;}
 .rank-n{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;font-size:11px;color:var(--text-3);font-weight:600;}
+.lb-tbl td{padding-top:17px;padding-bottom:17px;}
+.lb-tbl .lb-rank{padding-left:10px;padding-right:6px;width:54px;}
+.lb-tbl tbody tr:hover td{background:var(--surface-3);}
+.lb-row-1:hover td{background:rgba(255,193,7,.16)!important;}
+.lb-row-2:hover td{background:rgba(176,190,197,.18)!important;}
+.lb-row-3:hover td{background:rgba(205,127,50,.16)!important;}
+.lb-tbl .med{width:30px;height:30px;font-size:12px;box-shadow:0 2px 6px rgba(0,0,0,.18);}
+.lb-tbl .rank-n{width:30px;height:30px;font-size:12px;}
 .fired-soft td{opacity:.62;}.fired-soft:hover td{opacity:.8;}
+.rm-wrap{position:relative;display:inline-block;}
+.rm-dot{border:none;background:transparent;color:var(--text-3);cursor:pointer;font-size:18px;line-height:1;padding:4px 8px;border-radius:7px;transition:.15s;}
+.rm-dot:hover{background:var(--surface-3);color:var(--text);}
+.rm-pop{position:absolute;right:0;top:100%;margin-top:4px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:5px;min-width:230px;z-index:60;display:none;text-align:left;}
+.rm-pop.on{display:block;}
+.rm-pop button{display:block;width:100%;text-align:left;border:none;background:transparent;color:var(--text);font-size:13px;padding:9px 12px;border-radius:8px;cursor:pointer;white-space:nowrap;}
+.rm-pop button:hover{background:var(--surface-2);}
+.rm-pop button.danger{color:var(--red);}
+.de-list{display:flex;flex-direction:column;gap:6px;}
+.de-pick{display:flex;align-items:center;justify-content:space-between;gap:18px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:10px;padding:11px 14px;font-size:13px;cursor:pointer;}
+.de-pick:hover{border-color:var(--accent);}
 
 /* MODAL */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:center;justify-content:center;}
@@ -510,7 +529,7 @@ function renderSum(){
     var medHtml=i<3?'<span class="med '+medCls[i]+'">'+(i+1)+'</span>':'<span class="rank-n">'+(i+1)+'</span>';
     var rowCls=i<3?'lb-row-'+(i+1):'';
     return'<tr class="'+rowCls+'">'+
-      '<td style="padding-left:4px">'+medHtml+'</td>'+
+      '<td class="lb-rank">'+medHtml+'</td>'+
       '<td><span class="strong">'+esc(m.name)+'</span><div style="font-size:11px;color:var(--text-3)">'+esc(m.dept)+'</div></td>'+
       '<td class="r strong num" style="color:'+c3+'">'+fmt(m.fact)+'</td>'+
       '<td class="r muted num">'+fmt(m.plan)+'</td>'+
@@ -525,7 +544,7 @@ function renderSum(){
     (S.loadErr?'<div class="err-banner">⚠ '+esc(S.loadErr)+'</div>':'')+
     '<div class="panel"><div style="margin-bottom:18px">'+
       '<div class="lb-title">Лидерборд команды</div><div class="lb-sub">'+all.length+' менеджеров · '+calLabel()+'</div></div>'+
-      '<table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table></div>');
+      '<table class="tbl lb-tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table></div>');
 }
 
 /* ═══ ДАШБОРД ═══ */
@@ -649,18 +668,27 @@ function renderEmpView(){
     return S.cliSortDir*((va||0)-(vb||0));
   });
   var colDefs=[['name','Компания',''],['fact','Факт','r'],['_min','Мин исп.','r'],['minLeft','Мин ост.','r'],['expiry','До прод.','r']];
-  var th=colDefs.map(function(c){var a=S.cliSortKey===c[0];return'<th class="'+(c[2])+(a?' sorted':'')+'" onclick="sortCli(\''+c[0]+'\')">'+c[1]+si(a,S.cliSortDir)+'</th>';}).join('');
+  var th=colDefs.map(function(c){var a=S.cliSortKey===c[0];return'<th class="'+(c[2])+(a?' sorted':'')+'" onclick="sortCli(\''+c[0]+'\')">'+c[1]+si(a,S.cliSortDir)+'</th>';}).join('')+'<th style="width:38px;cursor:default"></th>';
   var rows=myClients.length?myClients.map(function(c){
     var c3=c.fact>0?grad(100):c.fact<0?'var(--red)':'var(--text-3)';
     var minCell=S.periodLoading?'<span style="color:var(--text-3)">···</span>':fmtMin(c._min);
+    var menuId='m_'+c.platform_org_id;
+    var menu='<div class="rm-wrap">'+
+      '<button class="rm-dot" onclick="toggleRowMenu(event,\''+menuId+'\')">⋯</button>'+
+      '<div class="rm-pop" id="'+menuId+'" data-org="'+c.platform_org_id+'" data-name="'+esc(c.name)+'">'+
+        '<button onclick="rmEditEvent(this)">✎ Редактировать событие</button>'+
+        '<button onclick="rmRename(this)">✐ Переименовать компанию</button>'+
+        '<button class="danger" onclick="rmArchive(this)">🗄 В архив</button>'+
+      '</div></div>';
     return'<tr>'+
       '<td><a class="ext-link" href="'+esc(c.url)+'" target="_blank">'+esc(c.name)+' <span class="lk">↗</span></a></td>'+
       '<td class="r strong num" style="color:'+c3+'">'+fmt(c.fact)+'</td>'+
       '<td class="r muted num">'+minCell+'</td>'+
       '<td class="r muted num">'+fmtMin(c.minLeft)+'</td>'+
       '<td class="r">'+daysBadge(c._d)+'</td>'+
+      '<td class="r" style="position:relative">'+menu+'</td>'+
     '</tr>';
-  }).join(''):'<tr><td colspan="5"><div class="empty-state">Нет клиентов в портфеле</div></td></tr>';
+  }).join(''):'<tr><td colspan="6"><div class="empty-state">Нет клиентов в портфеле</div></td></tr>';
   var empHeader='<div class="emp-header">'+
     '<div class="emp-avatar">'+initials+'</div>'+
     '<div><div class="emp-name">'+esc(emp.name)+'</div><div class="emp-meta">'+(emp.role==='lead'?'Тимлид':'Менеджер')+(d?' · '+esc(d.name):'')+'</div></div>'+
@@ -772,6 +800,36 @@ window.hideClient=function(orgId,name){
     function(){sbPatch('clients','platform_org_id=eq.'+orgId,{is_hidden:true});RAW.clients.forEach(function(c){if(c.platform_org_id===orgId)c.is_hidden=true;});buildDB();closeModal();render();});
 };
 window.unhideClient=function(orgId){sbPatch('clients','platform_org_id=eq.'+orgId,{is_hidden:false});RAW.clients.forEach(function(c){if(c.platform_org_id===orgId)c.is_hidden=false;});buildDB();render();};
+/* ═══ ROW MENU (клиент в карточке сотрудника) ═══ */
+window.toggleRowMenu=function(ev,id){
+  ev.stopPropagation();
+  var pop=document.getElementById(id);if(!pop)return;
+  var open=pop.classList.contains('on');
+  document.querySelectorAll('.rm-pop.on').forEach(function(p){p.classList.remove('on');});
+  if(!open)pop.classList.add('on');
+};
+document.addEventListener('click',function(e){if(!e.target.closest('.rm-wrap'))document.querySelectorAll('.rm-pop.on').forEach(function(p){p.classList.remove('on');});});
+function _rmData(btn){var pop=btn.closest('.rm-pop');return{org:pop.dataset.org,name:pop.dataset.name};}
+window.rmArchive=function(btn){var d=_rmData(btn);btn.closest('.rm-pop').classList.remove('on');hideClient(d.org,d.name);};
+window.rmRename=function(btn){
+  var d=_rmData(btn);btn.closest('.rm-pop').classList.remove('on');
+  openModal('Переименовать компанию','<div class="field"><label>Название</label><input id="rc-n" value="'+esc(d.name)+'"></div>',function(){
+    var nm=document.getElementById('rc-n').value.trim();if(!nm)return;
+    sbPatch('clients','platform_org_id=eq.'+d.org,{company_name:nm});
+    [RAW.clients,RAW.allClients].forEach(function(arr){(arr||[]).forEach(function(c){if(c.platform_org_id===d.org)c.company_name=nm;});});
+    buildDB();closeModal();render();
+  });
+};
+window.rmEditEvent=function(btn){
+  var d=_rmData(btn);btn.closest('.rm-pop').classList.remove('on');
+  var deals=S.dealsRaw.filter(function(x){return x.platform_org_id===d.org;});
+  if(!deals.length){openDealModal(null,S.empView,null);setTimeout(function(){_dc.orgId=d.org;_dc.name=d.name;renderCliUI();},30);return;}
+  if(deals.length===1){editDeal(deals[0].id);return;}
+  deals.sort(function(a,b){return(b.deal_date||'').localeCompare(a.deal_date||'');});
+  var list=deals.map(function(x){var sign=x.event_type==='refund'?'Возврат':'Оплата';return'<button class="de-pick" onclick="closeModal();editDeal(\''+x.id+'\')"><span>'+sign+' · '+fmtD(x.deal_date)+'</span><span class="num">'+fmt(Number(x.amount)||0)+'</span></button>';}).join('');
+  openModalSimple('События: '+esc(d.name),'<div class="de-list">'+list+'</div>');
+};
+
 
 /* ═══ ПЛАН (monthly_targets) ═══ */
 window.openPlanModal=function(supaId,empName){
