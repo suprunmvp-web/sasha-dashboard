@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru" data-theme="dark">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="cache-control" content="no-cache,no-store,must-revalidate">
 <title>SashaAI · Аналитика продаж</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -12,30 +13,39 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .app{max-width:1060px;margin:0 auto;}
 .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
 .pos{color:var(--green);}.neg{color:var(--red);}.neu{color:var(--text-2);}
-.rolebar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;gap:12px;flex-wrap:wrap;}
+
+/* ROLE BAR */
+.rolebar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;gap:10px;flex-wrap:wrap;}
 .role-seg{display:flex;gap:3px;background:var(--surface-2);border:1px solid var(--border-soft);border-radius:11px;padding:3px;}
-.role-btn{font-size:12px;padding:7px 14px;border-radius:8px;border:none;background:transparent;color:var(--text-2);cursor:pointer;font-weight:500;}
+.role-btn{font-size:12px;padding:7px 14px;border-radius:8px;border:none;background:transparent;color:var(--text-2);cursor:pointer;font-weight:500;transition:.15s;}
 .role-btn.on{background:var(--accent);color:#fff;}
 .role-btn:not(.on):hover{color:var(--text);}
-.role-meta{font-size:11px;color:var(--text-3);}
-.bar-right{display:flex;align-items:center;gap:8px;}
-.icon-btn{width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.bar-right{display:flex;align-items:center;gap:6px;}
+.icon-btn{width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:.15s;}
 .icon-btn:hover{border-color:var(--accent);color:var(--accent);}
-.refresh-btn{font-size:12px;padding:6px 13px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);cursor:pointer;}
+.icon-btn.on{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);}
+.deal-btn{font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;font-weight:500;}
+.deal-btn:hover{opacity:.88;}
+.refresh-btn{font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);cursor:pointer;}
 .refresh-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* TOP BAR */
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;gap:12px;flex-wrap:wrap;}
-.nav-left{display:flex;align-items:center;gap:10px;}
-.back-btn{font-size:13px;color:var(--accent);cursor:pointer;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);}
+.nav-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .brand{font-size:18px;font-weight:600;letter-spacing:-.01em;}
-.brand .accent{color:var(--accent);}
+.brand .a{color:var(--accent);}
 .crumb-title{font-size:18px;font-weight:600;}
+.back-btn{font-size:12px;color:var(--text-2);cursor:pointer;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);transition:.15s;}
+.back-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* CALENDAR */
 .cal-trigger{display:flex;align-items:center;gap:8px;font-size:13px;padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);cursor:pointer;color:var(--text);}
-.cal-trigger svg{opacity:.6;}
 .cal-pop{position:absolute;right:0;top:48px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;z-index:50;box-shadow:var(--shadow);display:none;}
 .cal-pop.open{display:block;}
 .cal-wrap{position:relative;}
 .cal-presets{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
 .cal-preset{font-size:11px;padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;}
+.cal-preset:hover{border-color:var(--accent);color:var(--accent);}
 .cal-months{display:flex;gap:28px;}
 .cal-mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .cal-mtitle{font-size:13px;font-weight:600;}
@@ -45,16 +55,20 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .cal-day{font-size:12px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px;color:var(--text);}
 .cal-day:hover{background:var(--surface-3);}
 .cal-day.other{color:var(--text-3);}
-.cal-day.disabled{opacity:.25;pointer-events:none;cursor:default;}
+.cal-day.disabled{opacity:.25;pointer-events:none;}
 .cal-day.in-range{background:var(--accent-bg);border-radius:0;}
 .cal-day.range-start{background:var(--accent);color:#fff;border-radius:8px 0 0 8px;}
 .cal-day.range-end{background:var(--accent);color:#fff;border-radius:0 8px 8px 0;}
 .cal-day.range-single{background:var(--accent);color:#fff;border-radius:8px;}
+
+/* KPI CARDS */
 .ckpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem;}
 .ck{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:16px 18px;}
-.ck-l{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:500;display:flex;align-items:center;gap:6px;}
+.ck-l{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:500;}
 .ck-v{font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1;}
 .ck-s{font-size:12px;margin-top:8px;color:var(--text-2);}
+
+/* DEPT CARDS */
 .dept-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .dept-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:16px;padding:22px;cursor:pointer;transition:.18s;}
 .dept-card:hover{border-color:var(--accent);transform:translateY(-1px);}
@@ -66,10 +80,12 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .dc-fact{font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1;margin-bottom:4px;}
 .dc-plan{font-size:12px;color:var(--text-3);margin-bottom:14px;}
 .progress{height:6px;background:var(--surface-3);border-radius:6px;overflow:hidden;margin-bottom:14px;}
-.progress-fill{height:100%;border-radius:6px;transition:width .5s;}
+.progress-fill{height:100%;border-radius:6px;}
 .dc-stats{display:flex;justify-content:space-between;}
 .dc-stat-l{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;}
 .dc-stat-v{font-size:15px;font-weight:600;margin-top:2px;}
+
+/* DEPT KPI */
 .dept-kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.5rem;}
 .kcard{background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;padding:14px 16px;}
 .kl{font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;font-weight:500;}
@@ -77,120 +93,153 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .ks{font-size:11px;margin-top:6px;}
 .pbar{height:3px;background:var(--surface-3);border-radius:2px;margin-top:9px;overflow:hidden;}
 .pfill{height:100%;border-radius:2px;}
+
+/* EMP HEADER */
+.emp-header{background:var(--surface);border:1px solid var(--border-soft);border-radius:16px;padding:20px 22px;margin-bottom:14px;display:flex;align-items:center;gap:16px;}
+.emp-avatar{width:48px;height:48px;border-radius:50%;background:var(--accent-bg);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--accent);flex-shrink:0;}
+.emp-name{font-size:18px;font-weight:600;}
+.emp-meta{font-size:12px;color:var(--text-2);margin-top:3px;}
+
+/* TABS */
 .tab-row{display:flex;gap:4px;margin-bottom:1.5rem;background:var(--surface);border:1px solid var(--border-soft);border-radius:12px;padding:4px;width:fit-content;}
 .tab{font-size:13px;padding:8px 18px;border-radius:9px;border:none;background:transparent;color:var(--text-2);cursor:pointer;font-weight:500;}
 .tab.on{background:var(--accent);color:#fff;}
 .tab:not(.on):hover{color:var(--text);}
+
+/* PANEL */
 .panel{background:var(--surface);border:1px solid var(--border-soft);border-radius:16px;padding:20px 22px;margin-bottom:14px;}
-.panel-title{font-size:12px;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:16px;}
+.panel-title{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:16px;}
+
+/* TABLE */
 .tbl{width:100%;border-collapse:collapse;font-size:13px;}
 .tbl th{text-align:left;font-size:10px;font-weight:500;color:var(--text-3);padding:0 10px 12px 0;border-bottom:1px solid var(--border-soft);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;cursor:pointer;user-select:none;}
 .tbl th:hover{color:var(--text-2);}
-.tbl th .sort{opacity:.4;font-size:9px;margin-left:2px;}
-.tbl th.sorted{color:var(--accent);}.tbl th.sorted .sort{opacity:1;}
+.tbl th .si{opacity:.35;font-size:9px;margin-left:2px;}
+.tbl th.sorted{color:var(--accent);}.tbl th.sorted .si{opacity:1;}
 .tbl th.r,.tbl td.r{text-align:right;}
 .tbl td{padding:11px 10px 11px 0;border-bottom:1px solid var(--border-soft);vertical-align:middle;}
 .tbl tr:last-child td{border-bottom:none;}
 .tbl tbody tr:hover td{background:var(--surface-2);}
+.tbl tbody tr.clickable{cursor:pointer;}
 .tbl .muted{color:var(--text-2);}.tbl .strong{font-weight:600;}
 .inbar{height:4px;width:60px;background:var(--surface-3);border-radius:2px;overflow:hidden;margin-left:auto;margin-top:5px;}
 .inbar-f{height:100%;border-radius:2px;}
-.ms-wrap{position:relative;margin-bottom:12px;}
-.ms-control{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface-2);border:1px solid var(--border-soft);border-radius:30px;padding:7px 10px;min-height:44px;cursor:text;}
-.ms-add{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--text-2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.ms-add:hover{border-color:var(--accent);color:var(--accent);}
-.ms-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 8px 5px 11px;border-radius:20px;background:var(--accent-bg);border:1px solid var(--border);}
-.ms-chip .x{cursor:pointer;opacity:.6;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
-.ms-chip .x:hover{opacity:1;}
-.ms-hint{font-size:13px;color:var(--text-3);padding-left:4px;}
-.ms-drop{position:absolute;left:0;top:52px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:8px;z-index:40;box-shadow:var(--shadow);min-width:260px;display:none;max-height:320px;overflow-y:auto;}
-.ms-drop.open{display:block;}
-.ms-sect{font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;padding:8px 10px 6px;font-weight:600;}
-.ms-opt{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13px;}
-.ms-opt:hover{background:var(--surface-3);}
-.ms-opt .check{width:16px;height:16px;border-radius:4px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
-.ms-opt.sel .check{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* STYLED SELECT */
+.sel{appearance:none;-webkit-appearance:none;background:var(--surface-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235E6781' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center;border:1px solid var(--border-soft);border-radius:30px;padding:7px 32px 7px 14px;color:var(--text);font-size:12px;cursor:pointer;font-family:inherit;}
+.sel:focus{outline:none;border-color:var(--accent);}
+
+/* CLIENT SEARCH */
+.cli-search{width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit;}
+.cli-search:focus{outline:none;border-color:var(--accent);}
+.cli-selected{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--accent-bg);border:1px solid var(--border);border-radius:8px;font-size:13px;}
+.cli-selected .chg{margin-left:auto;font-size:11px;color:var(--text-3);cursor:pointer;padding:2px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface-2);}
+.cli-selected .chg:hover{color:var(--accent);border-color:var(--accent);}
+.cli-drop{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-top:6px;max-height:220px;overflow-y:auto;}
+.cli-ds{font-size:9px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;padding:8px 10px 4px;font-weight:600;}
+.cli-do{padding:8px 10px;cursor:pointer;font-size:12px;color:var(--text);}
+.cli-do:hover{background:var(--surface-3);}
+.cli-empty{padding:20px;text-align:center;font-size:12px;color:var(--text-3);}
+
+/* SEARCH INPUT */
+.search-inp{background:var(--surface-2);border:1px solid var(--border-soft);border-radius:30px;padding:7px 14px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:220px;}
+.search-inp:focus{border-color:var(--accent);}
+
+/* PAGINATION */
+.pag{display:flex;align-items:center;gap:5px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap;}
+.pag-info{font-size:12px;color:var(--text-3);margin-right:auto;}
+.pag-btn{min-width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;padding:0 8px;}
+.pag-btn:hover:not([disabled]){border-color:var(--accent);color:var(--accent);}
+.pag-btn.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+.pag-btn[disabled]{opacity:.3;cursor:not-allowed;}
+
+/* BUTTONS */
+.btn{font-size:12px;padding:8px 14px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);cursor:pointer;font-weight:500;}
+.btn:hover{border-color:var(--accent);}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn.primary:hover{opacity:.9;}
+.btn.sm{font-size:11px;padding:5px 10px;}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--text-3);}
+.btn.ghost:hover{color:var(--text);border-color:var(--border);}
+.btn.danger{color:var(--red);border-color:transparent;}
+.btn.danger:hover{background:var(--red-bg);border-color:var(--red-bg);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* FORM */
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.field label{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;font-weight:500;}
+.field input,.field select{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit;}
+.field input:focus,.field select:focus{outline:none;border-color:var(--accent);}
+.role-sel{background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:4px 8px;color:var(--text);font-size:11px;font-family:inherit;cursor:pointer;}
+.role-sel:focus{outline:none;border-color:var(--accent);}
+.role-sel.lead{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);}
+
+/* MISC */
 .ext-link{color:var(--text);text-decoration:none;display:inline-flex;align-items:center;gap:5px;font-weight:600;}
 .ext-link:hover{color:var(--accent);}
-.lk{font-size:10px;opacity:.5;}
+.lk{font-size:10px;opacity:.45;}
 .days-badge{font-size:11px;padding:3px 9px;border-radius:6px;font-weight:600;display:inline-block;}
 .db-red{background:var(--red-bg);color:var(--red);}.db-amb{background:var(--amber-bg);color:var(--amber);}
 .db-grn{background:var(--green-bg);color:var(--green);}.db-neu{background:var(--surface-3);color:var(--text-2);}
 .empty-state{text-align:center;padding:40px 20px;color:var(--text-3);font-size:13px;line-height:1.7;}
 .adm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
-.btn{font-size:12px;padding:8px 14px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);cursor:pointer;font-weight:500;}
-.btn:hover{border-color:var(--accent);}
-.btn:disabled{opacity:.4;cursor:not-allowed;}
-.btn:disabled:hover{border-color:var(--border);}
-.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff;}
-.btn-primary:hover{opacity:.9;}
-.btn-sm{font-size:11px;padding:5px 10px;}
-.btn-ghost{background:transparent;border-color:transparent;color:var(--text-3);}
-.btn-ghost:hover{color:var(--text);border-color:var(--border);}
-.btn-danger{color:var(--red);border-color:transparent;}
-.btn-danger:hover{background:var(--red-bg);border-color:var(--red-bg);}
-.field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
-.field label{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;font-weight:500;}
-.field input,.field select{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit;}
-.field input:focus,.field select:focus{outline:none;border-color:var(--accent);}
-.inline-input{background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:6px 9px;color:var(--text);font-size:13px;width:130px;text-align:right;font-family:inherit;font-variant-numeric:tabular-nums;}
-.inline-input:focus{outline:none;border-color:var(--accent);}
-.role-select{background:var(--surface-2);border:1px solid var(--border);border-radius:7px;padding:4px 8px;color:var(--text);font-size:11px;font-family:inherit;cursor:pointer;}
-.role-select:focus{outline:none;border-color:var(--accent);}
-.role-select.lead{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);}
 .status-dot{display:inline-flex;align-items:center;gap:6px;font-size:12px;}
 .status-dot .d{width:7px;height:7px;border-radius:50%;}
 .dept-edit-card{background:var(--surface-2);border:1px solid var(--border-soft);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
-.dept-edit-card.archived{opacity:.55;}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:center;justify-content:center;}
-.modal-bg.open{display:flex;}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;width:440px;max-width:92vw;box-shadow:var(--shadow);}
-.modal-title{font-size:16px;font-weight:600;margin-bottom:18px;}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;}
-.save-hint{font-size:11px;color:var(--green);margin-left:8px;opacity:0;transition:opacity .3s;}
+.dept-edit-card.archived{opacity:.5;}
+.save-hint{font-size:11px;color:var(--green);opacity:0;transition:opacity .3s;}
 .save-hint.show{opacity:1;}
-.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px;color:var(--text-3);}
-.spinner{width:38px;height:38px;border:3px solid var(--surface-3);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.err-banner{background:var(--red-bg);border:1px solid var(--red);border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:var(--red);}
-.toggle-wrap{display:flex;align-items:center;gap:12px;}
-.toggle{width:42px;height:24px;border-radius:14px;background:var(--surface-3);border:1px solid var(--border);position:relative;cursor:pointer;transition:.2s;flex-shrink:0;}
-.toggle.on{background:var(--accent);border-color:var(--accent);}
-.toggle .knob{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;}
-.toggle.on .knob{left:21px;}
-/* archive section */
+.snap-badge{font-size:9px;padding:2px 7px;border-radius:8px;background:var(--surface-3);color:var(--text-3);font-weight:500;white-space:nowrap;}
 .arch-toggle{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-3);cursor:pointer;padding:10px 0 2px;user-select:none;}
 .arch-toggle:hover{color:var(--text-2);}
 .arch-toggle .arr{transition:transform .2s;display:inline-block;}
 .arch-toggle.open .arr{transform:rotate(90deg);}
 .arch-block{display:none;margin-top:12px;}
 .arch-block.open{display:block;}
-/* snapshot badge */
-.snap-badge{font-size:9px;padding:2px 7px;border-radius:8px;background:var(--surface-3);color:var(--text-3);font-weight:500;letter-spacing:.03em;white-space:nowrap;}
-/* funnel stub */
-.funnel-stub{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 20px;gap:12px;color:var(--text-3);}
-.funnel-stub-icon{font-size:36px;opacity:.4;}
-.funnel-stub-title{font-size:14px;font-weight:600;color:var(--text-2);}
-.funnel-stub-text{font-size:12px;text-align:center;line-height:1.7;max-width:320px;}
-/* fired row */
 .fired-row{opacity:.5;}
 .fired-row td{font-style:italic;}
-/* locked funnel (dept view) */
-.fn-lock-wrap{position:relative;}
-.fn-lock-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;filter:blur(.6px);opacity:.5;}
-.tag-chip-lock{font-size:11px;padding:6px 11px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-3);}
-.fn-lock-bars{display:flex;flex-direction:column;gap:12px;filter:blur(1.5px);opacity:.4;pointer-events:none;}
-.fn-lock-row{display:grid;grid-template-columns:160px 1fr 40px;gap:14px;align-items:center;}
-.fn-lock-label{font-size:12px;color:var(--text-2);}
-.fn-lock-bar{height:26px;background:var(--surface-3);border-radius:7px;overflow:hidden;}
-.fn-lock-fill{height:100%;background:var(--accent);border-radius:7px;}
-.fn-lock-val{font-size:12px;color:var(--text-3);text-align:right;}
-.fn-lock-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(11,14,20,.35);border-radius:12px;}
-[data-theme="light"] .fn-lock-overlay{background:rgba(244,246,250,.55);}
-.fn-lock-icon{font-size:30px;opacity:.7;}
-.fn-lock-title{font-size:14px;font-weight:600;color:var(--text);}
-.fn-lock-text{font-size:12px;color:var(--text-2);text-align:center;line-height:1.7;max-width:380px;}
-.fn-lock-text code{background:var(--surface-3);padding:1px 6px;border-radius:5px;font-size:11px;}
+
+/* FUNNEL LOCK */
+.fn-wrap{position:relative;}
+.fn-bars{display:flex;flex-direction:column;gap:12px;filter:blur(1.5px);opacity:.4;pointer-events:none;}
+.fn-row{display:grid;grid-template-columns:160px 1fr 40px;gap:14px;align-items:center;}
+.fn-label{font-size:12px;color:var(--text-2);}
+.fn-bar{height:26px;background:var(--surface-3);border-radius:7px;overflow:hidden;}
+.fn-fill{height:100%;background:var(--accent);border-radius:7px;}
+.fn-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(11,14,20,.35);border-radius:12px;}
+[data-theme="light"] .fn-overlay{background:rgba(244,246,250,.55);}
+.fn-icon{font-size:30px;opacity:.7;}
+.fn-ttl{font-size:14px;font-weight:600;}
+.fn-txt{font-size:12px;color:var(--text-2);text-align:center;line-height:1.7;max-width:380px;}
+.fn-txt code{background:var(--surface-3);padding:1px 6px;border-radius:5px;font-size:11px;}
+
+/* LEADERBOARD */
+.lb-title{font-size:20px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px;}
+.lb-sub{font-size:13px;color:var(--text-2);margin-bottom:22px;}
+.lb-mode{display:flex;gap:3px;background:var(--surface-2);border:1px solid var(--border-soft);border-radius:11px;padding:3px;width:fit-content;margin-bottom:20px;}
+.lb-mode-btn{font-size:12px;padding:6px 14px;border-radius:8px;border:none;background:transparent;color:var(--text-2);cursor:pointer;font-weight:500;}
+.lb-mode-btn.on{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.lb-row-1 td{background:linear-gradient(90deg,rgba(255,215,0,.07),transparent);}
+.lb-row-2 td{background:linear-gradient(90deg,rgba(192,192,192,.07),transparent);}
+.lb-row-3 td{background:linear-gradient(90deg,rgba(205,127,50,.07),transparent);}
+.med{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.med-g{background:linear-gradient(135deg,#FFD700,#FFA000);color:#5a3000;}
+.med-s{background:linear-gradient(135deg,#E8E8E8,#9E9E9E);color:#333;}
+.med-b{background:linear-gradient(135deg,#CD7F32,#8B4010);color:#fff;}
+.rank-n{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;font-size:11px;color:var(--text-3);font-weight:600;}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:24px;width:440px;max-width:92vw;box-shadow:var(--shadow);}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:18px;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;}
+
+/* LOADING */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px;color:var(--text-3);}
+.spinner{width:38px;height:38px;border:3px solid var(--surface-3);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.err-banner{background:var(--red-bg);border:1px solid var(--red);border-radius:12px;padding:14px 18px;margin-bottom:16px;font-size:13px;color:var(--red);}
 </style>
 </head>
 <body>
@@ -201,43 +250,42 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 var SB_URL='https://qhpyrlhugpqgojwmarrw.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocHlybGh1Z3BxZ29qd21hcnJ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDY1Mjg5MCwiZXhwIjoyMDk2MjI4ODkwfQ.J1KvnwrxAbfEINT4ntxz_nWQJx7ZNgD4iPC2pPdGIV4';
 function sbGet(p){return fetch(SB_URL+'/rest/v1/'+p,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).then(function(d){if(d&&d.code){console.error('SB',p,d.message);return[];}return Array.isArray(d)?d:[];}).catch(function(e){console.error(e);return[];});}
-function sbPatch(t,f,d){return fetch(SB_URL+'/rest/v1/'+t+'?'+f,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(d)}).then(function(r){return r.status;});}
+function sbPatch(t,f,d){return fetch(SB_URL+'/rest/v1/'+t+'?'+f,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(d)});}
 function sbPost(t,d){return fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(d)}).then(function(r){return r.json();});}
+function sbUpsert(t,conflict,d){return fetch(SB_URL+'/rest/v1/'+t+'?on_conflict='+conflict,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify(d)});}
 
 /* ═══ CONSTANTS ═══ */
 var TODAY=new Date();
-var MIN_DATE=new Date(2026,2,1); // 1 марта 2026 — минимальная дата истории
+var MIN_DATE=new Date(2026,2,1);
 var MN=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 var DOW=['пн','вт','ср','чт','пт','сб','вс'];
 
 /* ═══ STATE ═══ */
-var DB=null,RAW={depts:[],employees:[],clients:[]};
-var S={role:'cd',theme:'dark',loading:true,loadErr:null,
+var DB=null, RAW={depts:[],employees:[],clients:[],allClients:[]};
+var S={
+  role:'sum',theme:'dark',loading:true,loadErr:null,
   rangeFrom:new Date(TODAY.getFullYear(),TODAY.getMonth(),1),
   rangeTo:new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0),
   calLeft:new Date(TODAY.getFullYear(),TODAY.getMonth(),1),calOpen:false,pick:0,
-  dept:null,tab:'staff',clientMgrs:[],mgrDropOpen:false,
-  cliSortKey:'minLeft',cliSortDir:1,staffSortKey:'fact',staffSortDir:-1,
-  ropDept:null,mgrAs:null,saveHint:false,factMode:'manual',
-  // v2 additions
+  dept:null,empView:null,tab:'staff',
+  mgrAs:null,mgrTab:'clients',
+  saveHint:false,
   periodStats:{},periodLoading:false,periodReady:false,
   showArchivedDepts:false,showArchivedClients:false,
-  mgrTab:'clients',
-  ropShowFired:false,ropShowArchivedDepts:false,
-  // v3 additions
+  ropDept:null,ropShowFired:false,ropShowArchivedDepts:false,
   deptFunnelMgr:'all',
-  // v4: deals / targets / payroll
-  dealsRaw:[],dealsByEmp:{},dealsByOrg:{},planByOrg:{},
-  payDept:'all',payEmp:'all',
+  dealsRaw:[],dealsByEmp:{},dealsByOrg:{},dealsByDept:{},
+  planByEmp:{},
+  payDept:'all',payEmp:'all',paySearch:'',payLimit:20,payPage:0,
+  staffSortKey:'fact',staffSortDir:-1,
+  cliSortKey:'minLeft',cliSortDir:1,
+  sumSort:'fact',sumSortDir:-1,sumMode:'fact',
 };
 
 /* ═══ UTILS ═══ */
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function r(n){return Math.round(n||0);}
-function fmtNum(n){
-  n=r(n);var s=String(Math.abs(n)),res='';
-  for(var i=0;i<s.length;i++){if(i>0&&(s.length-i)%3===0)res+='\u00A0';res+=s[i];}
-  return(n<0?'-':'')+res;
-}
+function fmtNum(n){n=r(n);var s=String(Math.abs(n)),res='';for(var i=0;i<s.length;i++){if(i>0&&(s.length-i)%3===0)res+='\u00A0';res+=s[i];}return(n<0?'-':'')+res;}
 function fmt(n){return fmtNum(n)+'\u00A0руб.';}
 function fmtMin(n){return fmtNum(r(n))+'\u00A0мин';}
 function pct(f,p){return p>0?r(f/p*100):0;}
@@ -245,51 +293,44 @@ function grad(p){p=Math.max(0,Math.min(100,p))/100;var s=[[251,110,91],[245,181,
 function daysTo(ds){if(!ds)return null;return Math.max(0,r((new Date(ds)-TODAY)/86400e3));}
 function fmtD(ds){if(!ds)return'—';var p=ds.substring(0,10).split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
-function rr(fact,plan){var f=S.rangeFrom,t=S.rangeTo,el=Math.max(1,r((Math.min(TODAY,t)-f)/864e5)+1),tot=Math.max(1,r((t-f)/864e5)+1);var ex=plan*(el/tot);return ex>0?r(fact/ex*100):0;}
-function calLabel(){var f=S.rangeFrom,t=S.rangeTo;return MN[f.getMonth()]+' '+String(f.getDate()).padStart(2,'0')+', '+f.getFullYear()+' — '+MN[t.getMonth()]+' '+String(t.getDate()).padStart(2,'0')+', '+t.getFullYear();}
+function rrPct(fact,plan){var f=S.rangeFrom,t=S.rangeTo,el=Math.max(1,r((Math.min(TODAY,t)-f)/864e5)+1),tot=Math.max(1,r((t-f)/864e5)+1);var ex=plan*(el/tot);return ex>0?r(fact/ex*100):0;}
+function calLabel(){var f=S.rangeFrom,t=S.rangeTo;if(f.getFullYear()===t.getFullYear()&&f.getMonth()===t.getMonth()&&f.getDate()===t.getDate())return MN[f.getMonth()]+' '+f.getDate()+', '+f.getFullYear();return MN[f.getMonth()]+' '+f.getDate()+' — '+MN[t.getMonth()]+' '+t.getDate()+', '+t.getFullYear();}
 function daysBadge(dn){if(dn===null)return'<span class="days-badge db-neu">—</span>';if(dn<=3)return'<span class="days-badge db-red">'+dn+'д</span>';if(dn<=7)return'<span class="days-badge db-amb">'+dn+'д</span>';if(dn<=14)return'<span class="days-badge db-neu">'+dn+'д</span>';return'<span class="days-badge db-grn">'+dn+'д</span>';}
-function si(a,d){return a?'<span class="sort">'+(d>0?'▲':'▼')+'</span>':'<span class="sort">↕</span>';}
-// v3: платящих за период = орги с минутами > 0. null = ещё грузится → fallback на снимок
-function payingInPeriod(clients){if(!S.periodReady)return null;return clients.filter(function(c){return(S.periodStats[c.platform_org_id]||0)>0;}).length;}
+function si(active,dir){return active?'<span class="si">'+(dir>0?'▲':'▼')+'</span>':'<span class="si">↕</span>';}
 function todayISO(){return TODAY.toISOString().substring(0,10);}
 function dateISO(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function tenure(hiredAt){if(!hiredAt)return null;return Math.max(0,Math.round((TODAY-new Date(hiredAt))/(864e5*30.44)));}
+function singleMonth(){return S.rangeFrom.getMonth()===S.rangeTo.getMonth()&&S.rangeFrom.getFullYear()===S.rangeTo.getFullYear();}
+function payingInPeriod(clients){if(!S.periodReady)return null;return clients.filter(function(c){return(S.periodStats[c.platform_org_id]||0)>0;}).length;}
 
-/* ═══ DATA LOADING ═══ */
+/* ═══ LOAD DATA ═══ */
 function loadData(){
   S.loading=true;S.loadErr=null;render();
   return Promise.all([
     sbGet('departments?select=*&order=created_at'),
     sbGet('employees?select=*&order=name'),
-    // Убрали is_archived=eq.false — теперь показываем всех с ответственным.
-    // Истёкшие подписки (isArchived=true на платформе) — это не архивные клиенты, просто без активной подписки.
-    // Реально архивированные орги (скрытые через «В архив» в платформе) исключаем через platform_status или руками через is_hidden.
-    sbGet('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,monthly_plan,monthly_fact,subscription_status,subscription_name,subscription_end,is_hidden,is_archived&responsible_platform_user_id=not.is.null&order=company_name&limit=3000'),
+    sbGet('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,subscription_status,subscription_end,is_hidden,is_archived&responsible_platform_user_id=not.is.null&order=company_name&limit=3000'),
     sbGet('clients?select=platform_org_id,company_name,responsible_platform_user_id,is_archived,is_hidden&responsible_platform_user_id=not.is.null&order=company_name&limit=5000')
   ]).then(function(res){
     RAW.depts=res[0];RAW.employees=res[1];RAW.clients=res[2];RAW.allClients=res[3]||[];
-    if(!RAW.depts.length&&!RAW.employees.length)
-      S.loadErr='Supabase вернул пустые данные. Запусти migration_v2.sql и нажми ↻ Обновить.';
+    if(!RAW.depts.length&&!RAW.employees.length)S.loadErr='Supabase вернул пустые данные. Запусти migration_v2.sql и нажми ↻.';
     buildDB();S.loading=false;
     if(!S.ropDept&&DB.depts.length)S.ropDept=DB.depts[0].id;
     if(!S.mgrAs){DB.depts.forEach(function(d){if(!S.mgrAs&&d.staff.length)S.mgrAs=d.staff[0].id;});}
-    render();
-    refreshPeriod();
+    render();refreshPeriod();
   }).catch(function(e){S.loading=false;S.loadErr=e.message;render();});
 }
 
-// v4: единый перерасчёт за период — минуты + сделки + планы
 function refreshPeriod(){
   S.periodReady=false;
-  return Promise.all([loadPeriodStatsRaw(),loadDeals(),loadPlans()]).then(function(){
-    buildDB();S.periodReady=true;render();
-  }).catch(function(e){console.error(e);S.periodReady=true;render();});
+  return Promise.all([loadPeriodStats(),loadDeals(),loadPlans()]).then(function(){buildDB();S.periodReady=true;render();}).catch(function(e){console.error(e);S.periodReady=true;render();});
 }
 
+/* ═══ BUILD DB ═══ */
 function buildDB(){
   var activeDepts=RAW.depts.filter(function(d){return!d.is_archived;});
   var firedEmps=RAW.employees.filter(function(e){return e.fired_at||e.is_archived;});
   var activeEmps=RAW.employees.filter(function(e){return!e.fired_at&&!e.is_archived;});
-
   var eBP={},eBD={},cBU={};
   activeEmps.forEach(function(e){if(e.platform_user_id)eBP[e.platform_user_id]=e;});
   activeEmps.forEach(function(e){if(e.dept_id)(eBD[e.dept_id]=eBD[e.dept_id]||[]).push(e);});
@@ -300,48 +341,46 @@ function buildDB(){
     var emps=eBD[d.id]||[];
     var lead=RAW.employees.find(function(e){return e.id===d.lead_employee_id;});
     var staff=emps.map(function(e){
-      var ec=cBU[e.platform_user_id]||[];
       var dealAgg=S.dealsByEmp[e.id]||{fact:0,comm:0,count:0};
-      var planAmt=ec.reduce(function(a,c){return a+(S.planByOrg[c.platform_org_id]||0);},0);
+      var planAmt=S.planByEmp[e.id]||0;
       return{id:e.platform_user_id,supaId:e.id,name:e.name,
-        role:e.role==='lead'?'Тимлид':'Менеджер',hired:e.hired_at||'2025-01-01',
+        role:e.role==='lead'?'Тимлид':'Менеджер',hired:e.hired_at||null,
         fact:dealAgg.fact,plan:planAmt,comm:dealAgg.comm,deals:dealAgg.count,
-        clients:ec.length};
+        clients:(cBU[e.platform_user_id]||[]).length};
     });
     staff.sort(function(a,b){return(b.role==='Тимлид')-(a.role==='Тимлид');});
     var dc=emps.reduce(function(a,e){return a.concat(cBU[e.platform_user_id]||[]);},[]);
-    var dFact=staff.reduce(function(a,m){return a+m.fact;},0);
+    // FIXED: dept fact from dealsByDept (snapshots deal's dept at write time), not sum of current staff
+    var dFact=S.dealsByDept[d.id]||0;
     var dPlan=staff.reduce(function(a,m){return a+m.plan;},0);
     return{id:d.id,name:d.name,tl:lead?lead.name:'—',leadId:d.lead_employee_id,
       fact:dFact,plan:dPlan,
       paying:dc.filter(function(c){return c.subscription_status==='active';}).length,
-      arpu:dc.length?r(dFact/dc.length):0,staff:staff,
+      arpu:dc.length?r(dFact/dc.length):0,
+      staff:staff,
       fired:firedEmps.filter(function(e){return e.dept_id===d.id;}),
-      clients:dc.map(function(c){return{platform_org_id:c.platform_org_id,
-        name:(c.company_name||'').substring(0,45),mgr:c.responsible_platform_user_id,
-        url:c.platform_url||'#',
-        plan:S.planByOrg[c.platform_org_id]||0,
-        fact:(S.dealsByOrg[c.platform_org_id]||{fact:0}).fact,
-        minSpent:Math.max(0,(c.minutes_total||0)-(c.minutes_left||0)),
-        minLeft:c.minutes_left||0,expiry:c.subscription_end||null};})};
+      clients:dc.map(function(c){
+        var emp=eBP[c.responsible_platform_user_id];
+        return{platform_org_id:c.platform_org_id,
+          name:(c.company_name||'').substring(0,50),mgr:c.responsible_platform_user_id,
+          url:c.platform_url||'#',
+          fact:(S.dealsByOrg[c.platform_org_id]||{fact:0}).fact,
+          minSpent:Math.max(0,(c.minutes_total||0)-(c.minutes_left||0)),
+          minLeft:c.minutes_left||0,expiry:c.subscription_end||null,
+          subStatus:c.subscription_status||''};
+      })};
   });
 
+  var companyFact=S.dealsRaw.reduce(function(a,d){var sign=d.event_type==='refund'?-1:1;return a+sign*(Number(d.amount)||0);},0);
   DB={
-    company:{
-      fact:depts.reduce(function(a,d){return a+d.fact;},0),
-      plan:depts.reduce(function(a,d){return a+d.plan;},0),
-      clients:depts.reduce(function(a,d){return a+d.clients.length;},0),
-      paying:depts.reduce(function(a,d){return a+d.paying;},0)
-    },
-    depts:depts,
-    archivedDepts:RAW.depts.filter(function(d){return d.is_archived;}),
-    firedEmps:firedEmps,
-    hiddenClients:RAW.clients.filter(function(c){return c.is_hidden;})
+    company:{fact:companyFact,plan:depts.reduce(function(a,d){return a+d.plan;},0),clients:depts.reduce(function(a,d){return a+d.clients.length;},0),paying:depts.reduce(function(a,d){return a+d.paying;},0)},
+    depts:depts,archivedDepts:RAW.depts.filter(function(d){return d.is_archived;}),
+    firedEmps:firedEmps,hiddenClients:RAW.clients.filter(function(c){return c.is_hidden;})
   };
 }
 
-/* ═══ PERIOD STATS (МИН ИСП.) ═══ */
-function loadPeriodStatsRaw(){
+/* ═══ PERIOD STATS ═══ */
+function loadPeriodStats(){
   S.periodStats={};S.periodLoading=true;
   var from=S.rangeFrom,to=S.rangeTo;
   var curMonthStart=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
@@ -352,20 +391,18 @@ function loadPeriodStatsRaw(){
   var promises=[];
   if(pastMonths.length){
     var dates=pastMonths.map(function(m){return m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-01';});
-    var q='client_stats?select=platform_org_id,used_minutes&period_type=eq.month&stat_date=in.('+dates.join(',')+')'+'&limit=50000';
-    promises.push(sbGet(q).then(function(rows){rows.forEach(function(row){S.periodStats[row.platform_org_id]=(S.periodStats[row.platform_org_id]||0)+(row.used_minutes||0);});}));
+    promises.push(sbGet('client_stats?select=platform_org_id,used_minutes&period_type=eq.month&stat_date=in.('+dates.join(',')+')'+'&limit=50000').then(function(rows){rows.forEach(function(row){S.periodStats[row.platform_org_id]=(S.periodStats[row.platform_org_id]||0)+(row.used_minutes||0);});}));
   }
   if(hasCurrent){
     var mStart=curMonthStart.getFullYear()+'-'+String(curMonthStart.getMonth()+1).padStart(2,'0')+'-01';
-    var q2='client_stats?select=platform_org_id,used_minutes&period_type=eq.day&stat_date=gte.'+mStart+'&stat_date=lte.'+todayISO()+'&limit=500000';
-    promises.push(sbGet(q2).then(function(rows){rows.forEach(function(row){S.periodStats[row.platform_org_id]=(S.periodStats[row.platform_org_id]||0)+(row.used_minutes||0);});}));
+    promises.push(sbGet('client_stats?select=platform_org_id,used_minutes&period_type=eq.day&stat_date=gte.'+mStart+'&stat_date=lte.'+todayISO()+'&limit=500000').then(function(rows){rows.forEach(function(row){S.periodStats[row.platform_org_id]=(S.periodStats[row.platform_org_id]||0)+(row.used_minutes||0);});}));
   }
   return Promise.all(promises).then(function(){S.periodLoading=false;}).catch(function(){S.periodLoading=false;});
 }
 
-/* ═══ DEALS (факт за период) ═══ */
+/* ═══ DEALS ═══ */
 function loadDeals(){
-  S.dealsRaw=[];S.dealsByEmp={};S.dealsByOrg={};
+  S.dealsRaw=[];S.dealsByEmp={};S.dealsByOrg={};S.dealsByDept={};
   var from=dateISO(S.rangeFrom),to=dateISO(S.rangeTo);
   return sbGet('deals?select=*&deal_date=gte.'+from+'&deal_date=lte.'+to+'&order=deal_date.desc&limit=100000').then(function(rows){
     S.dealsRaw=rows||[];
@@ -375,530 +412,638 @@ function loadDeals(){
       var comm=amt*(Number(d.motivation_pct)||0)/100;
       if(d.employee_id){var e=S.dealsByEmp[d.employee_id]||(S.dealsByEmp[d.employee_id]={fact:0,comm:0,count:0});e.fact+=amt;e.comm+=comm;e.count++;}
       if(d.platform_org_id){var o=S.dealsByOrg[d.platform_org_id]||(S.dealsByOrg[d.platform_org_id]={fact:0});o.fact+=amt;}
+      // FIXED: aggregate by deal's dept_id — historical attribution preserved when employees move
+      if(d.dept_id){S.dealsByDept[d.dept_id]=(S.dealsByDept[d.dept_id]||0)+amt;}
     });
   });
 }
 
-/* ═══ PLANS (план по клиентам за период) ═══ */
+/* ═══ PLANS (monthly_targets) ═══ */
 function loadPlans(){
-  S.planByOrg={};
+  S.planByEmp={};
   var months=[],cur=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);
   while(cur<=S.rangeTo){months.push({y:cur.getFullYear(),m:cur.getMonth()+1});cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);}
   if(!months.length)return Promise.resolve();
   var orParts=months.map(function(mm){return'and(year.eq.'+mm.y+',month.eq.'+mm.m+')';}).join(',');
-  var q='client_monthly_records?select=platform_org_id,monthly_plan,year,month&or=('+orParts+')&limit=100000';
-  return sbGet(q).then(function(rows){
-    (rows||[]).forEach(function(t){S.planByOrg[t.platform_org_id]=(S.planByOrg[t.platform_org_id]||0)+(Number(t.monthly_plan)||0);});
+  return sbGet('monthly_targets?select=employee_id,plan_amount,year,month&or=('+orParts+')&limit=100000').then(function(rows){
+    (rows||[]).forEach(function(t){S.planByEmp[t.employee_id]=(S.planByEmp[t.employee_id]||0)+(Number(t.plan_amount)||0);});
   });
 }
-
-/* ═══ SAVE ═══ */
-function saveClient(orgId,field,val){
-  var d={};d[field]=Number(val)||0;
-  sbPatch('clients','platform_org_id=eq.'+orgId,d);
-  RAW.clients.forEach(function(c){if(c.platform_org_id===orgId)c[field]=Number(val)||0;});
-  buildDB();
-}
-function assignDept(supaId,deptId){
-  sbPatch('employees','id=eq.'+supaId,{dept_id:deptId||null});
-  RAW.employees.forEach(function(e){if(e.id===supaId)e.dept_id=deptId||null;});
-  buildDB();
-}
-
-/* ═══ ARCHIVE ACTIONS ═══ */
-window.archiveDept=function(id){
-  openModal('В архив отдел?','<p style="font-size:13px;color:var(--text-2);line-height:1.7">Отдел исчезнет с главного экрана. Всю статистику можно посмотреть через «Архив отделов». Разархивировать можно в любой момент.</p>',
-    function(){sbPatch('departments','id=eq.'+id,{is_archived:true});RAW.depts.forEach(function(d){if(d.id===id)d.is_archived=true;});buildDB();closeModal();render();});
-};
-window.unarchiveDept=function(id){
-  sbPatch('departments','id=eq.'+id,{is_archived:false});
-  RAW.depts.forEach(function(d){if(d.id===id)d.is_archived=false;});
-  buildDB();render();
-};
-window.fireEmp=function(supaId){
-  openModal('Уволить сотрудника',
-    '<div class="field"><label>Дата увольнения</label><input id="f-date" type="date" value="'+todayISO()+'"></div><p style="font-size:12px;color:var(--text-2);margin-top:4px;line-height:1.6">История выручки и клиентов сохранится. Сотрудник уйдёт в архив РОП — разархивировать можно в любой момент.</p>',
-    function(){var dt=document.getElementById('f-date').value||todayISO();sbPatch('employees','id=eq.'+supaId,{fired_at:dt,is_archived:true});RAW.employees.forEach(function(e){if(e.id===supaId){e.fired_at=dt;e.is_archived=true;}});buildDB();closeModal();render();});
-};
-window.rehireEmp=function(supaId){
-  openModal('Вернуть сотрудника?','<p style="font-size:13px;color:var(--text-2)">Сотрудник вернётся в активный список отдела.</p>',
-    function(){sbPatch('employees','id=eq.'+supaId,{fired_at:null,is_archived:false});RAW.employees.forEach(function(e){if(e.id===supaId){e.fired_at=null;e.is_archived=false;}});buildDB();closeModal();render();});
-};
-window.hideClient=function(orgId,name){
-  openModal('Убрать клиента в архив?','<p style="font-size:13px;color:var(--text-2);line-height:1.7"><b>'+name+'</b> исчезнет из портфеля. Вернуть можно через «Архив» внизу списка.</p>',
-    function(){sbPatch('clients','platform_org_id=eq.'+orgId,{is_hidden:true});RAW.clients.forEach(function(c){if(c.platform_org_id===orgId)c.is_hidden=true;});buildDB();closeModal();render();});
-};
-window.unhideClient=function(orgId){
-  sbPatch('clients','platform_org_id=eq.'+orgId,{is_hidden:false});
-  RAW.clients.forEach(function(c){if(c.platform_org_id===orgId)c.is_hidden=false;});
-  buildDB();render();
-};
 
 /* ═══ CALENDAR ═══ */
 function buildMonth(base){var y=base.getFullYear(),m=base.getMonth(),first=new Date(y,m,1),sd=(first.getDay()+6)%7,days=[];for(var i=0;i<sd;i++)days.push({d:new Date(y,m,1-(sd-i)),other:true});var dim=new Date(y,m+1,0).getDate();for(var k=1;k<=dim;k++)days.push({d:new Date(y,m,k),other:false});while(days.length%7){var l=days[days.length-1].d;days.push({d:new Date(l.getFullYear(),l.getMonth(),l.getDate()+1),other:true});}return days;}
-function renderCalMonth(base){var days=buildMonth(base);var cells=DOW.map(function(d){return'<div class="cal-dow">'+d+'</div>';}).join('');days.forEach(function(o){var isDisabled=o.d<MIN_DATE;var cls='cal-day'+(o.other?' other':'')+(isDisabled?' disabled':'');var t=o.d.getTime(),f=S.rangeFrom.getTime(),tt=S.rangeTo.getTime();if(!isDisabled){if(sameDay(o.d,S.rangeFrom)&&sameDay(o.d,S.rangeTo))cls+=' range-single';else if(sameDay(o.d,S.rangeFrom))cls+=' range-start';else if(sameDay(o.d,S.rangeTo))cls+=' range-end';else if(t>f&&t<tt)cls+=' in-range';}cells+='<div class="'+cls+'" '+(isDisabled?'':'onclick="pickDay('+o.d.getFullYear()+','+o.d.getMonth()+','+o.d.getDate()+')"')+'>'+o.d.getDate()+'</div>';});return'<div class="cal-grid">'+cells+'</div>';}
-function renderCal(){var L=S.calLeft,R=new Date(L.getFullYear(),L.getMonth()+1,1);var ph=['7 дней','30 дней','Этот месяц','Квартал'].map(function(p,i){return'<button class="cal-preset" onclick="applyPreset('+i+')">'+p+'</button>';}).join('');return'<div class="cal-presets">'+ph+'</div><div class="cal-months"><div><div class="cal-mhead"><button class="cal-nav" onclick="calShift(-1)">‹</button><span class="cal-mtitle">'+MN[L.getMonth()]+' '+L.getFullYear()+'</span><span style="width:28px"></span></div>'+renderCalMonth(L)+'</div><div><div class="cal-mhead"><span style="width:28px"></span><span class="cal-mtitle">'+MN[R.getMonth()]+' '+R.getFullYear()+'</span><button class="cal-nav" onclick="calShift(1)">›</button></div>'+renderCalMonth(R)+'</div></div>';}
+function renderCalMonth(base){var days=buildMonth(base);var cells=DOW.map(function(d){return'<div class="cal-dow">'+d+'</div>';}).join('');days.forEach(function(o){var disabled=o.d<MIN_DATE;var cls='cal-day'+(o.other?' other':'')+(disabled?' disabled':'');var t=o.d.getTime(),f=S.rangeFrom.getTime(),tt=S.rangeTo.getTime();if(!disabled){if(sameDay(o.d,S.rangeFrom)&&sameDay(o.d,S.rangeTo))cls+=' range-single';else if(sameDay(o.d,S.rangeFrom))cls+=' range-start';else if(sameDay(o.d,S.rangeTo))cls+=' range-end';else if(t>f&&t<tt)cls+=' in-range';}cells+='<div class="'+cls+'"'+(disabled?'':' onclick="pickDay('+o.d.getFullYear()+','+o.d.getMonth()+','+o.d.getDate()+')"')+'>'+o.d.getDate()+'</div>';});return'<div class="cal-grid">'+cells+'</div>';}
+function calHtml(){var L=S.calLeft,R=new Date(L.getFullYear(),L.getMonth()+1,1);var prNames=['7 дней','30 дней','Этот месяц','Квартал','За всё время'];var ph=prNames.map(function(p,i){return'<button class="cal-preset" onclick="applyPreset('+i+')">'+p+'</button>';}).join('');return'<div class="cal-presets">'+ph+'</div><div class="cal-months"><div><div class="cal-mhead"><button class="cal-nav" onclick="calShift(-1)">‹</button><span class="cal-mtitle">'+MN[L.getMonth()]+' '+L.getFullYear()+'</span><span style="width:28px"></span></div>'+renderCalMonth(L)+'</div><div><div class="cal-mhead"><span style="width:28px"></span><span class="cal-mtitle">'+MN[R.getMonth()]+' '+R.getFullYear()+'</span><button class="cal-nav" onclick="calShift(1)">›</button></div>'+renderCalMonth(R)+'</div></div>';}
+function calTrigger(){return'<div class="cal-wrap"><div class="cal-trigger" onclick="toggleCal(event)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>'+calLabel()+'</div><div class="cal-pop'+(S.calOpen?' open':'')+'">'+calHtml()+'</div></div>';}
 window.calShift=function(d){S.calLeft=new Date(S.calLeft.getFullYear(),S.calLeft.getMonth()+d,1);render();};
 window.pickDay=function(y,m,d){var p=new Date(y,m,d);if(p<MIN_DATE)return;if(S.pick===0){S.rangeFrom=p;S.rangeTo=p;S.pick=1;}else{if(p<S.rangeFrom){S.rangeTo=S.rangeFrom;S.rangeFrom=p;}else S.rangeTo=p;S.pick=0;refreshPeriod();}render();};
-window.applyPreset=function(i){var p=[{days:7},{days:30},{tm:1},{days:90}][i];if(p.tm){S.rangeFrom=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);S.rangeTo=new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0);}else{S.rangeTo=new Date(TODAY);S.rangeFrom=new Date(Math.max(S.rangeTo.getTime()-(p.days-1)*864e5,MIN_DATE.getTime()));}S.calLeft=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);S.pick=0;refreshPeriod();render();};
+window.applyPreset=function(i){
+  if(i===0){S.rangeTo=new Date(TODAY);S.rangeFrom=new Date(Math.max(S.rangeTo-6*864e5,MIN_DATE));}
+  else if(i===1){S.rangeTo=new Date(TODAY);S.rangeFrom=new Date(Math.max(S.rangeTo-29*864e5,MIN_DATE));}
+  else if(i===2){S.rangeFrom=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);S.rangeTo=new Date(TODAY.getFullYear(),TODAY.getMonth()+1,0);}
+  else if(i===3){S.rangeTo=new Date(TODAY);S.rangeFrom=new Date(Math.max(S.rangeTo-89*864e5,MIN_DATE));}
+  else{S.rangeFrom=new Date(MIN_DATE);S.rangeTo=new Date(TODAY);}
+  S.calLeft=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);
+  S.pick=0;refreshPeriod();render();
+};
 window.toggleCal=function(e){e.stopPropagation();S.calOpen=!S.calOpen;render();};
-document.addEventListener('click',function(e){var ch=false;if(S.calOpen&&!e.target.closest('.cal-wrap')){S.calOpen=false;ch=true;}if(S.mgrDropOpen&&!e.target.closest('#ms-c')){S.mgrDropOpen=false;ch=true;}if(ch)render();});
-function calTrigger(){return'<div class="cal-wrap"><div class="cal-trigger" onclick="toggleCal(event)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>'+calLabel()+'</div><div class="cal-pop'+(S.calOpen?' open':'')+'">'+renderCal()+'</div></div>';}
+document.addEventListener('click',function(e){if(S.calOpen&&!e.target.closest('.cal-wrap')){S.calOpen=false;render();}});
 
 /* ═══ ROLE BAR ═══ */
-window.setRole=function(rl){S.role=rl;S.dept=null;S.calOpen=false;render();};
-window.toggleTheme=function(){S.theme=S.theme==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',S.theme);render();};
-window.doRefresh=function(){loadData();};
+function ctxEmpId(){
+  if(S.role==='cd'&&S.empView)return S.empView;
+  if(S.role==='mgr'&&S.mgrAs){var e=RAW.employees.find(function(e){return e.platform_user_id===S.mgrAs;});return e?e.id:null;}
+  return null;
+}
+function ctxDeptId(){return(S.role==='cd'&&S.dept&&!S.empView)?S.dept:null;}
 function roleBar(){
-  var roles=[['cd','Коммдир'],['rop','РОП'],['mgr','Менеджер'],['pay','Зарплаты']];
-  var meta={cd:'видит все отделы',rop:'управляет отделами и людьми',mgr:'клиенты, план и факт',pay:'сделки и начисления'}[S.role];
-  var seg=roles.map(function(x){return'<button class="role-btn'+(S.role===x[0]?' on':'')+'" onclick="setRole(\''+x[0]+'\')">'+x[1]+'</button>';}).join('');
-  return'<div class="rolebar"><div style="display:flex;align-items:center;gap:10px"><div class="role-seg">'+seg+'</div><span class="role-meta">'+meta+'</span></div><div class="bar-right"><button class="refresh-btn" onclick="doRefresh()">↻ Обновить</button><button class="icon-btn" onclick="toggleTheme()">'+(S.theme==='dark'?'☀':'☾')+'</button></div></div>';
+  var tabs=[['sum','Сводка'],['cd','Дашборд'],['mgr','Менеджер'],['pay','Логи оплат']];
+  var seg=tabs.map(function(t){return'<button class="role-btn'+(S.role===t[0]?' on':'')+'" onclick="setRole(\''+t[0]+'\')">'+t[1]+'</button>';}).join('');
+  var eid=ctxEmpId(),did=ctxDeptId();
+  return'<div class="rolebar"><div class="role-seg">'+seg+'</div><div class="bar-right">'+
+    '<button class="refresh-btn" onclick="loadData()">↻ Обновить</button>'+
+    '<button class="deal-btn" onclick="addDeal(\''+eid+'\',\''+did+'\')">+ Сделка</button>'+
+    '<button class="icon-btn" onclick="toggleTheme()">'+(S.theme==='dark'?'☀':'☾')+'</button>'+
+    '<button class="icon-btn'+(S.role==='rop'?' on':'')+'" title="Настройки" onclick="setRole(\'rop\')">⚙</button>'+
+    '<span class="save-hint'+(S.saveHint?' show':'')+'" style="font-size:11px;color:var(--green);margin-left:4px">✓ сохранено</span>'+
+  '</div></div>';
 }
-
-/* ═══ КОММДИР ═══ */
-function renderCo(){
-  var c=DB.company,cp=pct(c.fact,c.plan),rrv=rr(c.fact,c.plan);
-  var isCurrentMonth=sameDay(S.rangeFrom,new Date(TODAY.getFullYear(),TODAY.getMonth(),1));
-  var snapBadge='<span class="snap-badge">снимок сегодня</span>';
-  var allClients=DB.depts.reduce(function(a,d){return a.concat(d.clients);},[]);
-  var coPaying=payingInPeriod(allClients);if(coPaying===null)coPaying=c.paying;
-  var kH=[
-    '<div class="ck"><div class="ck-l">Выручка'+(isCurrentMonth?'':' '+snapBadge)+'</div><div class="ck-v num">'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div></div>',
-    '<div class="ck"><div class="ck-l">Ранрейт</div><div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="'+(rrv>=100?'pos':rrv>=80?'neu':'neg')+'">'+(rrv>=100?'опережаем темп':'отстаём от темпа')+'</span></div></div>',
-    '<div class="ck"><div class="ck-l">Платящих за период</div><div class="ck-v num">'+coPaying+'</div><div class="ck-s">из '+c.clients+' в портфеле</div></div>',
-    '<div class="ck"><div class="ck-l">Отделов</div><div class="ck-v num">'+DB.depts.length+'</div><div class="ck-s">активных · '+DB.archivedDepts.length+' в архиве</div></div>'
-  ].join('');
-  var cards=DB.depts.length?DB.depts.map(function(d){var p2=pct(d.fact,d.plan),rr2=rr(d.fact,d.plan),c2=grad(p2);var bT=d.plan>0?(rr2>=100?'В темпе':rr2>=80?'Отстаём':'Критично'):'Нет плана',bC=d.plan>0?(rr2>=100?'bg':rr2>=80?'ba':'br'):'br';
-    var dPaying=payingInPeriod(d.clients);if(dPaying===null)dPaying=d.paying;
-    return'<div class="dept-card" onclick="drill(\''+d.id+'\')"><div class="dc-top"><div><div class="dc-name">'+d.name+'</div><div class="dc-meta">'+d.tl+' · '+d.staff.length+' чел. · '+d.clients.length+' клиентов</div></div><span class="dc-badge '+bC+'">'+bT+'</span></div><div class="dc-fact num">'+fmt(d.fact)+'</div><div class="dc-plan">из '+fmt(d.plan)+' плана</div><div class="progress"><div class="progress-fill" style="width:'+Math.min(p2,100)+'%;background:'+c2+'"></div></div><div class="dc-stats"><div><div class="dc-stat-l">Выполнено</div><div class="dc-stat-v num" style="color:'+c2+'">'+p2+'%</div></div><div><div class="dc-stat-l">Ранрейт</div><div class="dc-stat-v num" style="color:'+grad(rr2)+'">'+rr2+'%</div></div><div><div class="dc-stat-l">Платящих</div><div class="dc-stat-v num">'+dPaying+'</div></div></div></div>';}).join(''):
-    '<div class="empty-state">Нет отделов.<br>Зайди в <b>РОП</b> → Создать отдел.</div>';
-  // Archive section
-  var archHtml='';
-  if(DB.archivedDepts.length){
-    var archList=DB.archivedDepts.map(function(d){return'<div class="dept-edit-card archived"><div><div class="strong">'+d.name+'</div><div style="font-size:11px;color:var(--text-3);margin-top:2px">Архив</div></div><button class="btn btn-sm" onclick="unarchiveDept(\''+d.id+'\')">Разархивировать</button></div>';}).join('');
-    archHtml='<div class="arch-toggle'+(S.showArchivedDepts?' open':'')+'" onclick="toggleArchDepts()"><span class="arr">›</span>Архив отделов ('+DB.archivedDepts.length+')</div><div class="arch-block'+(S.showArchivedDepts?' open':'')+'">'+archList+'</div>';
-  }
-  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="accent">AI</span> · Продажи</span></div>'+calTrigger()+'</div>'+(S.loadErr?'<div class="err-banner">⚠ '+S.loadErr+'</div>':'')+'<div class="ckpi">'+kH+'</div><div class="dept-grid">'+cards+'</div>'+archHtml);
-}
-window.toggleArchDepts=function(){S.showArchivedDepts=!S.showArchivedDepts;render();};
-window.drill=function(id){S.dept=id;S.tab='staff';S.calOpen=false;S.clientMgrs=[];render();};
-window.goUp=function(){S.dept=null;S.calOpen=false;render();};
-window.setTab=function(t){S.tab=t;render();};
-
-/* ═══ ОТДЕЛ ═══ */
-function renderDept(){
-  var d=DB.depts.find(function(x){return x.id===S.dept;});
-  if(!d){S.dept=null;render();return;}
-  var p2=pct(d.fact,d.plan),rrv=rr(d.fact,d.plan);
-  var dPaying=payingInPeriod(d.clients);if(dPaying===null)dPaying=d.paying;
-  var kpis=[{l:'Выручка',v:fmt(d.fact),s:'из '+fmt(d.plan)+' · '+p2+'%',bar:p2,bc:grad(p2)},{l:'Ранрейт',v:rrv+'%',s:'<span class="'+(rrv>=100?'pos':rrv>=80?'neu':'neg')+'">'+(rrv>=100?'опережаем':'отстаём')+'</span>',raw:true},{l:'ARPU',v:fmt(d.arpu),s:'средний на клиента'},{l:'Платящих за период',v:dPaying,s:'из '+d.clients.length+' в портфеле'},{l:'В команде',v:d.staff.length,s:'сотрудников'}];
-  var kH=kpis.map(function(k){var b=k.bar!=null?'<div class="pbar"><div class="pfill" style="width:'+Math.min(k.bar,100)+'%;background:'+k.bc+'"></div></div>':'';return'<div class="kcard"><div class="kl">'+k.l+'</div><div class="kv num">'+k.v+'</div><div class="ks">'+(k.raw?k.s:'<span class="neu">'+k.s+'</span>')+'</div>'+b+'</div>';}).join('');
-  var tabs='<div class="tab-row">'+[['staff','Сотрудники'],['clients','Клиенты'],['funnel','Воронка']].map(function(t){return'<button class="tab'+(S.tab===t[0]?' on':'')+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>';
-  var ct='';
-  if(S.tab==='staff'){
-    var staff=[].concat(d.staff);staff.forEach(function(m){m._p=pct(m.fact,m.plan);m._r=rr(m.fact,m.plan);});
-    staff.sort(function(a,b){var k=S.staffSortKey,va=k==='name'?a.name:(a[k]!==undefined?a[k]:a['_'+k.replace(/^_/,'')]),vb=k==='name'?b.name:(b[k]!==undefined?b[k]:b['_'+k.replace(/^_/,'')]);if(typeof va==='string')return S.staffSortDir*va.localeCompare(vb);return S.staffSortDir*(va-vb);});
-    var cols=[['name','Сотрудник',''],['fact','Факт','r'],['plan','План','r'],['pct','%','r'],['rr','Ранрейт','r'],['clients','Клиентов','r']];
-    var th=cols.map(function(c){var a=S.staffSortKey===c[0];return'<th class="'+c[2]+(a?' sorted':'')+'" onclick="sortStaff(\''+c[0]+'\')">'+c[1]+si(a,S.staffSortDir)+'</th>';}).join('');
-    var rows=staff.length?staff.map(function(m){var c3=grad(m._p);return'<tr><td><span class="strong">'+m.name+'</span></td><td class="r strong num">'+fmt(m.fact)+'</td><td class="r muted num">'+fmt(m.plan)+'</td><td class="r"><span style="color:'+c3+';font-weight:600" class="num">'+m._p+'%</span><div class="inbar"><div class="inbar-f" style="width:'+Math.min(m._p,100)+'%;background:'+c3+'"></div></div></td><td class="r"><span style="color:'+grad(m._r)+';font-weight:600" class="num">'+m._r+'%</span></td><td class="r muted num">'+m.clients+'</td></tr>';}).join(''):'<tr><td colspan="6"><div class="empty-state">Нет сотрудников</div></td></tr>';
-    ct='<div class="panel"><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
-  }
-  if(S.tab==='clients'){
-    var sel=S.clientMgrs;
-    var mgrNames=d.staff.reduce(function(m,x){m[x.id]=x.name.split(' ')[1]||x.name;return m;},{});
-    var msCtrl='<div id="ms-c" class="ms-wrap">'+(function(){var chips=sel.map(function(id){return'<span class="ms-chip">'+(mgrNames[id]||id)+'<span class="x" onclick="removeMgr(event,\''+id+'\')">×</span></span>';}).join('');var ctrl='<div class="ms-control" onclick="toggleMgrDrop(event)"><button class="ms-add" onclick="toggleMgrDrop(event)">+</button>'+(sel.length?chips:'<span class="ms-hint">Все менеджеры</span>')+'</div>';var opts=d.staff.map(function(m){var on=sel.indexOf(m.id)>=0;return'<div class="ms-opt'+(on?' sel':'')+'" onclick="toggleMgr(event,\''+m.id+'\')"><span class="check">'+(on?'✓':'')+'</span>'+m.name+'</div>';}).join('');return ctrl+'<div class="ms-drop'+(S.mgrDropOpen?' open':'')+'"><div class="ms-sect">Менеджеры</div>'+opts+'</div>';})()+'</div>';
-    var list=d.clients.filter(function(c){return!sel.length||sel.indexOf(c.mgr)>=0;});
-    list.forEach(function(c){c._p=pct(c.fact,c.plan);c._d=daysTo(c.expiry);});
-    list.sort(function(a,b){var k=S.cliSortKey,va=a[k],vb=b[k];if(k==='pct'){va=a._p;vb=b._p;}if(typeof va==='string')return S.cliSortDir*va.localeCompare(vb);return S.cliSortDir*((va||0)-(vb||0));});
-    var cols=[['name','Компания',''],['plan','План','r'],['fact','Факт','r'],['pct','%','r'],['minLeft','Мин ост.','r'],['expiry','До прод.','r']];
-    var th=cols.map(function(c){var a=S.cliSortKey===c[0];return'<th class="'+c[2]+(a?' sorted':'')+'" onclick="sortCli(\''+c[0]+'\')">'+c[1]+si(a,S.cliSortDir)+'</th>';}).join('');
-    var body=list.length?list.map(function(c){var c3=grad(c._p);return'<tr><td><a class="ext-link" href="'+c.url+'" target="_blank">'+c.name+' <span class="lk">↗</span></a></td><td class="r muted num">'+fmt(c.plan)+'</td><td class="r strong num" style="color:'+c3+'">'+fmt(c.fact)+'</td><td class="r"><span style="color:'+c3+';font-size:11px;font-weight:600" class="num">'+c._p+'%</span></td><td class="r muted num">'+fmtMin(c.minLeft)+'</td><td class="r">'+daysBadge(c._d)+'</td></tr>';}).join(''):'<tr><td colspan="6"><div class="empty-state">Нет клиентов</div></td></tr>';
-    ct='<div class="panel">'+msCtrl+'<table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+body+'</tbody></table></div>';
-  }
-  if(S.tab==='funnel'){
-    var fmgrs=[{id:'all',name:'Все менеджеры'}].concat(d.staff.map(function(m){return{id:m.id,name:m.name};}));
-    var fmgrSel='<select style="padding:7px 11px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:12px" onchange="setDeptFunnelMgr(this.value)">'+fmgrs.map(function(m){return'<option value="'+m.id+'"'+(m.id===S.deptFunnelMgr?' selected':'')+'>'+m.name+'</option>';}).join('')+'</select>';
-    var stages=['Лиды в работе','Квалифицировано','Встречи назначено','Встречи проведено','Счета выставлено','Оплаты получено'];
-    var tagChips=['холодка','Заявка с сайта','лидгенилья','Входящее обращение','beeline','Конференция'].map(function(t){return'<span class="tag-chip-lock">'+t+'</span>';}).join('');
-    var fakeW=[100,62,44,33,22,13];
-    var bars=stages.map(function(s,i){return'<div class="fn-lock-row"><span class="fn-lock-label">'+s+'</span><div class="fn-lock-bar"><div class="fn-lock-fill" style="width:'+fakeW[i]+'%"></div></div><span class="fn-lock-val">—</span></div>';}).join('');
-    ct='<div class="panel"><div class="adm-head" style="margin-bottom:18px"><div class="panel-title" style="margin:0">Воронка первички</div>'+fmgrSel+'</div>'+
-      '<div class="fn-lock-wrap">'+
-        '<div class="fn-lock-tags">'+tagChips+'</div>'+
-        '<div class="fn-lock-bars">'+bars+'</div>'+
-        '<div class="fn-lock-overlay"><div class="fn-lock-icon">🔒</div><div class="fn-lock-title">Воронка подключается</div><div class="fn-lock-text">Данные тянутся из amoCRM. Запусти синк <code>amoCRM.gs</code> → таблица <code>amo_leads</code> → воронка с разбивкой по тегам и менеджерам оживёт здесь.</div></div>'+
-      '</div></div>';
-  }
-  var archBtn='<button class="btn btn-sm btn-ghost" onclick="archiveDept(\''+d.id+'\')" title="Убрать отдел в архив" style="margin-left:8px">В архив</button>';
-  var dealBtn='<button class="btn btn-sm btn-primary" onclick="addDeal(null,\''+d.id+'\')" style="margin-left:8px">+ Сделка</button>';
-  setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUp()">‹ Все отделы</button><span class="crumb-title">'+d.name+'</span>'+dealBtn+archBtn+'</div>'+calTrigger()+'</div><div class="dept-kpi">'+kH+'</div>'+tabs+ct);
-}
-window.setDeptFunnelMgr=function(id){S.deptFunnelMgr=id;render();};
-window.toggleMgrDrop=function(e){e.stopPropagation();S.mgrDropOpen=!S.mgrDropOpen;render();};
-window.toggleMgr=function(e,id){e.stopPropagation();var i=S.clientMgrs.indexOf(id);if(i>=0)S.clientMgrs.splice(i,1);else S.clientMgrs.push(id);render();};
-window.removeMgr=function(e,id){e.stopPropagation();var i=S.clientMgrs.indexOf(id);if(i>=0)S.clientMgrs.splice(i,1);render();};
-window.sortCli=function(k){if(S.cliSortKey===k)S.cliSortDir*=-1;else{S.cliSortKey=k;S.cliSortDir=1;}render();};
-window.sortStaff=function(k){if(S.staffSortKey===k)S.staffSortDir*=-1;else{S.staffSortKey=k;S.staffSortDir=-1;}render();};
-
-/* ═══ РОП ═══ */
-function renderRop(){
-  if(!DB.depts.length){
-    setApp('<div class="topbar"><div class="nav-left"><span class="brand">Управление отделами</span></div></div><div class="empty-state">Нет отделов.</div><div style="text-align:center;margin-top:16px"><button class="btn btn-primary" onclick="createDept()">+ Создать отдел</button></div>');
-    return;
-  }
-  var d=DB.depts.find(function(x){return x.id===S.ropDept;})||DB.depts[0];
-  if(d&&!S.ropDept)S.ropDept=d.id;
-  var deptOpts=DB.depts.map(function(x){return'<option value="'+x.id+'"'+(x.id===S.ropDept?' selected':'')+'>'+x.name+'</option>';}).join('');
-  var staffRows=d&&d.staff.length?d.staff.map(function(m){
-    var isLead=m.role==='Тимлид';
-    return'<tr>'+
-      '<td><span class="strong">'+m.name+'</span></td>'+
-      '<td><select class="role-select'+(isLead?' lead':'')+'" onchange="changeEmpRole(\''+m.supaId+'\',this.value)"><option value="manager"'+(isLead?'':' selected')+'>Менеджер</option><option value="lead"'+(isLead?' selected':'')+'>Тимлид</option></select></td>'+
-      '<td class="muted num">'+fmtD(m.hired)+'</td>'+
-      '<td><span class="status-dot"><span class="d" style="background:var(--green)"></span>работает</span></td>'+
-      '<td class="r muted num">'+m.clients+'</td>'+
-      '<td class="r" style="display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-sm" onclick="reassignEmp(\''+m.supaId+'\')">Перевести</button><button class="btn btn-sm btn-danger" onclick="fireEmp(\''+m.supaId+'\')">Уволить</button></td>'+
-    '</tr>';}).join(''):
-    '<tr><td colspan="6"><div class="empty-state">Нет сотрудников</div></td></tr>';
-  // Уволенные
-  var firedInDept=(d.fired||[]);
-  var firedBlock='';
-  if(firedInDept.length){
-    var firedRows=firedInDept.map(function(e){return'<tr class="fired-row"><td>'+e.name+'</td><td><span style="font-size:11px;color:var(--text-3)">'+(e.role==='lead'?'Тимлид':'Менеджер')+'</span></td><td class="muted num">'+fmtD(e.hired_at)+'</td><td class="muted num">'+fmtD(e.fired_at)+'</td><td class="r"><button class="btn btn-sm" onclick="rehireEmp(\''+e.id+'\')">Вернуть</button></td></tr>';}).join('');
-    var isOpen=S.ropShowFired;
-    firedBlock='<div style="margin-top:4px"><div class="arch-toggle'+(isOpen?' open':'')+'" onclick="toggleRopFired()"><span class="arr">›</span>Уволенные ('+firedInDept.length+')</div><div class="arch-block'+(isOpen?' open':'')+'"><table class="tbl" style="margin-top:4px"><thead><tr><th>Имя</th><th>Роль</th><th>Нанят</th><th>Уволен</th><th class="r">Действие</th></tr></thead><tbody>'+firedRows+'</tbody></table></div></div>';
-  }
-  // Без отдела
-  var unassigned=RAW.employees.filter(function(e){return!e.dept_id&&!e.fired_at&&!e.is_archived;});
-  var unaBlock=unassigned.length?'<div class="panel"><div class="panel-title">Без отдела ('+unassigned.length+')</div><table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th class="r">Действие</th></tr></thead><tbody>'+
-    unassigned.map(function(e){return'<tr><td>'+e.name+'</td><td><span style="font-size:11px;color:var(--text-3)">'+(e.role==='lead'?'Тимлид':'Менеджер')+'</span></td><td class="r"><button class="btn btn-sm btn-primary" onclick="reassignEmp(\''+e.id+'\')">→ В отдел</button></td></tr>';}).join('')+
-  '</tbody></table></div>':'';
-  // Toggle
-  var tog='<div class="panel" style="margin-bottom:14px"><div class="adm-head" style="margin:0"><div><div style="font-weight:600;font-size:13px">Источник факта выручки</div><div style="font-size:11px;color:var(--text-3);margin-top:3px">'+(S.factMode==='api'?'Тянется из API':'Менеджеры вбивают вручную')+'</div></div><div class="toggle'+(S.factMode==='api'?' on':'')+'" onclick="toggleFM()"><div class="knob"></div></div></div></div>';
-  // Все отделы
-  var deptCards=DB.depts.map(function(x){return'<div class="dept-edit-card"><div><div class="strong">'+x.name+'</div><div class="muted" style="font-size:11px;margin-top:2px">'+x.tl+' · '+x.staff.length+' чел. · план '+fmt(x.plan)+'</div></div><div style="display:flex;gap:6px"><button class="btn btn-sm" onclick="editDept(\''+x.id+'\')">Настроить</button><button class="btn btn-sm btn-ghost" onclick="archiveDept(\''+x.id+'\')" title="В архив">▾</button></div></div>';}).join('');
-  // Архив отделов в РОП
-  var archDeptBlock='';
-  if(DB.archivedDepts.length){
-    var isOpen2=S.ropShowArchivedDepts;
-    var archList=DB.archivedDepts.map(function(x){return'<div class="dept-edit-card archived"><div><div class="strong">'+x.name+'</div><div style="font-size:11px;color:var(--text-3)">В архиве</div></div><button class="btn btn-sm" onclick="unarchiveDept(\''+x.id+'\')">Разархивировать</button></div>';}).join('');
-    archDeptBlock='<div class="arch-toggle'+(isOpen2?' open':'')+'" onclick="toggleRopArchDepts()"><span class="arr">›</span>Архив отделов ('+DB.archivedDepts.length+')</div><div class="arch-block'+(isOpen2?' open':'')+'">'+archList+'</div>';
-  }
-  setApp(
-    '<div class="topbar"><div class="nav-left"><span class="brand">Управление отделами</span></div></div>'+
-    tog+
-    '<div class="panel" style="margin-bottom:0">'+
-      '<div class="adm-head"><div style="display:flex;align-items:center;gap:12px"><div class="panel-title" style="margin:0">Состав отдела</div>'+
-        '<select style="padding:6px 10px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:12px" onchange="setRopDept(this.value)">'+deptOpts+'</select>'+
-      '</div><button class="btn btn-primary" onclick="addEmpModal()">+ Сотрудник</button></div>'+
-      '<table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th>Нанят</th><th>Статус</th><th class="r">Клиентов</th><th class="r">Действие</th></tr></thead><tbody>'+staffRows+'</tbody></table>'+
-      firedBlock+
-    '</div>'+
-    unaBlock+
-    '<div class="panel"><div class="adm-head"><div class="panel-title" style="margin:0">Все отделы</div><button class="btn btn-primary" onclick="createDept()">+ Создать отдел</button></div>'+deptCards+archDeptBlock+'</div>'
-  );
-}
-window.setRopDept=function(id){S.ropDept=id;render();};
-window.toggleFM=function(){S.factMode=S.factMode==='manual'?'api':'manual';render();};
-window.toggleRopFired=function(){S.ropShowFired=!S.ropShowFired;render();};
-window.toggleRopArchDepts=function(){S.ropShowArchivedDepts=!S.ropShowArchivedDepts;render();};
-window.changeEmpRole=function(supaId,role){sbPatch('employees','id=eq.'+supaId,{role:role});RAW.employees.forEach(function(e){if(e.id===supaId)e.role=role;});buildDB();render();};
-window.reassignEmp=function(supaId){
-  var emp=RAW.employees.find(function(e){return e.id===supaId;});
-  var opts='<option value="">— убрать из всех отделов —</option>'+DB.depts.map(function(x){return'<option value="'+x.id+'"'+(emp&&emp.dept_id===x.id?' selected':'')+'>'+x.name+'</option>';}).join('');
-  openModal('Назначить в отдел','<p style="font-size:13px;color:var(--text-2);margin-bottom:14px">'+(emp?emp.name:'')+'</p><div class="field"><label>Отдел</label><select id="re-dept">'+opts+'</select></div>',function(){var dept=document.getElementById('re-dept').value||null;assignDept(supaId,dept);closeModal();render();});
-};
-window.addEmpModal=function(){
-  openModal('Добавить сотрудника вручную','<p style="font-size:12px;color:var(--text-3);margin-bottom:14px;line-height:1.6">Сотрудники появляются автоматически после синка (GAS syncAll). Ручное добавление — для тестирования.</p><div class="field"><label>Имя</label><input id="ae-name" placeholder="Иван Иванов"></div>',function(){closeModal();});
-};
-window.editDept=function(id){
-  var x=DB.depts.find(function(z){return z.id===id;});
-  var leads=RAW.employees.filter(function(e){return e.role==='lead';});
-  var leadOpts='<option value="">— без тимлида —</option>'+leads.map(function(e){return'<option value="'+e.id+'"'+(x.leadId===e.id?' selected':'')+'>'+e.name+'</option>';}).join('');
-  openModal('Настройка отдела',
-    '<div class="field"><label>Название</label><input id="d-name" value="'+x.name+'"></div>'+
-    '<div class="field"><label>Тимлид</label><select id="d-lead">'+leadOpts+'</select></div>',
-    function(){var nm=document.getElementById('d-name').value.trim()||x.name;var lead=document.getElementById('d-lead').value||null;sbPatch('departments','id=eq.'+id,{name:nm,lead_employee_id:lead});RAW.depts.forEach(function(dd){if(dd.id===id){dd.name=nm;dd.lead_employee_id=lead;}});if(lead){sbPatch('employees','id=eq.'+lead,{dept_id:id,role:'lead'});RAW.employees.forEach(function(e){if(e.id===lead){e.dept_id=id;e.role='lead';}});}buildDB();closeModal();render();});
-};
-window.createDept=function(){
-  var leads=RAW.employees.filter(function(e){return e.role==='lead';});
-  var leadOpts='<option value="">— без тимлида —</option>'+leads.map(function(e){return'<option value="'+e.id+'">'+e.name+'</option>';}).join('');
-  var hint=leads.length?'':'<div style="font-size:11px;color:var(--amber);margin-top:6px">Нет тимлидов — сначала назначь роль Тимлид в списке отдела.</div>';
-  openModal('Новый отдел',
-    '<div class="field"><label>Название</label><input id="nd-name" placeholder="Отдел Иванцова"></div>'+
-    '<div class="field"><label>Тимлид</label><select id="nd-lead">'+leadOpts+'</select>'+hint+'</div>',
-    function(){var nm=document.getElementById('nd-name').value.trim();if(!nm)return;var lead=document.getElementById('nd-lead').value||null;sbPost('departments',{name:nm,lead_employee_id:lead,monthly_plan:0,is_archived:false}).then(function(res){var nd=Array.isArray(res)?res[0]:res;if(!nd||!nd.id)return;RAW.depts.push(nd);if(lead){sbPatch('employees','id=eq.'+lead,{dept_id:nd.id,role:'lead'});RAW.employees.forEach(function(e){if(e.id===lead){e.dept_id=nd.id;e.role='lead';}});}buildDB();closeModal();S.ropDept=nd.id;render();});});
-};
-
-/* ═══ МЕНЕДЖЕР ═══ */
-function renderMgr(){
-  var allMgrs=[];DB.depts.forEach(function(dd){dd.staff.forEach(function(m){allMgrs.push({id:m.id,name:m.name,dept:dd.name});});});
-  if(!allMgrs.length){setApp('<div class="topbar"><div class="nav-left"><span class="brand">Кабинет менеджера</span></div></div><div class="empty-state">Нет менеджеров.<br>Зайди в <b>РОП</b> → назначь людей в отделы.</div>');return;}
-  if(!S.mgrAs||!allMgrs.find(function(m){return m.id===S.mgrAs;}))S.mgrAs=allMgrs[0].id;
-  var d=DB.depts.find(function(x){return x.staff.some(function(m){return m.id===S.mgrAs;});});
-  if(!d){S.mgrAs=allMgrs[0].id;d=DB.depts.find(function(x){return x.staff.some(function(m){return m.id===S.mgrAs;});});}
-  var myClients=d?d.clients.filter(function(c){return c.mgr===S.mgrAs;}):[];
-  var asSel='<select style="padding:6px 10px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:12px" onchange="setMgrAs(this.value)">'+allMgrs.map(function(m){return'<option value="'+m.id+'"'+(m.id===S.mgrAs?' selected':'')+'>'+m.name+'</option>';}).join('')+'</select>';
-  var me=d?d.staff.find(function(m){return m.id===S.mgrAs;}):null;
-  var meSupaId=me?me.supaId:null;
-  var totalFact=me?me.fact:0;
-  var totalPlan=me?me.plan:0;
-  var myDeals=me?me.deals:0;
-  var mp=pct(totalFact,totalPlan);
-  var singleMonth=(S.rangeFrom.getMonth()===S.rangeTo.getMonth()&&S.rangeFrom.getFullYear()===S.rangeTo.getFullYear());
-  var planNote=singleMonth?'':'<span style="font-size:10px;color:var(--text-3);margin-left:6px">сумма за период</span>';
-  var kH=[
-    '<div class="kcard"><div class="kl">Мой план '+planNote+'</div><div class="kv num">'+fmt(totalPlan)+'</div><div class="ks"><span class="neu">факт '+fmt(totalFact)+' · '+mp+'%</span></div><div class="pbar"><div class="pfill" style="width:'+Math.min(mp,100)+'%;background:'+grad(mp)+'"></div></div></div>',
-    '<div class="kcard"><div class="kl">Сделок за период</div><div class="kv num">'+myDeals+'</div><div class="ks"><span class="neu">'+myClients.length+' клиентов в портфеле</span></div></div>',
-    '<div class="kcard"><div class="kl">Ранрейт</div><div class="kv num">'+rr(totalFact,totalPlan)+'%</div><div class="ks"><span class="neu">по моему плану</span></div></div>'
-  ].join('');
-  var tabs='<div class="tab-row">'+[['clients','Клиенты'],['funnel','Воронка']].map(function(t){return'<button class="tab'+(S.mgrTab===t[0]?' on':'')+'" onclick="setMgrTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>';
-  var content='';
-  if(S.mgrTab==='clients'){
-    var periodLabel=MN[S.rangeFrom.getMonth()];
-    if(S.rangeFrom.getMonth()!==S.rangeTo.getMonth())periodLabel=MN[S.rangeFrom.getMonth()]+' — '+MN[S.rangeTo.getMonth()];
-    var py=S.rangeFrom.getFullYear(),pm=S.rangeFrom.getMonth()+1;
-    var rows=myClients.map(function(c){
-      var cp=pct(c.fact,c.plan);
-      var minUsed=S.periodStats[c.platform_org_id];
-      var minCell=S.periodLoading?'<span style="color:var(--text-3);font-size:11px">···</span>':(minUsed!=null?fmtMin(minUsed):'<span style="color:var(--text-3)">—</span>');
-      var factColor=c.fact>0?grad(100):(c.fact<0?'var(--red)':'var(--text-3)');
-      var planCell=singleMonth?
-        '<td class="r"><input class="inline-input" type="number" value="'+c.plan+'" onchange="saveClientPlan(\''+c.platform_org_id+'\','+py+','+pm+',this.value)"></td>':
-        '<td class="r muted num">'+fmt(c.plan)+'</td>';
-      return'<tr>'+
-        '<td><a class="ext-link" href="'+c.url+'" target="_blank">'+c.name+' <span class="lk">↗</span></a></td>'+
-        planCell+
-        '<td class="r strong num" style="color:'+factColor+'">'+fmt(c.fact)+'</td>'+
-        '<td class="r"><span style="color:'+grad(cp)+';font-size:11px;font-weight:600" class="num">'+cp+'%</span></td>'+
-        '<td class="r muted num">'+minCell+'</td>'+
-        '<td class="r muted num">'+fmtMin(c.minLeft)+'</td>'+
-        '<td class="r">'+daysBadge(daysTo(c.expiry))+'</td>'+
-        '<td class="r"><button class="btn btn-sm btn-ghost" onclick="hideClient(\''+c.platform_org_id+'\',\''+c.name.replace(/'/g,'')+'\')" title="В архив">⋯</button></td>'+
-      '</tr>';
-    }).join('');
-    var planHdr=singleMonth?'План ('+MN[pm-1]+')':'План';
-    var table=myClients.length?
-      '<table class="tbl"><thead><tr><th>Компания</th><th class="r">'+planHdr+'</th><th class="r">Факт за период</th><th class="r">%</th><th class="r">Мин исп. ('+periodLabel+')</th><th class="r">Мин ост.</th><th class="r">До прод.</th><th class="r"></th></tr></thead><tbody>'+rows+'</tbody></table>':
-      '<div class="empty-state">Нет клиентов в портфеле.<br>Клиенты привязываются по ответственному в платформе.</div>';
-    var myHiddenClients=DB.hiddenClients?DB.hiddenClients.filter(function(c){return c.responsible_platform_user_id===S.mgrAs;}):[];
-    var archCliBlock='';
-    if(myHiddenClients.length){
-      var isOpen=S.showArchivedClients;
-      var archRows=myHiddenClients.map(function(c){return'<tr><td class="muted">'+c.company_name+'</td><td class="r"><button class="btn btn-sm" onclick="unhideClient(\''+c.platform_org_id+'\')">Вернуть</button></td></tr>';}).join('');
-      archCliBlock='<div class="arch-toggle'+(isOpen?' open':'')+'" onclick="toggleArchClients()"><span class="arr">›</span>Архив клиентов ('+myHiddenClients.length+')</div><div class="arch-block'+(isOpen?' open':'')+'"><table class="tbl" style="margin-top:8px"><tbody>'+archRows+'</tbody></table></div>';
-    }
-    var planHint=singleMonth?'Выставь план по каждому клиенту — сумма складывается в твой план за '+MN[pm-1]:'Выбран период из нескольких месяцев — план в режиме просмотра. Для редактирования выбери один месяц';
-    content='<div class="panel"><div class="panel-title">'+planHint+'. Факт считается из сделок</div>'+table+archCliBlock+'</div>';
-  }
-  if(S.mgrTab==='funnel'){
-    content='<div class="panel"><div class="funnel-stub"><div class="funnel-stub-icon">🔗</div><div class="funnel-stub-title">Воронка из amoCRM</div><div class="funnel-stub-text">Данные появятся после подключения amoCRM.<br>Готовый скрипт: <code>amoCRM.gs</code> → запиши в таблицу <code>amo_leads</code> → воронка оживёт автоматически.</div></div></div>';
-  }
-  var dealBtn=meSupaId?'<button class="btn btn-sm btn-primary" onclick="addDeal(\''+meSupaId+'\',null)" style="margin-left:8px">+ Сделка</button>':'';
-  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Кабинет менеджера</span>'+asSel+dealBtn+'<span class="save-hint'+(S.saveHint?' show':'')+'">✓ сохранено</span></div>'+calTrigger()+'</div><div class="dept-kpi" style="grid-template-columns:repeat(3,1fr)">'+kH+'</div>'+tabs+content);
-}
-window.setMgrAs=function(id){S.mgrAs=id;render();};
-window.setMgrTab=function(t){S.mgrTab=t;render();};
-window.toggleArchClients=function(){S.showArchivedClients=!S.showArchivedClients;render();};
-window.saveClientPlan=function(orgId,y,m,v){
-  fetch(SB_URL+'/rest/v1/client_monthly_records?on_conflict=platform_org_id,year,month',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({platform_org_id:orgId,year:y,month:m,monthly_plan:Number(v)||0})}).then(function(){refreshPeriod();flashSave();});
-};
+window.setRole=function(r){S.role=r;S.dept=null;S.empView=null;S.calOpen=false;render();};
+window.toggleTheme=function(){S.theme=S.theme==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',S.theme);render();};
+function setApp(h){document.getElementById('app').innerHTML=roleBar()+h;}
 function flashSave(){S.saveHint=true;render();setTimeout(function(){S.saveHint=false;render();},1500);}
 
-/* ═══ СДЕЛКИ (deal modal) ═══ */
-window.addDeal=function(preEmpId,preDeptId){openDealModal(null,preEmpId,preDeptId);};
-window.editDeal=function(dealId){var dl=S.dealsRaw.find(function(d){return d.id===dealId;});if(dl)openDealModal(dl,null,null);};
-function openDealModal(existing,preEmpId,preDeptId){
-  var emps=RAW.employees.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
-  var empOpts=emps.map(function(e){var arch=(e.fired_at||e.is_archived)?' (архив)':'';return'<option value="'+e.id+'">'+e.name+arch+'</option>';}).join('');
-  var initEmp=existing?existing.employee_id:(preEmpId||(emps[0]&&emps[0].id));
-  var body=
-    '<div class="field"><label>Событие *</label><select id="dl-type"><option value="payment">Оплата</option><option value="refund">Возврат</option></select></div>'+
-    '<div class="field"><label>Сотрудник *</label><select id="dl-emp" onchange="dealEmpChanged()">'+empOpts+'</select></div>'+
-    '<div class="field"><label>Клиент *</label><select id="dl-client"></select></div>'+
-    '<div class="form-row" style="display:flex;gap:10px"><div class="field" style="flex:1"><label>Сумма ₽ *</label><input id="dl-amount" type="number" placeholder="0"></div><div class="field" style="flex:1"><label>Мотивация % *</label><input id="dl-pct" type="number" placeholder="10" step="0.5"></div></div>'+
-    '<div class="field"><label>Дата сделки *</label><input id="dl-date" type="date" value="'+todayISO()+'"></div>'+
-    '<div class="field"><label>Комментарий (необязательно)</label><input id="dl-note" placeholder="—"></div>';
-  openModal(existing?'Редактировать сделку':'Добавить сделку',body,function(){saveDeal(existing,preDeptId);});
-  setTimeout(function(){
-    var es=document.getElementById('dl-emp');if(es)es.value=initEmp;
-    if(existing){
-      document.getElementById('dl-type').value=existing.event_type||'payment';
-      document.getElementById('dl-amount').value=existing.amount;
-      document.getElementById('dl-pct').value=existing.motivation_pct;
-      document.getElementById('dl-date').value=(existing.deal_date||'').substring(0,10);
-      document.getElementById('dl-note').value=existing.note||'';
-    }
-    dealEmpChanged(existing?existing.platform_org_id:null);
-    setupDealValidation();
-  },0);
-}
-window.dealEmpChanged=function(preselectOrg){
-  var empSel=document.getElementById('dl-emp');var clientSel=document.getElementById('dl-client');
-  if(!empSel||!clientSel)return;
-  var emp=RAW.employees.find(function(e){return e.id===empSel.value;});
-  var puid=emp?emp.platform_user_id:null;
-  var cls=(RAW.allClients||[]).filter(function(c){return c.responsible_platform_user_id===puid;});
-  if(!cls.length){clientSel.innerHTML='<option value="">— нет клиентов —</option>';validateDeal();return;}
-  clientSel.innerHTML=cls.map(function(c){var arch=(c.is_archived||c.is_hidden)?' (архив)':'';return'<option value="'+c.platform_org_id+'" data-name="'+(c.company_name||'').replace(/"/g,'')+'">'+(c.company_name||'')+arch+'</option>';}).join('');
-  if(preselectOrg&&typeof preselectOrg==='string')clientSel.value=preselectOrg;
-  validateDeal();
-};
-function setupDealValidation(){
-  ['dl-type','dl-client','dl-amount','dl-pct','dl-date'].forEach(function(id){var el=document.getElementById(id);if(el){el.oninput=validateDeal;el.onchange=validateDeal;}});
-  validateDeal();
-}
-function validateDeal(){
-  var btn=document.getElementById('msave');if(!btn)return;
-  function v(id){var el=document.getElementById(id);return el?el.value:'';}
-  var amount=parseFloat(v('dl-amount'));
-  var pctRaw=v('dl-pct');
-  var ok = v('dl-type') && v('dl-emp') && v('dl-client') && amount>0 && pctRaw!=='' && !isNaN(parseFloat(pctRaw)) && v('dl-date');
-  btn.disabled=!ok;
-}
-function saveDeal(existing,preDeptId){
-  var type=document.getElementById('dl-type').value;
-  var empId=document.getElementById('dl-emp').value;
-  var clientSel=document.getElementById('dl-client');
-  var orgId=clientSel.value||null;
-  var clientName=clientSel.selectedOptions[0]?clientSel.selectedOptions[0].getAttribute('data-name'):'';
-  var amount=Number(document.getElementById('dl-amount').value)||0;
-  var pct2=Number(document.getElementById('dl-pct').value)||0;
-  var date=document.getElementById('dl-date').value||todayISO();
-  var note=document.getElementById('dl-note').value||null;
-  if(amount<=0||!orgId){return;}
-  var emp=RAW.employees.find(function(e){return e.id===empId;});
-  var deptId=emp?emp.dept_id:(preDeptId||null);
-  var dept=RAW.depts.find(function(x){return x.id===deptId;});
-  var row={event_type:type,employee_id:empId,employee_name:emp?emp.name:'',
-    platform_org_id:orgId,client_name:clientName,
-    dept_id:deptId,dept_name:dept?dept.name:'',
-    amount:amount,motivation_pct:pct2,deal_date:date,note:note};
-  if(existing){
-    sbPatch('deals','id=eq.'+existing.id,row).then(function(){closeModal();refreshPeriod();flashSave();});
-  }else{
-    sbPost('deals',row).then(function(){closeModal();refreshPeriod();flashSave();});
-  }
-}
-window.deleteDeal=function(dealId){
-  var dl=S.dealsRaw.find(function(d){return d.id===dealId;});
-  openModal('Удалить сделку?','<p style="font-size:13px;color:var(--text-2);line-height:1.7">'+(dl?(dl.client_name||'—')+' · '+fmt(dl.amount):'')+'<br>Это действие нельзя отменить.</p>',
-    function(){fetch(SB_URL+'/rest/v1/deals?id=eq.'+dealId,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'}}).then(function(){closeModal();refreshPeriod();});});
-};
-
-/* ═══ ЗАРПЛАТЫ (payroll) ═══ */
-function renderPayroll(){
-  // агрегируем S.dealsRaw по сотрудникам, с фильтрами
-  var deptOpts='<option value="all">Все отделы</option>'+DB.depts.concat(DB.archivedDepts.map(function(d){return{id:d.id,name:d.name+' (архив)'};})).map(function(d){return'<option value="'+d.id+'"'+(S.payDept===d.id?' selected':'')+'>'+d.name+'</option>';}).join('');
-  var allEmps=RAW.employees.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
-  var empOpts='<option value="all">Все сотрудники</option>'+allEmps.map(function(e){var arch=(e.fired_at||e.is_archived)?' (архив)':'';return'<option value="'+e.id+'"'+(S.payEmp===e.id?' selected':'')+'>'+e.name+arch+'</option>';}).join('');
-
-  var filtered=S.dealsRaw.filter(function(d){
-    if(S.payDept!=='all'&&d.dept_id!==S.payDept)return false;
-    if(S.payEmp!=='all'&&d.employee_id!==S.payEmp)return false;
-    return true;
-  });
-
-  // агрегат по сотруднику
-  var byEmp={};
-  filtered.forEach(function(d){
-    var sign=d.event_type==='refund'?-1:1;
-    var amt=sign*(Number(d.amount)||0);
-    var comm=amt*(Number(d.motivation_pct)||0)/100;
-    var key=d.employee_id||'—';
-    var e=byEmp[key]||(byEmp[key]={name:d.employee_name||'—',dept:d.dept_name||'—',fact:0,comm:0,count:0});
-    e.fact+=amt;e.comm+=comm;e.count++;
-  });
-  var rowsArr=Object.keys(byEmp).map(function(k){return byEmp[k];}).sort(function(a,b){return b.comm-a.comm;});
-  var totFact=rowsArr.reduce(function(a,e){return a+e.fact;},0);
-  var totComm=rowsArr.reduce(function(a,e){return a+e.comm;},0);
-  var totCount=rowsArr.reduce(function(a,e){return a+e.count;},0);
-
-  var kH=[
-    '<div class="ck"><div class="ck-l">Выручка за период</div><div class="ck-v num">'+fmt(totFact)+'</div><div class="ck-s">по выбранным фильтрам</div></div>',
-    '<div class="ck"><div class="ck-l">Сделок</div><div class="ck-v num">'+totCount+'</div><div class="ck-s">оплат и возвратов</div></div>',
-    '<div class="ck"><div class="ck-l">Начислено мотивации</div><div class="ck-v num">'+fmt(totComm)+'</div><div class="ck-s">сумма по сотрудникам</div></div>',
-    '<div class="ck"><div class="ck-l">Сотрудников</div><div class="ck-v num">'+rowsArr.length+'</div><div class="ck-s">со сделками</div></div>'
-  ].join('');
-
-  var body=rowsArr.length?rowsArr.map(function(e){var avgPct=e.fact!==0?r(e.comm/e.fact*100):0;return'<tr><td><span class="strong">'+e.name+'</span></td><td class="muted">'+e.dept+'</td><td class="r muted num">'+e.count+'</td><td class="r strong num">'+fmt(e.fact)+'</td><td class="r muted num">'+avgPct+'%</td><td class="r strong num" style="color:var(--green)">'+fmt(e.comm)+'</td></tr>';}).join(''):'<tr><td colspan="6"><div class="empty-state">Нет сделок</div></td></tr>';
-
-  // построчная таблица сделок (для редактирования/удаления)
-  var dealRows=filtered.slice().sort(function(a,b){return(b.deal_date||'').localeCompare(a.deal_date||'');}).map(function(d){
-    var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);var comm=amt*(Number(d.motivation_pct)||0)/100;
-    return'<tr>'+
-      '<td class="muted num">'+fmtD(d.deal_date)+'</td>'+
-      '<td><span class="strong">'+(d.employee_name||'—')+'</span></td>'+
-      '<td class="muted">'+(d.dept_name||'—')+'</td>'+
-      '<td>'+(d.client_name||'—')+(d.event_type==='refund'?' <span style="color:var(--red);font-size:10px">возврат</span>':'')+'</td>'+
-      '<td class="r strong num"'+(amt<0?' style="color:var(--red)"':'')+'>'+fmt(amt)+'</td>'+
-      '<td class="r muted num">'+(d.motivation_pct||0)+'%</td>'+
-      '<td class="r strong num" style="color:var(--green)">'+fmt(comm)+'</td>'+
-      '<td class="muted" style="font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(d.note||'')+'</td>'+
-      '<td class="r" style="white-space:nowrap"><button class="btn btn-sm btn-ghost" onclick="editDeal(\''+d.id+'\')" title="Редактировать">✎</button> <button class="btn btn-sm btn-danger" onclick="deleteDeal(\''+d.id+'\')" title="Удалить">✕</button></td>'+
-    '</tr>';
-  }).join('');
-  var dealTable=filtered.length?
-    '<table class="tbl"><thead><tr><th>Дата</th><th>Сотрудник</th><th>Отдел</th><th>Компания</th><th class="r">Сумма</th><th class="r">%</th><th class="r">Начислено</th><th>Комментарий</th><th class="r"></th></tr></thead><tbody>'+dealRows+'</tbody></table>':
-    '<div class="empty-state">Нет сделок за выбранный период и фильтры.<br>Добавь сделку через Коммдир → отдел → «+ Сделка» или в кабинете менеджера.</div>';
-
-  var filters='<div class="adm-head"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
-    '<select style="padding:7px 11px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:12px" onchange="setPayDept(this.value)">'+deptOpts+'</select>'+
-    '<select style="padding:7px 11px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border);color:var(--text);font-size:12px" onchange="setPayEmp(this.value)">'+empOpts+'</select>'+
-    '</div><button class="btn btn-primary" onclick="exportPayroll()">↓ Выгрузить xlsx</button></div>';
-
-  // свод по сотрудникам (компактный, под детальной таблицей)
-  var summaryRows=rowsArr.length?rowsArr.map(function(e){var avgPct=e.fact!==0?r(e.comm/e.fact*100):0;return'<tr><td><span class="strong">'+e.name+'</span></td><td class="muted">'+e.dept+'</td><td class="r muted num">'+e.count+'</td><td class="r strong num">'+fmt(e.fact)+'</td><td class="r muted num">'+avgPct+'%</td><td class="r strong num" style="color:var(--green)">'+fmt(e.comm)+'</td></tr>';}).join(''):'';
-  var summaryBlock=rowsArr.length?'<div class="panel"><div class="panel-title">Свод по сотрудникам</div><table class="tbl"><thead><tr><th>Сотрудник</th><th>Отдел</th><th class="r">Сделок</th><th class="r">Выручка</th><th class="r">Ср. %</th><th class="r">Начислено</th></tr></thead><tbody>'+summaryRows+'</tbody></table></div>':'';
-
-  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Зарплатные листы</span></div>'+calTrigger()+'</div>'+
-    '<div class="ckpi">'+kH+'</div>'+
-    '<div class="panel">'+filters+dealTable+'</div>'+
-    summaryBlock);
-}
-window.setPayDept=function(v){S.payDept=v;render();};
-window.setPayEmp=function(v){S.payEmp=v;render();};
-window.exportPayroll=function(){
-  var filtered=S.dealsRaw.filter(function(d){
-    if(S.payDept!=='all'&&d.dept_id!==S.payDept)return false;
-    if(S.payEmp!=='all'&&d.employee_id!==S.payEmp)return false;
-    return true;
-  });
-  if(!filtered.length){alert('Нет сделок для выгрузки');return;}
-  // Лист 1: детально по сделкам
-  var deals=filtered.map(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);return{
-    'Дата':d.deal_date,'Событие':d.event_type==='refund'?'Возврат':'Оплата','Сотрудник':d.employee_name,
-    'Отдел':d.dept_name,'Клиент':d.client_name,'Сумма':amt,'Мотивация %':d.motivation_pct,
-    'Начислено':amt*(Number(d.motivation_pct)||0)/100,'Комментарий':d.note||''};});
-  // Лист 2: свод по сотрудникам
-  var byEmp={};
-  filtered.forEach(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);var key=d.employee_id||'—';var e=byEmp[key]||(byEmp[key]={'Сотрудник':d.employee_name,'Отдел':d.dept_name,'Сделок':0,'Выручка':0,'Начислено':0});e['Сделок']++;e['Выручка']+=amt;e['Начислено']+=amt*(Number(d.motivation_pct)||0)/100;});
-  var summary=Object.keys(byEmp).map(function(k){return byEmp[k];}).sort(function(a,b){return b['Начислено']-a['Начислено'];});
-  var wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(summary),'Свод');
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(deals),'Сделки');
-  var fname='Зарплаты_'+dateISO(S.rangeFrom)+'_'+dateISO(S.rangeTo)+'.xlsx';
-  XLSX.writeFile(wb,fname);
-};
-
-/* ═══ MODAL ═══ */
-function openModal(title,body,onSave){
-  var m=document.getElementById('modal');
-  m.innerHTML='<div class="modal"><div class="modal-title">'+title+'</div>'+body+'<div class="modal-actions"><button class="btn" onclick="closeModal()">Отмена</button><button class="btn btn-primary" id="msave">Сохранить</button></div></div>';
-  m.classList.add('open');document.getElementById('msave').onclick=onSave;
-}
-window.closeModal=function(){var m=document.getElementById('modal');m.classList.remove('open');m.innerHTML='';};
-
 /* ═══ RENDER ═══ */
-function setApp(html){document.getElementById('app').innerHTML=roleBar()+html;}
 function render(){
   if(S.loading){document.getElementById('app').innerHTML='<div class="loading"><div class="spinner"></div><div>Загружаю из Supabase…</div></div>';return;}
   if(S.role==='rop'){renderRop();return;}
   if(S.role==='mgr'){renderMgr();return;}
   if(S.role==='pay'){renderPayroll();return;}
-  if(S.dept)renderDept();else renderCo();
+  if(S.role==='sum'){renderSum();return;}
+  if(S.dept&&S.empView){renderEmpView();return;}
+  if(S.dept){renderDept();return;}
+  renderCo();
 }
+
+/* ═══ СВОДКА ═══ */
+window.setSumSort=function(k){if(S.sumSort===k)S.sumSortDir*=-1;else{S.sumSort=k;S.sumSortDir=-1;}render();};
+window.setSumMode=function(m){S.sumMode=m;render();};
+function renderSum(){
+  var all=[];
+  DB.depts.forEach(function(d){d.staff.forEach(function(m){all.push({name:m.name,dept:d.name,fact:m.fact,plan:m.plan,pct:pct(m.fact,m.plan),clients:m.clients,tenure:tenure(m.hired)});});});
+  all.sort(function(a,b){var k=S.sumSort;var va=a[k],vb=b[k];if(typeof va==='string')return S.sumSortDir*va.localeCompare(vb);return S.sumSortDir*(va-vb);});
+  var medCls=['med-g','med-s','med-b'];
+  var rows=all.length?all.map(function(m,i){
+    var c3=grad(m.pct);
+    var medHtml=i<3?'<span class="med '+medCls[i]+'">'+(i+1)+'</span>':'<span class="rank-n">'+(i+1)+'</span>';
+    var rowCls=i<3?'lb-row-'+(i+1):'';
+    return'<tr class="'+rowCls+'">'+
+      '<td style="padding-left:4px">'+medHtml+'</td>'+
+      '<td><span class="strong">'+esc(m.name)+'</span><div style="font-size:11px;color:var(--text-3)">'+esc(m.dept)+'</div></td>'+
+      '<td class="r strong num" style="color:'+c3+'">'+fmt(m.fact)+'</td>'+
+      '<td class="r muted num">'+fmt(m.plan)+'</td>'+
+      '<td class="r"><span style="color:'+c3+';font-weight:600" class="num">'+m.pct+'%</span><div class="inbar"><div class="inbar-f" style="width:'+Math.min(m.pct,100)+'%;background:'+c3+'"></div></div></td>'+
+      '<td class="r muted num">'+m.clients+'</td>'+
+      '<td class="r muted num">'+(m.tenure!==null?m.tenure+' мес.':'—')+'</td>'+
+    '</tr>';
+  }).join(''):'<tr><td colspan="7"><div class="empty-state">Нет менеджеров. Назначь людей в отделы через ⚙ Настройки.</div></td></tr>';
+  var colDefs=[['','#'],['name','Сотрудник'],['fact','Факт','r'],['plan','План','r'],['pct','%','r'],['clients','Клиентов','r'],['tenure','Стаж','r']];
+  var th=colDefs.map(function(c){if(!c[0])return'<th style="width:34px">#</th>';var a=S.sumSort===c[0];return'<th class="'+(c[2]||'')+(a?' sorted':'')+'" onclick="setSumSort(\''+c[0]+'\')">'+c[1]+si(a,S.sumSortDir)+'</th>';}).join('');
+  var modeHtml=['fact','pct'].map(function(m){return'<button class="lb-mode-btn'+(S.sumMode===m?' on':'')+'" onclick="setSumMode(\''+m+'\')">'+{fact:'По выручке',pct:'По % плана'}[m]+'</button>';}).join('');
+  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="a">AI</span> · Сводка</span></div>'+calTrigger()+'</div>'+
+    (S.loadErr?'<div class="err-banner">⚠ '+esc(S.loadErr)+'</div>':'')+
+    '<div class="panel"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">'+
+      '<div><div class="lb-title">Лидерборд команды</div><div class="lb-sub">'+all.length+' менеджеров · '+calLabel()+'</div></div>'+
+      '<div class="lb-mode">'+modeHtml+'</div></div>'+
+      '<table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table></div>');
+}
+
+/* ═══ ДАШБОРД ═══ */
+function renderCo(){
+  var c=DB.company,cp=pct(c.fact,c.plan),rrv=rrPct(c.fact,c.plan);
+  var allClients=DB.depts.reduce(function(a,d){return a.concat(d.clients);},[]);
+  var coPaying=payingInPeriod(allClients);if(coPaying===null)coPaying=c.paying;
+  var kH=[
+    '<div class="ck"><div class="ck-l">Выручка за период</div><div class="ck-v num">'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div></div>',
+    '<div class="ck"><div class="ck-l">Ранрейт</div><div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="'+(rrv>=100?'pos':rrv>=80?'neu':'neg')+'">'+(rrv>=100?'опережаем темп':'отстаём от темпа')+'</span></div></div>',
+    '<div class="ck"><div class="ck-l">Платящих за период</div><div class="ck-v num">'+coPaying+'</div><div class="ck-s">из '+c.clients+' в портфеле</div></div>',
+    '<div class="ck"><div class="ck-l">Отделов</div><div class="ck-v num">'+DB.depts.length+'</div><div class="ck-s">'+DB.archivedDepts.length+' в архиве</div></div>'
+  ].join('');
+  var cards=DB.depts.length?DB.depts.map(function(d){
+    var p2=pct(d.fact,d.plan),rr2=rrPct(d.fact,d.plan),c2=grad(p2);
+    var bT=d.plan>0?(rr2>=100?'В темпе':rr2>=80?'Отстаём':'Критично'):'Нет плана',bC=d.plan>0?(rr2>=100?'bg':rr2>=80?'ba':'br'):'br';
+    var dPaying=payingInPeriod(d.clients);if(dPaying===null)dPaying=d.paying;
+    return'<div class="dept-card" onclick="drill(\''+d.id+'\')">'+
+      '<div class="dc-top"><div><div class="dc-name">'+esc(d.name)+'</div><div class="dc-meta">'+esc(d.tl)+' · '+d.staff.length+' чел. · '+d.clients.length+' клиентов</div></div><span class="dc-badge '+bC+'">'+bT+'</span></div>'+
+      '<div class="dc-fact num">'+fmt(d.fact)+'</div><div class="dc-plan">из '+fmt(d.plan)+' плана</div>'+
+      '<div class="progress"><div class="progress-fill" style="width:'+Math.min(p2,100)+'%;background:'+c2+'"></div></div>'+
+      '<div class="dc-stats"><div><div class="dc-stat-l">Выполнено</div><div class="dc-stat-v num" style="color:'+c2+'">'+p2+'%</div></div><div><div class="dc-stat-l">Ранрейт</div><div class="dc-stat-v num" style="color:'+grad(rr2)+'">'+rr2+'%</div></div><div><div class="dc-stat-l">Платящих</div><div class="dc-stat-v num">'+dPaying+'</div></div></div>'+
+    '</div>';
+  }).join(''):'<div class="empty-state">Нет отделов. Зайди в <b>⚙ Настройки</b> → Создать отдел.</div>';
+  var archHtml='';
+  if(DB.archivedDepts.length){
+    var archList=DB.archivedDepts.map(function(d){return'<div class="dept-edit-card archived"><div><div class="strong">'+esc(d.name)+'</div></div><button class="btn sm" onclick="unarchiveDept(\''+d.id+'\')">Разархивировать</button></div>';}).join('');
+    archHtml='<div class="arch-toggle'+(S.showArchivedDepts?' open':'')+'" onclick="toggleArchDepts()"><span class="arr">›</span> Архив отделов ('+DB.archivedDepts.length+')</div><div class="arch-block'+(S.showArchivedDepts?' open':'')+'">'+archList+'</div>';
+  }
+  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="a">AI</span> · Дашборд</span></div>'+calTrigger()+'</div>'+
+    (S.loadErr?'<div class="err-banner">⚠ '+esc(S.loadErr)+'</div>':'')+
+    '<div class="ckpi">'+kH+'</div><div class="dept-grid">'+cards+'</div>'+archHtml);
+}
+window.toggleArchDepts=function(){S.showArchivedDepts=!S.showArchivedDepts;render();};
+window.drill=function(id){S.dept=id;S.tab='staff';S.calOpen=false;S.empView=null;render();};
+window.goUp=function(){S.dept=null;S.empView=null;render();};
+window.goUpFromEmp=function(){S.empView=null;render();};
+window.setTab=function(t){S.tab=t;render();};
+
+/* ═══ ОТДЕЛ ═══ */
+window.sortStaff=function(k){if(S.staffSortKey===k)S.staffSortDir*=-1;else{S.staffSortKey=k;S.staffSortDir=-1;}render();};
+window.drillEmp=function(supaId){S.empView=supaId;render();};
+window.setDeptFunnelMgr=function(id){S.deptFunnelMgr=id;render();};
+function renderDept(){
+  var d=DB.depts.find(function(x){return x.id===S.dept;});
+  if(!d){S.dept=null;render();return;}
+  var p2=pct(d.fact,d.plan),rrv=rrPct(d.fact,d.plan);
+  var dPaying=payingInPeriod(d.clients);if(dPaying===null)dPaying=d.paying;
+  var kpis=[
+    {l:'Выручка',v:fmt(d.fact),s:'из '+fmt(d.plan)+' · '+p2+'%',bar:p2,bc:grad(p2)},
+    {l:'Ранрейт',v:rrv+'%',s:'<span class="'+(rrv>=100?'pos':rrv>=80?'neu':'neg')+'">'+(rrv>=100?'опережаем':'отстаём')+'</span>',raw:true},
+    {l:'ARPU',v:fmt(d.arpu),s:'средний на клиента'},
+    {l:'Платящих',v:dPaying,s:'из '+d.clients.length+' в портфеле'},
+    {l:'В команде',v:d.staff.length,s:'сотрудников'}
+  ];
+  var kH=kpis.map(function(k){var b=k.bar!=null?'<div class="pbar"><div class="pfill" style="width:'+Math.min(k.bar,100)+'%;background:'+k.bc+'"></div></div>':'';return'<div class="kcard"><div class="kl">'+k.l+'</div><div class="kv num">'+k.v+'</div><div class="ks">'+(k.raw?k.s:'<span class="neu">'+k.s+'</span>')+'</div>'+b+'</div>';}).join('');
+  var tabs='<div class="tab-row">'+[['staff','Сотрудники'],['funnel','Воронка']].map(function(t){return'<button class="tab'+(S.tab===t[0]?' on':'')+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>';
+  var ct='';
+  if(S.tab==='staff'){
+    var staff=[].concat(d.staff);
+    staff.forEach(function(m){m._p=pct(m.fact,m.plan);m._r=rrPct(m.fact,m.plan);});
+    staff.sort(function(a,b){
+      var k=S.staffSortKey,va,vb;
+      if(k==='name'){va=a.name;vb=b.name;}else if(k==='pct'){va=a._p;vb=b._p;}else if(k==='rr'){va=a._r;vb=b._r;}else{va=a[k]||0;vb=b[k]||0;}
+      if(typeof va==='string')return S.staffSortDir*va.localeCompare(vb);
+      return S.staffSortDir*(va-vb);
+    });
+    var cols=[['name','Сотрудник',''],['fact','Факт','r'],['plan','План','r'],['pct','%','r'],['rr','Ранрейт','r'],['clients','Клиентов','r']];
+    var th=cols.map(function(c){var a=S.staffSortKey===c[0];return'<th class="'+(c[2])+(a?' sorted':'')+'" onclick="sortStaff(\''+c[0]+'\')">'+c[1]+si(a,S.staffSortDir)+'</th>';}).join('');
+    var rows=staff.length?staff.map(function(m){
+      var c3=grad(m._p);
+      return'<tr class="clickable" onclick="drillEmp(\''+m.supaId+'\')">'+
+        '<td><span class="strong">'+esc(m.name)+'</span><div style="font-size:11px;color:var(--text-3)">'+m.role+'</div></td>'+
+        '<td class="r strong num" style="color:'+c3+'">'+fmt(m.fact)+'</td>'+
+        '<td class="r muted num">'+fmt(m.plan)+'</td>'+
+        '<td class="r"><span style="color:'+c3+';font-weight:600" class="num">'+m._p+'%</span><div class="inbar"><div class="inbar-f" style="width:'+Math.min(m._p,100)+'%;background:'+c3+'"></div></div></td>'+
+        '<td class="r"><span style="color:'+grad(m._r)+'" class="num">'+m._r+'%</span></td>'+
+        '<td class="r muted num">'+m.clients+' <span style="color:var(--accent);font-size:10px">→</span></td>'+
+      '</tr>';
+    }).join(''):'<tr><td colspan="6"><div class="empty-state">Нет сотрудников</div></td></tr>';
+    ct='<div class="panel"><p style="font-size:11px;color:var(--text-3);margin-bottom:14px">Нажми на строку — увидишь клиентов сотрудника</p><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+  if(S.tab==='funnel'){
+    var fmgrs=[{id:'all',name:'Все менеджеры'}].concat(d.staff.map(function(m){return{id:m.id,name:m.name};}));
+    var fmgrSel='<select class="sel" onchange="setDeptFunnelMgr(this.value)">'+fmgrs.map(function(m){return'<option value="'+m.id+'"'+(m.id===S.deptFunnelMgr?' selected':'')+'>'+esc(m.name)+'</option>';}).join('')+'</select>';
+    var stages=['Лиды в работе','Квалифицировано','Встречи назначено','Встречи проведено','Счета выставлено','Оплаты'];
+    var fw=[100,62,44,33,22,13];
+    var bars=stages.map(function(s,i){return'<div class="fn-row"><span class="fn-label">'+s+'</span><div class="fn-bar"><div class="fn-fill" style="width:'+fw[i]+'%"></div></div><span style="font-size:12px;color:var(--text-3);text-align:right">—</span></div>';}).join('');
+    ct='<div class="panel"><div class="adm-head" style="margin-bottom:18px"><div class="panel-title" style="margin:0">Воронка первички</div>'+fmgrSel+'</div><div class="fn-wrap"><div class="fn-bars">'+bars+'</div><div class="fn-overlay"><div class="fn-icon">🔒</div><div class="fn-ttl">Воронка подключается</div><div class="fn-txt">Данные из amoCRM. Запусти <code>amoCRM.gs</code> → таблица <code>amo_leads</code>.</div></div></div></div>';
+  }
+  setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUp()">‹ Дашборд</button><span class="crumb-title">'+esc(d.name)+'</span><button class="btn sm ghost" onclick="archiveDept(\''+d.id+'\')" style="margin-left:4px">В архив</button></div>'+calTrigger()+'</div><div class="dept-kpi">'+kH+'</div>'+tabs+ct);
+}
+
+/* ═══ EMPLOYEE VIEW ═══ */
+window.sortCli=function(k){if(S.cliSortKey===k)S.cliSortDir*=-1;else{S.cliSortKey=k;S.cliSortDir=1;}render();};
+function renderEmpView(){
+  var emp=RAW.employees.find(function(e){return e.id===S.empView;});
+  if(!emp){S.empView=null;render();return;}
+  var d=DB.depts.find(function(x){return x.id===S.dept;});
+  var dealAgg=S.dealsByEmp[S.empView]||{fact:0,comm:0,count:0};
+  var plan=S.planByEmp[S.empView]||0;
+  var mp=pct(dealAgg.fact,plan),mr=rrPct(dealAgg.fact,plan);
+  var myClients=d?d.clients.filter(function(c){return c.mgr===emp.platform_user_id;}):[];
+  var ten=tenure(emp.hired_at);
+  var initials=(emp.name||'?').split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase();
+  var kH=[
+    '<div class="kcard"><div class="kl">Факт за период</div><div class="kv num" style="color:'+grad(mp)+'">'+fmt(dealAgg.fact)+'</div><div class="ks"><span class="neu">план '+fmt(plan)+' · '+mp+'%</span></div><div class="pbar"><div class="pfill" style="width:'+Math.min(mp,100)+'%;background:'+grad(mp)+'"></div></div></div>',
+    '<div class="kcard"><div class="kl">Ранрейт</div><div class="kv num" style="color:'+grad(mr)+'">'+mr+'%</div><div class="ks"><span class="neu">по плану</span></div></div>',
+    '<div class="kcard"><div class="kl">Сделок</div><div class="kv num">'+dealAgg.count+'</div><div class="ks"><span class="neu">за период</span></div></div>',
+    '<div class="kcard"><div class="kl">Клиентов</div><div class="kv num">'+myClients.length+'</div><div class="ks"><span class="neu">в портфеле</span></div></div>',
+    '<div class="kcard"><div class="kl">Стаж</div><div class="kv num">'+(ten!==null?ten+' мес.':'—')+'</div><div class="ks"><span class="neu">'+(emp.hired_at?'с '+fmtD(emp.hired_at):'')+'</span></div></div>'
+  ].join('');
+  // Sort clients
+  myClients.forEach(function(c){c._min=S.periodStats[c.platform_org_id]||0;c._d=daysTo(c.expiry);});
+  myClients.sort(function(a,b){
+    var k=S.cliSortKey;
+    var va=k==='expiry'?a._d:k==='_min'?a._min:(a[k]||0);
+    var vb=k==='expiry'?b._d:k==='_min'?b._min:(b[k]||0);
+    if(typeof va==='string')return S.cliSortDir*va.localeCompare(vb);
+    return S.cliSortDir*((va||0)-(vb||0));
+  });
+  var colDefs=[['name','Компания',''],['fact','Факт','r'],['_min','Мин исп.','r'],['minLeft','Мин ост.','r'],['expiry','До прод.','r']];
+  var th=colDefs.map(function(c){var a=S.cliSortKey===c[0];return'<th class="'+(c[2])+(a?' sorted':'')+'" onclick="sortCli(\''+c[0]+'\')">'+c[1]+si(a,S.cliSortDir)+'</th>';}).join('');
+  var rows=myClients.length?myClients.map(function(c){
+    var c3=c.fact>0?grad(100):c.fact<0?'var(--red)':'var(--text-3)';
+    var minCell=S.periodLoading?'<span style="color:var(--text-3)">···</span>':fmtMin(c._min);
+    return'<tr>'+
+      '<td><a class="ext-link" href="'+esc(c.url)+'" target="_blank">'+esc(c.name)+' <span class="lk">↗</span></a></td>'+
+      '<td class="r strong num" style="color:'+c3+'">'+fmt(c.fact)+'</td>'+
+      '<td class="r muted num">'+minCell+'</td>'+
+      '<td class="r muted num">'+fmtMin(c.minLeft)+'</td>'+
+      '<td class="r">'+daysBadge(c._d)+'</td>'+
+    '</tr>';
+  }).join(''):'<tr><td colspan="5"><div class="empty-state">Нет клиентов в портфеле</div></td></tr>';
+  var empHeader='<div class="emp-header">'+
+    '<div class="emp-avatar">'+initials+'</div>'+
+    '<div><div class="emp-name">'+esc(emp.name)+'</div><div class="emp-meta">'+(emp.role==='lead'?'Тимлид':'Менеджер')+(d?' · '+esc(d.name):'')+'</div></div>'+
+    '<div style="margin-left:auto"><button class="btn primary sm" onclick="openPlanModal(\''+S.empView+'\',\''+esc(emp.name)+'\')">Редактировать план</button></div>'+
+  '</div>';
+  setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUpFromEmp()">‹ '+esc(d?d.name:'Отдел')+'</button><span class="crumb-title">'+esc(emp.name)+'</span></div>'+calTrigger()+'</div>'+
+    empHeader+'<div class="dept-kpi">'+kH+'</div>'+
+    '<div class="panel"><div class="panel-title">Клиенты ('+myClients.length+')</div><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table></div>');
+}
+
+/* ═══ РОП / НАСТРОЙКИ ═══ */
+function renderRop(){
+  if(!DB){setApp('<div class="topbar"><span class="brand">⚙ Настройки</span></div>');return;}
+  var d=S.ropDept?DB.depts.find(function(x){return x.id===S.ropDept;}):DB.depts[0];
+  if(!d&&DB.depts.length)d=DB.depts[0];
+  if(d&&!S.ropDept)S.ropDept=d.id;
+  var deptOpts=DB.depts.map(function(x){return'<option value="'+x.id+'"'+(x.id===S.ropDept?' selected':'')+'>'+esc(x.name)+'</option>';}).join('');
+  var staffRows=d&&d.staff.length?d.staff.map(function(m){
+    var isLead=m.role==='Тимлид';
+    return'<tr>'+
+      '<td><span class="strong">'+esc(m.name)+'</span></td>'+
+      '<td><select class="role-sel'+(isLead?' lead':'')+'" onchange="changeEmpRole(\''+m.supaId+'\',this.value)"><option value="manager"'+(isLead?'':' selected')+'>Менеджер</option><option value="lead"'+(isLead?' selected':'')+'>Тимлид</option></select></td>'+
+      '<td class="muted num">'+fmtD(m.hired)+'</td>'+
+      '<td><span class="status-dot"><span class="d" style="background:var(--green)"></span>активен</span></td>'+
+      '<td class="r muted num">'+m.clients+'</td>'+
+      '<td class="r"><button class="btn sm" onclick="editEmpModal(\''+m.supaId+'\')">Редактировать</button></td>'+
+    '</tr>';
+  }).join(''):'<tr><td colspan="6"><div class="empty-state">Нет сотрудников</div></td></tr>';
+  var firedInDept=(d&&d.fired)||[];
+  var firedBlock='';
+  if(firedInDept.length){
+    var isOpen=S.ropShowFired;
+    var firedRows=firedInDept.map(function(e){return'<tr class="fired-row"><td>'+esc(e.name)+'</td><td><span style="font-size:11px;color:var(--text-3)">'+(e.role==='lead'?'Тимлид':'Менеджер')+'</span></td><td class="muted num">'+fmtD(e.hired_at)+'</td><td class="muted num">'+fmtD(e.fired_at)+'</td><td class="r"><button class="btn sm" onclick="rehireEmp(\''+e.id+'\')">Вернуть</button></td></tr>';}).join('');
+    firedBlock='<div class="arch-toggle'+(isOpen?' open':'')+'" onclick="toggleRopFired()"><span class="arr">›</span> Уволенные ('+firedInDept.length+')</div><div class="arch-block'+(isOpen?' open':'')+'"><table class="tbl" style="margin-top:4px"><thead><tr><th>Имя</th><th>Роль</th><th>Нанят</th><th>Уволен</th><th class="r">Действие</th></tr></thead><tbody>'+firedRows+'</tbody></table></div>';
+  }
+  var unassigned=RAW.employees.filter(function(e){return!e.dept_id&&!e.fired_at&&!e.is_archived;});
+  var unaBlock=unassigned.length?'<div class="panel"><div class="panel-title">Без отдела ('+unassigned.length+')</div><table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th class="r">Действие</th></tr></thead><tbody>'+
+    unassigned.map(function(e){return'<tr><td>'+esc(e.name)+'</td><td><span style="font-size:11px;color:var(--text-3)">'+(e.role==='lead'?'Тимлид':'Менеджер')+'</span></td><td class="r"><button class="btn sm primary" onclick="reassignEmp(\''+e.id+'\')">→ В отдел</button></td></tr>';}).join('')+'</tbody></table></div>':'';
+  var deptCards=DB.depts.map(function(x){return'<div class="dept-edit-card"><div><div class="strong">'+esc(x.name)+'</div><div class="muted" style="font-size:11px;margin-top:2px">'+esc(x.tl)+' · '+x.staff.length+' чел.</div></div><div style="display:flex;gap:6px"><button class="btn sm" onclick="editDept(\''+x.id+'\')">Настроить</button><button class="btn sm ghost" onclick="archiveDept(\''+x.id+'\')">В архив</button></div></div>';}).join('');
+  var archDeptBlock='';
+  if(DB.archivedDepts.length){
+    var isOpen2=S.ropShowArchivedDepts;
+    var archList=DB.archivedDepts.map(function(x){return'<div class="dept-edit-card archived"><div><div class="strong">'+esc(x.name)+'</div></div><button class="btn sm" onclick="unarchiveDept(\''+x.id+'\')">Разархивировать</button></div>';}).join('');
+    archDeptBlock='<div class="arch-toggle'+(isOpen2?' open':'')+'" onclick="toggleRopArchDepts()"><span class="arr">›</span> Архив отделов ('+DB.archivedDepts.length+')</div><div class="arch-block'+(isOpen2?' open':'')+'">'+archList+'</div>';
+  }
+  setApp('<div class="topbar"><div class="nav-left"><span class="brand">⚙ Настройки</span></div></div>'+
+    '<div class="panel" style="margin-bottom:14px"><div class="adm-head">'+
+      '<div style="display:flex;align-items:center;gap:10px"><div class="panel-title" style="margin:0">Состав отдела</div>'+
+        '<select class="sel" onchange="setRopDept(this.value)">'+deptOpts+'</select></div>'+
+      '<button class="btn primary" onclick="addEmpModal()">+ Сотрудник</button></div>'+
+      '<table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th>Нанят</th><th>Статус</th><th class="r">Клиентов</th><th class="r">Действие</th></tr></thead><tbody>'+staffRows+'</tbody></table>'+
+      firedBlock+'</div>'+
+    unaBlock+
+    '<div class="panel"><div class="adm-head"><div class="panel-title" style="margin:0">Все отделы</div><button class="btn primary" onclick="createDept()">+ Создать отдел</button></div>'+deptCards+archDeptBlock+'</div>');
+}
+window.setRopDept=function(id){S.ropDept=id;render();};
+window.toggleRopFired=function(){S.ropShowFired=!S.ropShowFired;render();};
+window.toggleRopArchDepts=function(){S.ropShowArchivedDepts=!S.ropShowArchivedDepts;render();};
+window.changeEmpRole=function(supaId,role){sbPatch('employees','id=eq.'+supaId,{role:role});RAW.employees.forEach(function(e){if(e.id===supaId)e.role=role;});buildDB();render();};
+
+/* Edit emp modal: single button → 4 actions */
+window.editEmpModal=function(supaId){
+  var emp=RAW.employees.find(function(e){return e.id===supaId;});
+  if(!emp)return;
+  var body='<div style="display:grid;gap:8px">'+
+    '<button class="btn" style="text-align:left;padding:12px 16px;border-radius:12px;font-size:13px" onclick="closeModal();reassignEmp(\''+supaId+'\')">↪ Перевести в другой отдел</button>'+
+    '<button class="btn" style="text-align:left;padding:12px 16px;border-radius:12px;font-size:13px" onclick="renameEmpModal(\''+supaId+'\')">✎ Переименовать</button>'+
+    '<button class="btn" style="text-align:left;padding:12px 16px;border-radius:12px;font-size:13px" onclick="changeHireModal(\''+supaId+'\')">📅 Изменить дату найма</button>'+
+    '<button class="btn danger" style="text-align:left;padding:12px 16px;border-radius:12px;font-size:13px" onclick="closeModal();fireEmp(\''+supaId+'\')">✕ Уволить</button>'+
+  '</div>';
+  openModalSimple(esc(emp.name),body);
+};
+window.renameEmpModal=function(supaId){
+  var emp=RAW.employees.find(function(e){return e.id===supaId;});
+  openModal('Переименовать','<div class="field"><label>Имя</label><input id="rn-n" value="'+esc(emp?emp.name:'')+'"></div>',function(){var nm=document.getElementById('rn-n').value.trim();if(!nm)return;sbPatch('employees','id=eq.'+supaId,{name:nm});RAW.employees.forEach(function(e){if(e.id===supaId)e.name=nm;});buildDB();closeModal();render();});
+};
+window.changeHireModal=function(supaId){
+  var emp=RAW.employees.find(function(e){return e.id===supaId;});
+  openModal('Дата найма','<div class="field"><label>Дата найма</label><input id="hire-d" type="date" value="'+(emp&&emp.hired_at?emp.hired_at.substring(0,10):todayISO())+'"></div>',function(){var dt=document.getElementById('hire-d').value;sbPatch('employees','id=eq.'+supaId,{hired_at:dt});RAW.employees.forEach(function(e){if(e.id===supaId)e.hired_at=dt;});buildDB();closeModal();render();});
+};
+window.reassignEmp=function(supaId){
+  var emp=RAW.employees.find(function(e){return e.id===supaId;});
+  var opts='<option value="">— убрать из всех отделов —</option>'+DB.depts.map(function(x){return'<option value="'+x.id+'"'+(emp&&emp.dept_id===x.id?' selected':'')+'>'+esc(x.name)+'</option>';}).join('');
+  openModal('Назначить в отдел','<p style="font-size:13px;color:var(--text-2);margin-bottom:14px">'+esc(emp?emp.name:'')+'</p><div class="field"><label>Отдел</label><select id="re-d" class="sel" style="width:100%;border-radius:8px">'+opts+'</select></div>',function(){var deptId=document.getElementById('re-d').value||null;sbPatch('employees','id=eq.'+supaId,{dept_id:deptId||null});RAW.employees.forEach(function(e){if(e.id===supaId)e.dept_id=deptId||null;});buildDB();closeModal();render();});
+};
+window.addEmpModal=function(){openModal('Добавить сотрудника','<p style="font-size:12px;color:var(--text-3);line-height:1.6">Сотрудники появляются после синка GAS syncAll. Ручное добавление — для тестирования.</p><div class="field" style="margin-top:12px"><label>Имя</label><input id="ae-n" placeholder="Иван Иванов"></div>',function(){closeModal();});};
+window.editDept=function(id){
+  var x=DB.depts.find(function(z){return z.id===id;});
+  var leads=RAW.employees.filter(function(e){return e.role==='lead';});
+  var lo='<option value="">— без тимлида —</option>'+leads.map(function(e){return'<option value="'+e.id+'"'+(x.leadId===e.id?' selected':'')+'>'+esc(e.name)+'</option>';}).join('');
+  openModal('Настройка отдела','<div class="field"><label>Название</label><input id="d-nm" value="'+esc(x.name)+'"></div><div class="field"><label>Тимлид</label><select id="d-lead" class="sel" style="width:100%;border-radius:8px">'+lo+'</select></div>',
+    function(){var nm=document.getElementById('d-nm').value.trim()||x.name;var lead=document.getElementById('d-lead').value||null;sbPatch('departments','id=eq.'+id,{name:nm,lead_employee_id:lead});RAW.depts.forEach(function(dd){if(dd.id===id){dd.name=nm;dd.lead_employee_id=lead;}});if(lead){sbPatch('employees','id=eq.'+lead,{dept_id:id,role:'lead'});RAW.employees.forEach(function(e){if(e.id===lead){e.dept_id=id;e.role='lead';}});}buildDB();closeModal();render();});
+};
+window.createDept=function(){
+  var leads=RAW.employees.filter(function(e){return e.role==='lead';});
+  var lo='<option value="">— без тимлида —</option>'+leads.map(function(e){return'<option value="'+e.id+'">'+esc(e.name)+'</option>';}).join('');
+  openModal('Новый отдел','<div class="field"><label>Название</label><input id="nd-nm" placeholder="Отдел Иванцова"></div><div class="field"><label>Тимлид</label><select id="nd-lead" class="sel" style="width:100%;border-radius:8px">'+lo+'</select></div>',
+    function(){var nm=document.getElementById('nd-nm').value.trim();if(!nm)return;var lead=document.getElementById('nd-lead').value||null;sbPost('departments',{name:nm,lead_employee_id:lead,monthly_plan:0,is_archived:false}).then(function(res){var nd=Array.isArray(res)?res[0]:res;if(!nd||!nd.id)return;RAW.depts.push(nd);if(lead){sbPatch('employees','id=eq.'+lead,{dept_id:nd.id,role:'lead'});RAW.employees.forEach(function(e){if(e.id===lead){e.dept_id=nd.id;e.role='lead';}});}buildDB();closeModal();S.ropDept=nd.id;render();});});
+};
+window.archiveDept=function(id){openModal('В архив отдел?','<p style="font-size:13px;color:var(--text-2);line-height:1.7">Отдел исчезнет с главного экрана.</p>',function(){sbPatch('departments','id=eq.'+id,{is_archived:true});RAW.depts.forEach(function(d){if(d.id===id)d.is_archived=true;});buildDB();closeModal();render();});};
+window.unarchiveDept=function(id){sbPatch('departments','id=eq.'+id,{is_archived:false});RAW.depts.forEach(function(d){if(d.id===id)d.is_archived=false;});buildDB();render();};
+window.fireEmp=function(supaId){
+  openModal('Уволить сотрудника','<div class="field"><label>Дата увольнения</label><input id="f-d" type="date" value="'+todayISO()+'"></div><p style="font-size:12px;color:var(--text-2);margin-top:4px;line-height:1.6">История выручки сохранится. Разархивировать можно в любой момент.</p>',
+    function(){var dt=document.getElementById('f-d').value||todayISO();sbPatch('employees','id=eq.'+supaId,{fired_at:dt,is_archived:true});RAW.employees.forEach(function(e){if(e.id===supaId){e.fired_at=dt;e.is_archived=true;}});buildDB();closeModal();render();});
+};
+window.rehireEmp=function(supaId){openModal('Вернуть сотрудника?','<p style="font-size:13px;color:var(--text-2)">Сотрудник вернётся в активный список.</p>',function(){sbPatch('employees','id=eq.'+supaId,{fired_at:null,is_archived:false});RAW.employees.forEach(function(e){if(e.id===supaId){e.fired_at=null;e.is_archived=false;}});buildDB();closeModal();render();});};
+window.hideClient=function(orgId,name){
+  openModal('Убрать в архив?','<p style="font-size:13px;color:var(--text-2);line-height:1.7"><b>'+esc(name)+'</b> исчезнет из портфеля. Вернуть можно через «Архив».</p>',
+    function(){sbPatch('clients','platform_org_id=eq.'+orgId,{is_hidden:true});RAW.clients.forEach(function(c){if(c.platform_org_id===orgId)c.is_hidden=true;});buildDB();closeModal();render();});
+};
+window.unhideClient=function(orgId){sbPatch('clients','platform_org_id=eq.'+orgId,{is_hidden:false});RAW.clients.forEach(function(c){if(c.platform_org_id===orgId)c.is_hidden=false;});buildDB();render();};
+
+/* ═══ ПЛАН (monthly_targets) ═══ */
+window.openPlanModal=function(supaId,empName){
+  var curPlan=S.planByEmp[supaId]||0;
+  var months=[],cur=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);
+  while(cur<=S.rangeTo){months.push({y:cur.getFullYear(),m:cur.getMonth()+1});cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);}
+  var isSingle=singleMonth();
+  var note=isSingle?'на '+MN[months[0].m-1]+' '+months[0].y:'на каждый из '+months.length+' месяцев';
+  openModal('План: '+esc(empName),
+    '<div class="field"><label>Сумма '+note+'</label><input id="plan-v" type="number" value="'+curPlan+'" style="font-size:16px;padding:12px 14px;text-align:right"></div>'+
+    (!isSingle?'<p style="font-size:11px;color:var(--amber);margin-top:-6px">Применится к каждому месяцу периода</p>':''),
+    function(){
+      var val=Number(document.getElementById('plan-v').value)||0;
+      var ps=months.map(function(mm){return sbUpsert('monthly_targets','employee_id,year,month',{employee_id:supaId,year:mm.y,month:mm.m,plan_amount:val});});
+      Promise.all(ps).then(function(){closeModal();refreshPeriod();flashSave();});
+    });
+};
+
+/* ═══ МЕНЕДЖЕР ═══ */
+window.setMgrAs=function(id){S.mgrAs=id;render();};
+window.setMgrTab=function(t){S.mgrTab=t;render();};
+window.toggleArchClients=function(){S.showArchivedClients=!S.showArchivedClients;render();};
+function renderMgr(){
+  var allMgrs=[];DB.depts.forEach(function(dd){dd.staff.forEach(function(m){allMgrs.push({id:m.id,supaId:m.supaId,name:m.name,dept:dd.name});});});
+  if(!allMgrs.length){setApp('<div class="topbar"><span class="brand">Кабинет менеджера</span></div><div class="empty-state">Нет менеджеров. Зайди в <b>⚙ Настройки</b>.</div>');return;}
+  if(!S.mgrAs||!allMgrs.find(function(m){return m.id===S.mgrAs;}))S.mgrAs=allMgrs[0].id;
+  var d=DB.depts.find(function(x){return x.staff.some(function(m){return m.id===S.mgrAs;});});
+  if(!d){S.mgrAs=allMgrs[0].id;d=DB.depts.find(function(x){return x.staff.some(function(m){return m.id===S.mgrAs;});});}
+  var myClients=d?d.clients.filter(function(c){return c.mgr===S.mgrAs;}):[];
+  var me=d?d.staff.find(function(m){return m.id===S.mgrAs;}):null;
+  var meSupaId=me?me.supaId:null;
+  var totalFact=me?me.fact:0,totalPlan=me?me.plan:0,myDeals=me?me.deals:0;
+  var mp=pct(totalFact,totalPlan),mr=rrPct(totalFact,totalPlan);
+  var asSel='<select class="sel" onchange="setMgrAs(this.value)">'+allMgrs.map(function(m){return'<option value="'+m.id+'"'+(m.id===S.mgrAs?' selected':'')+'>'+esc(m.name)+'</option>';}).join('')+'</select>';
+  var kH='<div class="kcard"><div class="kl">Мой план</div><div class="kv num">'+fmt(totalPlan)+'</div><div class="ks"><span class="neu">факт '+fmt(totalFact)+' · '+mp+'%</span></div><div class="pbar"><div class="pfill" style="width:'+Math.min(mp,100)+'%;background:'+grad(mp)+'"></div></div></div>'+
+    '<div class="kcard"><div class="kl">Сделок за период</div><div class="kv num">'+myDeals+'</div><div class="ks"><span class="neu">'+myClients.length+' клиентов</span></div></div>'+
+    '<div class="kcard"><div class="kl">Ранрейт</div><div class="kv num" style="color:'+grad(mr)+'">'+mr+'%</div><div class="ks"><span class="'+(mr>=100?'pos':mr>=80?'neu':'neg')+'">'+(mr>=100?'опережаем':'отстаём')+'</span></div></div>';
+  var tabs='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">'+
+    '<div class="tab-row" style="margin-bottom:0">'+[['clients','Клиенты'],['funnel','Воронка']].map(function(t){return'<button class="tab'+(S.mgrTab===t[0]?' on':'')+'" onclick="setMgrTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>'+
+    (meSupaId?'<button class="btn sm primary" onclick="openPlanModal(\''+meSupaId+'\',\''+esc(me?me.name:'')+'\')">Редактировать план</button>':'')+'</div>';
+  var content='';
+  if(S.mgrTab==='clients'){
+    myClients.forEach(function(c){c._min=S.periodStats[c.platform_org_id];c._d=daysTo(c.expiry);});
+    myClients.sort(function(a,b){
+      var k=S.cliSortKey;
+      var va=k==='expiry'?a._d:k==='_min'?a._min:(a[k]||0);
+      var vb=k==='expiry'?b._d:k==='_min'?b._min:(b[k]||0);
+      return S.cliSortDir*((va||0)-(vb||0));
+    });
+    var colDefs=[['name','Компания',''],['fact','Факт','r'],['_min','Мин исп.','r'],['minLeft','Мин ост.','r'],['expiry','До прод.','r'],['','','r']];
+    var th=colDefs.map(function(c){if(!c[0])return'<th></th>';var a=S.cliSortKey===c[0];return'<th class="'+(c[2])+(a?' sorted':'')+'" onclick="sortCli(\''+c[0]+'\')">'+c[1]+si(a,S.cliSortDir)+'</th>';}).join('');
+    var rows=myClients.map(function(c){
+      var c3=c.fact>0?grad(100):c.fact<0?'var(--red)':'var(--text-3)';
+      var minCell=S.periodLoading?'<span style="color:var(--text-3)">···</span>':(c._min!=null?fmtMin(c._min):'<span style="color:var(--text-3)">—</span>');
+      // FIXED: use data attributes to avoid escaping issues with company names
+      return'<tr>'+
+        '<td><a class="ext-link" href="'+esc(c.url)+'" target="_blank">'+esc(c.name)+' <span class="lk">↗</span></a></td>'+
+        '<td class="r strong num" style="color:'+c3+'">'+fmt(c.fact)+'</td>'+
+        '<td class="r muted num">'+minCell+'</td>'+
+        '<td class="r muted num">'+fmtMin(c.minLeft)+'</td>'+
+        '<td class="r">'+daysBadge(c._d)+'</td>'+
+        '<td class="r"><button class="btn sm ghost" data-org="'+c.platform_org_id+'" data-name="'+esc(c.name)+'" onclick="hideClient(this.dataset.org,this.dataset.name)">⋯</button></td>'+
+      '</tr>';
+    }).join('');
+    if(!myClients.length)rows='<tr><td colspan="6"><div class="empty-state">Нет клиентов.</div></td></tr>';
+    var myHidden=DB.hiddenClients?DB.hiddenClients.filter(function(c){return c.responsible_platform_user_id===S.mgrAs;}):[];
+    var archCliBlock='';
+    if(myHidden.length){
+      var archRows=myHidden.map(function(c){return'<tr><td class="muted">'+esc(c.company_name)+'</td><td class="r"><button class="btn sm" onclick="unhideClient(\''+c.platform_org_id+'\')">Вернуть</button></td></tr>';}).join('');
+      archCliBlock='<div class="arch-toggle'+(S.showArchivedClients?' open':'')+'" onclick="toggleArchClients()"><span class="arr">›</span> Архив клиентов ('+myHidden.length+')</div><div class="arch-block'+(S.showArchivedClients?' open':'')+'"><table class="tbl" style="margin-top:8px"><tbody>'+archRows+'</tbody></table></div>';
+    }
+    content='<div class="panel"><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>'+archCliBlock+'</div>';
+  }
+  if(S.mgrTab==='funnel'){content='<div class="panel"><div style="text-align:center;padding:50px"><div style="font-size:36px;opacity:.4">🔗</div><div style="font-size:14px;font-weight:600;color:var(--text-2);margin-top:12px">amoCRM воронка</div><div style="font-size:12px;color:var(--text-3);margin-top:8px">Подключи amoCRM.gs для данных.</div></div></div>';}
+  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Кабинет менеджера</span>'+asSel+'</div>'+calTrigger()+'</div>'+
+    '<div class="dept-kpi" style="grid-template-columns:repeat(3,1fr)">'+kH+'</div>'+tabs+content);
+}
+
+/* ═══ СДЕЛКИ ═══ */
+var _dc={orgId:null,name:'',search:''};
+window.addDeal=function(eid,did){openDealModal(null,eid==='null'?null:eid,did==='null'?null:did);};
+window.editDeal=function(id){var dl=S.dealsRaw.find(function(d){return d.id===id;});if(dl)openDealModal(dl,null,null);};
+window.deleteDeal=function(id){
+  var dl=S.dealsRaw.find(function(d){return d.id===id;});
+  openModal('Удалить сделку?','<p style="font-size:13px;color:var(--text-2);line-height:1.7">'+(dl?esc(dl.client_name||'—')+' · '+fmt(dl.amount):'')+'<br>Это нельзя отменить.</p>',
+    function(){fetch(SB_URL+'/rest/v1/deals?id=eq.'+id,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'}}).then(function(){closeModal();refreshPeriod();});});
+};
+function openDealModal(existing,preEmpId,preDeptId){
+  var emps=RAW.employees.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
+  var empOpts=emps.map(function(e){var arch=(e.fired_at||e.is_archived)?' (архив)':'';return'<option value="'+e.id+'">'+esc(e.name)+arch+'</option>';}).join('');
+  var initEmp=existing?existing.employee_id:(preEmpId||(emps[0]&&emps[0].id));
+  var body=
+    '<div class="field"><label>Событие *</label><select id="dl-type" class="sel" style="width:100%;border-radius:8px"><option value="payment">Оплата</option><option value="refund">Возврат</option></select></div>'+
+    '<div class="field"><label>Сотрудник *</label><select id="dl-emp" class="sel" style="width:100%;border-radius:8px" onchange="dealEmpChanged()">'+empOpts+'</select></div>'+
+    '<div class="field"><label>Клиент *</label><div id="dl-cwrap"></div></div>'+
+    '<div style="display:flex;gap:10px"><div class="field" style="flex:1"><label>Сумма ₽ *</label><input id="dl-amt" type="number" placeholder="0"></div><div class="field" style="flex:1"><label>Мотивация % *</label><input id="dl-pct" type="number" placeholder="10" step="0.5"></div></div>'+
+    '<div class="field"><label>Дата *</label><input id="dl-date" type="date" value="'+todayISO()+'"></div>'+
+    '<div class="field"><label>Комментарий</label><input id="dl-note" placeholder="—"></div>';
+  _dc={orgId:null,name:'',search:''};
+  openModal(existing?'Редактировать сделку':'Добавить сделку',body,function(){saveDeal(existing,preDeptId);});
+  setTimeout(function(){
+    var es=document.getElementById('dl-emp');if(es&&initEmp)es.value=initEmp;
+    if(existing){
+      var et=document.getElementById('dl-type');if(et)et.value=existing.event_type||'payment';
+      var ea=document.getElementById('dl-amt');if(ea)ea.value=existing.amount;
+      var ep=document.getElementById('dl-pct');if(ep)ep.value=existing.motivation_pct;
+      var ed=document.getElementById('dl-date');if(ed)ed.value=(existing.deal_date||'').substring(0,10);
+      var en=document.getElementById('dl-note');if(en)en.value=existing.note||'';
+    }
+    rebuildCliUI(existing?existing.platform_org_id:null);
+    setupDealVal();
+  },0);
+}
+window.dealEmpChanged=function(){_dc={orgId:null,name:'',search:''};rebuildCliUI(null);};
+function rebuildCliUI(preOrg){
+  if(preOrg){var cl=(RAW.allClients||[]).find(function(c){return c.platform_org_id===preOrg;});if(cl){_dc.orgId=preOrg;_dc.name=cl.company_name||'';}}
+  renderCliUI();
+}
+function renderCliUI(){
+  var wrap=document.getElementById('dl-cwrap');if(!wrap)return;
+  if(_dc.orgId){
+    wrap.innerHTML='<div class="cli-selected"><span>'+esc(_dc.name)+'</span><button class="chg" onclick="clearDealCli()">Изменить</button></div>';
+    validateDeal();return;
+  }
+  var empSel=document.getElementById('dl-emp');
+  var emp=empSel?RAW.employees.find(function(e){return e.id===empSel.value;}):null;
+  var puid=emp?emp.platform_user_id:null;
+  var allC=RAW.allClients||[];
+  var mine=allC.filter(function(c){return c.responsible_platform_user_id===puid;});
+  var others=allC.filter(function(c){return c.responsible_platform_user_id!==puid;});
+  var q=(_dc.search||'').toLowerCase();
+  if(q){var fn=function(c){return(c.company_name||'').toLowerCase().indexOf(q)>=0;};mine=mine.filter(fn);others=others.filter(fn);}
+  function makeOpts(list,sect){
+    if(!list.length)return'';
+    return'<div class="cli-ds">'+sect+'</div>'+list.slice(0,60).map(function(c){return'<div class="cli-do" data-orgid="'+c.platform_org_id+'" data-name="'+esc(c.company_name||'')+'">'+esc(c.company_name||'—')+'</div>';}).join('');
+  }
+  var dropHtml=makeOpts(mine,'Текущие клиенты сотрудника')+makeOpts(others,'Все остальные');
+  if(!dropHtml)dropHtml='<div class="cli-empty">Не найдено</div>';
+  wrap.innerHTML='<input id="dl-csearch" class="cli-search" placeholder="Поиск клиента..." value="'+esc(_dc.search||'')+'">'+
+    '<div class="cli-drop" id="dl-cdrop">'+dropHtml+'</div>';
+  setTimeout(function(){
+    var si=document.getElementById('dl-csearch');
+    if(si)si.oninput=function(){_dc.search=this.value;renderCliUI();setTimeout(function(){var x=document.getElementById('dl-csearch');if(x){x.focus();x.setSelectionRange(x.value.length,x.value.length);}},0);};
+    var drop=document.getElementById('dl-cdrop');
+    if(drop)drop.addEventListener('click',function(e){var opt=e.target.closest('.cli-do');if(opt){_dc.orgId=opt.dataset.orgid;_dc.name=opt.dataset.name;renderCliUI();}});
+    var si2=document.getElementById('dl-csearch');if(si2)si2.focus();
+  },0);
+  validateDeal();
+}
+window.clearDealCli=function(){_dc={orgId:null,name:'',search:''};renderCliUI();};
+function setupDealVal(){['dl-type','dl-amt','dl-pct','dl-date'].forEach(function(id){var el=document.getElementById(id);if(el){el.oninput=validateDeal;el.onchange=validateDeal;}});}
+function validateDeal(){
+  var btn=document.getElementById('msave');if(!btn)return;
+  function v(id){var el=document.getElementById(id);return el?el.value:'';}
+  var amt=parseFloat(v('dl-amt'));
+  var ok=v('dl-type')&&v('dl-emp')&&_dc.orgId&&amt>0&&v('dl-pct')!==''&&!isNaN(parseFloat(v('dl-pct')))&&v('dl-date');
+  btn.disabled=!ok;
+}
+function saveDeal(existing,preDeptId){
+  var type=document.getElementById('dl-type').value;
+  var empId=document.getElementById('dl-emp').value;
+  var orgId=_dc.orgId||null;
+  var clientName=_dc.name||'';
+  var amount=Number(document.getElementById('dl-amt').value)||0;
+  var pct2=Number(document.getElementById('dl-pct').value)||0;
+  var date=document.getElementById('dl-date').value||todayISO();
+  var note=document.getElementById('dl-note').value||null;
+  if(amount<=0||!orgId)return;
+  var emp=RAW.employees.find(function(e){return e.id===empId;});
+  var deptId=emp?emp.dept_id:(preDeptId||null);
+  var dept=RAW.depts.find(function(x){return x.id===deptId;});
+  var row={event_type:type,employee_id:empId,employee_name:emp?emp.name:'',platform_org_id:orgId,client_name:clientName,dept_id:deptId,dept_name:dept?dept.name:'',amount:amount,motivation_pct:pct2,deal_date:date,note:note};
+  if(existing){sbPatch('deals','id=eq.'+existing.id,row).then(function(){closeModal();refreshPeriod();flashSave();});}
+  else{sbPost('deals',row).then(function(){closeModal();refreshPeriod();flashSave();});}
+}
+
+/* ═══ ЛОГИ ОПЛАТ ═══ */
+window.setPayDept=function(v){S.payDept=v;S.payPage=0;render();};
+window.setPayEmp=function(v){S.payEmp=v;S.payPage=0;render();};
+window.setPaySearch=function(q){S.paySearch=q;S.payPage=0;render();setTimeout(function(){var el=document.getElementById('pay-srch');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}},0);};
+window.setPayLimit=function(v){S.payLimit=Number(v);S.payPage=0;render();};
+window.setPayPage=function(p){S.payPage=p;render();};
+function pagHtml(cur,tot,total){
+  if(tot<=1&&total<=S.payLimit)return'';
+  var pages=[];
+  if(tot<=7){for(var i=0;i<tot;i++)pages.push(i);}
+  else{pages=[0];if(cur>2)pages.push('…');for(var j=Math.max(1,cur-1);j<=Math.min(tot-2,cur+1);j++)pages.push(j);if(cur<tot-3)pages.push('…');pages.push(tot-1);}
+  var btns=pages.map(function(p){if(p==='…')return'<span style="color:var(--text-3);padding:0 4px;font-size:12px">…</span>';return'<button class="pag-btn'+(p===cur?' on':'')+'" onclick="setPayPage('+p+')">'+(p+1)+'</button>';}).join('');
+  return'<div class="pag"><span class="pag-info">'+total+' записей</span>'+
+    '<button class="pag-btn"'+(cur===0?' disabled':'')+' onclick="setPayPage('+(cur-1)+')">‹</button>'+btns+
+    '<button class="pag-btn"'+(cur>=tot-1?' disabled':'')+' onclick="setPayPage('+(cur+1)+')">›</button>'+
+    '<select class="sel" onchange="setPayLimit(this.value)" style="margin-left:4px">'+[10,20,50].map(function(n){return'<option value="'+n+'"'+(S.payLimit===n?' selected':'')+'>'+n+'/стр.</option>';}).join('')+'</select></div>';
+}
+function renderPayroll(){
+  var deptOpts='<option value="all">Все отделы</option>'+DB.depts.concat(DB.archivedDepts.map(function(d){return{id:d.id,name:d.name+' (архив)'};})).map(function(d){return'<option value="'+d.id+'"'+(S.payDept===d.id?' selected':'')+'>'+esc(d.name)+'</option>';}).join('');
+  var allEmps=RAW.employees.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
+  var empOpts='<option value="all">Все сотрудники</option>'+allEmps.map(function(e){return'<option value="'+e.id+'"'+(S.payEmp===e.id?' selected':'')+'>'+esc(e.name)+(e.fired_at?' (архив)':'')+'</option>';}).join('');
+  var filtered=S.dealsRaw.filter(function(d){
+    if(S.payDept!=='all'&&d.dept_id!==S.payDept)return false;
+    if(S.payEmp!=='all'&&d.employee_id!==S.payEmp)return false;
+    if(S.paySearch&&!(d.client_name||'').toLowerCase().includes(S.paySearch.toLowerCase()))return false;
+    return true;
+  });
+  var byEmp={};
+  filtered.forEach(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);var comm=amt*(Number(d.motivation_pct)||0)/100;var k=d.employee_id||'—';var e=byEmp[k]||(byEmp[k]={name:d.employee_name||'—',dept:d.dept_name||'—',fact:0,comm:0,count:0});e.fact+=amt;e.comm+=comm;e.count++;});
+  var rowsArr=Object.keys(byEmp).map(function(k){return byEmp[k];}).sort(function(a,b){return b.comm-a.comm;});
+  var totFact=rowsArr.reduce(function(a,e){return a+e.fact;},0);
+  var totComm=rowsArr.reduce(function(a,e){return a+e.comm;},0);
+  var totCount=rowsArr.reduce(function(a,e){return a+e.count;},0);
+  var kH=[
+    '<div class="ck"><div class="ck-l">Выручка по фильтрам</div><div class="ck-v num">'+fmt(totFact)+'</div></div>',
+    '<div class="ck"><div class="ck-l">Сделок</div><div class="ck-v num">'+totCount+'</div><div class="ck-s">оплат и возвратов</div></div>',
+    '<div class="ck"><div class="ck-l">Начислено мотивации</div><div class="ck-v num">'+fmt(totComm)+'</div></div>',
+    '<div class="ck"><div class="ck-l">Сотрудников со сделками</div><div class="ck-v num">'+rowsArr.length+'</div></div>'
+  ].join('');
+  var sorted=filtered.slice().sort(function(a,b){return(b.deal_date||'').localeCompare(a.deal_date||'');});
+  var total=sorted.length,tot=Math.max(1,Math.ceil(total/S.payLimit)),page=Math.min(S.payPage,tot-1);
+  var paged=sorted.slice(page*S.payLimit,(page+1)*S.payLimit);
+  var q=S.paySearch;
+  var dealRows=paged.map(function(d){
+    var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);var comm=amt*(Number(d.motivation_pct)||0)/100;
+    var cn=esc(d.client_name||'—');
+    if(q){var re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');cn=cn.replace(re,'<mark style="background:var(--accent-bg);border-radius:2px">$1</mark>');}
+    return'<tr>'+
+      '<td class="muted num">'+fmtD(d.deal_date)+'</td>'+
+      '<td><span class="strong">'+esc(d.employee_name||'—')+'</span></td>'+
+      '<td class="muted">'+esc(d.dept_name||'—')+'</td>'+
+      '<td>'+cn+(d.event_type==='refund'?' <span style="color:var(--red);font-size:10px">возврат</span>':'')+'</td>'+
+      '<td class="r strong num"'+(amt<0?' style="color:var(--red)"':'')+'>'+fmt(amt)+'</td>'+
+      '<td class="r muted num">'+(d.motivation_pct||0)+'%</td>'+
+      '<td class="r strong num" style="color:var(--green)">'+fmt(comm)+'</td>'+
+      '<td class="muted" style="font-size:11px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(d.note||'')+'</td>'+
+      '<td class="r" style="white-space:nowrap"><button class="btn sm ghost" onclick="editDeal(\''+d.id+'\')" title="Ред.">✎</button> <button class="btn sm danger" onclick="deleteDeal(\''+d.id+'\')" title="Удалить">✕</button></td>'+
+    '</tr>';
+  }).join('');
+  var dealTable=paged.length?'<table class="tbl"><thead><tr><th>Дата</th><th>Сотрудник</th><th>Отдел</th><th>Компания</th><th class="r">Сумма</th><th class="r">%</th><th class="r">Начислено</th><th>Коммент.</th><th></th></tr></thead><tbody>'+dealRows+'</tbody></table>':
+    '<div class="empty-state">Нет сделок по фильтрам.</div>';
+  var summaryRows=rowsArr.map(function(e){var avgPct=e.fact!==0?r(e.comm/e.fact*100):0;return'<tr><td><span class="strong">'+esc(e.name)+'</span></td><td class="muted">'+esc(e.dept)+'</td><td class="r muted num">'+e.count+'</td><td class="r strong num">'+fmt(e.fact)+'</td><td class="r muted num">'+avgPct+'%</td><td class="r strong num" style="color:var(--green)">'+fmt(e.comm)+'</td></tr>';}).join('');
+  var sumBlock=rowsArr.length?'<div class="panel"><div class="panel-title">Свод по сотрудникам</div><table class="tbl"><thead><tr><th>Сотрудник</th><th>Отдел</th><th class="r">Сделок</th><th class="r">Выручка</th><th class="r">Ср. %</th><th class="r">Начислено</th></tr></thead><tbody>'+summaryRows+'</tbody></table></div>':'';
+  var filters='<div class="adm-head" style="gap:10px;flex-wrap:wrap">'+
+    '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
+      '<select class="sel" onchange="setPayDept(this.value)">'+deptOpts+'</select>'+
+      '<select class="sel" onchange="setPayEmp(this.value)">'+empOpts+'</select>'+
+      '<input id="pay-srch" class="search-inp" placeholder="🔍 Поиск по компании..." value="'+esc(S.paySearch)+'" oninput="setPaySearch(this.value)">'+
+    '</div>'+
+    '<button class="btn primary" onclick="exportPayroll()">↓ XLSX</button>'+
+  '</div>';
+  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Логи оплат</span></div>'+calTrigger()+'</div>'+
+    '<div class="ckpi">'+kH+'</div>'+
+    '<div class="panel">'+filters+dealTable+pagHtml(page,tot,total)+'</div>'+sumBlock);
+}
+window.exportPayroll=function(){
+  var filtered=S.dealsRaw.filter(function(d){
+    if(S.payDept!=='all'&&d.dept_id!==S.payDept)return false;
+    if(S.payEmp!=='all'&&d.employee_id!==S.payEmp)return false;
+    if(S.paySearch&&!(d.client_name||'').toLowerCase().includes(S.paySearch.toLowerCase()))return false;
+    return true;
+  });
+  if(!filtered.length){alert('Нет сделок для выгрузки');return;}
+  var deals=filtered.map(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);return{'Дата':d.deal_date,'Событие':d.event_type==='refund'?'Возврат':'Оплата','Сотрудник':d.employee_name,'Отдел':d.dept_name,'Клиент':d.client_name,'Сумма':amt,'Мотивация %':d.motivation_pct,'Начислено':amt*(Number(d.motivation_pct)||0)/100,'Комментарий':d.note||''};});
+  var byEmp2={};filtered.forEach(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);var k=d.employee_id||'—';var e=byEmp2[k]||(byEmp2[k]={'Сотрудник':d.employee_name,'Отдел':d.dept_name,'Сделок':0,'Выручка':0,'Начислено':0});e['Сделок']++;e['Выручка']+=amt;e['Начислено']+=amt*(Number(d.motivation_pct)||0)/100;});
+  var summary=Object.keys(byEmp2).map(function(k){return byEmp2[k];}).sort(function(a,b){return b['Начислено']-a['Начислено'];});
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(summary),'Свод');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(deals),'Сделки');
+  XLSX.writeFile(wb,'Логи_оплат_'+dateISO(S.rangeFrom)+'_'+dateISO(S.rangeTo)+'.xlsx');
+};
+
+/* ═══ MODAL ═══ */
+function openModal(title,body,onSave){
+  var m=document.getElementById('modal');
+  m.innerHTML='<div class="modal"><div class="modal-title">'+title+'</div>'+body+'<div class="modal-actions"><button class="btn" onclick="closeModal()">Отмена</button><button class="btn primary" id="msave">Сохранить</button></div></div>';
+  m.classList.add('open');document.getElementById('msave').onclick=onSave;
+}
+function openModalSimple(title,body){
+  var m=document.getElementById('modal');
+  m.innerHTML='<div class="modal"><div class="modal-title">'+title+'</div>'+body+'<div class="modal-actions"><button class="btn" onclick="closeModal()">Закрыть</button></div></div>';
+  m.classList.add('open');
+}
+window.closeModal=function(){var m=document.getElementById('modal');m.classList.remove('open');m.innerHTML='';};
+
+/* ═══ BOOT ═══ */
 loadData();
 </script>
-</body></html>
+</body>
+</html>
