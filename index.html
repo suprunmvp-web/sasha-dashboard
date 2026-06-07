@@ -1489,7 +1489,7 @@ function renderMgr(){
     }
     content='<div class="panel"><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>'+archCliBlock+'</div>';
   }
-  if(S.mgrTab==='funnel'){content='<div class="panel"><div style="text-align:center;padding:50px"><div style="font-size:36px;opacity:.4">🔗</div><div style="font-size:14px;font-weight:600;color:var(--text-2);margin-top:12px">amoCRM воронка</div><div style="font-size:12px;color:var(--text-3);margin-top:8px">Подключи amoCRM.gs для данных.</div></div></div>';}
+  if(S.mgrTab==='funnel'){var prevMgrs=S.fnMgrs?S.fnMgrs.slice():[];S.fnMgrs=[S.mgrAs];try{content=renderFunnelContent_(d);}finally{S.fnMgrs=prevMgrs;}}
   setApp('<div class="topbar"><div class="nav-left"><span class="brand">Кабинет менеджера</span>'+asSel+'</div>'+calTrigger()+'</div>'+
     '<div class="dept-kpi" style="grid-template-columns:repeat(3,1fr)">'+kH+'</div>'+tabs+content);
 }
