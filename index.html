@@ -199,18 +199,52 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .fired-row{opacity:.5;}
 .fired-row td{font-style:italic;}
 
-/* FUNNEL LOCK */
-.fn-wrap{position:relative;}
-.fn-bars{display:flex;flex-direction:column;gap:12px;filter:blur(1.5px);opacity:.4;pointer-events:none;}
-.fn-row{display:grid;grid-template-columns:160px 1fr 40px;gap:14px;align-items:center;}
-.fn-label{font-size:12px;color:var(--text-2);}
-.fn-bar{height:26px;background:var(--surface-3);border-radius:7px;overflow:hidden;}
-.fn-fill{height:100%;background:var(--accent);border-radius:7px;}
-.fn-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(11,14,20,.35);border-radius:12px;}
-[data-theme="light"] .fn-overlay{background:rgba(244,246,250,.55);}
-.fn-icon{font-size:30px;opacity:.7;}
-.fn-ttl{font-size:14px;font-weight:600;}
-.fn-txt{font-size:12px;color:var(--text-2);text-align:center;line-height:1.7;max-width:380px;}
+/* FUNNEL v2 */
+.fn2-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.fn2-tag{font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;transition:.15s;white-space:nowrap;}
+.fn2-tag:hover{border-color:var(--accent);color:var(--accent);}
+.fn2-tag.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+.fn2-tag .tc{font-size:11px;opacity:.8;margin-left:3px;}
+.fn2-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
+.fn2-title{font-size:15px;font-weight:700;flex:1;}
+.fn2-cmp-btn{font-size:12px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;transition:.15s;}
+.fn2-cmp-btn:hover,.fn2-cmp-btn.on{border-color:var(--accent);color:var(--accent);}
+.fn2-cmp-btn.on{background:var(--accent-bg);}
+.fn2-tbl{width:100%;border-collapse:collapse;}
+.fn2-tbl th{text-align:left;font-size:10px;font-weight:500;color:var(--text-3);padding:0 12px 10px 0;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;}
+.fn2-tbl th.r{text-align:right;}
+.fn2-tbl td{padding:2px 12px 2px 0;vertical-align:middle;}
+.fn2-tbl td.r{text-align:right;}
+.fn2-stage-name{font-size:13px;color:var(--text);font-weight:500;white-space:nowrap;}
+.fn2-bar-wrap{height:22px;background:var(--surface-3);border-radius:6px;overflow:hidden;}
+.fn2-bar-fill{height:100%;border-radius:6px;transition:width .4s ease;}
+.fn2-pct{font-size:13px;font-weight:700;min-width:44px;text-align:right;}
+.fn2-num{font-size:13px;color:var(--text-2);min-width:36px;text-align:right;font-variant-numeric:tabular-nums;}
+.fn2-plan-num{font-size:13px;color:var(--text-3);min-width:36px;text-align:right;font-variant-numeric:tabular-nums;}
+.fn2-conv-row td{padding:1px 12px 8px 0;}
+.fn2-conv{font-size:11px;color:var(--text-3);padding-left:4px;}
+.fn2-conv b{color:var(--text-2);}
+.fn2-stat-row{display:flex;gap:6px;margin-bottom:6px;align-items:center;font-size:12px;color:var(--text-3);}
+.fn2-stat-row b{color:var(--text);font-weight:600;}
+/* channel cards */
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:4px;}
+.ch-card{background:var(--surface-2);border:1px solid var(--border-soft);border-radius:12px;padding:14px;cursor:pointer;transition:.15s;}
+.ch-card:hover{border-color:var(--accent);transform:translateY(-1px);}
+.ch-card.on{border-color:var(--accent);background:var(--accent-bg);}
+.ch-name{font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text);}
+.ch-stat{display:flex;justify-content:space-between;font-size:12px;color:var(--text-2);margin-bottom:3px;}
+.ch-stat b{color:var(--text);}
+.ch-conv{margin-top:8px;font-size:14px;font-weight:700;}
+/* compare mode */
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.cmp-head{text-align:center;font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px;}
+.cmp-tbl{width:100%;border-collapse:collapse;}
+.cmp-tbl th{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;padding:0 8px 8px 0;}
+.cmp-tbl td{font-size:13px;padding:6px 8px 6px 0;border-bottom:1px solid var(--border-soft);vertical-align:middle;}
+.cmp-tbl tr:last-child td{border-bottom:none;}
+.cmp-bar{height:8px;background:var(--surface-3);border-radius:4px;overflow:hidden;margin-top:4px;}
+.cmp-fill{height:100%;border-radius:4px;}
+.fn-empty{font-size:13px;color:var(--text-3);padding:24px;text-align:center;}
 .fn-txt code{background:var(--surface-3);padding:1px 6px;border-radius:5px;font-size:11px;}
 
 /* LEADERBOARD */
@@ -317,7 +351,7 @@ var S={
   periodStats:{},periodLoading:false,periodReady:false,
   showArchivedDepts:false,showArchivedClients:false,
   ropDept:null,ropShowFired:false,ropShowArchivedDepts:false,
-  deptFunnelMgr:'all',
+  deptFunnelMgr:'all',fnCompare:false,fnMgr2:null,fnTagFilter:null,
   dealsRaw:[],dealsByEmp:{},dealsByOrg:{},dealsByDept:{},
   amoLeads:[],funnelTargets:{},amoUsers:[],
   planByEmp:{},
@@ -654,6 +688,168 @@ window.setTab=function(t){S.tab=t;render();};
 window.sortStaff=function(k){if(S.staffSortKey===k)S.staffSortDir*=-1;else{S.staffSortKey=k;S.staffSortDir=-1;}render();};
 window.drillEmp=function(supaId){S.empView=supaId;render();};
 window.setDeptFunnelMgr=function(id){S.deptFunnelMgr=id;render();};
+/* ═══ FUNNEL v2 — helpers ═══ */
+function amoUserIdForMgr_(supaId){var e=RAW.employees.find(function(x){return x.id===supaId;});return e?e.amo_user_id:null;}
+function filterLeadsByMgr_(leads,supaId,dStaff){
+  if(supaId==='all'){
+    var auids=(dStaff||[]).map(function(m){return amoUserIdForMgr_(m.supaId);}).filter(Boolean);
+    return auids.length?leads.filter(function(l){return auids.indexOf(l.responsible_user_id)>=0;}):leads;
+  }
+  var auid=amoUserIdForMgr_(supaId);
+  return auid?leads.filter(function(l){return l.responsible_user_id===auid;}):[]; 
+}
+function filterLeadsByTag_(leads,tag){
+  if(!tag)return leads;
+  return leads.filter(function(l){var tags=(l.tags||'').split(',');return tags.some(function(t){return t.trim()===tag;});});
+}
+function getTagCounts_(leads){
+  var tc={};
+  leads.forEach(function(l){(l.tags||'').split(',').forEach(function(t){t=t.trim();if(t)tc[t]=(tc[t]||0)+1;});});
+  return tc;
+}
+function fmtK_(n){return n>=1000?r(n/1000)+'к':String(n);}
+
+function renderFunnelContent_(d){
+  var hasAmo=S.amoLeads.length>0;
+  var planBtn='<button class="btn sm ghost" onclick="openFunnelPlanModal(\''+d.id+'\')" style="margin-right:4px">📋 Редактировать план</button>';
+  /* All dept leads (both managers) */
+  var deptLeads=filterLeadsByMgr_(S.amoLeads,'all',d.staff);
+  /* Tag chips */
+  var allTagCounts=getTagCounts_(deptLeads);
+  var tagKeys=Object.keys(allTagCounts).sort(function(a,b){return allTagCounts[b]-allTagCounts[a];}).slice(0,18);
+  var tagChips='<div class="fn2-tags">'+
+    '<button class="fn2-tag'+(S.fnTagFilter===null?' on':'')+'" onclick="setFnTag(null)">Все теги</button>'+
+    tagKeys.map(function(t){return'<button class="fn2-tag'+(S.fnTagFilter===t?' on':'')+'" onclick="setFnTag(\''+esc(t)+'\')" title="'+esc(t)+'">'+esc(t.length>22?t.slice(0,20)+'…':t)+'<span class="tc">'+allTagCounts[t]+'</span></button>';}).join('')+
+  '</div>';
+
+  var allMgrs=[{id:'all',name:'Все менеджеры',dept:''}].concat(
+    RAW.employees.filter(function(e){return !e.fired_at&&!e.is_archived&&e.amo_user_id;}).map(function(e){
+      var dd=RAW.depts.find(function(x){return x.id===e.dept_id;});
+      return{id:e.id,name:e.name,dept:dd?dd.name:''};
+    })
+  );
+  var mgr1Sel='<select class="sel" onchange="setDeptFunnelMgr(this.value)">'+
+    [{id:'all',name:'Все менеджеры'}].concat(d.staff).map(function(m){return'<option value="'+m.id+'"'+(m.id===S.deptFunnelMgr?' selected':'')+'>'+esc(m.name)+'</option>';}).join('')+'</select>';
+  var mgr2Sel='<select class="sel" onchange="setFnMgr2(this.value)" style="min-width:180px">'+
+    allMgrs.map(function(m){return'<option value="'+m.id+'"'+(m.id===S.fnMgr2?' selected':'')+'>'+esc(m.name)+(m.dept?' · '+esc(m.dept):'')+'</option>';}).join('')+'</select>';
+  var cmpToggle='<button class="fn2-cmp-btn'+(S.fnCompare?' on':'')+'" onclick="toggleFnCompare()">⇄ Сравнить</button>';
+  var mgrRow=S.fnCompare?
+    ('<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+mgr1Sel+'<span style="color:var(--text-3);font-weight:600">vs</span>'+mgr2Sel+cmpToggle+'</div>'):
+    ('<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+mgr1Sel+cmpToggle+'</div>');
+
+  /* Filtered leads for mgr1 */
+  var leads1=filterLeadsByTag_(filterLeadsByMgr_(S.amoLeads,S.deptFunnelMgr,d.staff),S.fnTagFilter);
+  var ft=S.funnelTargets[d.id]||{};
+  var fc1=buildFunnelCounts(leads1);
+
+  var body='';
+  if(!hasAmo){
+    body='<div class="fn-empty">🔒 Запусти <code>amoSyncAll()</code> в GAS — данные появятся здесь.</div>';
+  } else if(S.fnCompare){
+    /* COMPARE MODE */
+    var leads2=filterLeadsByTag_(filterLeadsByMgr_(S.amoLeads,S.fnMgr2||'all',d.staff),S.fnTagFilter);
+    var fc2=buildFunnelCounts(leads2);
+    var mgr1Name=S.deptFunnelMgr==='all'?'Весь отдел':(d.staff.find(function(m){return m.supaId===S.deptFunnelMgr;})||{name:'—'}).name;
+    var mgr2Name=S.fnMgr2==='all'||!S.fnMgr2?'Весь (глобал)':(allMgrs.find(function(m){return m.id===S.fnMgr2;})||{name:'—'}).name;
+    var max1=fc1.total||1,max2=fc2.total||1;
+    var rows=AMO_STAGES.map(function(st,i){
+      var c1=fc1.counts[st.key]||0,c2=fc2.counts[st.key]||0;
+      var p1=max1>0?r(c1/max1*100):0,p2=max2>0?r(c2/max2*100):0;
+      var prev1=i>0?(fc1.counts[AMO_STAGES[i-1].key]||fc1.total):fc1.total;
+      var prev2=i>0?(fc2.counts[AMO_STAGES[i-1].key]||fc2.total):fc2.total;
+      var cv1=prev1>0?r(c1/prev1*100):0,cv2=prev2>0?r(c2/prev2*100):0;
+      var col1=grad(p1),col2=grad(p2);
+      return'<tr>'+
+        '<td class="cmp-tbl" style="font-size:13px;font-weight:500;white-space:nowrap;padding-right:16px">'+esc(st.label)+'</td>'+
+        '<td style="width:40%">'+
+          '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:'+col1+';font-weight:600">'+c1+'</span>'+
+          (i>0?'<span style="color:var(--text-3)">↳ '+cv1+'%</span>':'')+'</div>'+
+          '<div class="cmp-bar"><div class="cmp-fill" style="width:'+Math.min(p1,100)+'%;background:'+col1+'"></div></div>'+
+        '</td>'+
+        '<td style="width:40%">'+
+          '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="color:'+col2+';font-weight:600">'+c2+'</span>'+
+          (i>0?'<span style="color:var(--text-3)">↳ '+cv2+'%</span>':'')+'</div>'+
+          '<div class="cmp-bar"><div class="cmp-fill" style="width:'+Math.min(p2,100)+'%;background:'+col2+'"></div></div>'+
+        '</td>'+
+      '</tr>';
+    }).join('');
+    body='<div class="cmp-grid">'+
+      '<div style="grid-column:1/-1"><table class="cmp-tbl" style="width:100%">'+
+        '<thead><tr><th style="width:20%">ЭТАП</th><th style="width:40%">'+esc(mgr1Name)+'</th><th style="width:40%">'+esc(mgr2Name)+'</th></tr></thead>'+
+        '<tbody>'+rows+'</tbody></table></div>'+
+      '<div style="font-size:12px;color:var(--text-3);"><b>'+esc(mgr1Name)+'</b>: '+fc1.total+' лидов · '+fc1.rejected+' откатов · '+(fc1.counts.paid||0)+' оплат</div>'+
+      '<div style="font-size:12px;color:var(--text-3);"><b>'+esc(mgr2Name)+'</b>: '+fc2.total+' лидов · '+fc2.rejected+' откатов · '+(fc2.counts.paid||0)+' оплат</div>'+
+    '</div>';
+  } else {
+    /* NORMAL FUNNEL TABLE */
+    var statRow='<div class="fn2-stat-row">Лидов: <b>'+fc1.total+'</b> &nbsp;·&nbsp; Откатов: <b>'+fc1.rejected+'</b> &nbsp;·&nbsp; Оплат: <b>'+(fc1.counts.paid||0)+'</b></div>';
+    var tblRows=AMO_STAGES.map(function(st,i){
+      var cnt=fc1.counts[st.key]||0;
+      var plan=ft[st.key]||0;
+      var prev=i>0?(fc1.counts[AMO_STAGES[i-1].key]||fc1.total):fc1.total;
+      var conv=prev>0?r(cnt/prev*100):0;
+      var pctPlan=plan>0?r(cnt/plan*100):null;
+      var barW=fc1.total>0?Math.min(100,r(cnt/fc1.total*100)):0;
+      var c3=pctPlan!==null?grad(pctPlan):'var(--accent)';
+      var convRow=i>0?('<tr class="fn2-conv-row"><td></td><td colspan="4"><span class="fn2-conv">↳ конверсия <b>'+conv+'%</b></span></td></tr>'):'';
+      return convRow+
+        '<tr>'+
+          '<td class="fn2-stage-name" style="padding-right:18px;white-space:nowrap">'+esc(st.label)+'</td>'+
+          '<td style="width:100%">'+
+            '<div class="fn2-bar-wrap"><div class="fn2-bar-fill" style="width:'+barW+'%;background:'+c3+'"></div></div>'+
+            (pctPlan!==null?'<div style="font-size:10px;color:var(--text-3);margin-top:2px;padding-left:2px">'+pctPlan+'% плана</div>':'')+'</td>'+
+          '<td class="fn2-num r">'+cnt+'</td>'+
+          '<td class="fn2-plan-num r">'+(plan||'—')+'</td>'+
+          '<td class="fn2-pct r" style="color:'+c3+'">'+cnt+'</td>'+
+        '</tr>';
+    }).join('');
+    var thead='<thead><tr>'+
+      '<th>ЭТАП</th><th>ВЫПОЛНЕНИЕ</th>'+
+      '<th class="r">ФАКТ</th><th class="r">ПЛАН</th><th class="r">%</th>'+
+    '</tr></thead>';
+    body=statRow+'<table class="fn2-tbl" style="width:100%;margin-top:10px">'+thead+'<tbody>'+tblRows+'</tbody></table>';
+  }
+
+  /* CHANNEL CARDS by tag (always show, not blurred) */
+  var SKIP_TAGS={'platform.trysasha.ru':1,'sasha ai':1,'sasha ai krutyak':1,'sashaai':1,'off':1};
+  var SKIP_PREFIX=['импорт_','wazzup','ООО '];
+  var tagForCards=Object.keys(allTagCounts).filter(function(t){
+    if(SKIP_TAGS[t.toLowerCase()])return false;
+    for(var i=0;i<SKIP_PREFIX.length;i++){if(t.toLowerCase().startsWith(SKIP_PREFIX[i].toLowerCase()))return false;}
+    return allTagCounts[t]>=3;
+  }).sort(function(a,b){return allTagCounts[b]-allTagCounts[a];}).slice(0,12);
+  
+  var cards=tagForCards.map(function(tag){
+    var tl=filterLeadsByMgr_(S.amoLeads,'all',d.staff).filter(function(l){return(l.tags||'').split(',').some(function(t){return t.trim()===tag;});});
+    var paid=tl.filter(function(l){return l.status_id===142;});
+    var rev=paid.reduce(function(a,l){return a+(Number(l.price)||0);},0);
+    var conv=tl.length>0?r(paid.length/tl.length*100):0;
+    var convCol=grad(conv*3.3);
+    return'<div class="ch-card">'+
+      '<div class="ch-name">'+esc(tag)+'</div>'+
+      '<div class="ch-stat"><span>Лидов</span><b>'+tl.length+'</b></div>'+
+      '<div class="ch-stat"><span>Оплат</span><b>'+paid.length+'</b></div>'+
+      '<div class="ch-stat"><span>Выручка</span><b>'+fmtK_(rev)+'</b></div>'+
+      '<div class="ch-conv" style="color:'+convCol+'">'+conv+'%</div>'+
+      '<div style="font-size:10px;color:var(--text-3)">конверсия</div>'+
+    '</div>';
+  }).join('');
+  var channelSection=cards?'<div class="panel" style="margin-top:14px"><div class="panel-title" style="margin-bottom:12px">Каналы по тегам — что приносит деньги</div><div class="ch-grid">'+cards+'</div></div>':'';
+
+  return tagChips+
+    '<div class="panel">'+
+      '<div class="fn2-head">'+
+        '<div class="fn2-title">Воронка первички</div>'+
+        planBtn+mgrRow+
+      '</div>'+
+      body+
+    '</div>'+
+    channelSection;
+}
+window.setFnTag=function(t){S.fnTagFilter=t;render();};
+window.toggleFnCompare=function(){S.fnCompare=!S.fnCompare;if(!S.fnMgr2)S.fnMgr2='all';render();};
+window.setFnMgr2=function(id){S.fnMgr2=id;render();};
+
 function renderDept(){
   var d=DB.depts.find(function(x){return x.id===S.dept;});
   if(!d){S.dept=null;render();return;}
@@ -694,56 +890,7 @@ function renderDept(){
     }).join(''):'<tr><td colspan="6"><div class="empty-state">Нет сотрудников</div></td></tr>';
     ct='<div class="panel"><p style="font-size:11px;color:var(--text-3);margin-bottom:14px">Нажми на строку — увидишь клиентов сотрудника</p><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
   }
-  if(S.tab==='funnel'){
-    var fmgrs=[{id:'all',name:'Все менеджеры'}].concat(d.staff.map(function(m){return{id:m.id,name:m.name};}));
-    var fmgrSel='<select class="sel" onchange="setDeptFunnelMgr(this.value)">'+fmgrs.map(function(m){return'<option value="'+m.id+'"'+(m.id===S.deptFunnelMgr?' selected':'')+'>'+esc(m.name)+'</option>';}).join('')+'</select>';
-    /* Amo funnel — реальные данные */
-    var amoUserIdForMgr=function(supaId){var e=RAW.employees.find(function(x){return x.id===supaId;});return e?e.amo_user_id:null;};
-    var fLeads=S.amoLeads;
-    if(S.deptFunnelMgr!=='all'){
-      var auid=amoUserIdForMgr(S.deptFunnelMgr);
-      if(auid)fLeads=fLeads.filter(function(l){return l.responsible_user_id===auid;});
-      else fLeads=[];
-    }else{
-      /* показываем только лиды ответственных сотрудников этого отдела */
-      var deptAuids=d.staff.map(function(m){return amoUserIdForMgr(m.supaId);}).filter(Boolean);
-      if(deptAuids.length)fLeads=fLeads.filter(function(l){return deptAuids.indexOf(l.responsible_user_id)>=0;});
-    }
-    var fc=buildFunnelCounts(fLeads);
-    var ft=S.funnelTargets[d.id]||{};
-    var hasAmo=S.amoLeads.length>0;
-    var bars=AMO_STAGES.map(function(st,i){
-      var cnt=fc.counts[st.key]||0;
-      var plan=ft[st.key]||0;
-      var prev=i>0?(fc.counts[AMO_STAGES[i-1].key]||0):fc.total;
-      var conv=prev>0?r(cnt/prev*100):0;
-      var pctPlan=plan>0?r(cnt/plan*100):null;
-      var barW=fc.total>0?r(cnt/fc.total*100):0;
-      var c3=pctPlan!==null?grad(pctPlan):'var(--accent)';
-      var convHtml=i>0?'<span style="font-size:11px;color:var(--text-3)">'+conv+'%</span>':'';
-      var planHtml=plan?'<span style="font-size:11px;color:'+c3+'">'+cnt+'/'+plan+'</span>':'<span style="font-size:12px;color:var(--text-2)">'+cnt+'</span>';
-      return'<div class="fn-row">'+
-        '<span class="fn-label">'+st.label+'</span>'+
-        '<div class="fn-bar"><div class="fn-fill" style="width:'+barW+'%;background:var(--accent)"></div></div>'+
-        '<div style="display:flex;gap:8px;align-items:center;min-width:100px;justify-content:flex-end">'+planHtml+convHtml+'</div>'+
-      '</div>';
-    }).join('');
-    var sourceSel={}; fLeads.forEach(function(l){if(l.source)(sourceSel[l.source]=(sourceSel[l.source]||0)+1);});
-    var sourceRows=Object.keys(sourceSel).sort(function(a,b){return sourceSel[b]-sourceSel[a];}).map(function(s){
-      return'<div class="src-row"><span class="src-name">'+esc(s)+'</span><span class="src-cnt">'+sourceSel[s]+'</span></div>';
-    }).join('')||'<div class="src-row"><span class="src-name muted">—</span></div>';
-    var overlay=!hasAmo?'<div class="fn-overlay"><div class="fn-icon">🔒</div><div class="fn-ttl">Воронка подключается</div><div class="fn-txt">Запусти <code>amoSyncAll()</code> в GAS → данные появятся здесь.</div></div>':'';
-    var planBtn='<button class="btn sm" onclick="openFunnelPlanModal(\''+d.id+'\')" style="margin-left:8px">📋 Редактировать план</button>';
-    ct='<div class="fn-grid">'+
-      '<div class="panel"><div class="adm-head" style="margin-bottom:14px"><div class="panel-title" style="margin:0">Воронка первички'+planBtn+'</div>'+fmgrSel+'</div>'+
-        '<div style="display:flex;justify-content:space-between;margin-bottom:14px">'+
-          '<span style="font-size:12px;color:var(--text-2)">Лидов: <b>'+fc.total+'</b> &nbsp;·&nbsp; Откащено: <b>'+fc.rejected+'</b></span>'+
-        '</div>'+
-        '<div class="fn-wrap"><div class="fn-bars">'+bars+'</div>'+overlay+'</div></div>'+
-      '<div class="panel"><div class="panel-title" style="margin-bottom:12px">По источникам</div>'+
-        '<div class="src-list">'+sourceRows+'</div></div>'+
-    '</div>';
-  }
+  if(S.tab==='funnel'){ct=renderFunnelContent_(d);}
   setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUp()">‹ Дашборд</button><span class="crumb-title">'+esc(d.name)+'</span><button class="btn sm ghost" onclick="archiveDept(\''+d.id+'\')" style="margin-left:4px">В архив</button></div>'+calTrigger()+'</div><div class="dept-kpi">'+kH+'</div>'+tabs+ct);
 }
 
