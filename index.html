@@ -555,6 +555,19 @@ function loadData(){
   }).catch(function(e){S.loading=false;S.loadErr=e.message;render();});
 }
 
+/* Серверная сверка: после структурных операций перетягиваем истину из Supabase, не доверяя только локальному апдейту */
+function reloadEmployees(){
+  return sbGet('employees?select=*&order=name').then(function(rows){if(rows&&rows.length)RAW.employees=rows;buildDB();});
+}
+function reloadDepts(){
+  return sbGet('departments?select=*&order=created_at').then(function(rows){if(rows&&rows.length)RAW.depts=rows;buildDB();});
+}
+/* optimistic: применяем локально для мгновенного отклика, затем сверяемся с сервером */
+function patchEmpSync(supaId,patch,optimistic){
+  if(optimistic){RAW.employees.forEach(function(e){if(e.id===supaId)Object.assign(e,optimistic);});buildDB();render();}
+  return sbPatch('employees','id=eq.'+supaId,patch).then(reloadEmployees,reloadEmployees).then(render);
+}
+
 function refreshPeriod(){
   S.periodReady=false;
   return Promise.all([loadPeriodStats(),loadDeals(),loadPrevDeals(),loadPlans(),loadAmoLeads()]).then(function(){buildDB();S.periodReady=true;render();}).catch(function(e){console.error(e);S.periodReady=true;render();});
@@ -588,7 +601,17 @@ function buildDB(){
   var depts=activeDepts.map(function(d){
     var emps=eBD[d.id]||[];
     var lead=RAW.employees.find(function(e){return e.id===d.lead_employee_id;});
-    var staffEmps=(allBD[d.id]||[]).filter(inPeriod);
+    var staffEmps=(allBD[d.id]||[]).filter(function(e){
+      var isFired=!!(e.fired_at||e.is_archived);
+      if(isFired){
+        // уволенный/архивный показывается ТОЛЬКО если заносил выручку в выбранном периоде
+        var ag=S.dealsByEmp[e.id];
+        return !!(ag&&ag.count>0);
+      }
+      // действующий — если нанят не позже конца периода
+      if(e.hired_at&&e.hired_at.substring(0,10)>_toS)return false;
+      return true;
+    });
     var staff=staffEmps.map(function(e){
       var dealAgg=S.dealsByEmp[e.id]||{fact:0,comm:0,count:0};
       var planAmt=S.planByEmp[e.id]||0;
@@ -1223,7 +1246,7 @@ function renderRop(){
 window.setRopDept=function(id){S.ropDept=id;render();};
 window.toggleRopFired=function(){S.ropShowFired=!S.ropShowFired;render();};
 window.toggleRopArchDepts=function(){S.ropShowArchivedDepts=!S.ropShowArchivedDepts;render();};
-window.changeEmpRole=function(supaId,role){sbPatch('employees','id=eq.'+supaId,{role:role});RAW.employees.forEach(function(e){if(e.id===supaId)e.role=role;});buildDB();render();};
+window.changeEmpRole=function(supaId,role){patchEmpSync(supaId,{role:role},{role:role});};
 
 /* Edit emp modal: single button → 4 actions */
 window.editEmpModal=function(supaId){
@@ -1271,7 +1294,7 @@ window.changeHireModal=function(supaId){
 window.reassignEmp=function(supaId){
   var emp=RAW.employees.find(function(e){return e.id===supaId;});
   var opts='<option value="">— убрать из всех отделов —</option>'+DB.depts.map(function(x){return'<option value="'+x.id+'"'+(emp&&emp.dept_id===x.id?' selected':'')+'>'+esc(x.name)+'</option>';}).join('');
-  openModal('Назначить в отдел','<p style="font-size:13px;color:var(--text-2);margin-bottom:14px">'+esc(emp?emp.name:'')+'</p><div class="field"><label>Отдел</label><select id="re-d" class="sel" style="width:100%;border-radius:8px">'+opts+'</select></div>',function(){var deptId=document.getElementById('re-d').value||null;sbPatch('employees','id=eq.'+supaId,{dept_id:deptId||null});RAW.employees.forEach(function(e){if(e.id===supaId)e.dept_id=deptId||null;});buildDB();closeModal();render();});
+  openModal('Назначить в отдел','<p style="font-size:13px;color:var(--text-2);margin-bottom:14px">'+esc(emp?emp.name:'')+'</p><div class="field"><label>Отдел</label><select id="re-d" class="sel" style="width:100%;border-radius:8px">'+opts+'</select></div>',function(){var deptId=document.getElementById('re-d').value||null;closeModal();patchEmpSync(supaId,{dept_id:deptId||null},{dept_id:deptId||null});});
 };
 window.addEmpModal=function(){openModal('Добавить сотрудника','<p style="font-size:12px;color:var(--text-3);line-height:1.6">Сотрудники появляются после синка GAS syncAll. Ручное добавление — для тестирования.</p><div class="field" style="margin-top:12px"><label>Имя</label><input id="ae-n" placeholder="Иван Иванов"></div>',function(){closeModal();});};
 window.editDept=function(id){
@@ -1279,21 +1302,21 @@ window.editDept=function(id){
   var leads=RAW.employees.filter(function(e){return e.role==='lead';});
   var lo='<option value="">— без тимлида —</option>'+leads.map(function(e){return'<option value="'+e.id+'"'+(x.leadId===e.id?' selected':'')+'>'+esc(e.name)+'</option>';}).join('');
   openModal('Настройка отдела','<div class="field"><label>Название</label><input id="d-nm" value="'+esc(x.name)+'"></div><div class="field"><label>Тимлид</label><select id="d-lead" class="sel" style="width:100%;border-radius:8px">'+lo+'</select></div>',
-    function(){var nm=document.getElementById('d-nm').value.trim()||x.name;var lead=document.getElementById('d-lead').value||null;sbPatch('departments','id=eq.'+id,{name:nm,lead_employee_id:lead});RAW.depts.forEach(function(dd){if(dd.id===id){dd.name=nm;dd.lead_employee_id=lead;}});if(lead){sbPatch('employees','id=eq.'+lead,{dept_id:id,role:'lead'});RAW.employees.forEach(function(e){if(e.id===lead){e.dept_id=id;e.role='lead';}});}buildDB();closeModal();render();});
+    function(){var nm=document.getElementById('d-nm').value.trim()||x.name;var lead=document.getElementById('d-lead').value||null;sbPatch('departments','id=eq.'+id,{name:nm,lead_employee_id:lead});RAW.depts.forEach(function(dd){if(dd.id===id){dd.name=nm;dd.lead_employee_id=lead;}});if(lead){sbPatch('employees','id=eq.'+lead,{dept_id:id,role:'lead'});RAW.employees.forEach(function(e){if(e.id===lead){e.dept_id=id;e.role='lead';}});}buildDB();closeModal();render();if(lead)reloadEmployees().then(render);});
 };
 window.createDept=function(){
   var leads=RAW.employees.filter(function(e){return e.role==='lead';});
   var lo='<option value="">— без тимлида —</option>'+leads.map(function(e){return'<option value="'+e.id+'">'+esc(e.name)+'</option>';}).join('');
   openModal('Новый отдел','<div class="field"><label>Название</label><input id="nd-nm" placeholder="Отдел Иванцова"></div><div class="field"><label>Тимлид</label><select id="nd-lead" class="sel" style="width:100%;border-radius:8px">'+lo+'</select></div>',
-    function(){var nm=document.getElementById('nd-nm').value.trim();if(!nm)return;var lead=document.getElementById('nd-lead').value||null;sbPost('departments',{name:nm,lead_employee_id:lead,monthly_plan:0,is_archived:false}).then(function(res){var nd=Array.isArray(res)?res[0]:res;if(!nd||!nd.id)return;RAW.depts.push(nd);if(lead){sbPatch('employees','id=eq.'+lead,{dept_id:nd.id,role:'lead'});RAW.employees.forEach(function(e){if(e.id===lead){e.dept_id=nd.id;e.role='lead';}});}buildDB();closeModal();S.ropDept=nd.id;render();});});
+    function(){var nm=document.getElementById('nd-nm').value.trim();if(!nm)return;var lead=document.getElementById('nd-lead').value||null;sbPost('departments',{name:nm,lead_employee_id:lead,monthly_plan:0,is_archived:false}).then(function(res){var nd=Array.isArray(res)?res[0]:res;if(!nd||!nd.id)return;RAW.depts.push(nd);if(lead){sbPatch('employees','id=eq.'+lead,{dept_id:nd.id,role:'lead'});RAW.employees.forEach(function(e){if(e.id===lead){e.dept_id=nd.id;e.role='lead';}});}buildDB();closeModal();S.ropDept=nd.id;render();if(lead)reloadEmployees().then(render);});});
 };
 window.archiveDept=function(id){openModal('В архив отдел?','<p style="font-size:13px;color:var(--text-2);line-height:1.7">Отдел исчезнет с главного экрана.</p>',function(){sbPatch('departments','id=eq.'+id,{is_archived:true});RAW.depts.forEach(function(d){if(d.id===id)d.is_archived=true;});buildDB();closeModal();render();});};
 window.unarchiveDept=function(id){sbPatch('departments','id=eq.'+id,{is_archived:false});RAW.depts.forEach(function(d){if(d.id===id)d.is_archived=false;});buildDB();render();};
 window.fireEmp=function(supaId){
   openModal('Уволить сотрудника','<div class="field"><label>Дата увольнения</label><input id="f-d" type="date" value="'+todayISO()+'"></div><p style="font-size:12px;color:var(--text-2);margin-top:4px;line-height:1.6">История выручки сохранится. Разархивировать можно в любой момент.</p>',
-    function(){var dt=document.getElementById('f-d').value||todayISO();sbPatch('employees','id=eq.'+supaId,{fired_at:dt,is_archived:true});RAW.employees.forEach(function(e){if(e.id===supaId){e.fired_at=dt;e.is_archived=true;}});buildDB();closeModal();render();});
+    function(){var dt=document.getElementById('f-d').value||todayISO();closeModal();patchEmpSync(supaId,{fired_at:dt,is_archived:true},{fired_at:dt,is_archived:true});});
 };
-window.rehireEmp=function(supaId){openModal('Вернуть сотрудника?','<p style="font-size:13px;color:var(--text-2)">Сотрудник вернётся в активный список.</p>',function(){sbPatch('employees','id=eq.'+supaId,{fired_at:null,is_archived:false});RAW.employees.forEach(function(e){if(e.id===supaId){e.fired_at=null;e.is_archived=false;}});buildDB();closeModal();render();});};
+window.rehireEmp=function(supaId){openModal('Вернуть сотрудника?','<p style="font-size:13px;color:var(--text-2)">Сотрудник вернётся в активный список.</p>',function(){closeModal();patchEmpSync(supaId,{fired_at:null,is_archived:false},{fired_at:null,is_archived:false});});};
 
 window.hideClient=function(orgId,name){
   openModal('Убрать в архив?','<p style="font-size:13px;color:var(--text-2);line-height:1.7"><b>'+esc(name)+'</b> исчезнет из портфеля. Вернуть можно через «Архив».</p>',
