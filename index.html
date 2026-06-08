@@ -13,6 +13,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .app{max-width:1060px;margin:0 auto;}
 .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
 .pos{color:var(--green);}.neg{color:var(--red);}.neu{color:var(--text-2);}
+.tag-once{display:inline-block;font-size:10px;font-weight:600;padding:1px 7px;border-radius:9px;background:var(--bg-3,rgba(127,127,127,.14));color:var(--text-3);vertical-align:middle;letter-spacing:.2px;}
 .dlt{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;font-variant-numeric:tabular-nums;white-space:nowrap;}
 .dlt-ico{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
 .dlt-up{color:var(--green);background:var(--green-bg);}
@@ -494,10 +495,10 @@ var S={
   periodStats:{},periodLoading:false,periodReady:false,
   showArchivedDepts:false,showArchivedClients:false,
   ropDept:null,ropShowFired:false,ropShowArchivedDepts:false,
-  fnCompare:false,fnMgrs:[],fnMgrsB:[],fnTags:[],msOpen:null,msSearch:'',empAmoMap:{},funnelParticipants:{},
-  dealsRaw:[],dealsByEmp:{},dealsByOrg:{},dealsByDept:{},
+  fnCompare:false,fnMgrs:[],fnMgrsB:[],fnTags:[],msOpen:null,msSearch:'',empAmoMap:{},
+  dealsRaw:[],dealsByEmp:{},dealsByOrg:{},dealsByDept:{},dealsByEmpOrg:{},
   prevByEmp:{},prevByDept:{},prevCompany:0,
-  amoLeads:[],funnelTargets:{},amoUsers:[],
+  amoLeads:[],amoUsers:[],
   planByEmp:{},
   payDept:'all',payEmp:'all',paySearch:'',payLimit:20,payPage:0,
   staffSortKey:'fact',staffSortDir:-1,
@@ -556,7 +557,7 @@ function loadData(){
 
 function refreshPeriod(){
   S.periodReady=false;
-  return Promise.all([loadPeriodStats(),loadDeals(),loadPrevDeals(),loadPlans(),loadAmoLeads(),loadFunnelTargets(),loadFunnelParticipants()]).then(function(){buildDB();S.periodReady=true;render();}).catch(function(e){console.error(e);S.periodReady=true;render();});
+  return Promise.all([loadPeriodStats(),loadDeals(),loadPrevDeals(),loadPlans(),loadAmoLeads()]).then(function(){buildDB();S.periodReady=true;render();}).catch(function(e){console.error(e);S.periodReady=true;render();});
 }
 
 /* ═══ BUILD DB ═══ */
@@ -651,7 +652,7 @@ function loadPeriodStats(){
 
 /* ═══ DEALS ═══ */
 function loadDeals(){
-  S.dealsRaw=[];S.dealsByEmp={};S.dealsByOrg={};S.dealsByDept={};
+  S.dealsRaw=[];S.dealsByEmp={};S.dealsByOrg={};S.dealsByDept={};S.dealsByEmpOrg={};
   var from=dateISO(S.rangeFrom),to=dateISO(S.rangeTo);
   return sbGet('deals?select=*&deal_date=gte.'+from+'&deal_date=lte.'+to+'&order=deal_date.desc&limit=100000').then(function(rows){
     S.dealsRaw=rows||[];
@@ -661,6 +662,8 @@ function loadDeals(){
       var comm=amt*(Number(d.motivation_pct)||0)/100;
       if(d.employee_id){var e=S.dealsByEmp[d.employee_id]||(S.dealsByEmp[d.employee_id]={fact:0,comm:0,count:0});e.fact+=amt;e.comm+=comm;e.count++;}
       if(d.platform_org_id){var o=S.dealsByOrg[d.platform_org_id]||(S.dealsByOrg[d.platform_org_id]={fact:0});o.fact+=amt;}
+      // вклад конкретного менеджера в конкретную компанию (для списка клиентов в карточке менеджера)
+      if(d.employee_id&&d.platform_org_id){var eo=S.dealsByEmpOrg[d.employee_id]||(S.dealsByEmpOrg[d.employee_id]={});eo[d.platform_org_id]=(eo[d.platform_org_id]||0)+amt;}
       // FIXED: aggregate by deal's dept_id — historical attribution preserved when employees move
       if(d.dept_id){S.dealsByDept[d.dept_id]=(S.dealsByDept[d.dept_id]||0)+amt;}
     });
@@ -704,33 +707,6 @@ function loadAmoLeads(){
   return sbGet('amo_leads?select=id,price,responsible_user_id,status_id,pipeline_id,created_at_unix,source,package,tags&pipeline_id=eq.'+AMO_PIPE_SALES+'&created_at_unix=gte.'+fromU+'&created_at_unix=lte.'+toU+'&is_deleted=is.false&limit=5000').then(function(rows){
     S.amoLeads=rows||[];
   }).catch(function(){S.amoLeads=[];});
-}
-function loadFunnelTargets(){
-  S.funnelTargets={};
-  var months=[],cur=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);
-  while(cur<=S.rangeTo){months.push({y:cur.getFullYear(),m:cur.getMonth()+1});cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);}
-  if(!months.length)return Promise.resolve();
-  var orParts=months.map(function(mm){return'and(year.eq.'+mm.y+',month.eq.'+mm.m+')';}).join(',');
-  return sbGet('funnel_targets?select=dept_id,year,month,target_type,target_count&or=('+orParts+')&limit=10000').then(function(rows){
-    (rows||[]).forEach(function(t){
-      var k=t.dept_id;
-      if(!S.funnelTargets[k])S.funnelTargets[k]={};
-      S.funnelTargets[k][t.target_type]=(S.funnelTargets[k][t.target_type]||0)+(Number(t.target_count)||0);
-    });
-  }).catch(function(){S.funnelTargets={};});
-}
-function loadFunnelParticipants(){
-  S.funnelParticipants={};
-  var months=[],cur=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);
-  while(cur<=S.rangeTo){months.push({y:cur.getFullYear(),m:cur.getMonth()+1});cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);}
-  if(!months.length)return Promise.resolve();
-  var orParts=months.map(function(mm){return'and(year.eq.'+mm.y+',month.eq.'+mm.m+')';}).join(',');
-  return sbGet('funnel_participants?select=dept_id,employee_id&or=('+orParts+')&limit=10000').then(function(rows){
-    (rows||[]).forEach(function(p){
-      if(!S.funnelParticipants[p.dept_id])S.funnelParticipants[p.dept_id]=[];
-      if(S.funnelParticipants[p.dept_id].indexOf(p.employee_id)<0)S.funnelParticipants[p.dept_id].push(p.employee_id);
-    });
-  }).catch(function(){S.funnelParticipants={};});
 }
 /* Считает воронку по массиву лидов (с фильтром по amo_user_id если нужно) */
 function buildFunnelCounts(leads){
@@ -912,54 +888,36 @@ function applyTagFilter_(leads){
 }
 function getTagCounts_(leads){var tc={};leads.forEach(function(l){(l.tags||'').split(',').forEach(function(t){t=t.trim();if(t)tc[t]=(tc[t]||0)+1;});});return tc;}
 function fmtK_(n){return n>=1000?r(n/1000)+'к':String(n);}
-/* план с декомпозицией по участникам */
-function funnelPlanFor_(d,selSupaIds){
-  var ft=S.funnelTargets[d.id]||{};
-  var participants=S.funnelParticipants[d.id]||d.staff.map(function(m){return m.supaId;});
-  var nP=participants.length||1;
-  var sel=(selSupaIds&&selSupaIds.length)?selSupaIds:participants;
-  var selPart=sel.filter(function(id){return participants.indexOf(id)>=0;});
-  var factor=selPart.length/nP;
-  var out={};AMO_STAGES.forEach(function(st){out[st.key]=Math.round((ft[st.key]||0)*factor);});
-  out._factor=factor;out._nP=nP;out._selPart=selPart.length;
-  return out;
-}
-/* визуальная мини-воронка (для compare и обычного режима) */
-function funnelBarsHtml_(fc,plan){
+/* визуальная мини-воронка (для compare и обычного режима) — без планов, только факт и конверсии */
+function funnelBarsHtml_(fc){
   return AMO_STAGES.map(function(st,i){
     var cnt=fc.counts[st.key]||0;
-    var pl=plan?(plan[st.key]||0):0;
     var prev=i>0?(fc.counts[AMO_STAGES[i-1].key]||fc.total):fc.total;
     var conv=prev>0?r(cnt/prev*100):0;
-    var pctPlan=pl>0?r(cnt/pl*100):null;
     var barW=fc.total>0?Math.min(100,r(cnt/fc.total*100)):0;
-    var c3=pctPlan!==null?grad(pctPlan):'var(--accent)';
-    var convRow=i>0?('<tr class="fn2-conv-row"><td></td><td colspan="4"><span class="fn2-conv">\u21b3 \u043a\u043e\u043d\u0432\u0435\u0440\u0441\u0438\u044f \u0438\u0437 \u043f\u0440\u0435\u0434\u044b\u0434\u0443\u0449\u0435\u0433\u043e <b>'+conv+'%</b></span></td></tr>'):'';
+    var convRow=i>0?('<tr class="fn2-conv-row"><td></td><td colspan="2"><span class="fn2-conv">\u21b3 \u043a\u043e\u043d\u0432\u0435\u0440\u0441\u0438\u044f \u0438\u0437 \u043f\u0440\u0435\u0434\u044b\u0434\u0443\u0449\u0435\u0433\u043e <b>'+conv+'%</b></span></td></tr>'):'';
     return convRow+'<tr class="fn2-main">'+
       '<td class="fn2-stage-name" style="padding-right:20px;white-space:nowrap">'+esc(st.label)+'</td>'+
-      '<td style="width:100%;min-width:140px"><div class="fn2-bar-wrap"><div class="fn2-bar-fill" style="width:'+barW+'%;background:'+c3+'"></div></div></td>'+
+      '<td style="width:100%;min-width:140px"><div class="fn2-bar-wrap"><div class="fn2-bar-fill" style="width:'+barW+'%;background:var(--accent)"></div></div></td>'+
       '<td class="fn2-num r">'+cnt+'</td>'+
-      '<td class="fn2-plan-num r">'+(pl||'\u2014')+'</td>'+
-      '<td class="fn2-pct r" style="color:'+c3+'">'+(pl>0?(pctPlan+'%'):'\u2014')+'</td>'+
     '</tr>';
   }).join('');
 }
 /* ── COMPARE: единый график, группированные бары A/B ── */
 var CMP_A='var(--accent)',CMP_B='#A98BFF';
-function funnelCompareHtml_(fcA,fcB,planA,planB){
+function funnelCompareHtml_(fcA,fcB){
   var maxAll=1;
   AMO_STAGES.forEach(function(st){maxAll=Math.max(maxAll,fcA.counts[st.key]||0,fcB.counts[st.key]||0);});
   return AMO_STAGES.map(function(st,i){
     var a=fcA.counts[st.key]||0,b=fcB.counts[st.key]||0;
-    var pa=planA?(planA[st.key]||0):0,pb=planB?(planB[st.key]||0):0;
     var prevA=i>0?(fcA.counts[AMO_STAGES[i-1].key]||fcA.total):fcA.total;
     var prevB=i>0?(fcB.counts[AMO_STAGES[i-1].key]||fcB.total):fcB.total;
     var convA=prevA>0?r(a/prevA*100):0,convB=prevB>0?r(b/prevB*100):0;
     var convLine=i>0?'<span class="cmp2-conv">конв. <b style="color:'+CMP_A+'">'+convA+'%</b> / <b style="color:'+CMP_B+'">'+convB+'%</b></span>':'';
     return'<div class="cmp2-stage">'+
       '<div class="cmp2-name"><span>'+esc(st.label)+'</span>'+convLine+'</div>'+
-      '<div class="cmp2-track"><span class="cmp2-tag" style="color:'+CMP_A+'">А</span><div class="cmp2-barwrap"><div class="cmp2-bar" style="width:'+(a/maxAll*100)+'%;background:'+CMP_A+'"></div></div><span class="cmp2-val">'+a+'</span><span class="cmp2-plan">'+(pa?'/ '+pa:'')+'</span></div>'+
-      '<div class="cmp2-track"><span class="cmp2-tag" style="color:'+CMP_B+'">Б</span><div class="cmp2-barwrap"><div class="cmp2-bar" style="width:'+(b/maxAll*100)+'%;background:'+CMP_B+'"></div></div><span class="cmp2-val">'+b+'</span><span class="cmp2-plan">'+(pb?'/ '+pb:'')+'</span></div>'+
+      '<div class="cmp2-track"><span class="cmp2-tag" style="color:'+CMP_A+'">А</span><div class="cmp2-barwrap"><div class="cmp2-bar" style="width:'+(a/maxAll*100)+'%;background:'+CMP_A+'"></div></div><span class="cmp2-val">'+a+'</span></div>'+
+      '<div class="cmp2-track"><span class="cmp2-tag" style="color:'+CMP_B+'">Б</span><div class="cmp2-barwrap"><div class="cmp2-bar" style="width:'+(b/maxAll*100)+'%;background:'+CMP_B+'"></div></div><span class="cmp2-val">'+b+'</span></div>'+
     '</div>';
   }).join('');
 }
@@ -970,7 +928,6 @@ function msOptHtml_(stateKey,id,name,hasAmo){
 }
 function renderFunnelContent_(d){
   var hasAmo=S.amoLeads.length>0;
-  var planBtn='<button class="btn sm ghost" onclick="openFunnelPlanModal(\''+d.id+'\')">\ud83d\udccb \u041f\u043b\u0430\u043d</button>';
   var deptLeads=leadsForMgrs_([],d.staff);
 
   /* ── TAG PILLS (inline, multi-select) ── */
@@ -1015,7 +972,6 @@ function renderFunnelContent_(d){
     var leadsA=applyTagFilter_(leadsForMgrs_(S.fnMgrs,d.staff));
     var leadsB=applyTagFilter_(leadsForMgrs_(S.fnMgrsB,d.staff));
     var fcA=buildFunnelCounts(leadsA),fcB=buildFunnelCounts(leadsB);
-    var planA=funnelPlanFor_(d,S.fnMgrs),planB=funnelPlanFor_(d,S.fnMgrsB);
     var nameA=S.fnMgrs.length?S.fnMgrs.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return e?e.name.split(' ')[0]:'';}).join(', '):'\u0412\u0435\u0441\u044c \u043e\u0442\u0434\u0435\u043b';
     var nameB=S.fnMgrsB.length?S.fnMgrsB.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return e?e.name.split(' ')[0]:'';}).join(', '):'\u0412\u0435\u0441\u044c \u043e\u0442\u0434\u0435\u043b';
     body='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px">'+
@@ -1026,15 +982,13 @@ function renderFunnelContent_(d){
       '</div>'+
       '<div class="cmp2-legend"><span class="cmp2-leg"><span class="sw" style="background:'+CMP_A+'"></span>'+esc(nameA)+'<span class="ln">группа А</span></span>'+
         '<span class="cmp2-leg"><span class="sw" style="background:'+CMP_B+'"></span>'+esc(nameB)+'<span class="ln">группа Б</span></span></div>'+
-      '<div>'+funnelCompareHtml_(fcA,fcB,planA,planB)+'</div>';
+      '<div>'+funnelCompareHtml_(fcA,fcB)+'</div>';
   } else {
     var leads1=applyTagFilter_(leadsForMgrs_(S.fnMgrs,d.staff));
     var fc1=buildFunnelCounts(leads1);
-    var plan1=funnelPlanFor_(d,S.fnMgrs);
-    var planNote=plan1._factor<1?'<span style="font-size:11px;color:var(--text-3);margin-left:8px">\u043f\u043b\u0430\u043d \u043e\u0442\u0434\u0435\u043b\u0430 \u00d7 '+plan1._selPart+'/'+plan1._nP+'</span>':'';
-    var statRow='<div class="fn2-stat-row">\u041b\u0438\u0434\u043e\u0432: <b>'+fc1.total+'</b> &nbsp;\u00b7&nbsp; \u041e\u0442\u043a\u0430\u0437\u043e\u0432: <b>'+fc1.rejected+'</b> &nbsp;\u00b7&nbsp; \u041e\u043f\u043b\u0430\u0442: <b>'+(fc1.counts.paid||0)+'</b>'+planNote+'</div>';
-    var thead='<thead><tr><th>\u042d\u0422\u0410\u041f</th><th>\u0412\u042b\u041f\u041e\u041b\u041d\u0415\u041d\u0418\u0415</th><th class="r">\u0424\u0410\u041a\u0422</th><th class="r">\u041f\u041b\u0410\u041d</th><th class="r">%</th></tr></thead>';
-    body=statRow+'<table class="fn2-tbl" style="width:100%;margin-top:10px">'+thead+'<tbody>'+funnelBarsHtml_(fc1,plan1)+'</tbody></table>';
+    var statRow='<div class="fn2-stat-row">\u041b\u0438\u0434\u043e\u0432: <b>'+fc1.total+'</b> &nbsp;\u00b7&nbsp; \u041e\u0442\u043a\u0430\u0437\u043e\u0432: <b>'+fc1.rejected+'</b> &nbsp;\u00b7&nbsp; \u041e\u043f\u043b\u0430\u0442: <b>'+(fc1.counts.paid||0)+'</b></div>';
+    var thead='<thead><tr><th>\u042d\u0422\u0410\u041f</th><th>\u041e\u0411\u042a\u0415\u041c</th><th class="r">\u0424\u0410\u041a\u0422</th></tr></thead>';
+    body=statRow+'<table class="fn2-tbl" style="width:100%;margin-top:10px">'+thead+'<tbody>'+funnelBarsHtml_(fc1)+'</tbody></table>';
   }
 
   /* ── CHANNEL CARDS ── */
@@ -1058,7 +1012,7 @@ function renderFunnelContent_(d){
   }).join('');
   var channelSection=cards?'<div class="panel" style="margin-top:14px"><div class="panel-title" style="margin-bottom:12px">\u041a\u0430\u043d\u0430\u043b\u044b \u043f\u043e \u0442\u0435\u0433\u0430\u043c \u2014 \u0447\u0442\u043e \u043f\u0440\u0438\u043d\u043e\u0441\u0438\u0442 \u0434\u0435\u043d\u044c\u0433\u0438</div><div class="ch-grid">'+cards+'</div></div>':'';
 
-  var headerRight=S.fnCompare?(planBtn+cmpToggle):(planBtn+mgrMs('fnMgrs','mgrA','dept')+cmpToggle);
+  var headerRight=S.fnCompare?cmpToggle:(mgrMs('fnMgrs','mgrA','dept')+cmpToggle);
   return tagBlock+
     '<div class="panel"><div class="fn2-head"><div class="fn2-title">\u0412\u043e\u0440\u043e\u043d\u043a\u0430 \u043f\u0435\u0440\u0432\u0438\u0447\u043a\u0438</div>'+headerRight+'</div>'+body+'</div>'+
     channelSection;
@@ -1127,14 +1081,34 @@ function renderEmpView(){
   var dealAgg=S.dealsByEmp[S.empView]||{fact:0,comm:0,count:0};
   var plan=S.planByEmp[S.empView]||0;
   var mp=pct(dealAgg.fact,plan),mr=rrPct(dealAgg.fact,plan);
-  var myClients=d?d.clients.filter(function(c){return c.mgr===emp.platform_user_id;}):[];
+  // вклад менеджера по компаниям + справочник клиентов по org
+  var empOrg=S.dealsByEmpOrg[S.empView]||{};
+  var cliByOrg={};RAW.clients.forEach(function(c){cliByOrg[c.platform_org_id]=c;});
+  // 1) портфельные клиенты (responsible = этот менеджер), факт = его вклад
+  var portfolioOrgs={};
+  var myClients=RAW.clients.filter(function(c){return!c.is_hidden&&c.responsible_platform_user_id===emp.platform_user_id;}).map(function(c){
+    portfolioOrgs[c.platform_org_id]=1;
+    return{platform_org_id:c.platform_org_id,name:(c.company_name||'').substring(0,50),mgr:c.responsible_platform_user_id,
+      url:c.platform_url||'#',fact:(empOrg[c.platform_org_id]||0),minLeft:c.minutes_left||0,
+      expiry:c.subscription_end||null,foreign:false};
+  });
+  var portfolioCount=myClients.length;
+  // 2) «чужие» компании — есть оплата от менеджера в периоде, но клиент не в его портфеле; уйдут сами на след. период если оплат нет
+  Object.keys(empOrg).forEach(function(org){
+    if(portfolioOrgs[org]||!empOrg[org])return;
+    var ci=cliByOrg[org];var nm=ci?ci.company_name:null;
+    if(!nm){var ac=(RAW.allClients||[]).find(function(x){return x.platform_org_id===org;});nm=ac?ac.company_name:org;}
+    myClients.push({platform_org_id:org,name:(nm||'').substring(0,50),mgr:ci?ci.responsible_platform_user_id:null,
+      url:ci&&ci.platform_url?ci.platform_url:'#',fact:empOrg[org],minLeft:ci?(ci.minutes_left||0):0,
+      expiry:ci?(ci.subscription_end||null):null,foreign:true});
+  });
   var ten=tenure(emp.hired_at);
   var initials=(emp.name||'?').split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase();
   var kH=[
     '<div class="kcard"><div class="kl">Факт за период</div><div class="kv num">'+fmt(dealAgg.fact)+'</div><div class="ks"><span class="neu">план '+fmt(plan)+' · '+mp+'%</span> '+deltaTag(dealAgg.fact,S.prevByEmp[S.empView]||0)+'</div><div class="pbar"><div class="pfill" style="width:'+Math.min(mp,100)+'%;background:'+grad(mp)+'"></div></div></div>',
     '<div class="kcard"><div class="kl">Ранрейт</div><div class="kv num" style="color:'+grad(mr)+'">'+mr+'%</div><div class="ks"><span class="neu">по плану</span></div></div>',
     '<div class="kcard"><div class="kl">Сделок</div><div class="kv num">'+dealAgg.count+'</div><div class="ks"><span class="neu">за период</span></div></div>',
-    '<div class="kcard"><div class="kl">Клиентов</div><div class="kv num">'+myClients.length+'</div><div class="ks"><span class="neu">в портфеле</span></div></div>',
+    '<div class="kcard"><div class="kl">Клиентов</div><div class="kv num">'+portfolioCount+'</div><div class="ks"><span class="neu">в портфеле</span></div></div>',
     '<div class="kcard"><div class="kl">Стаж</div><div class="kv num">'+(ten!==null?ten+' мес.':'—')+'</div><div class="ks"><span class="neu">'+(emp.hired_at?'с '+fmtD(emp.hired_at):'')+'</span></div></div>'
   ].join('');
   // Sort clients
@@ -1156,11 +1130,13 @@ function renderEmpView(){
       '<button class="rm-dot" onclick="toggleRowMenu(event,\''+menuId+'\')">'+ICO.dots+'</button>'+
       '<div class="rm-pop" id="'+menuId+'" data-org="'+c.platform_org_id+'" data-name="'+esc(c.name)+'">'+
         '<button class="mi" onclick="rmEditEvent(this)">'+ICO.edit+' Редактировать событие</button>'+
-        '<button class="mi" onclick="rmRename(this)">'+ICO.rename+' Переименовать компанию</button>'+
-        '<button class="mi danger" onclick="rmArchive(this)">'+ICO.archive+' В архив</button>'+
+        (c.foreign?'':'<button class="mi" onclick="rmRename(this)">'+ICO.rename+' Переименовать компанию</button>'+
+        '<button class="mi danger" onclick="rmArchive(this)">'+ICO.archive+' В архив</button>')+
       '</div></div>';
+    var nameCell='<a class="ext-link" href="'+esc(c.url)+'" target="_blank">'+esc(c.name)+'</a>'+
+      (c.foreign?' <span class="tag-once" title="Разовая оплата — не в портфеле менеджера">разовая</span>':'');
     return'<tr>'+
-      '<td><a class="ext-link" href="'+esc(c.url)+'" target="_blank">'+esc(c.name)+'</a></td>'+
+      '<td>'+nameCell+'</td>'+
       '<td class="r strong num" style="color:'+c3+'">'+fmt(c.fact)+'</td>'+
       '<td class="r muted num">'+minCell+'</td>'+
       '<td class="r muted num">'+fmtMin(c.minLeft)+'</td>'+
@@ -1319,63 +1295,6 @@ window.fireEmp=function(supaId){
 };
 window.rehireEmp=function(supaId){openModal('Вернуть сотрудника?','<p style="font-size:13px;color:var(--text-2)">Сотрудник вернётся в активный список.</p>',function(){sbPatch('employees','id=eq.'+supaId,{fired_at:null,is_archived:false});RAW.employees.forEach(function(e){if(e.id===supaId){e.fired_at=null;e.is_archived=false;}});buildDB();closeModal();render();});};
 
-/* ═══ ПЛАН ВОРОНКИ (funnel_targets) ═══ */
-var _planPart=[]; /* выбранные участники в модалке плана */
-window.openFunnelPlanModal=function(deptId){
-  var d=DB.depts.find(function(x){return x.id===deptId;});if(!d)return;
-  var ft=S.funnelTargets[deptId]||{};
-  var months=[],cur=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);
-  while(cur<=S.rangeTo){months.push({y:cur.getFullYear(),m:cur.getMonth()+1});cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);}
-  var mLabel=months.length===1?('за '+MN[months[0].m-1]+' '+months[0].y):('за период, поровну на '+months.length+' мес.');
-  /* инициализируем участников */
-  _planPart=(S.funnelParticipants[deptId]||d.staff.map(function(m){return m.supaId;})).slice();
-  /* предыдущий период той же длины */
-  var spanDays=Math.round((S.rangeTo-S.rangeFrom)/864e5)+1;
-  var prevTo=new Date(S.rangeFrom.getTime()-864e5);
-  var prevFrom=new Date(prevTo.getTime()-(spanDays-1)*864e5);
-  var pfU=Math.floor(prevFrom.getTime()/1000),ptU=Math.floor(prevTo.getTime()/1000)+86400;
-
-  function buildModal(prevFc){
-    var partChips='<label style="font-size:12px;color:var(--text-2)">Участники распреда (план делится на них):</label><div class="pc-grid" id="pc-grid">'+
-      d.staff.map(function(m){var on=_planPart.indexOf(m.supaId)>=0;return'<button type="button" class="pc-chip'+(on?' on':'')+'" data-id="'+m.supaId+'" onclick="planTogglePart(this)">'+esc(m.name.split(' ')[0])+'</button>';}).join('')+'</div>';
-    var fields=AMO_STAGES.map(function(st){
-      var prevVal=prevFc?(prevFc.counts[st.key]||0):null;
-      var prevHtml=prevFc?('<div class="fn-prev">в прошлом периоде: <b>'+prevVal+'</b></div>'):'';
-      return'<div class="field" style="margin-bottom:10px"><label>'+st.label+'</label>'+
-        '<input id="ft-'+st.key+'" type="number" min="0" value="'+(ft[st.key]||0)+'" placeholder="0">'+prevHtml+'</div>';
-    }).join('');
-    return '<p style="font-size:12px;color:var(--text-3);margin-bottom:12px">'+mLabel+'</p>'+partChips+'<div style="height:14px"></div>'+fields;
-  }
-
-  function open(prevFc){
-    openModal('План воронки · '+esc(d.name),buildModal(prevFc),function(){
-      var rows=[],partRows=[];
-      AMO_STAGES.forEach(function(st){
-        var val=parseInt(document.getElementById('ft-'+st.key).value)||0;
-        months.forEach(function(mm){rows.push({dept_id:deptId,year:mm.y,month:mm.m,target_type:st.key,target_count:Math.round(val/(months.length||1)),updated_at:new Date().toISOString()});});
-      });
-      months.forEach(function(mm){_planPart.forEach(function(eid){partRows.push({dept_id:deptId,year:mm.y,month:mm.m,employee_id:eid});});});
-      /* чистим старых участников за эти месяцы, потом пишем новых */
-      var orParts=months.map(function(mm){return'and(year.eq.'+mm.y+',month.eq.'+mm.m+')';}).join(',');
-      fetch(SB_URL+'/rest/v1/funnel_participants?dept_id=eq.'+deptId+'&or=('+orParts+')',{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'}})
-      .then(function(){
-        var p=[sbUpsert('funnel_targets','dept_id,year,month,target_type',rows)];
-        if(partRows.length)p.push(sbPost('funnel_participants',partRows));
-        return Promise.all(p);
-      }).then(function(){closeModal();refreshPeriod();flashSave();});
-    });
-  }
-  /* грузим прошлый период для ориентира */
-  sbGet('amo_leads?select=status_id,responsible_user_id&pipeline_id=eq.'+AMO_PIPE_SALES+'&created_at_unix=gte.'+pfU+'&created_at_unix=lte.'+ptU+'&is_deleted=is.false&limit=5000').then(function(rows){
-    var partAuids=_planPart.map(function(id){return S.empAmoMap[id];}).filter(Boolean);
-    var pl=(rows||[]).filter(function(l){return partAuids.indexOf(l.responsible_user_id)>=0;});
-    open(buildFunnelCounts(pl));
-  }).catch(function(){open(null);});
-};
-window.planTogglePart=function(btn){
-  var id=btn.dataset.id;var i=_planPart.indexOf(id);
-  if(i>=0){_planPart.splice(i,1);btn.classList.remove('on');}else{_planPart.push(id);btn.classList.add('on');}
-};
 window.hideClient=function(orgId,name){
   openModal('Убрать в архив?','<p style="font-size:13px;color:var(--text-2);line-height:1.7"><b>'+esc(name)+'</b> исчезнет из портфеля. Вернуть можно через «Архив».</p>',
     function(){sbPatch('clients','platform_org_id=eq.'+orgId,{is_hidden:true});RAW.clients.forEach(function(c){if(c.platform_org_id===orgId)c.is_hidden=true;});buildDB();closeModal();render();});
