@@ -14,6 +14,9 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
 .pos{color:var(--green);}.neg{color:var(--red);}.neu{color:var(--text-2);}
 .tag-once{display:inline-block;font-size:10px;font-weight:600;padding:1px 7px;border-radius:9px;background:var(--bg-3,rgba(127,127,127,.14));color:var(--text-3);vertical-align:middle;letter-spacing:.2px;}
+.tg-days{display:flex;gap:6px;flex-wrap:wrap;}
+.tg-day{font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid var(--border,#e2e6ee);background:transparent;color:var(--text-3);cursor:pointer;transition:.15s;}
+.tg-day.on{background:var(--accent);border-color:var(--accent);color:#fff;}
 .dlt{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;font-variant-numeric:tabular-nums;white-space:nowrap;}
 .dlt-ico{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
 .dlt-up{color:var(--green);background:var(--green-bg);}
@@ -461,6 +464,8 @@ var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI
 function sbGet(p){return fetch(SB_URL+'/rest/v1/'+p,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).then(function(d){if(d&&d.code){console.error('SB',p,d.message);return[];}return Array.isArray(d)?d:[];}).catch(function(e){console.error(e);return[];});}
 function sbPatch(t,f,d){return fetch(SB_URL+'/rest/v1/'+t+'?'+f,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(d)});}
 function sbPost(t,d){return fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(d)}).then(function(r){return r.json();});}
+function sbDelete(t,f){return fetch(SB_URL+'/rest/v1/'+t+'?'+f,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'}});}
+function reloadTg(){return Promise.all([sbGet('telegram_integrations?select=*&order=created_at'),sbGet('telegram_chats?select=*&order=seen_at.desc&limit=200')]).then(function(r){RAW.tgIntegrations=r[0]||[];RAW.tgChats=r[1]||[];render();});}
 function sbUpsert(t,conflict,d){return fetch(SB_URL+'/rest/v1/'+t+'?on_conflict='+conflict,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify(d)});}
 
 /* ═══ CONSTANTS ═══ */
@@ -544,9 +549,12 @@ function loadData(){
     sbGet('employees?select=*&order=name'),
     sbGet('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,subscription_status,subscription_end,is_hidden,is_archived&responsible_platform_user_id=not.is.null&order=company_name&limit=3000'),
     sbGet('clients?select=platform_org_id,company_name,responsible_platform_user_id,is_archived,is_hidden&responsible_platform_user_id=not.is.null&order=company_name&limit=5000'),
-    sbGet('amo_users?select=amo_user_id,name,email&order=name&limit=500')
+    sbGet('amo_users?select=amo_user_id,name,email&order=name&limit=500'),
+    sbGet('telegram_integrations?select=*&order=created_at'),
+    sbGet('telegram_chats?select=*&order=seen_at.desc&limit=200')
   ]).then(function(res){
     RAW.depts=res[0];RAW.employees=res[1];RAW.clients=res[2];RAW.allClients=res[3]||[];S.amoUsers=res[4]||[];
+    RAW.tgIntegrations=res[5]||[];RAW.tgChats=res[6]||[];
     if(!RAW.depts.length&&!RAW.employees.length)S.loadErr='Supabase вернул пустые данные. Запусти migration_v2.sql и нажми ↻.';
     buildDB();S.loading=false;
     if(!S.ropDept&&DB.depts.length)S.ropDept=DB.depts[0].id;
@@ -1178,6 +1186,29 @@ function renderEmpView(){
 }
 
 /* ═══ РОП / НАСТРОЙКИ ═══ */
+function tgDays_(arr){var N=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];return(arr||[]).slice().sort(function(a,b){return a-b;}).map(function(d){return N[d-1]||d;}).join(', ')||'—';}
+function tgIntegrationBlock_(){
+  var chats=RAW.tgChats||[],its=RAW.tgIntegrations||[];
+  var rows=its.length?its.map(function(it){
+    var dept=DB.depts.find(function(d){return d.id===it.dept_id;});
+    var deptName=dept?esc(dept.name):'(отдел удалён)';
+    var chat=chats.find(function(c){return String(c.chat_id)===String(it.chat_id);});
+    var chatLabel=chat&&chat.title?esc(chat.title):('ID '+esc(String(it.chat_id)));
+    var tm=(it.send_time||'19:00').slice(0,5);
+    return'<div class="dept-edit-card">'+
+      '<div><div class="strong">'+deptName+' → '+chatLabel+'</div>'+
+        '<div class="muted" style="font-size:11px;margin-top:2px">'+tm+' МСК · '+tgDays_(it.send_days)+' · '+(it.enabled?'<span style="color:var(--green)">включено</span>':'<span style="color:var(--text-3)">выключено</span>')+'</div></div>'+
+      '<div style="display:flex;gap:6px">'+
+        '<button class="btn sm" onclick="tgTest(\''+it.dept_id+'\',\''+esc(String(it.chat_id))+'\',this)">Тест</button>'+
+        '<button class="btn sm ghost" onclick="tgToggle(\''+it.id+'\','+(it.enabled?'false':'true')+')">'+(it.enabled?'Выкл':'Вкл')+'</button>'+
+        '<button class="btn sm ghost" onclick="tgDelete(\''+it.id+'\')">Удалить</button>'+
+      '</div></div>';
+  }).join(''):'<p style="font-size:12px;color:var(--text-3)">Пока нет подключённых чатов. Добавь бота в чат отдела — он пришлёт ID, затем нажми «Подключить чат».</p>';
+  return'<div class="panel"><div class="adm-head"><div class="panel-title" style="margin:0">Интеграции · Telegram</div>'+
+    '<button class="btn primary" onclick="tgAddModal()">+ Подключить чат</button></div>'+
+    '<p style="font-size:12px;color:var(--text-3);margin:-4px 0 12px">Ежедневные отчёты по менеджерам отдела в Telegram. Бот сам пришлёт ID при добавлении в чат.</p>'+
+    rows+'</div>';
+}
 function amoMappingBlock_(){
   if(!(S.amoUsers||[]).length)return'<div class="panel"><div class="panel-title">AmoCRM · Синхронизация</div><p style="font-size:12px;color:var(--text-3)">Запусти <code>amoSyncAll()</code> в GAS — список пользователей загрузится.</p></div>';
   var nonFired=RAW.employees.filter(function(e){return!e.fired_at&&!e.is_archived;});
@@ -1241,7 +1272,7 @@ function renderRop(){
       firedBlock+'</div>'+
     unaBlock+
     '<div class="panel"><div class="adm-head"><div class="panel-title" style="margin:0">Все отделы</div><button class="btn primary" onclick="createDept()">+ Создать отдел</button></div>'+deptCards+archDeptBlock+'</div>'+
-    amoMappingBlock_());
+    amoMappingBlock_()+tgIntegrationBlock_());
 }
 window.setRopDept=function(id){S.ropDept=id;render();};
 window.toggleRopFired=function(){S.ropShowFired=!S.ropShowFired;render();};
@@ -1290,6 +1321,43 @@ window.renameEmpModal=function(supaId){
 window.changeHireModal=function(supaId){
   var emp=RAW.employees.find(function(e){return e.id===supaId;});
   openModal('Дата найма','<div class="field"><label>Дата найма</label><input id="hire-d" type="date" value="'+(emp&&emp.hired_at?emp.hired_at.substring(0,10):todayISO())+'"></div>',function(){var dt=document.getElementById('hire-d').value;sbPatch('employees','id=eq.'+supaId,{hired_at:dt});RAW.employees.forEach(function(e){if(e.id===supaId)e.hired_at=dt;});buildDB();closeModal();render();});
+};
+window.tgAddModal=function(){
+  var chats=RAW.tgChats||[];
+  var chatOpts=chats.length?chats.map(function(c){return'<option value="'+esc(String(c.chat_id))+'">'+(c.title?esc(c.title):'без названия')+' (ID '+esc(String(c.chat_id))+')</option>';}).join(''):'<option value="">— чатов пока нет —</option>';
+  var deptOpts=DB.depts.map(function(d){return'<option value="'+d.id+'">'+esc(d.name)+'</option>';}).join('');
+  var dayBtns=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(function(n,i){var on=i<5;return'<button type="button" class="tg-day'+(on?' on':'')+'" data-d="'+(i+1)+'" onclick="this.classList.toggle(\'on\')">'+n+'</button>';}).join('');
+  var body='<div class="field"><label>Чат (из обнаруженных ботом)</label><select id="tg-chat" class="sel" style="width:100%">'+chatOpts+'</select></div>'+
+    '<div class="field"><label>…или вписать ID вручную</label><input id="tg-chatman" class="sel" style="width:100%" placeholder="-100…"></div>'+
+    '<div class="field"><label>Отдел</label><select id="tg-dept" class="sel" style="width:100%">'+deptOpts+'</select></div>'+
+    '<div class="field"><label>Время отправки (МСК)</label><input id="tg-time" type="time" class="sel" value="19:00" style="width:100%"></div>'+
+    '<div class="field"><label>Дни недели</label><div class="tg-days">'+dayBtns+'</div></div>';
+  openModal('Подключить Telegram-чат',body,tgSave);
+};
+window.tgSave=function(){
+  var man=(document.getElementById('tg-chatman').value||'').trim();
+  var chatId=man||document.getElementById('tg-chat').value;
+  if(!chatId){openModalSimple('Нужен чат','<p style="font-size:13px;color:var(--text-2)">Выбери чат из списка или впиши ID вручную.</p>');return;}
+  var deptId=document.getElementById('tg-dept').value;
+  var time=document.getElementById('tg-time').value||'19:00';
+  var days=[].slice.call(document.querySelectorAll('.tg-day.on')).map(function(b){return parseInt(b.dataset.d,10);});
+  if(!days.length)days=[1,2,3,4,5];
+  closeModal();
+  sbPost('telegram_integrations',{dept_id:deptId,chat_id:String(chatId),enabled:true,send_time:time,send_days:days}).then(function(res){
+    if(res&&res.code)openModalSimple('Не получилось','<p style="font-size:13px;color:var(--text-2)">'+esc(res.message||'Возможно, этот чат уже подключён к отделу.')+'</p>');
+    return reloadTg();
+  });
+};
+window.tgToggle=function(id,en){sbPatch('telegram_integrations','id=eq.'+id,{enabled:en}).then(reloadTg);};
+window.tgDelete=function(id){openModal('Удалить интеграцию?','<p style="font-size:13px;color:var(--text-2)">Чат перестанет получать ежедневные отчёты.</p>',function(){closeModal();sbDelete('telegram_integrations','id=eq.'+id).then(reloadTg);});};
+window.tgTest=function(deptId,chatId,btn){
+  if(btn){btn.disabled=true;btn.textContent='…';}
+  fetch(SB_URL+'/functions/v1/daily-report',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},body:JSON.stringify({mode:'test',dept_id:deptId,chat_id:String(chatId)})})
+    .then(function(r){return r.json();}).then(function(j){
+      if(btn){btn.disabled=false;btn.textContent='Тест';}
+      if(j&&j.ok)openModalSimple('Отправлено','<p style="font-size:13px;color:var(--text-2)">Тестовый отчёт ушёл в чат: '+(j.sent||0)+' сообщ. (по числу менеджеров отдела).</p>');
+      else openModalSimple('Ошибка','<p style="font-size:13px;color:var(--text-2)">'+esc((j&&(j.error||j.message))||'Функция daily-report недоступна. Проверь, что она задеплоена и Verify JWT выключен.')+'</p>');
+    }).catch(function(e){if(btn){btn.disabled=false;btn.textContent='Тест';}openModalSimple('Ошибка','<p style="font-size:13px;color:var(--text-2)">'+esc(String(e))+'</p>');});
 };
 window.reassignEmp=function(supaId){
   var emp=RAW.employees.find(function(e){return e.id===supaId;});
