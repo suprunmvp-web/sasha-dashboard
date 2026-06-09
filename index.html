@@ -204,6 +204,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .adm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
 .status-dot{display:inline-flex;align-items:center;gap:6px;font-size:12px;}
 .status-dot .d{width:7px;height:7px;border-radius:50%;}
+.status-dot-only{display:inline-block;width:8px;height:8px;border-radius:50%;vertical-align:middle;}
 .dept-edit-card{background:var(--surface-2);border:1px solid var(--border-soft);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
 .dept-edit-card.archived{opacity:.5;}
 .save-hint{font-size:11px;color:var(--green);opacity:0;transition:opacity .3s;}
@@ -1190,24 +1191,36 @@ function renderEmpView(){
 function tgDays_(arr){var N=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];return(arr||[]).slice().sort(function(a,b){return a-b;}).map(function(d){return N[d-1]||d;}).join(', ')||'—';}
 function tgIntegrationBlock_(){
   var its=RAW.tgIntegrations||[];
-  var rows=its.length?its.map(function(it){
+  var thead='<thead><tr><th>Отдел</th><th>Чат ID</th><th>Расписание</th><th>Статус</th><th class="r">Действия</th></tr></thead>';
+  var tbody=its.length?its.map(function(it){
     var dept=DB.depts.find(function(d){return d.id===it.dept_id;});
     var deptName=dept?esc(dept.name):'(отдел удалён)';
-    var chatLabel='ID '+esc(String(it.chat_id));
     var tm=(it.send_time||'19:00').slice(0,5);
-    return'<div class="dept-edit-card">'+
-      '<div><div class="strong">'+deptName+' → '+chatLabel+'</div>'+
-        '<div class="muted" style="font-size:11px;margin-top:2px">'+tm+' МСК · '+tgDays_(it.send_days)+' · '+(it.enabled?'<span style="color:var(--green)">включено</span>':'<span style="color:var(--text-3)">выключено</span>')+'</div></div>'+
-      '<div style="display:flex;gap:6px">'+
-        '<button class="btn sm" onclick="tgTest(\''+it.dept_id+'\',\''+esc(String(it.chat_id))+'\',this)">Тест</button>'+
-        '<button class="btn sm ghost" onclick="tgToggle(\''+it.id+'\','+(it.enabled?'false':'true')+')">'+(it.enabled?'Выкл':'Вкл')+'</button>'+
-        '<button class="btn sm ghost" onclick="tgDelete(\''+it.id+'\')">Удалить</button>'+
-      '</div></div>';
-  }).join(''):'<p style="font-size:12px;color:var(--text-3)">Пока нет подключённых чатов. Добавь бота в чат отдела — он пришлёт ID, затем нажми «Подключить чат».</p>';
-  return'<div class="panel"><div class="adm-head"><div class="panel-title" style="margin:0">Интеграции · Telegram</div>'+
-    '<button class="btn primary" onclick="tgAddModal()">+ Подключить чат</button></div>'+
-    '<p style="font-size:12px;color:var(--text-3);margin:-4px 0 12px">Ежедневные отчёты по менеджерам отдела в Telegram. Бот сам пришлёт ID при добавлении в чат.</p>'+
-    rows+'</div>';
+    var statusCell=it.enabled
+      ?'<span class="status-dot-only" style="background:var(--green);margin-right:5px" title="включено"></span><span style="font-size:12px;color:var(--green)">включено</span>'
+      :'<span class="status-dot-only" style="background:var(--text-3);margin-right:5px" title="выключено"></span><span style="font-size:12px;color:var(--text-3)">выключено</span>';
+    return'<tr>'+
+      '<td><span class="strong">'+deptName+'</span></td>'+
+      '<td><span style="font-size:12px;color:var(--text-2);font-family:monospace">'+esc(String(it.chat_id))+'</span></td>'+
+      '<td style="font-size:12px;color:var(--text-2)">'+tm+' МСК · '+tgDays_(it.send_days)+'</td>'+
+      '<td>'+statusCell+'</td>'+
+      '<td class="r" style="white-space:nowrap">'+
+        '<button class="btn sm" style="margin-right:4px" onclick="tgTest(\''+it.dept_id+'\',\''+esc(String(it.chat_id))+'\',this)">Тест</button>'+
+        '<button class="btn sm ghost" style="margin-right:4px" onclick="tgToggle(\''+it.id+'\','+(it.enabled?'false':'true')+')">'+(it.enabled?'Выкл':'Вкл')+'</button>'+
+        '<button class="btn sm ghost" style="color:var(--red)" onclick="tgDelete(\''+it.id+'\')">Удалить</button>'+
+      '</td>'+
+    '</tr>';
+  }).join(''):'<tr><td colspan="5"><div style="padding:16px 0;font-size:12px;color:var(--text-3)">Нет подключённых чатов. Добавь бота в чат отдела — он пришлёт ID.</div></td></tr>';
+  return'<div class="panel">'+
+    '<div class="adm-head" style="margin-bottom:6px">'+
+      '<div>'+
+        '<div class="panel-title" style="margin:0">Интеграции · Telegram</div>'+
+        '<div style="font-size:12px;color:var(--text-3);margin-top:3px">Ежедневные отчёты по менеджерам. Бот пришлёт ID при добавлении в чат.</div>'+
+      '</div>'+
+      '<button class="btn primary" onclick="tgAddModal()">+ Подключить чат</button>'+
+    '</div>'+
+    '<table class="tbl"><thead>'+thead+'</thead><tbody>'+tbody+'</tbody></table>'+
+  '</div>';
 }
 function amoMappingBlock_(){
   if(!(S.amoUsers||[]).length)return'<div class="panel"><div class="panel-title">AmoCRM · Синхронизация</div><p style="font-size:12px;color:var(--text-3)">Запусти <code>amoSyncAll()</code> в GAS — список пользователей загрузится.</p></div>';
@@ -1241,8 +1254,8 @@ function renderRop(){
       '<td><span class="strong">'+esc(m.name)+'</span></td>'+
       '<td><select class="role-sel'+(isLead?' lead':'')+'" onchange="changeEmpRole(\''+m.supaId+'\',this.value)"><option value="manager"'+(isLead?'':' selected')+'>Менеджер</option><option value="lead"'+(isLead?' selected':'')+'>Тимлид</option></select></td>'+
       '<td class="muted num">'+fmtD(m.hired)+'</td>'+
-      '<td><span class="status-dot"><span class="d" style="background:var(--green)"></span>активен</span></td>'+
-      '<td class="r"><button class="amo-dot-btn" title="'+(S.empAmoMap[m.supaId]?'Синхронизирован с AmoCRM':'Не синхронизирован — нажми для настройки')+'" onclick="syncEmpModal(\''+m.supaId+'\')"><span class="amo-dot" style="background:'+(S.empAmoMap[m.supaId]?'var(--green)':'var(--amber)')+'"></span></button></td>'+
+      '<td><span class="status-dot-only" style="background:var(--green)" title="активен"></span></td>'+
+      '<td><span class="status-dot-only '+(S.empAmoMap[m.supaId]?'':'dim')+'" style="background:'+(S.empAmoMap[m.supaId]?'var(--green)':'var(--amber)')+';cursor:pointer" title="'+(S.empAmoMap[m.supaId]?'Синхронизирован с AmoCRM':'Не синхронизирован — нажми для настройки')+'" onclick="syncEmpModal(\''+m.supaId+'\')"></span></td>'+
       '<td class="r muted num">'+m.clients+'</td>'+
       '<td class="r"><button class="btn sm" onclick="editEmpModal(\''+m.supaId+'\')">Редактировать</button></td>'+
     '</tr>';
@@ -1289,7 +1302,6 @@ window.editEmpModal=function(supaId){
     '<button class="btn mi" style="text-align:left;padding:12px 16px;border-radius:12px;font-size:13px;justify-content:flex-start" onclick="renameEmpModal(\''+supaId+'\')">'+ICO.rename+' Переименовать</button>'+
     '<button class="btn mi" style="text-align:left;padding:12px 16px;border-radius:12px;font-size:13px;justify-content:flex-start" onclick="changeHireModal(\''+supaId+'\')">'+ICO.calendar+' Изменить дату найма</button>'+
     '<button class="btn mi" style="text-align:left;padding:12px 16px;border-radius:12px;font-size:13px;justify-content:flex-start" onclick="syncEmpModal(\''+supaId+'\')">'+ICO.link+' Синхронизация Amo</button>'+
-    '<button class="btn mi" style="text-align:left;padding:12px 16px;border-radius:12px;font-size:13px;justify-content:flex-start" onclick="tgUsernameModal(\''+supaId+'\')">'+ICO.link+' Telegram-юзернейм</button>'+
     '<button class="btn danger mi" style="text-align:left;padding:12px 16px;border-radius:12px;font-size:13px;justify-content:flex-start" onclick="closeModal();fireEmp(\''+supaId+'\')">'+ICO.fire+' Уволить</button>'+
   '</div>';
   openModalSimple(esc(emp.name),body);
@@ -1324,17 +1336,7 @@ window.changeHireModal=function(supaId){
   var emp=RAW.employees.find(function(e){return e.id===supaId;});
   openModal('Дата найма','<div class="field"><label>Дата найма</label><input id="hire-d" type="date" value="'+(emp&&emp.hired_at?emp.hired_at.substring(0,10):todayISO())+'"></div>',function(){var dt=document.getElementById('hire-d').value;sbPatch('employees','id=eq.'+supaId,{hired_at:dt});RAW.employees.forEach(function(e){if(e.id===supaId)e.hired_at=dt;});buildDB();closeModal();render();});
 };
-window.tgUsernameModal=function(supaId){
-  var emp=RAW.employees.find(function(e){return e.id===supaId;});
-  if(!emp)return;
-  var cur=(emp.telegram_username||'').replace(/^@/,'');
-  var body='<div class="field"><label>Telegram-юзернейм</label><input id="tgu" class="sel" style="width:100%" value="'+esc(cur)+'" placeholder="kokorev_i"><div style="font-size:11px;color:var(--text-3);margin-top:4px">Без @. Покажется в ежедневном отчёте рядом с именем.</div></div>';
-  openModal('Telegram-юзернейм · '+esc(emp.name),body,function(){
-    var v=(document.getElementById('tgu').value||'').trim().replace(/^@/,'');
-    closeModal();
-    patchEmpSync(supaId,{telegram_username:v||null},{telegram_username:v||null});
-  });
-};
+
 window.tgAddModal=function(){
   var deptOpts=DB.depts.map(function(d){return'<option value="'+d.id+'">'+esc(d.name)+'</option>';}).join('');
   var dayBtns=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(function(n,i){var on=i<5;return'<button type="button" class="tg-day'+(on?' on':'')+'" data-d="'+(i+1)+'" onclick="this.classList.toggle(\'on\')">'+n+'</button>';}).join('');
