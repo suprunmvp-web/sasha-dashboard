@@ -525,7 +525,16 @@ function grad(p){p=Math.max(0,Math.min(100,p))/100;var s=[[251,110,91],[245,181,
 function daysTo(ds){if(!ds)return null;return Math.max(0,r((new Date(ds)-TODAY)/86400e3));}
 function fmtD(ds){if(!ds)return'—';var p=ds.substring(0,10).split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
-function rrPct(fact,plan){var f=S.rangeFrom,t=S.rangeTo,el=Math.max(1,r((Math.min(TODAY,t)-f)/864e5)+1),tot=Math.max(1,r((t-f)/864e5)+1);var ex=plan*(el/tot);return ex>0?r(fact/ex*100):0;}
+function rrPct(fact,plan){
+  var f=S.rangeFrom,t=S.rangeTo;
+  // tot = полный месяц rangeFrom (или rangeTo если период длиннее месяца)
+  var monthEnd=new Date(f.getFullYear(),f.getMonth()+1,0);
+  var fullEnd=t>monthEnd?t:monthEnd;
+  var tot=Math.max(1,r((fullEnd-f)/864e5)+1);
+  var el=Math.max(1,r((Math.min(TODAY,fullEnd)-f)/864e5)+1);
+  var ex=plan*(el/tot);
+  return ex>0?r(fact/ex*100):0;
+}
 function calLabel(){var f=S.rangeFrom,t=S.rangeTo;if(f.getFullYear()===t.getFullYear()&&f.getMonth()===t.getMonth()&&f.getDate()===t.getDate())return MN[f.getMonth()]+' '+f.getDate()+', '+f.getFullYear();return MN[f.getMonth()]+' '+f.getDate()+' — '+MN[t.getMonth()]+' '+t.getDate()+', '+t.getFullYear();}
 function daysBadge(dn){if(dn===null)return'<span class="days-badge db-neu">—</span>';if(dn<=3)return'<span class="days-badge db-red">'+dn+'д</span>';if(dn<=7)return'<span class="days-badge db-amb">'+dn+'д</span>';if(dn<=14)return'<span class="days-badge db-neu">'+dn+'д</span>';return'<span class="days-badge db-grn">'+dn+'д</span>';}
 function expiryBadge(ds){
@@ -902,12 +911,35 @@ function renderCo(){
   var c=DB.company,cp=pct(c.fact,c.plan),rrv=rrPct(c.fact,c.plan);
   var allClients=DB.depts.reduce(function(a,d){return a.concat(d.clients);},[]);
   var coPaying=payingInPeriod(allClients);if(coPaying===null)coPaying=c.paying;
+
+  // CEO-блок: LTV, ARPU, Churn — только для коммдира
+  var ceoHtml='';
+  if(!S.cdHideCeo){
+    var arpu=coPaying>0?r(c.fact/coPaying):0;
+    // Churn: клиенты у кого subscription_end в выбранном периоде
+    var fromS=dateISO(S.rangeFrom),toS=dateISO(S.rangeTo);
+    var churned=RAW.clients.filter(function(cl){return cl.subscription_end&&cl.subscription_end.substring(0,10)>=fromS&&cl.subscription_end.substring(0,10)<=toS;}).length;
+    var activeStart=RAW.clients.filter(function(cl){return cl.subscription_status==='active'||cl.subscription_end&&cl.subscription_end.substring(0,10)>=fromS;}).length;
+    var churnRate=activeStart>0?r(churned/activeStart*100):0;
+    // Воронка компании
+    var allLeads=S.amoLeads||[];
+    var coFc=buildFunnelCounts(allLeads);
+    var funnelHtml=allLeads.length?'<div class="panel" style="margin-bottom:14px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><div class="panel-title" style="margin:0">Воронка первички · вся компания</div><span style="font-size:12px;color:var(--text-3)">Лидов: <b style="color:var(--text)">'+coFc.total+'</b> · Оплат: <b style="color:var(--text)">'+(coFc.counts.paid||0)+'</b></span></div><table class="fn2-tbl" style="width:100%"><thead><tr><th>Этап</th><th>Объём</th><th class="r">Факт</th></tr></thead><tbody>'+funnelBarsHtml_(coFc)+'</tbody></table></div>':'';
+    ceoHtml='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">'+
+      '<div class="kcard"><div class="kl">ARPU</div><div class="kv num">'+fmt(arpu)+'</div><div class="ks neu">на платящего клиента</div></div>'+
+      '<div class="kcard"><div class="kl">Платящих</div><div class="kv num">'+coPaying+'</div><div class="ks neu">из '+c.clients+' в портфеле</div></div>'+
+      '<div class="kcard"><div class="kl">Churn за период</div><div class="kv num">'+churnRate+'%</div><div class="ks neu">'+churned+' клиентов ушло</div></div>'+
+      '<div class="kcard"><div class="kl">Отделов</div><div class="kv num">'+DB.depts.length+'</div><div class="ks neu">'+DB.archivedDepts.length+' в архиве</div></div>'+
+    '</div>'+funnelHtml;
+  }
+
   var kH=[
     '<div class="ck"><div class="ck-l">Выручка за период</div><div class="ck-v num">'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div>'+(deltaTag(c.fact,c.prevFact)?'<div class="ck-delta">'+deltaTag(c.fact,c.prevFact)+'<span>к пред. периоду</span></div>':'')+'</div>',
     '<div class="ck"><div class="ck-l">Ранрейт</div><div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="'+(rrv>=100?'pos':rrv>=80?'neu':'neg')+'">'+(rrv>=100?'опережаем темп':'отстаём от темпа')+'</span></div></div>',
     '<div class="ck"><div class="ck-l">Платящих за период</div><div class="ck-v num">'+coPaying+'</div><div class="ck-s">из '+c.clients+' в портфеле</div></div>',
     '<div class="ck"><div class="ck-l">Отделов</div><div class="ck-v num">'+DB.depts.length+'</div><div class="ck-s">'+DB.archivedDepts.length+' в архиве</div></div>'
   ].join('');
+  var ceoToggle='<button class="arch-toggle" style="padding:0 0 14px" onclick="window.S.cdHideCeo=!window.S.cdHideCeo;render()">'+(S.cdHideCeo?'› Показать CEO-метрики и воронку':'↑ Скрыть CEO-метрики')+'</button>';
   var cards=DB.depts.length?DB.depts.map(function(d){
     var p2=pct(d.fact,d.plan),rr2=rrPct(d.fact,d.plan),c2=grad(p2);
     var bT=d.plan>0?(rr2>=100?'В темпе':rr2>=80?'Отстаём':'Критично'):'Нет плана',bC=d.plan>0?(rr2>=100?'bg':rr2>=80?'ba':'br'):'br';
@@ -927,7 +959,9 @@ function renderCo(){
   }
   setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="a">AI</span> · Дашборд</span></div>'+calTrigger()+'</div>'+
     (S.loadErr?'<div class="err-banner">⚠ '+esc(S.loadErr)+'</div>':'')+
-    '<div class="ckpi">'+kH+'</div><div class="dept-grid">'+cards+'</div>'+archHtml);
+    '<div class="ckpi">'+kH+'</div>'+
+    ceoToggle+ceoHtml+
+    '<div class="dept-grid">'+cards+'</div>'+archHtml);
 }
 window.toggleArchDepts=function(){S.showArchivedDepts=!S.showArchivedDepts;render();};
 window.drill=function(id){S.dept=id;S.tab='staff';S.calOpen=false;S.empView=null;render();};
@@ -1036,13 +1070,17 @@ function renderFunnelContent_(d){
     var leadsA=applyTagFilter_(leadsForMgrs_(S.fnMgrs,d.staff));
     var leadsB=applyTagFilter_(leadsForMgrs_(S.fnMgrsB,d.staff));
     var fcA=buildFunnelCounts(leadsA),fcB=buildFunnelCounts(leadsB);
-    var nameA=S.fnMgrs.length?S.fnMgrs.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return e?e.name.split(' ')[0]:'';}).join(', '):'\u0412\u0435\u0441\u044c \u043e\u0442\u0434\u0435\u043b';
-    var nameB=S.fnMgrsB.length?S.fnMgrsB.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return e?e.name.split(' ')[0]:'';}).join(', '):'\u0412\u0435\u0441\u044c \u043e\u0442\u0434\u0435\u043b';
-    body='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:6px">'+
-        '<div style="flex:1;min-width:200px"><div style="font-size:11px;color:'+CMP_A+';font-weight:700;margin-bottom:6px">ГРУППА А</div>'+mgrMs('fnMgrs','mgrA','dept')+
-          '<div class="fn2-stat-row" style="margin-top:8px">Лидов: <b>'+fcA.total+'</b> · Оплат: <b>'+(fcA.counts.paid||0)+'</b></div></div>'+
-        '<div style="flex:1;min-width:200px"><div style="font-size:11px;color:'+CMP_B+';font-weight:700;margin-bottom:6px">ГРУППА Б</div>'+mgrMs('fnMgrsB','mgrB','all')+
-          '<div class="fn2-stat-row" style="margin-top:8px">Лидов: <b>'+fcB.total+'</b> · Оплат: <b>'+(fcB.counts.paid||0)+'</b></div></div>'+
+    var nameA=S.fnMgrs.length?S.fnMgrs.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return e?(e.display_name||e.name).split(' ')[0]:'';}).join(', '):'Весь отдел';
+    var nameB=S.fnMgrsB.length?S.fnMgrsB.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return e?(e.display_name||e.name).split(' ')[0]:'';}).join(', '):'Весь отдел';
+    body='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding:10px 12px;background:var(--surface-2);border-radius:10px">'+
+        '<span style="font-size:11px;font-weight:700;color:'+CMP_A+';min-width:12px">А</span>'+mgrMs('fnMgrs','mgrA','dept')+
+        '<span style="font-size:11px;color:var(--text-3);margin:0 4px">·</span>'+
+        '<span style="font-size:11px;color:var(--text-3)">Лидов: <b style="color:var(--text)">'+fcA.total+'</b> Оплат: <b style="color:var(--text)">'+(fcA.counts.paid||0)+'</b></span>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding:10px 12px;background:var(--surface-2);border-radius:10px">'+
+        '<span style="font-size:11px;font-weight:700;color:'+CMP_B+';min-width:12px">Б</span>'+mgrMs('fnMgrsB','mgrB','all')+
+        '<span style="font-size:11px;color:var(--text-3);margin:0 4px">·</span>'+
+        '<span style="font-size:11px;color:var(--text-3)">Лидов: <b style="color:var(--text)">'+fcB.total+'</b> Оплат: <b style="color:var(--text)">'+(fcB.counts.paid||0)+'</b></span>'+
       '</div>'+
       '<div class="cmp2-legend"><span class="cmp2-leg"><span class="sw" style="background:'+CMP_A+'"></span>'+esc(nameA)+'<span class="ln">группа А</span></span>'+
         '<span class="cmp2-leg"><span class="sw" style="background:'+CMP_B+'"></span>'+esc(nameB)+'<span class="ln">группа Б</span></span></div>'+
@@ -1331,7 +1369,7 @@ function renderRop(){
     '<div class="panel" style="margin-bottom:14px"><div class="adm-head">'+
       '<div style="display:flex;align-items:center;gap:10px"><div class="panel-title" style="margin:0">Состав отдела</div>'+
         '<select class="sel" onchange="setRopDept(this.value)">'+deptOpts+'</select></div>'+
-      '<button class="btn primary" onclick="addEmpModal()">+ Сотрудник</button></div>'+
+      '<button class="btn" onclick="loadData()">'+ICO.refresh+' Синхронизировать</button></div>'+
       '<table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th>Нанят</th><th>Статус</th><th class="r">AMO</th><th class="r">Клиентов</th><th class="r">Действие</th></tr></thead><tbody>'+staffRows+'</tbody></table>'+
       firedBlock+'</div>'+
     unaBlock+
