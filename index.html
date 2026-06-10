@@ -824,10 +824,13 @@ function roleBar(){
 }
 window.setRole=function(r){S.role=r;S.dept=null;S.empView=null;S.calOpen=false;render();};
 window.toggleTheme=function(){S.theme=S.theme==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',S.theme);render();};
-function setApp(h){
-  var bd=S.msOpen?'<div id="ms-bd" onclick="applyFnPending();S.msOpen=null;S.msSearch=\'\';render()" style="position:fixed;inset:0;z-index:65;cursor:default"></div>':'';
-  document.getElementById('app').innerHTML=roleBar()+bd+h;
+function setApp(h){document.getElementById('app').innerHTML=roleBar()+h;}
+function _showBd(){
+  var bd=document.getElementById('_ms_bd');
+  if(!bd){bd=document.createElement('div');bd.id='_ms_bd';bd.style.cssText='position:fixed;inset:0;z-index:65';document.body.appendChild(bd);}
+  bd.onclick=function(){applyFnPending();S.msOpen=null;S.msSearch='';_hideBd();render();};
 }
+function _hideBd(){var bd=document.getElementById('_ms_bd');if(bd)bd.remove();}
 function flashSave(){S.saveHint=true;render();setTimeout(function(){S.saveHint=false;render();},1500);}
 
 /* ═══ ICON LIBRARY (минималистичные line-иконки) ═══ */
@@ -1087,28 +1090,18 @@ function renderFunnelContent_(d){
       var q=(S.msSearch||'').toLowerCase();
       var optHtml='';
       var pendArr2=stateKey==='fnMgrs'?(S.fnPendingMgrs||sel):(S.fnPendingMgrsB||sel);
-      // Кнопка "Весь отдел" (снять всех)
-      var allSel=pendArr2.length===0;
-      var allBtn='<div class="ms-opt'+(allSel?' sel':'')+'" onclick="event.stopPropagation();fnClearMgrs(\''+stateKey+'\')">'+
-        '<span class="ms-opt-dot" style="'+(allSel?'background:var(--accent)':'')+'">\u200b</span>'+
-        '<span class="ms-nm">Весь отдел</span>'+
-        '<svg class="ms-opt-chk" style="opacity:'+(allSel?1:0)+'" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>';
       if(scope==='dept'){
         var list=d.staff.filter(function(m){return!q||m.name.toLowerCase().indexOf(q)>=0;});
         optHtml=list.length?list.map(function(m){return msOptHtml_(stateKey,m.supaId,m.name,empAmo_(m.supaId));}).join(''):'<div class="ms-empty">Ничего не найдено</div>';
-        // Кнопка "Весь отдел" только без поиска
-        if(!q) optHtml=allBtn+optHtml;
       } else {
         DB.depts.forEach(function(dd){
           var staff=dd.staff.filter(function(m){return!q||m.name.toLowerCase().indexOf(q)>=0;});
           if(!staff.length)return;
-          // Заголовок отдела кликабельный — добавить весь отдел
           var deptAllSel=staff.every(function(m){return pendArr2.indexOf(m.supaId)>=0;});
           optHtml+='<div class="ms-group" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="event.stopPropagation();fnSelectDept(\''+stateKey+'\',\''+dd.id+'\')">'+esc(dd.name)+'<span style="font-size:10px;color:var(--accent);font-weight:600">'+(deptAllSel?'снять':'выбрать всех')+'</span></div>'+
             staff.map(function(m){return msOptHtml_(stateKey,m.supaId,m.name,empAmo_(m.supaId));}).join('');
         });
         if(!optHtml)optHtml='<div class="ms-empty">Ничего не найдено</div>';
-        if(!q)optHtml=allBtn+optHtml;
       }
       dropInner='<div style="padding:8px 8px 4px;border-bottom:0.5px solid var(--border-soft)"><input class="ms-search" id="ms-search-'+msId+'" placeholder="Поиск..." value="'+esc(S.msSearch||'')+'" oninput="fnMsSearch(this.value)" onclick="event.stopPropagation()" style="margin:0"></div><div style="padding:4px;max-height:280px;overflow-y:auto">'+optHtml+'</div>';
     }
@@ -1178,31 +1171,21 @@ S.fnPendingMgrs=null;S.fnPendingMgrsB=null;
 function applyFnPending(){
   if(S.fnPendingMgrs!==null){S.fnMgrs=S.fnPendingMgrs;S.fnPendingMgrs=null;}
   if(S.fnPendingMgrsB!==null){S.fnMgrsB=S.fnPendingMgrsB;S.fnPendingMgrsB=null;}
+  _hideBd();
 }
 function closeMsIfOpen(e){
   if(S.msOpen&&!e.target.closest('.ms')){applyFnPending();S.msOpen=null;S.msSearch='';render();}
 }
 window.fnToggleMs=function(e,id){
   e.stopPropagation();
-  if(S.msOpen===id){applyFnPending();S.msOpen=null;S.msSearch='';render();}
+  if(S.msOpen===id){applyFnPending();S.msOpen=null;S.msSearch='';_hideBd();render();}
   else{
     applyFnPending();
     S.msOpen=id;
     S.fnPendingMgrs=S.fnMgrs.slice();
     S.fnPendingMgrsB=S.fnMgrsB.slice();
-    S.msSearch='';render();
-    // Одноразовый listener — закрываем при клике вне .ms
-    function _outsideClick(ev){
-      if(!ev.target||!ev.target.closest||!ev.target.closest('.ms')){
-        window.removeEventListener('click',_outsideClick,true);
-        window.removeEventListener('touchstart',_outsideClick,true);
-        applyFnPending();S.msOpen=null;S.msSearch='';render();
-      }
-    }
-    setTimeout(function(){
-      window.addEventListener('click',_outsideClick,true);
-      window.addEventListener('touchstart',_outsideClick,{capture:true,passive:true});
-    },50);
+    S.msSearch='';
+    _showBd();render();
   }
 };
 window.fnClearTags=function(){S.fnTags=[];render();};
@@ -1254,7 +1237,6 @@ window.fnToggleMgr=function(key,id){
 window.fnRemoveMgr=function(key,id){var arr=S[key];var i=arr.indexOf(id);if(i>=0)arr.splice(i,1);S.fnPendingMgrs=null;S.fnPendingMgrsB=null;render();};
 window.fnApplyMgrs=function(){applyFnPending();S.msOpen=null;render();};
 window.toggleFnCompare=function(){applyFnPending();S.fnCompare=!S.fnCompare;S.msOpen=null;render();};
-document.addEventListener('keydown',function(e){if(e.key==='Escape'&&S.msOpen){applyFnPending();S.msOpen=null;S.msSearch='';render();}});
 document.addEventListener('click',function(e){if(S.msOpen&&e.target&&e.target.closest&&!e.target.closest('.ms')){applyFnPending();S.msOpen=null;S.msSearch='';render();}});
 
 function renderDept(){
