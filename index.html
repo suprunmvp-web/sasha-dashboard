@@ -824,7 +824,10 @@ function roleBar(){
 }
 window.setRole=function(r){S.role=r;S.dept=null;S.empView=null;S.calOpen=false;render();};
 window.toggleTheme=function(){S.theme=S.theme==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',S.theme);render();};
-function setApp(h){document.getElementById('app').innerHTML=roleBar()+h;}
+function setApp(h){
+  var bd=S.msOpen?'<div id="ms-bd" onclick="applyFnPending();S.msOpen=null;S.msSearch=\'\';render()" style="position:fixed;inset:0;z-index:65;cursor:default"></div>':'';
+  document.getElementById('app').innerHTML=roleBar()+bd+h;
+}
 function flashSave(){S.saveHint=true;render();setTimeout(function(){S.saveHint=false;render();},1500);}
 
 /* ═══ ICON LIBRARY (минималистичные line-иконки) ═══ */
@@ -1251,6 +1254,7 @@ window.fnToggleMgr=function(key,id){
 window.fnRemoveMgr=function(key,id){var arr=S[key];var i=arr.indexOf(id);if(i>=0)arr.splice(i,1);S.fnPendingMgrs=null;S.fnPendingMgrsB=null;render();};
 window.fnApplyMgrs=function(){applyFnPending();S.msOpen=null;render();};
 window.toggleFnCompare=function(){applyFnPending();S.fnCompare=!S.fnCompare;S.msOpen=null;render();};
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&S.msOpen){applyFnPending();S.msOpen=null;S.msSearch='';render();}});
 document.addEventListener('click',function(e){if(S.msOpen&&e.target&&e.target.closest&&!e.target.closest('.ms')){applyFnPending();S.msOpen=null;S.msSearch='';render();}});
 
 function renderDept(){
