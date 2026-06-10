@@ -1188,6 +1188,18 @@ window.fnToggleMs=function(e,id){
     S.fnPendingMgrs=S.fnMgrs.slice();
     S.fnPendingMgrsB=S.fnMgrsB.slice();
     S.msSearch='';render();
+    // Одноразовый listener — закрываем при клике вне .ms
+    function _outsideClick(ev){
+      if(!ev.target||!ev.target.closest||!ev.target.closest('.ms')){
+        window.removeEventListener('click',_outsideClick,true);
+        window.removeEventListener('touchstart',_outsideClick,true);
+        applyFnPending();S.msOpen=null;S.msSearch='';render();
+      }
+    }
+    setTimeout(function(){
+      window.addEventListener('click',_outsideClick,true);
+      window.addEventListener('touchstart',_outsideClick,{capture:true,passive:true});
+    },50);
   }
 };
 window.fnClearTags=function(){S.fnTags=[];render();};
@@ -1239,8 +1251,7 @@ window.fnToggleMgr=function(key,id){
 window.fnRemoveMgr=function(key,id){var arr=S[key];var i=arr.indexOf(id);if(i>=0)arr.splice(i,1);S.fnPendingMgrs=null;S.fnPendingMgrsB=null;render();};
 window.fnApplyMgrs=function(){applyFnPending();S.msOpen=null;render();};
 window.toggleFnCompare=function(){applyFnPending();S.fnCompare=!S.fnCompare;S.msOpen=null;render();};
-document.addEventListener('click',closeMsIfOpen);
-document.addEventListener('touchstart',closeMsIfOpen,{passive:true});
+document.addEventListener('click',function(e){if(S.msOpen&&e.target&&e.target.closest&&!e.target.closest('.ms')){applyFnPending();S.msOpen=null;S.msSearch='';render();}});
 
 function renderDept(){
   var d=DB.depts.find(function(x){return x.id===S.dept;});
