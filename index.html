@@ -924,11 +924,12 @@ function renderCo(){
   var coPaying=payingInPeriod(allClients);if(coPaying===null)coPaying=c.paying;
 
   var arpu2=coPaying>0?r(c.fact/coPaying):0;
+  var totalStaff=DB.depts.reduce(function(a,d){return a+d.staff.filter(function(m){return!m.fired;}).length;},0);
   var kH=[
     '<div class="ck"><div class="ck-l">Выручка за период</div><div class="ck-v num">'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div><div class="ck-delta">'+deltaTag(c.fact,c.prevFact)+'<span>к пред. периоду</span></div></div>',
-    '<div class="ck"><div class="ck-l">Ранрейт</div><div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="'+(rrv>=100?'pos':rrv>=80?'neu':'neg')+'">'+(rrv>=100?'опережаем темп':'отстаём от темпа')+'</span></div><div class="ck-s" style="margin-top:6px">выполнено '+cp+'% плана</div></div>',
+    '<div class="ck"><div class="ck-l">Ранрейт</div><div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="'+(rrv>=100?'pos':rrv>=80?'neu':'neg')+'">'+(rrv>=100?'опережаем темп':'отстаём от темпа')+'</span></div></div>',
     '<div class="ck"><div class="ck-l">Платящих за период</div><div class="ck-v num">'+coPaying+'</div><div class="ck-s">из '+c.clients+' в портфеле</div><div class="ck-s" style="margin-top:6px">ARPU '+(arpu2?fmt(arpu2):'—')+'</div></div>',
-    '<div class="ck"><div class="ck-l">Отделов</div><div class="ck-v num">'+DB.depts.length+'</div><div class="ck-s">'+DB.archivedDepts.length+' в архиве</div><div class="ck-s" style="margin-top:6px">'+c.clients+' клиентов всего</div></div>'
+    '<div class="ck"><div class="ck-l">Отделов</div><div class="ck-v num">'+DB.depts.length+'</div><div class="ck-s">'+DB.archivedDepts.length+' в архиве</div><div class="ck-s" style="margin-top:6px">'+totalStaff+' сотрудников</div></div>'
   ].join('');
 
   // Воронка с выбором отдела
