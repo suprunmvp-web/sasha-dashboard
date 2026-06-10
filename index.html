@@ -14,6 +14,13 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
 .pos{color:var(--green);}.neg{color:var(--red);}.neu{color:var(--text-2);}
 .tag-once{display:inline-block;font-size:10px;font-weight:600;padding:1px 7px;border-radius:9px;background:var(--bg-3,rgba(127,127,127,.14));color:var(--text-3);vertical-align:middle;letter-spacing:.2px;}
+.tg-sw{position:relative;display:inline-block;width:36px;height:20px;flex-shrink:0;}
+.tg-sw input{opacity:0;width:0;height:0;position:absolute;}
+.tg-sw-track{position:absolute;inset:0;background:var(--border);border-radius:10px;cursor:pointer;transition:.2s;}
+.tg-sw input:checked+.tg-sw-track{background:var(--green);}
+.tg-sw-track::after{content:'';position:absolute;left:2px;top:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.15);}
+.tg-sw input:checked+.tg-sw-track::after{transform:translateX(16px);}
+.tg-sw-track:hover{opacity:.85;}
 .tg-days{display:flex;gap:6px;flex-wrap:wrap;}
 .tg-day{font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid var(--border,#e2e6ee);background:transparent;color:var(--text-3);cursor:pointer;transition:.15s;}
 .tg-day.on{background:var(--accent);border-color:var(--accent);color:#fff;}
@@ -299,14 +306,14 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .ms-drop.on{display:block;animation:rise .22s cubic-bezier(.16,1,.3,1);}
 .ms-search{width:100%;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text);font-size:13px;padding:9px 11px;margin-bottom:6px;}
 .ms-search:focus{outline:none;border-color:var(--accent);}
-.ms-opt{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:9px;font-size:13px;color:var(--text);cursor:pointer;line-height:1.3;transition:background .12s;}
+.ms-opt{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--text);cursor:pointer;line-height:1.3;transition:background .12s;}
 .ms-opt:hover{background:var(--surface-2);}
 .ms-opt.sel{background:var(--accent-bg);}
-.ms-opt .ck{width:18px;height:18px;min-width:18px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.12s;background:var(--surface-2);}
-.ms-opt .ck svg{width:11px;height:11px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.5);transition:.15s;}
-.ms-opt.sel .ck{background:var(--accent);border-color:var(--accent);}
-.ms-opt.sel .ck svg{opacity:1;transform:scale(1);}
-.ms-opt.sel .ms-nm{color:var(--accent);font-weight:600;}
+.ms-opt-dot{width:8px;height:8px;min-width:8px;border-radius:50%;background:var(--border);flex-shrink:0;transition:.12s;}
+.ms-opt.sel .ms-opt-dot{background:var(--accent);}
+.ms-opt-chk{margin-left:auto;flex-shrink:0;opacity:0;color:var(--accent);}
+.ms-opt.sel .ms-opt-chk{opacity:1;}
+.ms-opt.sel .ms-nm{color:var(--accent);font-weight:500;}
 .ms-nm{flex:1;min-width:0;}
 .ms-opt .sub{font-size:10px;color:var(--amber);margin-left:auto;flex-shrink:0;background:var(--amber-bg);padding:2px 7px;border-radius:10px;}
 .ms-group{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;padding:10px 11px 5px;}
@@ -1037,8 +1044,9 @@ function funnelCompareHtml_(fcA,fcB){
 }
 
 function msOptHtml_(stateKey,id,name,hasAmo){
-  var sl=S[stateKey].indexOf(id)>=0;
-  return'<div class="ms-opt'+(sl?' sel':'')+'" onclick="event.stopPropagation();fnToggleMgr(\''+stateKey+'\',\''+id+'\')"><span class="ck"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span><span class="ms-nm">'+esc(name)+'</span>'+(hasAmo?'':'<span class="sub">нет Amo</span>')+'</div>';
+  var pendArr=stateKey==="fnMgrs"?(S.fnPendingMgrs||S.fnMgrs):(S.fnPendingMgrsB||S.fnMgrsB);
+  var sl=pendArr.indexOf(id)>=0;
+  return'<div class="ms-opt'+(sl?' sel':'')+'" data-id="'+id+'" onclick="event.stopPropagation();fnToggleMgr(\'+stateKey+'\,"'+id+'")">"'+"'<span class="ms-opt-dot"></span>"'+"'<span class="ms-nm">'+esc(name)+'</span>"'+(hasAmo?'':'<span class="sub">нет Amo</span>')+"'<svg class="ms-opt-chk" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>';
 }
 function renderFunnelContent_(d){
   var hasAmo=S.amoLeads.length>0;
@@ -1054,25 +1062,25 @@ function renderFunnelContent_(d){
   /* ── MANAGER MULTISELECT (grouped by dept + search) ── */
   function mgrMs(stateKey,msId,scope){
     var sel=S[stateKey];
-    var chips=sel.length?sel.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return'<span class="ms-chip">'+esc((e?e.name:'?').split(' ').slice(0,2).join(' '))+'<button onclick="event.stopPropagation();fnRemoveMgr(\''+stateKey+'\',\''+id+'\')">\u00d7</button></span>';}).join(''):'<span class="ms-ph">\u0412\u0435\u0441\u044c \u043e\u0442\u0434\u0435\u043b</span>';
-    var open=S.msOpen===msId;
+    // Показываем pending state если дропдаун открыт
+    var dispArr=open?(stateKey==='fnMgrs'?(S.fnPendingMgrs||sel):(S.fnPendingMgrsB||sel)):sel;
+    var chips=dispArr.length?dispArr.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return'<span class="ms-chip">'+esc((e?(e.display_name||e.name):'?').split(' ').slice(0,2).join(' '))+'<button onclick="event.stopPropagation();fnRemoveMgr(\''+stateKey+'\',\''+id+'\')">\u00d7</button></span>';}).join(''):'<span class="ms-ph">Весь отдел</span>';
     var dropInner='';
     if(open){
       var q=(S.msSearch||'').toLowerCase();
       var optHtml='';
       if(scope==='dept'){
         var list=d.staff.filter(function(m){return!q||m.name.toLowerCase().indexOf(q)>=0;});
-        optHtml=list.length?list.map(function(m){return msOptHtml_(stateKey,m.supaId,m.name,empAmo_(m.supaId));}).join(''):'<div class="ms-empty">\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e</div>';
+        optHtml=list.length?list.map(function(m){return msOptHtml_(stateKey,m.supaId,m.name,empAmo_(m.supaId));}).join(''):'<div class="ms-empty">Ничего не найдено</div>';
       } else {
-        /* grouped by dept */
         DB.depts.forEach(function(dd){
           var staff=dd.staff.filter(function(m){return!q||m.name.toLowerCase().indexOf(q)>=0;});
           if(!staff.length)return;
           optHtml+='<div class="ms-group">'+esc(dd.name)+'</div>'+staff.map(function(m){return msOptHtml_(stateKey,m.supaId,m.name,empAmo_(m.supaId));}).join('');
         });
-        if(!optHtml)optHtml='<div class="ms-empty">\u041d\u0438\u0447\u0435\u0433\u043e \u043d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e</div>';
+        if(!optHtml)optHtml='<div class="ms-empty">Ничего не найдено</div>';
       }
-      dropInner='<input class="ms-search" id="ms-search-'+msId+'" placeholder="\u041f\u043e\u0438\u0441\u043a..." value="'+esc(S.msSearch||'')+'" oninput="fnMsSearch(this.value)" onclick="event.stopPropagation()">'+optHtml;
+      dropInner='<div style="padding:8px 8px 4px;border-bottom:0.5px solid var(--border-soft)"><input class="ms-search" id="ms-search-'+msId+'" placeholder="Поиск..." value="'+esc(S.msSearch||'')+'" oninput="fnMsSearch(this.value)" onclick="event.stopPropagation()" style="margin:0"></div><div style="padding:4px">'+optHtml+'</div>';
     }
     return'<div class="ms"><div class="ms-trig'+(open?' open':'')+'" onclick="fnToggleMs(event,\''+msId+'\')">'+chips+'<span class="ms-arrow">\u25be</span></div><div class="ms-drop'+(open?' on':'')+'">'+dropInner+'</div></div>';
   }
@@ -1135,16 +1143,56 @@ function renderFunnelContent_(d){
     '<div class="panel"><div class="fn2-head"><div class="fn2-title">Воронка первички</div>'+headerRight+'</div>'+body+'</div>'+
     channelSection;
 }
-window.fnToggleMs=function(e,id){e.stopPropagation();S.msOpen=S.msOpen===id?null:id;S.msSearch='';render();};
+/* Pending state для мультиселекта — render только при закрытии */
+S.fnPendingMgrs=null;S.fnPendingMgrsB=null;
+function applyFnPending(){
+  if(S.fnPendingMgrs!==null){S.fnMgrs=S.fnPendingMgrs;S.fnPendingMgrs=null;}
+  if(S.fnPendingMgrsB!==null){S.fnMgrsB=S.fnPendingMgrsB;S.fnPendingMgrsB=null;}
+}
+window.fnToggleMs=function(e,id){
+  e.stopPropagation();
+  if(S.msOpen===id){applyFnPending();S.msOpen=null;S.msSearch='';render();}
+  else{
+    applyFnPending();
+    S.msOpen=id;
+    S.fnPendingMgrs=S.fnMgrs.slice();
+    S.fnPendingMgrsB=S.fnMgrsB.slice();
+    S.msSearch='';render();
+  }
+};
 window.fnClearTags=function(){S.fnTags=[];render();};
 window.fnMsSearch=function(v){S.msSearch=v;render();setTimeout(function(){var el=document.querySelector('.ms-drop.on .ms-search');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}},0);};
 window.fnToggleTag=function(t){var i=S.fnTags.indexOf(t);if(i>=0)S.fnTags.splice(i,1);else S.fnTags.push(t);render();};
 window.fnRemoveTag=function(t){var i=S.fnTags.indexOf(t);if(i>=0)S.fnTags.splice(i,1);render();};
-window.fnToggleMgr=function(key,id){var arr=S[key];var i=arr.indexOf(id);if(i>=0)arr.splice(i,1);else arr.push(id);render();setTimeout(function(){S.msOpen=key==='fnMgrs'?'mgrA':'mgrB';render();},0);};
-window.fnRemoveMgr=function(key,id){var arr=S[key];var i=arr.indexOf(id);if(i>=0)arr.splice(i,1);render();};
-window.fnApplyMgrs=function(){S.msOpen=null;render();};
-window.toggleFnCompare=function(){S.fnCompare=!S.fnCompare;S.msOpen=null;render();};
-document.addEventListener('click',function(e){if(S.msOpen&&!e.target.closest('.ms')){S.msOpen=null;S.msSearch='';render();}});
+window.fnToggleMgr=function(key,id){
+  var arr=(key==='fnMgrs'?S.fnPendingMgrs:S.fnPendingMgrsB)||[];
+  var i=arr.indexOf(id);if(i>=0)arr.splice(i,1);else arr.push(id);
+  if(key==='fnMgrs')S.fnPendingMgrs=arr;else S.fnPendingMgrsB=arr;
+  /* DOM-only update — без render() */
+  var opt=document.querySelector('.ms-opt[data-id="'+id+'"]');
+  if(opt){
+    var sel=arr.indexOf(id)>=0;
+    opt.classList.toggle('sel',sel);
+    var dot=opt.querySelector('.ms-opt-dot');if(dot)dot.style.background=sel?'var(--accent)':'var(--border)';
+    var chk=opt.querySelector('.ms-opt-chk');if(chk)chk.style.opacity=sel?1:0;
+    var nm=opt.querySelector('.ms-nm');if(nm){nm.style.color=sel?'var(--accent)':'';nm.style.fontWeight=sel?'500':'';}
+  }
+  /* обновляем chips в триггере */
+  var msId=key==='fnMgrs'?'mgrA':'mgrB';
+  var trig=document.querySelector('.ms-trig[onclick*="\''+msId+'\'"]');
+  if(trig){
+    var chips=arr.length?arr.map(function(xid){var e=RAW.employees.find(function(x){return x.id===xid;});return'<span class="ms-chip">'+esc((e?(e.display_name||e.name):'?').split(' ').slice(0,2).join(' '))+'<button onclick="event.stopPropagation();fnRemoveMgr(\''+key+'\',\''+xid+'\')">×</button></span>';}).join(''):'<span class="ms-ph">Весь отдел</span>';
+    var arrow=trig.querySelector('.ms-arrow');
+    trig.innerHTML=chips+'<span class="ms-arrow">▾</span>';
+  }
+};
+window.fnRemoveMgr=function(key,id){
+  var arr=S[key];var i=arr.indexOf(id);if(i>=0)arr.splice(i,1);
+  S.fnPendingMgrs=null;S.fnPendingMgrsB=null;render();
+};
+window.fnApplyMgrs=function(){applyFnPending();S.msOpen=null;render();};
+window.toggleFnCompare=function(){applyFnPending();S.fnCompare=!S.fnCompare;S.msOpen=null;render();};
+document.addEventListener('click',function(e){if(S.msOpen&&!e.target.closest('.ms')){applyFnPending();S.msOpen=null;S.msSearch='';render();}});
 
 function renderDept(){
   var d=DB.depts.find(function(x){return x.id===S.dept;});
@@ -1224,10 +1272,10 @@ function renderEmpView(){
   var ten=tenure(emp.hired_at);
   var initials=(emp.name||'?').split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase();
   var kH=[
-    '<div class="kcard"><div class="kl">Факт за период</div><div class="kv num">'+fmt(dealAgg.fact)+'</div><div class="ks"><span class="neu">план '+fmt(plan)+' · '+mp+'%</span> '+deltaTag(dealAgg.fact,S.prevByEmp[S.empView]||0)+'</div><div class="pbar"><div class="pfill" style="width:'+Math.min(mp,100)+'%;background:'+grad(mp)+'"></div></div></div>',
-    '<div class="kcard"><div class="kl">Ранрейт</div><div class="kv num" style="color:'+grad(mr)+'">'+mr+'%</div><div class="ks"><span class="neu">по плану</span></div></div>',
-    '<div class="kcard"><div class="kl">Сделок</div><div class="kv num">'+dealAgg.count+'</div><div class="ks"><span class="neu">за период</span></div></div>',
-    '<div class="kcard"><div class="kl">Клиентов</div><div class="kv num">'+portfolioCount+'</div><div class="ks"><span class="neu">в портфеле</span></div></div>',
+    '<div class="kcard"><div class="kl">Факт за период</div><div class="kv num">'+fmt(dealAgg.fact)+'</div><div class="ks"><span class="neu">план '+fmt(plan)+'</span></div><div class="ks" style="margin-top:4px">'+mp+'% · '+deltaTag(dealAgg.fact,S.prevByEmp[S.empView]||0)+'</div></div>',
+    '<div class="kcard"><div class="kl">Ранрейт</div><div class="kv num" style="color:'+grad(mr)+'">'+mr+'%</div><div class="ks"><span class="'+(mr>=100?'pos':mr>=80?'neu':'neg')+'">'+(mr>=100?'опережаем':'отстаём от темпа')+'</span></div></div>',
+    '<div class="kcard"><div class="kl">Сделок</div><div class="kv num">'+dealAgg.count+'</div><div class="ks"><span class="neu">за период</span></div><div class="ks" style="margin-top:4px"><span class="neu">ср. чек '+(dealAgg.count>0?fmt(r(dealAgg.fact/dealAgg.count)):'—')+'</span></div></div>',
+    '<div class="kcard"><div class="kl">Клиентов</div><div class="kv num">'+portfolioCount+'</div><div class="ks"><span class="neu">в портфеле</span></div><div class="ks" style="margin-top:4px"><span class="neu">платящих: '+(payingInPeriod(myClients.filter(function(c){return!c.foreign;}))||0)+'</span></div></div>',
     '<div class="kcard"><div class="kl">Стаж</div><div class="kv num">'+(ten!==null?ten+' мес.':'—')+'</div><div class="ks"><span class="neu">'+(emp.hired_at?'с '+fmtD(emp.hired_at):'')+'</span></div></div>'
   ].join('');
   // Sort clients
@@ -1289,18 +1337,17 @@ function tgIntegrationBlock_(){
     var tm=(it.send_time||'19:00').slice(0,5);
     var dotColor=it.enabled?'var(--green)':'var(--text-3)';
     var dotTitle=it.enabled?'включено':'выключено';
-    return'<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--border-soft)">'+
-      '<span style="width:8px;height:8px;border-radius:50%;background:'+dotColor+';flex-shrink:0" title="'+dotTitle+'"></span>'+
+    return'<div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:0.5px solid var(--border-soft)">'+
+      '<label class="tg-sw" title="'+dotTitle+'"><input type="checkbox"'+(it.enabled?' checked':'')+' onchange="tgToggle(\''+it.id+'\',this.checked)"><span class="tg-sw-track"></span></label>'+
       '<div style="flex:1;min-width:0">'+
         '<div style="font-size:13px;font-weight:600;color:var(--text)">'+deptName+'</div>'+
         '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+
           tm+' МСК · '+tgDays_(it.send_days)+
-          ' <span style="font-family:monospace;color:var(--text-3)">'+esc(String(it.chat_id))+'</span>'+
+          ' <span style="font-family:monospace">'+esc(String(it.chat_id))+'</span>'+
         '</div>'+
       '</div>'+
-      '<div style="display:flex;gap:6px;flex-shrink:0">'+
+      '<div style="display:flex;gap:6px;flex-shrink:0;align-items:center">'+
         '<button class="btn sm" onclick="tgTest(\''+it.dept_id+'\',\''+esc(String(it.chat_id))+'\',this)">Тест</button>'+
-        '<button class="btn sm ghost" onclick="tgToggle(\''+it.id+'\','+(it.enabled?'false':'true')+')">'+(it.enabled?'Выкл':'Вкл')+'</button>'+
         '<button class="btn sm ghost" style="color:var(--red)" onclick="tgDelete(\''+it.id+'\')">Удалить</button>'+
       '</div>'+
     '</div>';
