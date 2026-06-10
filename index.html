@@ -862,12 +862,14 @@ function renderLb(){
     all.sort(function(a,b){var k=S.sumSort;var va=a[k],vb=b[k];if(typeof va==='string')return S.sumSortDir*va.localeCompare(vb);return S.sumSortDir*(va-vb);});
     var colDefs=[['','#'],['name','Сотрудник'],['fact','Факт','r'],['plan','План','r'],['pct','%','r'],['_dlt','Δ период','r'],['clients','Клиентов','r'],['tenure','Стаж','r']];
     var th=colDefs.map(function(c){if(!c[0])return'<th style="width:40px">#</th>';if(c[0]==='_dlt')return'<th class="r">Δ период</th>';var a=S.sumSort===c[0];return'<th class="'+(c[2]||'')+(a?' sorted':'')+'" onclick="setSumSort(\''+c[0]+'\')">'+c[1]+si(a,S.sumSortDir)+'</th>';}).join('');
+    var MEDALS=['🥇','🥈','🥉'];
     var rows=all.length?all.map(function(m,i){
       var pctColor=m.pct>=100?'var(--green)':m.pct>=70?'var(--amber)':'var(--red)';
-      var rowBg=i===0?'background:var(--accent-bg)':i<3?'background:var(--surface-2)':'';
-      var rowBorder=i===0?'box-shadow:inset 2px 0 0 var(--accent)':'';
+      var rowBg=i===0?'background:rgba(255,193,7,.07)':i===1?'background:rgba(148,163,184,.05)':i===2?'background:rgba(205,127,50,.05)':'';
+      var rowBorder=i===0?'box-shadow:inset 2px 0 0 #F5B544':i===1?'box-shadow:inset 2px 0 0 #94A3B8':i===2?'box-shadow:inset 2px 0 0 #CD7F32':'';
+      var rankCell=i<3?'<span style="font-size:16px;line-height:1">'+MEDALS[i]+'</span>':'<span style="font-size:12px;font-weight:500;color:var(--text-3);display:inline-flex;align-items:center;justify-content:center;width:26px">'+(i+1)+'</span>';
       return'<tr style="'+rowBg+';'+rowBorder+'">'+
-        '<td style="padding-left:12px"><span style="font-size:12px;font-weight:500;color:var(--text-3)">'+(i+1)+'</span></td>'+
+        '<td style="padding-left:12px">'+rankCell+'</td>'+
         '<td><span class="strong">'+esc(m.name)+'</span><div style="font-size:11px;color:var(--text-3)">'+esc(m.dept)+'</div></td>'+
         '<td class="r strong num">'+fmt(m.fact)+'</td>'+
         '<td class="r muted num">'+fmt(m.plan)+'</td>'+
@@ -907,31 +909,12 @@ function renderLb(){
 }
 
 /* ═══ ДАШБОРД ═══ */
+if(!S.cdFunnelDept)S.cdFunnelDept='all';
+window.setCdFunnelDept=function(id){S.cdFunnelDept=id;render();};
 function renderCo(){
   var c=DB.company,cp=pct(c.fact,c.plan),rrv=rrPct(c.fact,c.plan);
   var allClients=DB.depts.reduce(function(a,d){return a.concat(d.clients);},[]);
   var coPaying=payingInPeriod(allClients);if(coPaying===null)coPaying=c.paying;
-
-  // CEO-блок: LTV, ARPU, Churn — только для коммдира
-  var ceoHtml='';
-  if(!S.cdHideCeo){
-    var arpu=coPaying>0?r(c.fact/coPaying):0;
-    // Churn: клиенты у кого subscription_end в выбранном периоде
-    var fromS=dateISO(S.rangeFrom),toS=dateISO(S.rangeTo);
-    var churned=RAW.clients.filter(function(cl){return cl.subscription_end&&cl.subscription_end.substring(0,10)>=fromS&&cl.subscription_end.substring(0,10)<=toS;}).length;
-    var activeStart=RAW.clients.filter(function(cl){return cl.subscription_status==='active'||cl.subscription_end&&cl.subscription_end.substring(0,10)>=fromS;}).length;
-    var churnRate=activeStart>0?r(churned/activeStart*100):0;
-    // Воронка компании
-    var allLeads=S.amoLeads||[];
-    var coFc=buildFunnelCounts(allLeads);
-    var funnelHtml=allLeads.length?'<div class="panel" style="margin-bottom:14px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><div class="panel-title" style="margin:0">Воронка первички · вся компания</div><span style="font-size:12px;color:var(--text-3)">Лидов: <b style="color:var(--text)">'+coFc.total+'</b> · Оплат: <b style="color:var(--text)">'+(coFc.counts.paid||0)+'</b></span></div><table class="fn2-tbl" style="width:100%"><thead><tr><th>Этап</th><th>Объём</th><th class="r">Факт</th></tr></thead><tbody>'+funnelBarsHtml_(coFc)+'</tbody></table></div>':'';
-    ceoHtml='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">'+
-      '<div class="kcard"><div class="kl">ARPU</div><div class="kv num">'+fmt(arpu)+'</div><div class="ks neu">на платящего клиента</div></div>'+
-      '<div class="kcard"><div class="kl">Платящих</div><div class="kv num">'+coPaying+'</div><div class="ks neu">из '+c.clients+' в портфеле</div></div>'+
-      '<div class="kcard"><div class="kl">Churn за период</div><div class="kv num">'+churnRate+'%</div><div class="ks neu">'+churned+' клиентов ушло</div></div>'+
-      '<div class="kcard"><div class="kl">Отделов</div><div class="kv num">'+DB.depts.length+'</div><div class="ks neu">'+DB.archivedDepts.length+' в архиве</div></div>'+
-    '</div>'+funnelHtml;
-  }
 
   var kH=[
     '<div class="ck"><div class="ck-l">Выручка за период</div><div class="ck-v num">'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div>'+(deltaTag(c.fact,c.prevFact)?'<div class="ck-delta">'+deltaTag(c.fact,c.prevFact)+'<span>к пред. периоду</span></div>':'')+'</div>',
@@ -939,7 +922,31 @@ function renderCo(){
     '<div class="ck"><div class="ck-l">Платящих за период</div><div class="ck-v num">'+coPaying+'</div><div class="ck-s">из '+c.clients+' в портфеле</div></div>',
     '<div class="ck"><div class="ck-l">Отделов</div><div class="ck-v num">'+DB.depts.length+'</div><div class="ck-s">'+DB.archivedDepts.length+' в архиве</div></div>'
   ].join('');
-  var ceoToggle='<button class="arch-toggle" style="padding:0 0 14px" onclick="window.S.cdHideCeo=!window.S.cdHideCeo;render()">'+(S.cdHideCeo?'› Показать CEO-метрики и воронку':'↑ Скрыть CEO-метрики')+'</button>';
+
+  // Воронка с выбором отдела
+  var funnelHtml='';
+  if(S.amoLeads&&S.amoLeads.length){
+    var deptPills='<button class="fn2-tag'+(S.cdFunnelDept==='all'?' on':'')+'" onclick="setCdFunnelDept(\'all\')">Вся компания</button>'+
+      DB.depts.map(function(d){return'<button class="fn2-tag'+(S.cdFunnelDept===d.id?' on':'')+'" onclick="setCdFunnelDept(\''+d.id+'\')">'+esc(d.name)+'</button>';}).join('');
+    var fLeads;
+    if(S.cdFunnelDept==='all'){
+      fLeads=S.amoLeads;
+    } else {
+      var dObj=DB.depts.find(function(x){return x.id===S.cdFunnelDept;});
+      fLeads=dObj?leadsForMgrs_([],dObj.staff):[];
+    }
+    var fc=buildFunnelCounts(fLeads);
+    var thead='<thead><tr><th>Этап</th><th>Объём</th><th class="r">Факт</th></tr></thead>';
+    funnelHtml='<div class="panel" style="margin-bottom:14px">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'+
+        '<div class="panel-title" style="margin:0">Воронка первички</div>'+
+        '<span style="font-size:12px;color:var(--text-3)">Лидов: <b style="color:var(--text)">'+fc.total+'</b> · Оплат: <b style="color:var(--text)">'+(fc.counts.paid||0)+'</b></span>'+
+      '</div>'+
+      '<div class="fn2-tags" style="margin-bottom:14px">'+deptPills+'</div>'+
+      '<table class="fn2-tbl" style="width:100%">'+thead+'<tbody>'+funnelBarsHtml_(fc)+'</tbody></table>'+
+    '</div>';
+  }
+
   var cards=DB.depts.length?DB.depts.map(function(d){
     var p2=pct(d.fact,d.plan),rr2=rrPct(d.fact,d.plan),c2=grad(p2);
     var bT=d.plan>0?(rr2>=100?'В темпе':rr2>=80?'Отстаём':'Критично'):'Нет плана',bC=d.plan>0?(rr2>=100?'bg':rr2>=80?'ba':'br'):'br';
@@ -960,7 +967,7 @@ function renderCo(){
   setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="a">AI</span> · Дашборд</span></div>'+calTrigger()+'</div>'+
     (S.loadErr?'<div class="err-banner">⚠ '+esc(S.loadErr)+'</div>':'')+
     '<div class="ckpi">'+kH+'</div>'+
-    ceoToggle+ceoHtml+
+    funnelHtml+
     '<div class="dept-grid">'+cards+'</div>'+archHtml);
 }
 window.toggleArchDepts=function(){S.showArchivedDepts=!S.showArchivedDepts;render();};
@@ -1279,35 +1286,37 @@ function renderEmpView(){
 function tgDays_(arr){var N=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];return(arr||[]).slice().sort(function(a,b){return a-b;}).map(function(d){return N[d-1]||d;}).join(', ')||'—';}
 function tgIntegrationBlock_(){
   var its=RAW.tgIntegrations||[];
-  var thead='<thead><tr><th>Отдел</th><th>Чат ID</th><th>Расписание</th><th>Статус</th><th class="r">Действия</th></tr></thead>';
-  var tbody=its.length?its.map(function(it){
+  var list=its.length?its.map(function(it){
     var dept=DB.depts.find(function(d){return d.id===it.dept_id;});
     var deptName=dept?esc(dept.name):'(отдел удалён)';
     var tm=(it.send_time||'19:00').slice(0,5);
-    var statusCell=it.enabled
-      ?'<span class="status-dot-only" style="background:var(--green);margin-right:5px" title="включено"></span><span style="font-size:12px;color:var(--green)">включено</span>'
-      :'<span class="status-dot-only" style="background:var(--text-3);margin-right:5px" title="выключено"></span><span style="font-size:12px;color:var(--text-3)">выключено</span>';
-    return'<tr>'+
-      '<td><span class="strong">'+deptName+'</span></td>'+
-      '<td><span style="font-size:12px;color:var(--text-2);font-family:monospace">'+esc(String(it.chat_id))+'</span></td>'+
-      '<td style="font-size:12px;color:var(--text-2)">'+tm+' МСК · '+tgDays_(it.send_days)+'</td>'+
-      '<td>'+statusCell+'</td>'+
-      '<td class="r" style="white-space:nowrap">'+
-        '<button class="btn sm" style="margin-right:4px" onclick="tgTest(\''+it.dept_id+'\',\''+esc(String(it.chat_id))+'\',this)">Тест</button>'+
-        '<button class="btn sm ghost" style="margin-right:4px" onclick="tgToggle(\''+it.id+'\','+(it.enabled?'false':'true')+')">'+(it.enabled?'Выкл':'Вкл')+'</button>'+
+    var dotColor=it.enabled?'var(--green)':'var(--text-3)';
+    var dotTitle=it.enabled?'включено':'выключено';
+    return'<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--border-soft)">'+
+      '<span style="width:8px;height:8px;border-radius:50%;background:'+dotColor+';flex-shrink:0" title="'+dotTitle+'"></span>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-size:13px;font-weight:600;color:var(--text)">'+deptName+'</div>'+
+        '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+
+          tm+' МСК · '+tgDays_(it.send_days)+
+          ' <span style="font-family:monospace;color:var(--text-3)">'+esc(String(it.chat_id))+'</span>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:6px;flex-shrink:0">'+
+        '<button class="btn sm" onclick="tgTest(\''+it.dept_id+'\',\''+esc(String(it.chat_id))+'\',this)">Тест</button>'+
+        '<button class="btn sm ghost" onclick="tgToggle(\''+it.id+'\','+(it.enabled?'false':'true')+')">'+(it.enabled?'Выкл':'Вкл')+'</button>'+
         '<button class="btn sm ghost" style="color:var(--red)" onclick="tgDelete(\''+it.id+'\')">Удалить</button>'+
-      '</td>'+
-    '</tr>';
-  }).join(''):'<tr><td colspan="5"><div style="padding:16px 0;font-size:12px;color:var(--text-3)">Нет подключённых чатов. Добавь бота в чат отдела — он пришлёт ID.</div></td></tr>';
+      '</div>'+
+    '</div>';
+  }).join(''):'<div style="padding:16px 0;font-size:12px;color:var(--text-3)">Нет подключённых чатов. Добавь @SashaSpendBot в чат отдела — он пришлёт ID.</div>';
   return'<div class="panel">'+
-    '<div class="adm-head" style="margin-bottom:6px">'+
+    '<div class="adm-head" style="margin-bottom:4px">'+
       '<div>'+
         '<div class="panel-title" style="margin:0">Интеграции · Telegram</div>'+
-        '<div style="font-size:12px;color:var(--text-3);margin-top:3px">Ежедневные отчёты по менеджерам. Бот пришлёт ID при добавлении в чат.</div>'+
+        '<div style="font-size:12px;color:var(--text-3);margin-top:3px">Ежедневные отчёты по менеджерам через @SashaSpendBot</div>'+
       '</div>'+
       '<button class="btn primary" onclick="tgAddModal()">+ Подключить чат</button>'+
     '</div>'+
-    '<table class="tbl"><thead>'+thead+'</thead><tbody>'+tbody+'</tbody></table>'+
+    list+
   '</div>';
 }
 function amoMappingBlock_(){
@@ -1342,8 +1351,8 @@ function renderRop(){
       '<td><span class="strong">'+esc(m.name)+'</span></td>'+
       '<td><select class="role-sel'+(isLead?' lead':'')+'" onchange="changeEmpRole(\''+m.supaId+'\',this.value)"><option value="manager"'+(isLead?'':' selected')+'>Менеджер</option><option value="lead"'+(isLead?' selected':'')+'>Тимлид</option></select></td>'+
       '<td class="muted num">'+fmtD(m.hired)+'</td>'+
-      '<td><span class="status-dot-only" style="background:var(--green)" title="активен"></span></td>'+
-      '<td><span class="status-dot-only '+(S.empAmoMap[m.supaId]?'':'dim')+'" style="background:'+(S.empAmoMap[m.supaId]?'var(--green)':'var(--amber)')+';cursor:pointer" title="'+(S.empAmoMap[m.supaId]?'Синхронизирован с AmoCRM':'Не синхронизирован — нажми для настройки')+'" onclick="syncEmpModal(\''+m.supaId+'\')"></span></td>'+
+      '<td style="text-align:center"><span class="status-dot-only" style="background:var(--green)" title="активен"></span></td>'+
+      '<td style="text-align:center"><span class="status-dot-only '+(S.empAmoMap[m.supaId]?'':'dim')+'" style="background:'+(S.empAmoMap[m.supaId]?'var(--green)':'var(--amber)')+';cursor:pointer" title="'+(S.empAmoMap[m.supaId]?'Синхронизирован с AmoCRM':'Не синхронизирован — нажми для настройки')+'" onclick="syncEmpModal(\''+m.supaId+'\')"></span></td>'+
       '<td class="r muted num">'+m.clients+'</td>'+
       '<td class="r"><button class="btn sm" onclick="editEmpModal(\''+m.supaId+'\')">Редактировать</button></td>'+
     '</tr>';
@@ -1370,7 +1379,7 @@ function renderRop(){
       '<div style="display:flex;align-items:center;gap:10px"><div class="panel-title" style="margin:0">Состав отдела</div>'+
         '<select class="sel" onchange="setRopDept(this.value)">'+deptOpts+'</select></div>'+
       '<button class="btn" onclick="loadData()">'+ICO.refresh+' Синхронизировать</button></div>'+
-      '<table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th>Нанят</th><th>Статус</th><th class="r">AMO</th><th class="r">Клиентов</th><th class="r">Действие</th></tr></thead><tbody>'+staffRows+'</tbody></table>'+
+      '<table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th>Нанят</th><th style="text-align:center">Статус</th><th style="text-align:center">AMO</th><th class="r">Клиентов</th><th class="r">Действие</th></tr></thead><tbody>'+staffRows+'</tbody></table>'+
       firedBlock+'</div>'+
     unaBlock+
     '<div class="panel"><div class="adm-head"><div class="panel-title" style="margin:0">Все отделы</div><button class="btn primary" onclick="createDept()">+ Создать отдел</button></div>'+deptCards+archDeptBlock+'</div>'+
@@ -1428,7 +1437,14 @@ window.changeHireModal=function(supaId){
 window.tgAddModal=function(){
   var deptOpts=DB.depts.map(function(d){return'<option value="'+d.id+'">'+esc(d.name)+'</option>';}).join('');
   var dayBtns=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(function(n,i){var on=i<5;return'<button type="button" class="tg-day'+(on?' on':'')+'" data-d="'+(i+1)+'" onclick="this.classList.toggle(\'on\')">'+n+'</button>';}).join('');
-  var body='<div class="field"><label>ID чата</label><input id="tg-chatman" class="sel" style="width:100%" placeholder="-100…"><div style="font-size:11px;color:var(--text-3);margin-top:4px">Добавь бота в чат — он пришлёт ID. Скопируй сюда.</div></div>'+
+  var body=
+    '<div style="background:var(--surface-2);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--text-2);line-height:1.7">'+
+      '<b style="color:var(--text)">Как подключить:</b><br>'+
+      '1. Добавь <b>@SashaSpendBot</b> в нужный Telegram-чат как участника<br>'+
+      '2. Бот пришлёт ID чата (выглядит как <code style="background:var(--surface-3);padding:1px 5px;border-radius:4px">-1002185486219</code>)<br>'+
+      '3. Скопируй ID сюда и выбери отдел'+
+    '</div>'+
+    '<div class="field"><label>ID чата</label><input id="tg-chatman" style="width:100%" placeholder="-5122585816"></div>'+
     '<div class="field"><label>Отдел</label><select id="tg-dept" class="sel" style="width:100%">'+deptOpts+'</select></div>'+
     '<div class="field"><label>Время отправки (МСК)</label><input id="tg-time" type="time" class="sel" value="19:00" style="width:100%"></div>'+
     '<div class="field"><label>Дни недели</label><div class="tg-days">'+dayBtns+'</div></div>';
