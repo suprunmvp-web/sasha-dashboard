@@ -987,10 +987,10 @@ function renderCo(){
     '<div class="dept-grid">'+cards+'</div>'+archHtml);
 }
 window.toggleArchDepts=function(){S.showArchivedDepts=!S.showArchivedDepts;render();};
-window.drill=function(id){S.dept=id;S.tab='staff';S.calOpen=false;S.empView=null;render();};
-window.goUp=function(){S.dept=null;S.empView=null;render();};
+window.drill=function(id){S.dept=id;S.tab='staff';S.calOpen=false;S.empView=null;S.msOpen=null;S.fnPendingMgrs=null;S.fnPendingMgrsB=null;render();};
+window.goUp=function(){S.dept=null;S.empView=null;S.msOpen=null;render();};
 window.goUpFromEmp=function(){S.empView=null;render();};
-window.setTab=function(t){S.tab=t;render();};
+window.setTab=function(t){S.tab=t;S.msOpen=null;S.msSearch='';S.fnPendingMgrs=null;S.fnPendingMgrsB=null;render();};
 
 /* ═══ ОТДЕЛ ═══ */
 window.sortStaff=function(k){if(S.staffSortKey===k)S.staffSortDir*=-1;else{S.staffSortKey=k;S.staffSortDir=-1;}render();};
@@ -1209,7 +1209,7 @@ window.fnRemoveTag=function(t){var i=S.fnTags.indexOf(t);if(i>=0)S.fnTags.splice
 /* Сбросить всех — "Весь отдел" */
 window.fnClearMgrs=function(key){
   if(key==='fnMgrs')S.fnPendingMgrs=[];else S.fnPendingMgrsB=[];
-  render();setTimeout(function(){S.msOpen=key==='fnMgrs'?'mgrA':'mgrB';render();},0);
+  render();
 };
 /* Выбрать / снять весь отдел */
 window.fnSelectDept=function(key,deptId){
@@ -1221,7 +1221,7 @@ window.fnSelectDept=function(key,deptId){
   if(allIn){arr=arr.filter(function(id){return ids.indexOf(id)<0;});}
   else{ids.forEach(function(id){if(arr.indexOf(id)<0)arr.push(id);});}
   if(key==='fnMgrs')S.fnPendingMgrs=arr;else S.fnPendingMgrsB=arr;
-  render();setTimeout(function(){S.msOpen=key==='fnMgrs'?'mgrA':'mgrB';render();},0);
+  render();
 };
 window.fnToggleMgr=function(key,id){
   var arr=(key==='fnMgrs'?S.fnPendingMgrs:S.fnPendingMgrsB)||[];
