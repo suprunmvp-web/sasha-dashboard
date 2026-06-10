@@ -1044,9 +1044,13 @@ function funnelCompareHtml_(fcA,fcB){
 }
 
 function msOptHtml_(stateKey,id,name,hasAmo){
-  var pendArr=stateKey==="fnMgrs"?(S.fnPendingMgrs||S.fnMgrs):(S.fnPendingMgrsB||S.fnMgrsB);
+  var pendArr=stateKey==='fnMgrs'?(S.fnPendingMgrs||S.fnMgrs):(S.fnPendingMgrsB||S.fnMgrsB);
   var sl=pendArr.indexOf(id)>=0;
-  return'<div class="ms-opt'+(sl?' sel':'')+'" data-id="'+id+'" onclick="event.stopPropagation();fnToggleMgr(\'+stateKey+'\,"'+id+'")">"'+"'<span class="ms-opt-dot"></span>"'+"'<span class="ms-nm">'+esc(name)+'</span>"'+(hasAmo?'':'<span class="sub">нет Amo</span>')+"'<svg class="ms-opt-chk" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>';
+  return'<div class="ms-opt'+(sl?' sel':'')+'" data-id="'+id+'" onclick="event.stopPropagation();fnToggleMgr(\''+stateKey+'\',\''+id+'\')">'+
+    '<span class="ms-opt-dot"></span>'+
+    '<span class="ms-nm">'+esc(name)+'</span>'+
+    (hasAmo?'':'<span class="sub">нет Amo</span>')+
+    '<svg class="ms-opt-chk" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>';
 }
 function renderFunnelContent_(d){
   var hasAmo=S.amoLeads.length>0;
