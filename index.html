@@ -1379,7 +1379,11 @@ function tgIntegrationBlock_(){
           ' <span style="font-family:monospace">'+esc(String(it.chat_id))+'</span>'+
         '</div>'+
       '</div>'+
-      '<div style="display:flex;gap:6px;flex-shrink:0;align-items:center">'+
+      '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">'+
+        '<label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:12px;color:var(--text-2);white-space:nowrap">'+
+          '<input type="checkbox"'+(it.include_lead?' checked':'')+' onchange="tgToggleLead(\''+it.id+'\',this.checked)" style="width:14px;height:14px;accent-color:var(--accent)">'+
+          'Тимлид'+
+        '</label>'+
         '<button class="btn sm" onclick="tgTest(\''+it.dept_id+'\',\''+esc(String(it.chat_id))+'\',this)">Тест</button>'+
         '<button class="btn sm ghost" style="color:var(--red)" onclick="tgDelete(\''+it.id+'\')">Удалить</button>'+
       '</div>'+
@@ -1541,6 +1545,7 @@ window.tgSave=function(){
   });
 };
 window.tgToggle=function(id,en){sbPatch('telegram_integrations','id=eq.'+id,{enabled:en}).then(reloadTg);};
+window.tgToggleLead=function(id,en){sbPatch('telegram_integrations','id=eq.'+id,{include_lead:en}).then(reloadTg);};
 window.tgDelete=function(id){openModal('Удалить интеграцию?','<p style="font-size:13px;color:var(--text-2)">Чат перестанет получать ежедневные отчёты.</p>',function(){closeModal();sbDelete('telegram_integrations','id=eq.'+id).then(reloadTg);});};
 window.tgTest=function(deptId,chatId,btn){
   if(btn){btn.disabled=true;btn.textContent='…';}
