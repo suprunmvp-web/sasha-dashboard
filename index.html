@@ -1078,6 +1078,7 @@ function renderFunnelContent_(d){
   /* ── MANAGER MULTISELECT (grouped by dept + search) ── */
   function mgrMs(stateKey,msId,scope){
     var sel=S[stateKey];
+    var open=S.msOpen===msId;
     // Chips: показываем первые 2 + "+N"
     var dispArr=open?(stateKey==='fnMgrs'?(S.fnPendingMgrs||sel):(S.fnPendingMgrsB||sel)):sel;
     var MAX_CHIPS=2;
