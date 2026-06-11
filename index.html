@@ -824,10 +824,16 @@ function roleBar(){
 }
 window.setRole=function(r){S.role=r;S.dept=null;S.empView=null;S.calOpen=false;render();};
 window.toggleTheme=function(){S.theme=S.theme==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',S.theme);render();};
-function setApp(h){document.getElementById('app').innerHTML=roleBar()+h;}
+function setApp(h){document.getElementById('app').innerHTML=roleBar()+h;_syncBd();}
+function _syncBd(){if(S.msOpen)_showBd();else _hideBd();}
 function _showBd(){
   var bd=document.getElementById('_ms_bd');
-  if(!bd){bd=document.createElement('div');bd.id='_ms_bd';bd.style.cssText='position:fixed;inset:0;z-index:65';document.body.appendChild(bd);}
+  if(!bd){
+    bd=document.createElement('div');
+    bd.id='_ms_bd';
+    bd.style.cssText='position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.001)';
+    document.body.appendChild(bd);
+  }
   bd.onclick=function(){applyFnPending();S.msOpen=null;S.msSearch='';_hideBd();render();};
 }
 function _hideBd(){var bd=document.getElementById('_ms_bd');if(bd)bd.remove();}
@@ -1213,26 +1219,7 @@ window.fnToggleMgr=function(key,id){
   var arr=(key==='fnMgrs'?S.fnPendingMgrs:S.fnPendingMgrsB)||[];
   var i=arr.indexOf(id);if(i>=0)arr.splice(i,1);else arr.push(id);
   if(key==='fnMgrs')S.fnPendingMgrs=arr;else S.fnPendingMgrsB=arr;
-  /* DOM-only update */
-  var opt=document.querySelector('.ms-opt[data-id="'+id+'"]');
-  if(opt){
-    var sel=arr.indexOf(id)>=0;
-    opt.classList.toggle('sel',sel);
-    var dot=opt.querySelector('.ms-opt-dot');if(dot)dot.style.background=sel?'var(--accent)':'var(--border)';
-    var chk=opt.querySelector('.ms-opt-chk');if(chk)chk.style.opacity=sel?1:0;
-    var nm=opt.querySelector('.ms-nm');if(nm){nm.style.color=sel?'var(--accent)':'';nm.style.fontWeight=sel?'500':'';}
-  }
-  /* обновляем chips */
-  var msId=key==='fnMgrs'?'mgrA':'mgrB';
-  var trig=document.querySelector('[onclick*="fnToggleMs"][onclick*="\''+msId+'\'"]');
-  if(trig){
-    var MAX2=2;
-    var chips2;
-    if(!arr.length){chips2='<span class="ms-ph">Весь отдел</span>';}
-    else if(arr.length<=MAX2){chips2=arr.map(function(xid){var emp=RAW.employees.find(function(x){return x.id===xid;});return'<span class="ms-chip">'+esc((emp?(emp.display_name||emp.name):'?').split(' ')[0])+'<button onclick="event.stopPropagation();fnRemoveMgr(\''+key+'\',\''+xid+'\')">\u00d7</button></span>';}).join('');}
-    else{var f=RAW.employees.find(function(x){return x.id===arr[0];});chips2='<span class="ms-chip">'+esc((f?(f.display_name||f.name):'?').split(' ')[0])+'<button onclick="event.stopPropagation();fnRemoveMgr(\''+key+'\',\''+arr[0]+'\')">\u00d7</button></span><span style="font-size:12px;font-weight:600;color:var(--accent);white-space:nowrap">+'+(arr.length-1)+'</span>';}
-    trig.innerHTML=chips2+'<span class="ms-arrow">\u25be</span>';
-  }
+  render();
 };
 window.fnRemoveMgr=function(key,id){var arr=S[key];var i=arr.indexOf(id);if(i>=0)arr.splice(i,1);S.fnPendingMgrs=null;S.fnPendingMgrsB=null;render();};
 window.fnApplyMgrs=function(){applyFnPending();S.msOpen=null;render();};
