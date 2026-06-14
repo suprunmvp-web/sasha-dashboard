@@ -493,7 +493,11 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .chart-tip-amt{font-weight:600;color:var(--text);white-space:nowrap;}
 .chart-tip-total{border-top:1px solid var(--border);margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-weight:700;font-size:12px;}
 .chart-block{background:var(--surface);border:1px solid var(--border-soft);border-radius:16px;padding:20px 22px;margin-bottom:14px;}
-.chart-block-title{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:16px;}
+.chart-block-title{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:0;}
+.chart-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;gap:12px;}
+.chart-total{font-size:24px;font-weight:700;letter-spacing:-.03em;color:var(--text);line-height:1;}
+.chart-total-sub{font-size:11px;color:var(--text-3);margin-top:3px;}
+.chart-tip{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;font-size:12px;color:var(--text);box-shadow:var(--shadow);pointer-events:none;z-index:9000;min-width:180px;max-width:260px;display:none;backdrop-filter:blur(8px);}
 .dept-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;}
 .dept-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-2);}
 .dept-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
@@ -1091,25 +1095,6 @@ function renderLb(){
     }).join(''):'<tr><td colspan="5"><div class="empty-state">Нет данных за период</div></td></tr>';
     html='<div class="panel"><table class="tbl lb-tbl"><thead><tr>'+cth+'</tr></thead><tbody>'+crows+'</tbody></table></div>';
   }
-  if(S_LB_TAB==='company'){
-    if(S.companyLifetimeLoading||!S.companyLifetime){
-      html='<div class="chart-block" style="text-align:center;color:var(--text-3);font-size:12px;padding:32px">Загружаем данные...</div>';
-    } else {
-      var compData=buildCompanyMonthlyData(S.companyLifetime);
-      var legendHtml=compData.depts.map(function(d,i){
-        return'<div class="dept-legend-item"><div class="dept-legend-dot" style="background:'+DEPT_COLORS[i%DEPT_COLORS.length]+'"></div>'+esc(d)+'</div>';
-      }).join('');
-      var totalLt=S.companyLifetime.reduce(function(a,d){var s=d.event_type==='refund'?-1:1;return a+s*(Number(d.amount)||0);},0);
-      html='<div class="chart-block">'+
-        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'+
-          '<div class="chart-block-title" style="margin:0">Выручка компании · все время</div>'+
-          '<div style="font-size:13px;font-weight:600;color:var(--text)">'+fmt(totalLt)+'</div>'+
-        '</div>'+
-        '<div class="chart-wrap" style="margin-top:16px">'+buildCompanyChartSVG(compData)+'</div>'+
-        '<div class="dept-legend">'+legendHtml+'</div>'+
-      '</div>';
-    }
-  }
   setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="a">AI</span></span></div>'+calTrigger()+'</div>'+
     (S.loadErr?'<div class="err-banner">⚠ '+esc(S.loadErr)+'</div>':'')+tabBar+html);
 }
@@ -1540,10 +1525,27 @@ function renderEmpView(){
   var chartHtml='';
   if(lifeDeals&&lifeDeals.length){
     var mdata=buildMonthlyData(lifeDeals);
-    chartHtml='<div class="chart-block"><div class="chart-block-title">Динамика выручки · все время</div>'+
-      '<div class="chart-wrap">'+buildRevenueChartSVG(mdata)+'</div></div>';
+    var ltTotal=lifeDeals.reduce(function(a,d){var s=d.event_type==='refund'?-1:1;return a+s*(Number(d.amount)||0);},0);
+    var ltCount=lifeDeals.filter(function(d){return d.event_type!=='refund';}).length;
+    var bestM=mdata.reduce(function(a,m){return m.total>a.total?m:a;},{total:0,month:''});
+    var bestMLabel=bestM.month?['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'][Number(bestM.month.split('-')[1])-1]+' '+bestM.month.split('-')[0]:'—';
+    chartHtml='<div class="chart-block">'+
+      '<div class="chart-header">'+
+        '<div>'+
+          '<div class="chart-block-title">Выручка · все время</div>'+
+          '<div class="chart-total">'+fmt(ltTotal)+'</div>'+
+          '<div class="chart-total-sub">'+ltCount+' сделок · лучший месяц: '+bestMLabel+' ('+fmt(bestM.total)+')</div>'+
+        '</div>'+
+      '</div>'+
+      buildRevenueChartSVG(mdata)+
+    '</div>';
   } else if(!lifeDeals){
-    chartHtml='<div class="chart-block" style="text-align:center;color:var(--text-3);font-size:12px;padding:24px">Загружаем данные...</div>';
+    chartHtml='<div class="chart-block"><div class="chart-header"><div>'+
+      '<div class="chart-block-title">Выручка · все время</div>'+
+      '<div class="chart-total" style="color:var(--text-3)">···</div>'+
+      '</div></div>'+
+      '<div style="text-align:center;color:var(--text-3);font-size:12px;padding:20px 0">Загружаем данные...</div>'+
+    '</div>';
   }
   setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUpFromEmp()">‹ '+esc(d?d.name:'Отдел')+'</button><span class="crumb-title">'+esc(emp.name)+'</span></div>'+calTrigger()+'</div>'+
     empHeader+'<div class="dept-kpi">'+kH+'</div>'+
@@ -2151,6 +2153,162 @@ function _positionTip(e){
   if(x+tw>window.innerWidth-8)x=e.clientX-tw-14;
   if(y<8)y=8;if(y+th>window.innerHeight-8)y=window.innerHeight-th-8;
   t.style.left=x+'px';t.style.top=y+'px';
+}
+
+
+/* ═══ PREMIUM CHART ENGINE ═══ */
+function fmtShort(n){
+  if(!n||n===0)return'0';
+  if(n>=1000000)return(n/1000000).toFixed(1).replace('.0','')+'М';
+  if(n>=1000)return Math.round(n/1000)+'к';
+  return String(Math.round(n));
+}
+
+function buildSmoothPath(pts){
+  if(pts.length<2)return'';
+  var d='M'+pts[0][0]+','+pts[0][1];
+  for(var i=1;i<pts.length;i++){
+    var p0=pts[i-1],p1=pts[i];
+    var cpx=(p0[0]+p1[0])/2;
+    d+=' C'+cpx+','+p0[1]+' '+cpx+','+p1[1]+' '+p1[0]+','+p1[1];
+  }
+  return d;
+}
+
+// Улучшенный tooltip — с динамикой к предыдущему месяцу
+window.showChartTip=function(e,el){
+  var t=_getTip();
+  var month=el.getAttribute('data-month')||'';
+  var clients=[];try{clients=JSON.parse(el.getAttribute('data-clients')||'[]');}catch(x){}
+  var total=Number(el.getAttribute('data-total')||0);
+  var prev=Number(el.getAttribute('data-prev')||0);
+  var mp=month.split('-');
+  var mLabel=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][Number(mp[1]||1)-1]+' '+mp[0];
+  var deltaHtml='';
+  if(prev>0&&total>0){
+    var d=Math.round((total-prev)/prev*100);
+    var col=d>=0?'var(--green)':'var(--red)';
+    var sign=d>=0?'+':'';
+    deltaHtml='<span style="font-size:10px;font-weight:600;color:'+col+';margin-left:6px">'+sign+d+'%</span>';
+  }
+  var rows=clients.slice(0,5).map(function(c){
+    var w=total>0?Math.round(c.a/total*100):0;
+    return'<div style="margin-bottom:6px">'+
+      '<div class="chart-tip-row"><span class="chart-tip-name">'+esc(c.n)+'</span><span class="chart-tip-amt">'+fmt(c.a)+'</span></div>'+
+      '<div style="height:2px;background:var(--border);border-radius:1px;margin-top:3px"><div style="height:2px;width:'+w+'%;background:var(--accent);border-radius:1px;opacity:.7"></div></div>'+
+    '</div>';
+  }).join('');
+  if(clients.length>5)rows+='<div style="font-size:10px;color:var(--text-3);margin-top:2px">+ещё '+(clients.length-5)+' клиентов</div>';
+  var emptyHtml=total===0?'<div style="font-size:11px;color:var(--text-3);padding:8px 0">Нет выручки за месяц</div>':'';
+  t.innerHTML=
+    '<div style="font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:8px;letter-spacing:.03em;text-transform:uppercase">'+mLabel+'</div>'+
+    (total>0?'<div style="font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.02em;margin-bottom:10px;display:flex;align-items:baseline">'+fmt(total)+deltaHtml+'</div>':'') +
+    emptyHtml+rows;
+  t.style.display='block';
+  _positionTip(e);
+};
+
+function buildRevenueChartSVG(monthData,opts){
+  opts=opts||{};
+  var W=680,H=200,padL=52,padR=12,padT=12,padB=32;
+  var drawW=W-padL-padR,drawH=H-padT-padB;
+  var n=monthData.length;
+  if(!n)return'<div style="color:var(--text-3);font-size:12px;padding:24px 0;text-align:center">Нет данных</div>';
+
+  // Y scale — nice max
+  var maxV=Math.max.apply(null,monthData.map(function(m){return m.total;}));
+  if(!maxV)maxV=1;
+  var mag=Math.pow(10,Math.floor(Math.log10(maxV)));
+  var niceMax=Math.ceil(maxV/mag*1.25)*mag/1.25;
+  niceMax=Math.ceil(niceMax/(mag/2))*(mag/2);
+  if(niceMax<maxV)niceMax=maxV*1.3;
+
+  // Grid
+  var gLevels=4;
+  var gStep=niceMax/gLevels;
+  var svgParts=[];
+
+  // defs
+  var uid=Math.random().toString(36).slice(2,6);
+  svgParts.push('<defs>'+
+    '<linearGradient id="bg'+uid+'" x1="0" y1="0" x2="0" y2="1">'+
+      '<stop offset="0%" stop-color="var(--accent)" stop-opacity="0.85"/>'+
+      '<stop offset="100%" stop-color="var(--accent)" stop-opacity="0.35"/>'+
+    '</linearGradient>'+
+    '<filter id="blur'+uid+'"><feGaussianBlur stdDeviation="1"/></filter>'+
+  '</defs>');
+
+  // Grid lines + Y labels
+  for(var g=0;g<=gLevels;g++){
+    var gv=g*gStep;
+    var gy=padT+drawH-(gv/niceMax*drawH);
+    if(g>0){
+      svgParts.push('<line x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'" stroke="var(--border)" stroke-width="1" stroke-dasharray="4,5" opacity=".6"/>');
+    } else {
+      svgParts.push('<line x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'" stroke="var(--border)" stroke-width="1"/>');
+    }
+    svgParts.push('<text x="'+(padL-8)+'" y="'+(gy+3.5)+'" text-anchor="end" font-size="9.5" fill="var(--text-3)" font-family="Inter,-apple-system,sans-serif">'+fmtShort(gv)+'</text>');
+  }
+
+  // Bars + trend points
+  var slot=drawW/n;
+  var bw=Math.max(6,Math.min(slot*0.55,36));
+  var trendPts=[];
+  var bars=[];var labels=[];
+
+  monthData.forEach(function(m,i){
+    var cx=padL+i*slot+slot/2;
+    var h=m.total>0?Math.max(4,m.total/niceMax*drawH):0;
+    var by=padT+drawH-h;
+    var baseY=padT+drawH;
+    var prev=i>0?monthData[i-1].total:0;
+    var clients=JSON.stringify(m.clients).replace(/"/g,'&quot;');
+    var dataAttrs=' data-month="'+m.month+'" data-total="'+m.total+'" data-prev="'+prev+'" data-clients="'+clients+'"'+
+      ' onmouseover="showChartTip(event,this)" onmousemove="moveTip(event)" onmouseout="hideTip()"';
+
+    if(m.total>0){
+      // Gradient bar
+      bars.push('<rect x="'+(cx-bw/2)+'" y="'+by+'" width="'+bw+'" height="'+h+'" rx="4" fill="url(#bg'+uid+')"'+dataAttrs+'/>');
+      // Bright top cap
+      bars.push('<rect x="'+(cx-bw/2)+'" y="'+by+'" width="'+bw+'" height="4" rx="4" fill="var(--accent)" opacity=".9" pointer-events="none"/>');
+      trendPts.push([cx, by]);
+    } else {
+      // Ghost empty bar
+      bars.push('<rect x="'+(cx-bw/2)+'" y="'+(baseY-8)+'" width="'+bw+'" height="8" rx="4" fill="var(--surface-3)" opacity=".6"'+dataAttrs+'/>');
+      bars.push('<text x="'+cx+'" y="'+(baseY-14)+'" text-anchor="middle" font-size="9" fill="var(--text-3)" opacity=".6" pointer-events="none">—</text>');
+      trendPts.push(null);
+    }
+
+    // Invisible hover area (full column)
+    bars.push('<rect x="'+(cx-slot/2)+'" y="'+padT+'" width="'+slot+'" height="'+drawH+'" fill="transparent"'+dataAttrs+'/>');
+
+    // X labels
+    var show=n<=12||(i%Math.ceil(n/8)===0)||i===n-1;
+    if(show){
+      var mp=m.month.split('-');
+      var yr=mp[0].slice(2);
+      var lbl=MNS[Number(mp[1])-1]+(mp[1]==='01'||i===0?' \''+yr:'');
+      labels.push('<text x="'+cx+'" y="'+(H-5)+'" text-anchor="middle" font-size="9.5" fill="var(--text-3)" font-family="Inter,-apple-system,sans-serif">'+lbl+'</text>');
+    }
+  });
+
+  // Trend line — только через точки с данными
+  var validPts=trendPts.filter(function(p){return p;});
+  if(validPts.length>=2){
+    var trendD=buildSmoothPath(validPts);
+    svgParts.push('<path d="'+trendD+'" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-opacity=".35" stroke-linecap="round" pointer-events="none"/>');
+    // Dots на тренде
+    validPts.forEach(function(p){
+      svgParts.push('<circle cx="'+p[0]+'" cy="'+p[1]+'" r="2.5" fill="var(--accent)" opacity=".5" pointer-events="none"/>');
+    });
+  }
+
+  // Vertical axis line
+  svgParts.push('<line x1="'+padL+'" y1="'+padT+'" x2="'+padL+'" y2="'+(padT+drawH)+'" stroke="var(--border)" stroke-width="1"/>');
+
+  svgParts=svgParts.concat(bars).concat(labels);
+
+  return'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">'+svgParts.join('')+'</svg>';
 }
 
 function buildMonthlyData(deals){
