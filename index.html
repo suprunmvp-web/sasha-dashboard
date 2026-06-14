@@ -1044,7 +1044,6 @@ function renderLb(){
   var tabBar='<div class="tab-row" style="margin-bottom:20px">'+
     '<button class="tab'+(S_LB_TAB==='mgrs'?' on':'')+'" onclick="setLbTab(\'mgrs\')">Менеджеры</button>'+
     '<button class="tab'+(S_LB_TAB==='clients'?' on':'')+'" onclick="setLbTab(\'clients\')">Клиенты</button>'+
-    '<button class="tab'+(S_LB_TAB==='company'?' on':'')+'" onclick="setLbTab(\'company\');loadCompanyLifetime()">Компания</button>'+
   '</div>';
   var html='';
   if(S_LB_TAB==='mgrs'){
@@ -1525,27 +1524,9 @@ function renderEmpView(){
   var chartHtml='';
   if(lifeDeals&&lifeDeals.length){
     var mdata=buildMonthlyData(lifeDeals);
-    var ltTotal=lifeDeals.reduce(function(a,d){var s=d.event_type==='refund'?-1:1;return a+s*(Number(d.amount)||0);},0);
-    var ltCount=lifeDeals.filter(function(d){return d.event_type!=='refund';}).length;
-    var bestM=mdata.reduce(function(a,m){return m.total>a.total?m:a;},{total:0,month:''});
-    var bestMLabel=bestM.month?['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'][Number(bestM.month.split('-')[1])-1]+' '+bestM.month.split('-')[0]:'—';
-    chartHtml='<div class="chart-block">'+
-      '<div class="chart-header">'+
-        '<div>'+
-          '<div class="chart-block-title">Выручка · все время</div>'+
-          '<div class="chart-total">'+fmt(ltTotal)+'</div>'+
-          '<div class="chart-total-sub">'+ltCount+' сделок · лучший месяц: '+bestMLabel+' ('+fmt(bestM.total)+')</div>'+
-        '</div>'+
-      '</div>'+
-      buildRevenueChartSVG(mdata)+
-    '</div>';
+    chartHtml='<div class="chart-block">'+buildRevenueChartSVG(mdata)+'</div>';
   } else if(!lifeDeals){
-    chartHtml='<div class="chart-block"><div class="chart-header"><div>'+
-      '<div class="chart-block-title">Выручка · все время</div>'+
-      '<div class="chart-total" style="color:var(--text-3)">···</div>'+
-      '</div></div>'+
-      '<div style="text-align:center;color:var(--text-3);font-size:12px;padding:20px 0">Загружаем данные...</div>'+
-    '</div>';
+    chartHtml='<div class="chart-block" style="padding:24px 22px;text-align:center;color:var(--text-3);font-size:12px">Загружаем данные...</div>';
   }
   setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUpFromEmp()">‹ '+esc(d?d.name:'Отдел')+'</button><span class="crumb-title">'+esc(emp.name)+'</span></div>'+calTrigger()+'</div>'+
     empHeader+'<div class="dept-kpi">'+kH+'</div>'+
@@ -2210,104 +2191,97 @@ window.showChartTip=function(e,el){
 
 function buildRevenueChartSVG(monthData,opts){
   opts=opts||{};
+  // CSS переменные через computedStyle (работает в браузере)
+  var rs=getComputedStyle(document.documentElement);
+  var cAccent=(rs.getPropertyValue('--accent')||'').trim()||'#3D6BF5';
+  var cBorder=(rs.getPropertyValue('--border')||'').trim()||'#DCE1EB';
+  var cText3=(rs.getPropertyValue('--text-3')||'').trim()||'#98A1B3';
+  var cSurface3=(rs.getPropertyValue('--surface-3')||'').trim()||'#E6E9F0';
+
   var W=680,H=200,padL=52,padR=12,padT=12,padB=32;
   var drawW=W-padL-padR,drawH=H-padT-padB;
   var n=monthData.length;
-  if(!n)return'<div style="color:var(--text-3);font-size:12px;padding:24px 0;text-align:center">Нет данных</div>';
+  if(!n)return'<div style="color:'+cText3+';font-size:12px;padding:24px 0;text-align:center">Нет данных</div>';
 
-  // Y scale — nice max
   var maxV=Math.max.apply(null,monthData.map(function(m){return m.total;}));
-  if(!maxV)maxV=1;
+  if(!maxV||maxV<=0)maxV=1;
   var mag=Math.pow(10,Math.floor(Math.log10(maxV)));
-  var niceMax=Math.ceil(maxV/mag*1.25)*mag/1.25;
-  niceMax=Math.ceil(niceMax/(mag/2))*(mag/2);
-  if(niceMax<maxV)niceMax=maxV*1.3;
+  var niceMax=Math.ceil(maxV/mag*1.3)*mag/1;
+  if(niceMax<maxV*1.1)niceMax=maxV*1.3;
 
-  // Grid
-  var gLevels=4;
-  var gStep=niceMax/gLevels;
+  var uid='c'+Math.random().toString(36).slice(2,6);
   var svgParts=[];
 
-  // defs
-  var uid=Math.random().toString(36).slice(2,6);
+  // Gradient def — hex цвет работает надёжно
   svgParts.push('<defs>'+
     '<linearGradient id="bg'+uid+'" x1="0" y1="0" x2="0" y2="1">'+
-      '<stop offset="0%" stop-color="var(--accent)" stop-opacity="0.85"/>'+
-      '<stop offset="100%" stop-color="var(--accent)" stop-opacity="0.35"/>'+
+      '<stop offset="0%" stop-color="'+cAccent+'" stop-opacity="0.85"/>'+
+      '<stop offset="100%" stop-color="'+cAccent+'" stop-opacity="0.3"/>'+
     '</linearGradient>'+
-    '<filter id="blur'+uid+'"><feGaussianBlur stdDeviation="1"/></filter>'+
   '</defs>');
 
   // Grid lines + Y labels
+  var gLevels=4;
   for(var g=0;g<=gLevels;g++){
-    var gv=g*gStep;
-    var gy=padT+drawH-(gv/niceMax*drawH);
-    if(g>0){
-      svgParts.push('<line x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'" stroke="var(--border)" stroke-width="1" stroke-dasharray="4,5" opacity=".6"/>');
+    var gv=r(g*(niceMax/gLevels));
+    var gy=padT+drawH-r(gv/niceMax*drawH);
+    if(g===0){
+      svgParts.push('<line x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'" stroke="'+cBorder+'" stroke-width="1"/>');
     } else {
-      svgParts.push('<line x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'" stroke="var(--border)" stroke-width="1"/>');
+      svgParts.push('<line x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'" stroke="'+cBorder+'" stroke-width="1" stroke-dasharray="4,5" opacity="0.7"/>');
     }
-    svgParts.push('<text x="'+(padL-8)+'" y="'+(gy+3.5)+'" text-anchor="end" font-size="9.5" fill="var(--text-3)" font-family="Inter,-apple-system,sans-serif">'+fmtShort(gv)+'</text>');
+    svgParts.push('<text x="'+(padL-7)+'" y="'+(gy+4)+'" text-anchor="end" font-size="9.5" fill="'+cText3+'" font-family="Inter,-apple-system,sans-serif">'+fmtShort(gv)+'</text>');
   }
 
-  // Bars + trend points
+  // Vertical axis line
+  svgParts.push('<line x1="'+padL+'" y1="'+padT+'" x2="'+padL+'" y2="'+(padT+drawH)+'" stroke="'+cBorder+'" stroke-width="1"/>');
+
   var slot=drawW/n;
-  var bw=Math.max(6,Math.min(slot*0.55,36));
+  var bw=Math.max(6,Math.min(slot*0.55,38));
   var trendPts=[];
   var bars=[];var labels=[];
 
   monthData.forEach(function(m,i){
-    var cx=padL+i*slot+slot/2;
-    var h=m.total>0?Math.max(4,m.total/niceMax*drawH):0;
+    var cx=r(padL+i*slot+slot/2);
+    var h=m.total>0?Math.max(4,r(m.total/niceMax*drawH)):0;
     var by=padT+drawH-h;
     var baseY=padT+drawH;
     var prev=i>0?monthData[i-1].total:0;
     var clients=JSON.stringify(m.clients).replace(/"/g,'&quot;');
-    var dataAttrs=' data-month="'+m.month+'" data-total="'+m.total+'" data-prev="'+prev+'" data-clients="'+clients+'"'+
+    var dataA=' data-month="'+m.month+'" data-total="'+m.total+'" data-prev="'+prev+'" data-clients="'+clients+'"'+
       ' onmouseover="showChartTip(event,this)" onmousemove="moveTip(event)" onmouseout="hideTip()"';
 
     if(m.total>0){
-      // Gradient bar
-      bars.push('<rect x="'+(cx-bw/2)+'" y="'+by+'" width="'+bw+'" height="'+h+'" rx="4" fill="url(#bg'+uid+')"'+dataAttrs+'/>');
-      // Bright top cap
-      bars.push('<rect x="'+(cx-bw/2)+'" y="'+by+'" width="'+bw+'" height="4" rx="4" fill="var(--accent)" opacity=".9" pointer-events="none"/>');
-      trendPts.push([cx, by]);
+      bars.push('<rect x="'+r(cx-bw/2)+'" y="'+by+'" width="'+r(bw)+'" height="'+h+'" rx="4" fill="url(#bg'+uid+')"'+dataA+'/>');
+      bars.push('<rect x="'+r(cx-bw/2)+'" y="'+by+'" width="'+r(bw)+'" height="4" rx="4" fill="'+cAccent+'" opacity="0.9" pointer-events="none"/>');
+      trendPts.push([cx,by]);
     } else {
-      // Ghost empty bar
-      bars.push('<rect x="'+(cx-bw/2)+'" y="'+(baseY-8)+'" width="'+bw+'" height="8" rx="4" fill="var(--surface-3)" opacity=".6"'+dataAttrs+'/>');
-      bars.push('<text x="'+cx+'" y="'+(baseY-14)+'" text-anchor="middle" font-size="9" fill="var(--text-3)" opacity=".6" pointer-events="none">—</text>');
+      bars.push('<rect x="'+r(cx-bw/2)+'" y="'+(baseY-8)+'" width="'+r(bw)+'" height="8" rx="4" fill="'+cSurface3+'" opacity="0.8"'+dataA+'/>');
+      bars.push('<text x="'+cx+'" y="'+(baseY-14)+'" text-anchor="middle" font-size="9" fill="'+cText3+'" opacity="0.6" pointer-events="none">—</text>');
       trendPts.push(null);
     }
-
-    // Invisible hover area (full column)
-    bars.push('<rect x="'+(cx-slot/2)+'" y="'+padT+'" width="'+slot+'" height="'+drawH+'" fill="transparent"'+dataAttrs+'/>');
+    // Invisible hover area
+    bars.push('<rect x="'+r(cx-slot/2)+'" y="'+padT+'" width="'+r(slot)+'" height="'+drawH+'" fill="transparent"'+dataA+'/>');
 
     // X labels
-    var show=n<=12||(i%Math.ceil(n/8)===0)||i===n-1;
-    if(show){
+    var showLbl=n<=12||(i%Math.ceil(n/8)===0)||i===n-1;
+    if(showLbl){
       var mp=m.month.split('-');
-      var yr=mp[0].slice(2);
-      var lbl=MNS[Number(mp[1])-1]+(mp[1]==='01'||i===0?' \''+yr:'');
-      labels.push('<text x="'+cx+'" y="'+(H-5)+'" text-anchor="middle" font-size="9.5" fill="var(--text-3)" font-family="Inter,-apple-system,sans-serif">'+lbl+'</text>');
+      var lbl=MNS[Number(mp[1])-1]+(mp[1]==='01'||i===0?'\''+mp[0].slice(2):'');
+      labels.push('<text x="'+cx+'" y="'+(H-5)+'" text-anchor="middle" font-size="9.5" fill="'+cText3+'" font-family="Inter,-apple-system,sans-serif">'+lbl+'</text>');
     }
   });
 
-  // Trend line — только через точки с данными
+  // Trend line через non-null points
   var validPts=trendPts.filter(function(p){return p;});
   if(validPts.length>=2){
-    var trendD=buildSmoothPath(validPts);
-    svgParts.push('<path d="'+trendD+'" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-opacity=".35" stroke-linecap="round" pointer-events="none"/>');
-    // Dots на тренде
+    svgParts.push('<path d="'+buildSmoothPath(validPts)+'" fill="none" stroke="'+cAccent+'" stroke-width="1.5" stroke-opacity="0.4" stroke-linecap="round" pointer-events="none"/>');
     validPts.forEach(function(p){
-      svgParts.push('<circle cx="'+p[0]+'" cy="'+p[1]+'" r="2.5" fill="var(--accent)" opacity=".5" pointer-events="none"/>');
+      svgParts.push('<circle cx="'+p[0]+'" cy="'+p[1]+'" r="2.5" fill="'+cAccent+'" opacity="0.5" pointer-events="none"/>');
     });
   }
 
-  // Vertical axis line
-  svgParts.push('<line x1="'+padL+'" y1="'+padT+'" x2="'+padL+'" y2="'+(padT+drawH)+'" stroke="var(--border)" stroke-width="1"/>');
-
   svgParts=svgParts.concat(bars).concat(labels);
-
   return'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">'+svgParts.join('')+'</svg>';
 }
 
