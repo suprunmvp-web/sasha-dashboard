@@ -2117,7 +2117,7 @@ function renderPayroll(){
     '<div class="ck"><div class="ck-l">Выручка по фильтрам</div><div class="ck-v num">'+fmt(totFact)+'</div><div class="ck-s">средний чек '+fmt(avgDeal)+'</div></div>',
     '<div class="ck"><div class="ck-l">Сделок</div><div class="ck-v num">'+totCount+'</div><div class="ck-s">оплат и возвратов</div></div>',
     '<div class="ck"><div class="ck-l">Начислено мотивации</div><div class="ck-v num">'+fmt(totComm)+'</div><div class="ck-s">'+(totFact>0?r(totComm/totFact*100)+'% от выручки':'—')+'</div></div>',
-    '<div class="ck"><div class="ck-l">Участвовали</div><div class="ck-v num">'+rowsArr.length+'</div><div class="ck-s">из '+RAW.employees.filter(function(e){return!e.fired_at&&!e.is_archived;}).length+' сотрудников</div></div>'
+    '<div class="ck"><div class="ck-l">Делают кассу</div><div class="ck-v num">'+rowsArr.length+'</div><div class="ck-s">из '+RAW.employees.filter(function(e){return!e.fired_at&&!e.is_archived;}).length+' сотрудников</div></div>'
   ].join('');
   var sorted=filtered.slice().sort(function(a,b){return(b.deal_date||'').localeCompare(a.deal_date||'');});
   var total=sorted.length,tot=Math.max(1,Math.ceil(total/S.payLimit)),page=Math.min(S.payPage,tot-1);
