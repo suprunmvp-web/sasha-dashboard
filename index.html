@@ -2296,35 +2296,7 @@ function buildMonthlyData(deals){
   return arr;
 }
 
-function buildRevenueChartSVG(monthData, opts){
-  opts=opts||{};
-  var W=680,H=150,padL=8,padR=8,padB=28,padT=10;
-  var drawW=W-padL-padR,drawH=H-padB-padT;
-  var n=monthData.length;if(!n)return'<div style="color:var(--text-3);font-size:12px;padding:20px 0;text-align:center">Нет данных</div>';
-  var maxV=Math.max(1,Math.max.apply(null,monthData.map(function(m){return m.total;})));
-  var slot=drawW/n;
-  var bw=Math.max(4,Math.min(slot*0.68,48));
-  var bars='';var labels='';
-  monthData.forEach(function(m,i){
-    var x=padL+i*slot+slot/2-bw/2;
-    var h=m.total>0?Math.max(3,r(m.total/maxV*drawH)):0;
-    var y=padT+drawH-h;
-    var clients=JSON.stringify(m.clients).replace(/"/g,'&quot;');
-    var col=opts.color||'var(--accent)';
-    bars+='<rect class="chart-bar" x="'+x+'" y="'+y+'" width="'+bw+'" height="'+h+'" rx="3"'+
-      ' data-month="'+m.month+'" data-total="'+m.total+'" data-clients="'+clients+'"'+
-      ' fill="'+col+'"'+
-      ' onmouseover="showChartTip(event,this)" onmousemove="moveTip(event)" onmouseout="hideTip()"/>';
-    // label — каждый 3й или если мало месяцев
-    var show=n<=12||(i%3===0)||i===n-1;
-    if(show){
-      var mp=m.month.split('-');
-      var lbl=MNS[Number(mp[1])-1]+(n>12&&(i===0||mp[1]==='01')?' '+mp[0]:'');
-      labels+='<text x="'+(padL+i*slot+slot/2)+'" y="'+(H-6)+'" text-anchor="middle" font-size="9" fill="var(--text-3)">'+lbl+'</text>';
-    }
-  });
-  return'<svg class="chart-svg" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+bars+labels+'</svg>';
-}
+/* old buildRevenueChartSVG removed */
 
 // Загрузка lifetime данных менеджера
 window.loadEmpLifetime=function(empId){
