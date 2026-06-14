@@ -508,6 +508,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 /* ═══ SUPABASE ═══ */
 var SB_URL='https://qhpyrlhugpqgojwmarrw.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocHlybGh1Z3BxZ29qd21hcnJ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDY1Mjg5MCwiZXhwIjoyMDk2MjI4ODkwfQ.J1KvnwrxAbfEINT4ntxz_nWQJx7ZNgD4iPC2pPdGIV4';
+var SB_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocHlybGh1Z3BxZ29qd21hcnJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NTI4OTAsImV4cCI6MjA5NjIyODg5MH0.wlEY_Nm2T6Oe-WbH4lHJxdv_1-RjqgpNtBziTTGX2OQ';
 function sbGet(p){return fetch(SB_URL+'/rest/v1/'+p,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).then(function(d){if(d&&d.code){console.error('SB',p,d.message);return[];}return Array.isArray(d)?d:[];}).catch(function(e){console.error(e);return[];});}
 function sbPatch(t,f,d){return fetch(SB_URL+'/rest/v1/'+t+'?'+f,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(d)});}
 function sbPost(t,d){return fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(d)}).then(function(r){return r.json();});}
@@ -555,7 +556,7 @@ window.doLogin=async function(){
   try{
     var r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{
       method:'POST',
-      headers:{'apikey':SB_KEY,'Content-Type':'application/json'},
+      headers:{'apikey':SB_ANON,'Content-Type':'application/json'},
       body:JSON.stringify({email:email,password:pass})
     });
     d=await r.json();
@@ -572,7 +573,7 @@ window.doLogin=async function(){
 
 window.doLogout=async function(){
   if(CURRENT_USER&&CURRENT_USER.access_token){
-    await fetch(SB_URL+'/auth/v1/logout',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+CURRENT_USER.access_token}}).catch(function(){});
+    await fetch(SB_URL+'/auth/v1/logout',{method:'POST',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+CURRENT_USER.access_token}}).catch(function(){});
   }
   authClear();
   document.getElementById('app').innerHTML='';
@@ -587,7 +588,7 @@ window.doChangePassword=async function(){
   if(p1!==p2){errEl.textContent='Пароли не совпадают';return;}
   errEl.textContent='';
   var r=await fetch(SB_URL+'/auth/v1/user',{method:'PUT',
-    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+CURRENT_USER.access_token,'Content-Type':'application/json'},
+    headers:{'apikey':SB_ANON,'Authorization':'Bearer '+CURRENT_USER.access_token,'Content-Type':'application/json'},
     body:JSON.stringify({password:p1})
   });
   var d=await r.json();
@@ -2094,7 +2095,7 @@ window.doForgot=async function(){
   try{
     var r=await fetch(SB_URL+'/auth/v1/recover',{
       method:'POST',
-      headers:{'apikey':SB_KEY,'Content-Type':'application/json'},
+      headers:{'apikey':SB_ANON,'Content-Type':'application/json'},
       body:JSON.stringify({email:email})
     });
     // Supabase всегда возвращает 200 (не раскрывает есть ли такой email)
@@ -2140,7 +2141,7 @@ window.doResetPassword=async function(token){
   try{
     var r=await fetch(SB_URL+'/auth/v1/user',{
       method:'PUT',
-      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+token,'Content-Type':'application/json'},
       body:JSON.stringify({password:p1})
     });
     var d=await r.json();
