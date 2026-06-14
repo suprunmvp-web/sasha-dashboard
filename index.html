@@ -2190,95 +2190,90 @@ window.showChartTip=function(e,el){
 };
 
 function buildRevenueChartSVG(monthData,opts){
-  opts=opts||{};
   var dark=document.documentElement.getAttribute('data-theme')==='dark';
-  var cAccent=dark?'#4D7CFE':'#3D6BF5';
-  var cAccentL=dark?'rgba(77,124,254,0.28)':'rgba(61,107,245,0.25)';
-  var cBorder=dark?'#232a3a':'#DCE1EB';
-  var cText3=dark?'#5E6781':'#98A1B3';
-  var cSurface3=dark?'#1C2230':'#E6E9F0';
+  var ACC=dark?'#4D7CFE':'#3D6BF5';
+  var BRD=dark?'#232a3a':'#d1d8e8';
+  var T3=dark?'#5E6781':'#94a3b8';
+  var SF3=dark?'#1C2230':'#e2e8f0';
 
-  var W=680,H=200,padL=54,padR=12,padT=14,padB=32;
-  var drawW=W-padL-padR,drawH=H-padT-padB;
+  var W=680,H=210,PL=58,PR=12,PT=14,PB=34;
+  var DW=W-PL-PR,DH=H-PT-PB;
   var n=monthData.length;
-  if(!n)return'<div style="color:'+cText3+';font-size:12px;padding:24px 0;text-align:center">Нет данных</div>';
+  if(!n)return'<div style="padding:30px;text-align:center;font-size:12px;color:'+T3+'">Нет данных</div>';
 
-  var maxV=Math.max.apply(null,monthData.map(function(m){return m.total;}));
-  if(!maxV||maxV<=0)maxV=1;
-  var mag=Math.pow(10,Math.floor(Math.log10(maxV)));
-  var niceMax=Math.ceil(maxV/mag*1.3)*(mag);
-  if(niceMax<maxV*1.1)niceMax=maxV*1.3;
+  // Nice max
+  var mx=Math.max.apply(null,monthData.map(function(m){return m.total||0;}));
+  if(mx<=0)mx=1000;
+  var p=Math.pow(10,Math.floor(Math.log10(mx)));
+  var nice=Math.ceil(mx/p)*p;
+  if(nice<mx*1.15)nice=Math.ceil(mx/p*1.15)*p;
 
-  var uid='c'+Math.random().toString(36).slice(2,7);
-  var out=[];
+  var parts=[];
 
-  // defs — gradient с hex цветами
-  out.push('<defs><linearGradient id="g'+uid+'" x1="0" y1="0" x2="0" y2="1">'+
-    '<stop offset="0%" stop-color="'+cAccent+'" stop-opacity="0.9"/>'+
-    '<stop offset="100%" stop-color="'+cAccent+'" stop-opacity="0.25"/>'+
-  '</linearGradient></defs>');
-
-  // Grid lines + Y axis labels
-  var gN=4;
-  for(var gi=0;gi<=gN;gi++){
-    var gv=Math.round(gi*(niceMax/gN));
-    var gy=Math.round(padT+drawH-(gv/niceMax*drawH));
-    if(gi===0){
-      out.push('<line style="stroke:'+cBorder+';stroke-width:1" x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'"/>');
+  // Y axis gridlines + labels (5 уровней)
+  var steps=4;
+  for(var si=0;si<=steps;si++){
+    var sv=Math.round(nice/steps*si);
+    var sy=Math.round(PT+DH-(sv/nice*DH));
+    // Горизонтальная линия
+    if(si===0){
+      parts.push('<line x1="'+PL+'" y1="'+sy+'" x2="'+(W-PR)+'" y2="'+sy+'" stroke="'+BRD+'" stroke-width="1"/>');
     } else {
-      out.push('<line style="stroke:'+cBorder+';stroke-width:1;stroke-dasharray:3 5;opacity:.8" x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'"/>');
+      parts.push('<line x1="'+PL+'" y1="'+sy+'" x2="'+(W-PR)+'" y2="'+sy+'" stroke="'+BRD+'" stroke-width="1" stroke-dasharray="3,6" opacity="0.8"/>');
     }
-    out.push('<text style="font-size:9.5px;fill:'+cText3+';font-family:Inter,-apple-system,sans-serif" x="'+(padL-7)+'" y="'+(gy+3.5)+'" text-anchor="end">'+fmtShort(gv)+'</text>');
+    // Y label
+    parts.push('<text x="'+(PL-8)+'" y="'+(sy+4)+'" text-anchor="end" font-size="10" font-family="Inter,sans-serif" fill="'+T3+'">'+fmtShort(sv)+'</text>');
   }
 
-  // Vertical axis
-  out.push('<line style="stroke:'+cBorder+';stroke-width:1" x1="'+padL+'" y1="'+padT+'" x2="'+padL+'" y2="'+(padT+drawH)+'"/>');
+  // Вертикальная ось
+  parts.push('<line x1="'+PL+'" y1="'+PT+'" x2="'+PL+'" y2="'+(PT+DH)+'" stroke="'+BRD+'" stroke-width="1"/>');
 
-  var slot=drawW/n;
-  var bw=Math.max(6,Math.min(slot*0.55,38));
-  var bars=[],labels=[],trendPts=[];
+  // Bars + trend + labels
+  var slot=DW/n;
+  var bw=Math.max(8,Math.min(slot*0.56,42));
+  var bars=[],xlabels=[],tpts=[];
 
   monthData.forEach(function(m,i){
-    var cx=Math.round(padL+i*slot+slot/2);
-    var h=m.total>0?Math.max(4,Math.round(m.total/niceMax*drawH)):0;
-    var by=padT+drawH-h;
-    var baseY=padT+drawH;
+    var cx=Math.round(PL+i*slot+slot/2);
+    var bh=m.total>0?Math.max(4,Math.round(m.total/nice*DH)):0;
+    var by=PT+DH-bh;
+    var baseY=PT+DH;
     var prev=i>0?monthData[i-1].total:0;
-    var clients=JSON.stringify(m.clients).replace(/"/g,'&quot;');
-    var hover=' data-month="'+m.month+'" data-total="'+m.total+'" data-prev="'+prev+'" data-clients="'+clients+'"'+
+    var cl=JSON.stringify(m.clients).replace(/"/g,'&quot;');
+    var hov=' data-month="'+m.month+'" data-total="'+m.total+'" data-prev="'+prev+'" data-clients="'+cl+'"'+
       ' onmouseover="showChartTip(event,this)" onmousemove="moveTip(event)" onmouseout="hideTip()"';
 
     if(m.total>0){
-      bars.push('<rect x="'+Math.round(cx-bw/2)+'" y="'+by+'" width="'+Math.round(bw)+'" height="'+h+'" rx="4" fill="url(#g'+uid+')"'+hover+'/>');
-      bars.push('<rect x="'+Math.round(cx-bw/2)+'" y="'+by+'" width="'+Math.round(bw)+'" height="4" rx="4" style="fill:'+cAccent+';opacity:.95" pointer-events="none"/>');
-      trendPts.push([cx,by]);
+      // Основной столбик
+      bars.push('<rect x="'+Math.round(cx-bw/2)+'" y="'+by+'" width="'+Math.round(bw)+'" height="'+bh+'" rx="4" fill="'+ACC+'" opacity="0.72"'+hov+'/>');
+      // Яркий cap сверху
+      bars.push('<rect x="'+Math.round(cx-bw/2)+'" y="'+by+'" width="'+Math.round(bw)+'" height="5" rx="4" fill="'+ACC+'" pointer-events="none"/>');
+      tpts.push([cx,by]);
     } else {
-      bars.push('<rect x="'+Math.round(cx-bw/2)+'" y="'+(baseY-8)+'" width="'+Math.round(bw)+'" height="8" rx="4" style="fill:'+cSurface3+';opacity:.7"'+hover+'/>');
-      bars.push('<text style="font-size:9px;fill:'+cText3+';opacity:.6" x="'+cx+'" y="'+(baseY-14)+'" text-anchor="middle" pointer-events="none">—</text>');
-      trendPts.push(null);
+      bars.push('<rect x="'+Math.round(cx-bw/2)+'" y="'+(baseY-7)+'" width="'+Math.round(bw)+'" height="7" rx="3" fill="'+SF3+'"'+hov+'/>');
+      tpts.push(null);
     }
-    // Invisible hover zone
-    bars.push('<rect x="'+Math.round(cx-slot/2)+'" y="'+padT+'" width="'+Math.round(slot)+'" height="'+drawH+'" fill="transparent"'+hover+'/>');
+    // Hover zone
+    bars.push('<rect x="'+Math.round(cx-slot/2)+'" y="'+PT+'" width="'+Math.round(slot)+'" height="'+DH+'" fill="transparent"'+hov+'/>');
 
-    var showL=n<=12||(i%Math.max(1,Math.ceil(n/8))===0)||i===n-1;
-    if(showL){
+    // X label
+    var show=n<=12||(i%Math.max(1,Math.floor(n/9))===0)||i===n-1;
+    if(show){
       var mp=m.month.split('-');
-      var lbl=MNS[Number(mp[1])-1]+(mp[1]==='01'||i===0?' \''+mp[0].slice(2):'');
-      labels.push('<text style="font-size:9.5px;fill:'+cText3+';font-family:Inter,-apple-system,sans-serif" x="'+cx+'" y="'+(H-5)+'" text-anchor="middle">'+lbl+'</text>');
+      var lbl=MNS[+mp[1]-1]+(mp[1]==='01'||i===0?' '+mp[0].slice(2):'');
+      xlabels.push('<text x="'+cx+'" y="'+(H-6)+'" text-anchor="middle" font-size="10" font-family="Inter,sans-serif" fill="'+T3+'">'+lbl+'</text>');
     }
   });
 
   // Trend line
-  var vp=trendPts.filter(function(p){return p;});
+  var vp=tpts.filter(function(p){return p;});
   if(vp.length>=2){
-    out.push('<path d="'+buildSmoothPath(vp)+'" fill="none" style="stroke:'+cAccent+';stroke-width:1.5;stroke-opacity:.4;stroke-linecap:round" pointer-events="none"/>');
-    vp.forEach(function(p){
-      out.push('<circle cx="'+p[0]+'" cy="'+p[1]+'" r="2.5" style="fill:'+cAccent+';opacity:.55" pointer-events="none"/>');
-    });
+    parts.push('<path d="'+buildSmoothPath(vp)+'" fill="none" stroke="'+ACC+'" stroke-width="2" stroke-opacity="0.35" stroke-linecap="round" pointer-events="none"/>');
+    vp.forEach(function(p){parts.push('<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3" fill="'+ACC+'" opacity="0.5" pointer-events="none"/>');});
   }
 
-  out=out.concat(bars).concat(labels);
-  return'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">'+out.join('')+'</svg>';
+  parts=parts.concat(bars).concat(xlabels);
+  return'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block;overflow:visible" xmlns="http://www.w3.org/2000/svg">'+parts.join('')+'</svg>';
 }
 
 function buildMonthlyData(deals){
