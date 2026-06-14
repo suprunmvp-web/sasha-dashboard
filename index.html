@@ -2191,14 +2191,14 @@ window.showChartTip=function(e,el){
 
 function buildRevenueChartSVG(monthData,opts){
   opts=opts||{};
-  // CSS переменные через computedStyle (работает в браузере)
-  var rs=getComputedStyle(document.documentElement);
-  var cAccent=(rs.getPropertyValue('--accent')||'').trim()||'#3D6BF5';
-  var cBorder=(rs.getPropertyValue('--border')||'').trim()||'#DCE1EB';
-  var cText3=(rs.getPropertyValue('--text-3')||'').trim()||'#98A1B3';
-  var cSurface3=(rs.getPropertyValue('--surface-3')||'').trim()||'#E6E9F0';
+  var dark=document.documentElement.getAttribute('data-theme')==='dark';
+  var cAccent=dark?'#4D7CFE':'#3D6BF5';
+  var cAccentL=dark?'rgba(77,124,254,0.28)':'rgba(61,107,245,0.25)';
+  var cBorder=dark?'#232a3a':'#DCE1EB';
+  var cText3=dark?'#5E6781':'#98A1B3';
+  var cSurface3=dark?'#1C2230':'#E6E9F0';
 
-  var W=680,H=200,padL=52,padR=12,padT=12,padB=32;
+  var W=680,H=200,padL=54,padR=12,padT=14,padB=32;
   var drawW=W-padL-padR,drawH=H-padT-padB;
   var n=monthData.length;
   if(!n)return'<div style="color:'+cText3+';font-size:12px;padding:24px 0;text-align:center">Нет данных</div>';
@@ -2206,83 +2206,79 @@ function buildRevenueChartSVG(monthData,opts){
   var maxV=Math.max.apply(null,monthData.map(function(m){return m.total;}));
   if(!maxV||maxV<=0)maxV=1;
   var mag=Math.pow(10,Math.floor(Math.log10(maxV)));
-  var niceMax=Math.ceil(maxV/mag*1.3)*mag/1;
+  var niceMax=Math.ceil(maxV/mag*1.3)*(mag);
   if(niceMax<maxV*1.1)niceMax=maxV*1.3;
 
-  var uid='c'+Math.random().toString(36).slice(2,6);
-  var svgParts=[];
+  var uid='c'+Math.random().toString(36).slice(2,7);
+  var out=[];
 
-  // Gradient def — hex цвет работает надёжно
-  svgParts.push('<defs>'+
-    '<linearGradient id="bg'+uid+'" x1="0" y1="0" x2="0" y2="1">'+
-      '<stop offset="0%" stop-color="'+cAccent+'" stop-opacity="0.85"/>'+
-      '<stop offset="100%" stop-color="'+cAccent+'" stop-opacity="0.3"/>'+
-    '</linearGradient>'+
-  '</defs>');
+  // defs — gradient с hex цветами
+  out.push('<defs><linearGradient id="g'+uid+'" x1="0" y1="0" x2="0" y2="1">'+
+    '<stop offset="0%" stop-color="'+cAccent+'" stop-opacity="0.9"/>'+
+    '<stop offset="100%" stop-color="'+cAccent+'" stop-opacity="0.25"/>'+
+  '</linearGradient></defs>');
 
-  // Grid lines + Y labels
-  var gLevels=4;
-  for(var g=0;g<=gLevels;g++){
-    var gv=r(g*(niceMax/gLevels));
-    var gy=padT+drawH-r(gv/niceMax*drawH);
-    if(g===0){
-      svgParts.push('<line x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'" stroke="'+cBorder+'" stroke-width="1"/>');
+  // Grid lines + Y axis labels
+  var gN=4;
+  for(var gi=0;gi<=gN;gi++){
+    var gv=Math.round(gi*(niceMax/gN));
+    var gy=Math.round(padT+drawH-(gv/niceMax*drawH));
+    if(gi===0){
+      out.push('<line style="stroke:'+cBorder+';stroke-width:1" x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'"/>');
     } else {
-      svgParts.push('<line x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'" stroke="'+cBorder+'" stroke-width="1" stroke-dasharray="4,5" opacity="0.7"/>');
+      out.push('<line style="stroke:'+cBorder+';stroke-width:1;stroke-dasharray:3 5;opacity:.8" x1="'+padL+'" y1="'+gy+'" x2="'+(W-padR)+'" y2="'+gy+'"/>');
     }
-    svgParts.push('<text x="'+(padL-7)+'" y="'+(gy+4)+'" text-anchor="end" font-size="9.5" fill="'+cText3+'" font-family="Inter,-apple-system,sans-serif">'+fmtShort(gv)+'</text>');
+    out.push('<text style="font-size:9.5px;fill:'+cText3+';font-family:Inter,-apple-system,sans-serif" x="'+(padL-7)+'" y="'+(gy+3.5)+'" text-anchor="end">'+fmtShort(gv)+'</text>');
   }
 
-  // Vertical axis line
-  svgParts.push('<line x1="'+padL+'" y1="'+padT+'" x2="'+padL+'" y2="'+(padT+drawH)+'" stroke="'+cBorder+'" stroke-width="1"/>');
+  // Vertical axis
+  out.push('<line style="stroke:'+cBorder+';stroke-width:1" x1="'+padL+'" y1="'+padT+'" x2="'+padL+'" y2="'+(padT+drawH)+'"/>');
 
   var slot=drawW/n;
   var bw=Math.max(6,Math.min(slot*0.55,38));
-  var trendPts=[];
-  var bars=[];var labels=[];
+  var bars=[],labels=[],trendPts=[];
 
   monthData.forEach(function(m,i){
-    var cx=r(padL+i*slot+slot/2);
-    var h=m.total>0?Math.max(4,r(m.total/niceMax*drawH)):0;
+    var cx=Math.round(padL+i*slot+slot/2);
+    var h=m.total>0?Math.max(4,Math.round(m.total/niceMax*drawH)):0;
     var by=padT+drawH-h;
     var baseY=padT+drawH;
     var prev=i>0?monthData[i-1].total:0;
     var clients=JSON.stringify(m.clients).replace(/"/g,'&quot;');
-    var dataA=' data-month="'+m.month+'" data-total="'+m.total+'" data-prev="'+prev+'" data-clients="'+clients+'"'+
+    var hover=' data-month="'+m.month+'" data-total="'+m.total+'" data-prev="'+prev+'" data-clients="'+clients+'"'+
       ' onmouseover="showChartTip(event,this)" onmousemove="moveTip(event)" onmouseout="hideTip()"';
 
     if(m.total>0){
-      bars.push('<rect x="'+r(cx-bw/2)+'" y="'+by+'" width="'+r(bw)+'" height="'+h+'" rx="4" fill="url(#bg'+uid+')"'+dataA+'/>');
-      bars.push('<rect x="'+r(cx-bw/2)+'" y="'+by+'" width="'+r(bw)+'" height="4" rx="4" fill="'+cAccent+'" opacity="0.9" pointer-events="none"/>');
+      bars.push('<rect x="'+Math.round(cx-bw/2)+'" y="'+by+'" width="'+Math.round(bw)+'" height="'+h+'" rx="4" fill="url(#g'+uid+')"'+hover+'/>');
+      bars.push('<rect x="'+Math.round(cx-bw/2)+'" y="'+by+'" width="'+Math.round(bw)+'" height="4" rx="4" style="fill:'+cAccent+';opacity:.95" pointer-events="none"/>');
       trendPts.push([cx,by]);
     } else {
-      bars.push('<rect x="'+r(cx-bw/2)+'" y="'+(baseY-8)+'" width="'+r(bw)+'" height="8" rx="4" fill="'+cSurface3+'" opacity="0.8"'+dataA+'/>');
-      bars.push('<text x="'+cx+'" y="'+(baseY-14)+'" text-anchor="middle" font-size="9" fill="'+cText3+'" opacity="0.6" pointer-events="none">—</text>');
+      bars.push('<rect x="'+Math.round(cx-bw/2)+'" y="'+(baseY-8)+'" width="'+Math.round(bw)+'" height="8" rx="4" style="fill:'+cSurface3+';opacity:.7"'+hover+'/>');
+      bars.push('<text style="font-size:9px;fill:'+cText3+';opacity:.6" x="'+cx+'" y="'+(baseY-14)+'" text-anchor="middle" pointer-events="none">—</text>');
       trendPts.push(null);
     }
-    // Invisible hover area
-    bars.push('<rect x="'+r(cx-slot/2)+'" y="'+padT+'" width="'+r(slot)+'" height="'+drawH+'" fill="transparent"'+dataA+'/>');
+    // Invisible hover zone
+    bars.push('<rect x="'+Math.round(cx-slot/2)+'" y="'+padT+'" width="'+Math.round(slot)+'" height="'+drawH+'" fill="transparent"'+hover+'/>');
 
-    // X labels
-    var showLbl=n<=12||(i%Math.ceil(n/8)===0)||i===n-1;
-    if(showLbl){
+    var showL=n<=12||(i%Math.max(1,Math.ceil(n/8))===0)||i===n-1;
+    if(showL){
       var mp=m.month.split('-');
-      var lbl=MNS[Number(mp[1])-1]+(mp[1]==='01'||i===0?'\''+mp[0].slice(2):'');
-      labels.push('<text x="'+cx+'" y="'+(H-5)+'" text-anchor="middle" font-size="9.5" fill="'+cText3+'" font-family="Inter,-apple-system,sans-serif">'+lbl+'</text>');
+      var lbl=MNS[Number(mp[1])-1]+(mp[1]==='01'||i===0?' \''+mp[0].slice(2):'');
+      labels.push('<text style="font-size:9.5px;fill:'+cText3+';font-family:Inter,-apple-system,sans-serif" x="'+cx+'" y="'+(H-5)+'" text-anchor="middle">'+lbl+'</text>');
     }
   });
 
-  // Trend line через non-null points
-  var validPts=trendPts.filter(function(p){return p;});
-  if(validPts.length>=2){
-    svgParts.push('<path d="'+buildSmoothPath(validPts)+'" fill="none" stroke="'+cAccent+'" stroke-width="1.5" stroke-opacity="0.4" stroke-linecap="round" pointer-events="none"/>');
-    validPts.forEach(function(p){
-      svgParts.push('<circle cx="'+p[0]+'" cy="'+p[1]+'" r="2.5" fill="'+cAccent+'" opacity="0.5" pointer-events="none"/>');
+  // Trend line
+  var vp=trendPts.filter(function(p){return p;});
+  if(vp.length>=2){
+    out.push('<path d="'+buildSmoothPath(vp)+'" fill="none" style="stroke:'+cAccent+';stroke-width:1.5;stroke-opacity:.4;stroke-linecap:round" pointer-events="none"/>');
+    vp.forEach(function(p){
+      out.push('<circle cx="'+p[0]+'" cy="'+p[1]+'" r="2.5" style="fill:'+cAccent+';opacity:.55" pointer-events="none"/>');
     });
   }
 
-  svgParts=svgParts.concat(bars).concat(labels);
-  return'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">'+svgParts.join('')+'</svg>';
+  out=out.concat(bars).concat(labels);
+  return'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">'+out.join('')+'</svg>';
 }
 
 function buildMonthlyData(deals){
