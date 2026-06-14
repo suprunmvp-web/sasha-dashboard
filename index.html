@@ -840,7 +840,7 @@ function buildDB(){
     return{id:d.id,name:d.name,tl:lead?lead.name:'—',leadId:d.lead_employee_id,
       fact:dFact,prevFact:S.prevByDept[d.id]||0,plan:dPlan,
       paying:dc.filter(function(c){return c.subscription_status==='active';}).length,
-      arpu:dc.length?r(dFact/dc.length):0,
+      arpu:(function(){var paying=dc.filter(function(c){return c.subscription_status==='active';}).length;return paying>0?r(dFact/paying):0;})(),
       staff:staff,
       fired:firedEmps.filter(function(e){return e.dept_id===d.id;}),
       clients:dc.map(function(c){
@@ -917,9 +917,9 @@ function loadPrevDeals(){
   }).catch(function(){});
 }
 function deltaPct(now,prev){if(prev>0)return Math.round((now-prev)/prev*100);if(now>0)return 100;return 0;}
-function deltaTag(now,prev){var dp=deltaPct(now,prev);if(prev===0&&now===0)return'';var up=dp>0;var ic=dp===0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 12h18"/></svg>':(up?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 11V7h-4"/></svg>':'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 13v4h-4"/></svg>');return'<span class="dlt '+(dp>0?'dlt-up':dp<0?'dlt-down':'dlt-neu')+'">'+ic+Math.abs(dp)+'%</span>';}
+function deltaTag(now,prev){var dp=deltaPct(now,prev);if(prev===0)return '';var up=dp>0;var ic=dp===0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 12h18"/></svg>':(up?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 11V7h-4"/></svg>':'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 13v4h-4"/></svg>');return'<span class="dlt '+(dp>0?'dlt-up':dp<0?'dlt-down':'dlt-neu')+'">'+ic+Math.abs(dp)+'%</span>';}
 function zigIco(dp){return dp>0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 11V7h-4"/></svg>':dp<0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 13v4h-4"/></svg>':'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 12h18"/></svg>';}
-function deltaBadge(now,prev){var dp=deltaPct(now,prev);var cls=dp>0?'db-up':dp<0?'db-down':'db-flat';if(prev===0&&now===0)return'<span class="delta-badge db-flat">нет данных</span>';return'<span class="delta-badge '+cls+'">'+zigIco(dp)+(dp>0?'+':'')+dp+'% к пред.</span>';}
+function deltaBadge(now,prev){var dp=deltaPct(now,prev);var cls=dp>0?'db-up':dp<0?'db-down':'db-flat';if(prev===0)return'<span class="delta-badge db-flat" style="opacity:.5">нет данных</span>';return'<span class="delta-badge '+cls+'">'+zigIco(dp)+(dp>0?'+':'')+dp+'% к пред.</span>';}
 
 /* ═══ PLANS (monthly_targets) ═══ */
 function loadPlans(){
@@ -1123,9 +1123,9 @@ function renderCo(){
   var arpu2=coPaying>0?r(c.fact/coPaying):0;
   var totalStaff=DB.depts.reduce(function(a,d){return a+d.staff.filter(function(m){return!m.fired;}).length;},0);
   var kH=[
-    '<div class="ck"><div class="ck-l">Выручка за период</div><div class="ck-v num">'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div><div class="ck-delta">'+deltaTag(c.fact,c.prevFact)+'<span>к пред. периоду</span></div></div>',
+    '<div class="ck"><div class="ck-l">Выручка</div><div class="ck-v num">'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div><div class="ck-delta">'+deltaTag(c.fact,c.prevFact)+'<span>к пред. периоду</span></div></div>',
     '<div class="ck"><div class="ck-l">Ранрейт</div><div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span></div></div>',
-    '<div class="ck"><div class="ck-l">Платящих за период</div><div class="ck-v num">'+coPaying+'</div><div class="ck-s">из '+c.clients+' в портфеле</div><div class="ck-s" style="margin-top:6px">ARPU '+(arpu2?fmt(arpu2):'—')+'</div></div>',
+    '<div class="ck"><div class="ck-l">Платящих</div><div class="ck-v num">'+coPaying+'</div><div class="ck-s">из '+c.clients+' активных · ARPU '+(arpu2?fmt(arpu2):'—')+'</div></div>',
     '<div class="ck"><div class="ck-l">Отделов</div><div class="ck-v num">'+DB.depts.length+'</div><div class="ck-s">'+DB.archivedDepts.length+' в архиве</div><div class="ck-s" style="margin-top:6px">'+totalStaff+' сотрудников</div></div>'
   ].join('');
 
@@ -1482,11 +1482,13 @@ function renderEmpView(){
   });
   var ten=tenure(emp.hired_at);
   var initials=(emp.name||'?').split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase();
+  var empPaying=payingInPeriod(myClients.filter(function(c){return!c.foreign;}))||0;
+  var empArpu=empPaying>0?r(dealAgg.fact/empPaying):0;
   var kH=[
-    '<div class="kcard"><div class="kl">Факт за период</div><div class="kv num">'+fmt(dealAgg.fact)+'</div><div class="ks"><span class="neu">план '+fmt(plan)+'</span></div><div class="ks" style="margin-top:4px">'+mp+'% · '+deltaTag(dealAgg.fact,S.prevByEmp[S.empView]||0)+'</div></div>',
+    '<div class="kcard"><div class="kl">Выручка</div><div class="kv num">'+fmt(dealAgg.fact)+'</div><div class="ks"><span class="neu">план '+fmt(plan)+' · '+mp+'%</span></div>'+(deltaTag(dealAgg.fact,S.prevByEmp[S.empView]||0)?'<div class="ck-delta">'+deltaTag(dealAgg.fact,S.prevByEmp[S.empView]||0)+'<span>к пред.</span></div>':'')+'</div>',
     '<div class="kcard"><div class="kl">Ранрейт</div><div class="kv num">'+mr+'%</div><div class="ks"><span class="neu">'+(mr>=100?'в темпе':mr>=80?'близко к плану':'отстаём')+'</span></div></div>',
-    '<div class="kcard"><div class="kl">Сделок</div><div class="kv num">'+dealAgg.count+'</div><div class="ks"><span class="neu">за период</span></div><div class="ks" style="margin-top:4px"><span class="neu">ср. чек '+(dealAgg.count>0?fmt(r(dealAgg.fact/dealAgg.count)):'—')+'</span></div></div>',
-    '<div class="kcard"><div class="kl">Клиентов</div><div class="kv num">'+portfolioCount+'</div><div class="ks"><span class="neu">в портфеле · платящих '+(payingInPeriod(myClients.filter(function(c){return!c.foreign;}))||0)+'</span></div></div>',
+    '<div class="kcard"><div class="kl">ARPU</div><div class="kv num">'+(empArpu?fmt(empArpu):'—')+'</div><div class="ks"><span class="neu">средний на клиента</span></div></div>',
+    '<div class="kcard"><div class="kl">Платящих</div><div class="kv num">'+empPaying+'</div><div class="ks"><span class="neu">из '+portfolioCount+' в портфеле</span></div></div>',
     '<div class="kcard"><div class="kl">Стаж</div><div class="kv num">'+(ten!==null?ten+' мес.':'—')+'</div><div class="ks"><span class="neu">'+(emp.hired_at?'с '+fmtD(emp.hired_at):'')+'</span></div></div>'
   ].join('');
   // Sort clients
