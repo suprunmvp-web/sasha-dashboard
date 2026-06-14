@@ -86,7 +86,7 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
 /* KPI CARDS */
 .ckpi{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:1.5rem;}
-.ck{background:var(--surface);border:1px solid var(--border-soft);border-top-width:3px;border-radius:14px;padding:16px 18px;}
+.ck{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:16px 18px;}
 .ck-l{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:500;}
 .ck-v{font-size:22px;font-weight:600;letter-spacing:-.02em;line-height:1;}
 .ck-s{font-size:12px;margin-top:8px;color:var(--text-2);}
@@ -113,10 +113,14 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 
 /* DEPT KPI */
 .dept-kpi{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.5rem;}
-.kcard{background:var(--surface);border:1px solid var(--border-soft);border-top-width:3px;border-radius:14px;padding:16px 18px;}
+.kcard{background:var(--surface);border:1px solid var(--border-soft);border-radius:14px;padding:16px 18px;}
 .kl{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:500;}
 .kv{font-size:22px;font-weight:600;line-height:1;letter-spacing:-.02em;}
 .ks{font-size:12px;margin-top:8px;color:var(--text-2);}
+
+/* micro-bar — одинаковая нижняя полоска у всех карточек */
+.mbar{height:2px;background:var(--surface-3);border-radius:2px;margin-top:12px;overflow:hidden;}
+.mbar-fill{height:100%;border-radius:2px;transition:width .8s cubic-bezier(.16,1,.3,1);}
 .pbar{height:3px;background:var(--surface-3);border-radius:2px;margin-top:9px;overflow:hidden;}
 .pfill{height:100%;border-radius:2px;}
 
@@ -1123,12 +1127,14 @@ function renderCo(){
   var arpu2=coPaying>0?r(c.fact/coPaying):0;
   var totalStaff=DB.depts.reduce(function(a,d){return a+d.staff.filter(function(m){return!m.fired;}).length;},0);
   var _c=getComputedStyle(document.documentElement);var _acc2=_c.getPropertyValue('--accent').trim()||'#3D6BF5';var _grn2=_c.getPropertyValue('--green').trim()||'#16A97F';
+  var _mb='<div class="mbar"></div>';
+  var _mbFill=function(p){return'<div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div>';};
   var kH=[
-    '<div class="ck" style="border-top-color:'+grad(cp)+'"><div class="ck-l">Выручка</div><div class="ck-v num">'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div>'+(deltaTag(c.fact,c.prevFact)?'<div class="ck-delta">'+deltaTag(c.fact,c.prevFact)+'<span>к пред. периоду</span></div>':'')+'</div>',
-    '<div class="ck" style="border-top-color:'+grad(rrv)+'"><div class="ck-l">Ранрейт</div><div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span></div></div>',
-    '<div class="ck" style="border-top-color:'+_acc2+'"><div class="ck-l">ARPU</div><div class="ck-v num">'+(arpu2?fmt(arpu2):'—')+'</div><div class="ck-s"><span class="neu">платящий клиент</span></div></div>',
-    '<div class="ck" style="border-top-color:'+_grn2+'"><div class="ck-l">Платящих</div><div class="ck-v num">'+coPaying+'</div><div class="ck-s"><span class="neu">из '+c.clients+' в портфеле</span></div></div>',
-    '<div class="ck" style="border-top-color:'+_acc2+'"><div class="ck-l">Отделов</div><div class="ck-v num">'+DB.depts.length+'</div><div class="ck-s"><span class="neu">'+totalStaff+' сотрудников</span></div></div>'
+    '<div class="ck"><div class="ck-l">Выручка</div><div class="ck-v num">'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div>'+(deltaTag(c.fact,c.prevFact)?'<div class="ck-delta">'+deltaTag(c.fact,c.prevFact)+'<span>к пред. периоду</span></div>':'')+_mbFill(cp)+'</div>',
+    '<div class="ck"><div class="ck-l">Ранрейт</div><div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span></div>'+_mb+'</div>',
+    '<div class="ck"><div class="ck-l">ARPU</div><div class="ck-v num">'+(arpu2?fmt(arpu2):'—')+'</div><div class="ck-s"><span class="neu">платящий клиент</span></div>'+_mb+'</div>',
+    '<div class="ck"><div class="ck-l">Платящих</div><div class="ck-v num">'+coPaying+'</div><div class="ck-s"><span class="neu">из '+c.clients+' в портфеле</span></div>'+_mb+'</div>',
+    '<div class="ck"><div class="ck-l">Отделов</div><div class="ck-v num">'+DB.depts.length+'</div><div class="ck-s"><span class="neu">'+totalStaff+' сотрудников</span></div>'+_mb+'</div>'
   ].join('');
 
   // Воронка с выбором отдела
@@ -1413,16 +1419,16 @@ function renderDept(){
   var p2=pct(d.fact,d.plan),rrv=rrPct(d.fact,d.plan);
   var dPaying=payingInPeriod(d.clients);if(dPaying===null)dPaying=d.paying;
   var dArpu=dPaying>0?r(d.fact/dPaying):0;
-  var _da=document.documentElement.getAttribute('data-theme')==='dark'?'#4D7CFE':'#3D6BF5';
-  var _dg=document.documentElement.getAttribute('data-theme')==='dark'?'#2ED3A7':'#16A97F';
+  var _mb2='<div class="mbar"></div>';
+  var _mbF2=function(p){return'<div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div>';};
   var kpis=[
-    {l:'Выручка',v:fmt(d.fact),s:'план '+fmt(d.plan)+' · '+p2+'%',dlt:deltaTag(d.fact,d.prevFact),tc:grad(p2),raw:true},
-    {l:'Ранрейт',v:rrv+'%',s:'<span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span>',tc:grad(rrv),raw:true},
-    {l:'ARPU',v:dArpu?fmt(dArpu):'—',s:'<span class="neu">платящий клиент</span>',tc:_da,raw:true},
-    {l:'Платящих',v:dPaying,s:'<span class="neu">из '+d.clients.length+' в портфеле</span>',tc:_dg,raw:true},
-    {l:'В команде',v:d.staff.filter(function(m){return!m.fired;}).length,s:'<span class="neu">сотрудников</span>',tc:_da,raw:true}
+    {l:'Выручка',v:fmt(d.fact),s:'план '+fmt(d.plan)+' · '+p2+'%',dlt:deltaTag(d.fact,d.prevFact),bar:p2,raw:true},
+    {l:'Ранрейт',v:rrv+'%',s:'<span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span>',raw:true},
+    {l:'ARPU',v:dArpu?fmt(dArpu):'—',s:'<span class="neu">платящий клиент</span>',raw:true},
+    {l:'Платящих',v:dPaying,s:'<span class="neu">из '+d.clients.length+' в портфеле</span>',raw:true},
+    {l:'В команде',v:d.staff.filter(function(m){return!m.fired;}).length,s:'<span class="neu">сотрудников</span>',raw:true}
   ];
-  var kH=kpis.map(function(k){var dl=k.dlt?'<div class="ck-delta">'+k.dlt+'<span>к пред. периоду</span></div>':'';return'<div class="kcard" style="border-top-color:'+(k.tc||_da)+'"><div class="kl">'+k.l+'</div><div class="kv num">'+k.v+'</div><div class="ks">'+(k.raw?k.s:'<span class="neu">'+k.s+'</span>')+'</div>'+dl+'</div>';}).join('');
+  var kH=kpis.map(function(k){var dl=k.dlt?'<div class="ck-delta">'+k.dlt+'<span>к пред. периоду</span></div>':'';var mb=k.bar!=null?_mbF2(k.bar):_mb2;return'<div class="kcard"><div class="kl">'+k.l+'</div><div class="kv num">'+k.v+'</div><div class="ks">'+(k.raw?k.s:'<span class="neu">'+k.s+'</span>')+'</div>'+dl+mb+'</div>';}).join('');
   var tabs='<div class="tab-row">'+[['staff','Сотрудники'],['funnel','Воронка']].map(function(t){return'<button class="tab'+(S.tab===t[0]?' on':'')+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>';
   var ct='';
   if(S.tab==='staff'){
@@ -1489,14 +1495,14 @@ function renderEmpView(){
   var initials=(emp.name||'?').split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase();
   var empPaying=payingInPeriod(myClients.filter(function(c){return!c.foreign;}))||0;
   var empArpu=empPaying>0?r(dealAgg.fact/empPaying):0;
-  var _ma=document.documentElement.getAttribute('data-theme')==='dark'?'#4D7CFE':'#3D6BF5';
-  var _mg=document.documentElement.getAttribute('data-theme')==='dark'?'#2ED3A7':'#16A97F';
+  var _mb3='<div class="mbar"></div>';
+  var _mbF3=function(p){return'<div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div>';};
   var kH=[
-    '<div class="kcard" style="border-top-color:'+grad(mp)+'"><div class="kl">Выручка</div><div class="kv num">'+fmt(dealAgg.fact)+'</div><div class="ks"><span class="neu">план '+fmt(plan)+' · '+mp+'%</span></div>'+(deltaTag(dealAgg.fact,S.prevByEmp[S.empView]||0)?'<div class="ck-delta">'+deltaTag(dealAgg.fact,S.prevByEmp[S.empView]||0)+'<span>к пред. периоду</span></div>':'')+'</div>',
-    '<div class="kcard" style="border-top-color:'+grad(mr)+'"><div class="kl">Ранрейт</div><div class="kv num">'+mr+'%</div><div class="ks"><span class="neu">'+(mr>=100?'в темпе':mr>=80?'близко к плану':'отстаём')+'</span></div></div>',
-    '<div class="kcard" style="border-top-color:'+_ma+'"><div class="kl">ARPU</div><div class="kv num">'+(empArpu?fmt(empArpu):'—')+'</div><div class="ks"><span class="neu">платящий клиент</span></div></div>',
-    '<div class="kcard" style="border-top-color:'+_mg+'"><div class="kl">Платящих</div><div class="kv num">'+empPaying+'</div><div class="ks"><span class="neu">из '+portfolioCount+' в портфеле</span></div></div>',
-    '<div class="kcard" style="border-top-color:'+_ma+'"><div class="kl">Стаж</div><div class="kv num">'+(ten!==null?ten+' мес.':'—')+'</div><div class="ks"><span class="neu">'+(emp.hired_at?'с '+fmtD(emp.hired_at):'')+'</span></div></div>'
+    '<div class="kcard"><div class="kl">Выручка</div><div class="kv num">'+fmt(dealAgg.fact)+'</div><div class="ks"><span class="neu">план '+fmt(plan)+' · '+mp+'%</span></div>'+(deltaTag(dealAgg.fact,S.prevByEmp[S.empView]||0)?'<div class="ck-delta">'+deltaTag(dealAgg.fact,S.prevByEmp[S.empView]||0)+'<span>к пред. периоду</span></div>':'')+_mbF3(mp)+'</div>',
+    '<div class="kcard"><div class="kl">Ранрейт</div><div class="kv num">'+mr+'%</div><div class="ks"><span class="neu">'+(mr>=100?'в темпе':mr>=80?'близко к плану':'отстаём')+'</span></div>'+_mb3+'</div>',
+    '<div class="kcard"><div class="kl">ARPU</div><div class="kv num">'+(empArpu?fmt(empArpu):'—')+'</div><div class="ks"><span class="neu">платящий клиент</span></div>'+_mb3+'</div>',
+    '<div class="kcard"><div class="kl">Платящих</div><div class="kv num">'+empPaying+'</div><div class="ks"><span class="neu">из '+portfolioCount+' в портфеле</span></div>'+_mb3+'</div>',
+    '<div class="kcard"><div class="kl">Стаж</div><div class="kv num">'+(ten!==null?ten+' мес.':'—')+'</div><div class="ks"><span class="neu">'+(emp.hired_at?'с '+fmtD(emp.hired_at):'')+'</span></div>'+_mb3+'</div>'
   ].join('');
   // Sort clients
   myClients.forEach(function(c){c._min=S.periodStats[c.platform_org_id]||0;c._d=daysTo(c.expiry);});
