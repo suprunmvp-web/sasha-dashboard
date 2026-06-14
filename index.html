@@ -464,6 +464,12 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 }
 
 
+
+.pw-wrap{position:relative;}
+.pw-wrap .login-input{padding-right:42px;width:100%;}
+.pw-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-3);padding:4px;display:flex;align-items:center;justify-content:center;}
+.pw-eye:hover{color:var(--text-2);}
+
 /* ═══ RECOVERY ═══ */
 .login-sub{font-size:12px;color:var(--text-3);margin-top:16px;text-align:center;}
 .login-sub a{color:var(--accent);cursor:pointer;text-decoration:none;}
@@ -508,6 +514,11 @@ function sbPost(t,d){return fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{'
 function sbDelete(t,f){return fetch(SB_URL+'/rest/v1/'+t+'?'+f,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'}});}
 function reloadTg(){return sbGet('telegram_integrations?select=*&order=created_at').then(function(r){RAW.tgIntegrations=r||[];render();});}
 
+
+var ICO_EYE='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+var ICO_EYE_OFF='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+window.togglePw=function(id,btn){var inp=document.getElementById(id);if(!inp)return;var show=inp.type==='password';inp.type=show?'text':'password';btn.innerHTML=show?ICO_EYE:ICO_EYE_OFF;};
+
 /* ═══ AUTH ═══ */
 var CURRENT_USER=null;
 function authLoad(){try{var t=localStorage.getItem('sasha_session');if(t){var o=JSON.parse(t);CURRENT_USER=o;return true;}}catch(e){}return false;}
@@ -522,7 +533,7 @@ function showLogin(err){
   el.innerHTML='<div class="login-card">'+
     '<div class="login-brand">Sasha<span class="a">AI</span></div>'+
     '<div class="login-field"><label>Email</label><input class="login-input" type="email" id="li-email" placeholder="name@trysasha.ru" autocomplete="email"></div>'+
-    '<div class="login-field"><label>Пароль</label><input class="login-input" type="password" id="li-pass" placeholder="••••••••" autocomplete="current-password"></div>'+
+    '<div class="login-field"><label>Пароль</label><div class="pw-wrap"><input class="login-input" type="password" id="li-pass" placeholder="••••••••" autocomplete="current-password"><button class="pw-eye" type="button" onclick="togglePw(\'li-pass\',this)" tabindex="-1">'+ICO_EYE_OFF+'</button></div></div>'+
     '<button class="login-btn" id="li-btn" onclick="doLogin()">Войти</button>'+
     '<div class="login-err" id="li-err">'+(err||'')+'</div>'+
     '<div class="login-sub"><a onclick="showForgot()">Забыли пароль?</a></div>'+
