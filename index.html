@@ -462,9 +462,40 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
   .dept-kpi .kcard:nth-child(5){grid-column:span 1;}
   .ch-grid{grid-template-columns:1fr;}
 }
+
+
+/* ═══ RECOVERY ═══ */
+.login-sub{font-size:12px;color:var(--text-3);margin-top:16px;text-align:center;}
+.login-sub a{color:var(--accent);cursor:pointer;text-decoration:none;}
+.login-sub a:hover{text-decoration:underline;}
+.login-back{font-size:12px;color:var(--text-2);cursor:pointer;margin-bottom:20px;display:inline-flex;align-items:center;gap:4px;}
+.login-back:hover{color:var(--accent);}
+.login-success{font-size:13px;color:var(--green);background:var(--green-bg);border-radius:10px;padding:12px 14px;margin-top:12px;line-height:1.5;}
+
+/* ═══ LOGIN ═══ */
+.login-bg{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px 40px;width:360px;box-shadow:var(--shadow);}
+.login-brand{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:28px;}
+.login-brand .a{color:var(--accent);}
+.login-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.login-field label{font-size:11px;font-weight:600;color:var(--text-2);text-transform:uppercase;letter-spacing:.06em;}
+.login-input{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:14px;color:var(--text);outline:none;transition:.15s;font-family:inherit;}
+.login-input:focus{border-color:var(--accent);}
+.login-btn{width:100%;padding:11px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;transition:.15s;font-family:inherit;}
+.login-btn:hover{opacity:.88;}
+.login-btn:disabled{opacity:.5;cursor:not-allowed;}
+.login-err{font-size:12px;color:var(--red);margin-top:10px;text-align:center;min-height:18px;}
+/* Profile section in settings */
+.prof-card{background:var(--surface);border:1px solid var(--border-soft);border-radius:16px;padding:22px;margin-bottom:14px;}
+.prof-head{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+.prof-avatar{width:44px;height:44px;border-radius:12px;background:var(--accent-bg);color:var(--accent);font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.prof-name{font-size:15px;font-weight:600;}
+.prof-email{font-size:12px;color:var(--text-3);margin-top:2px;}
+.prof-actions{display:flex;gap:8px;flex-wrap:wrap;}
 </style>
 </head>
 <body>
+<div id="login-screen" class="login-bg" style="display:none"></div>
 <div class="app" id="app"></div>
 <div class="modal-bg" id="modal"></div>
 <script>
@@ -476,6 +507,97 @@ function sbPatch(t,f,d){return fetch(SB_URL+'/rest/v1/'+t+'?'+f,{method:'PATCH',
 function sbPost(t,d){return fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(d)}).then(function(r){return r.json();});}
 function sbDelete(t,f){return fetch(SB_URL+'/rest/v1/'+t+'?'+f,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'}});}
 function reloadTg(){return sbGet('telegram_integrations?select=*&order=created_at').then(function(r){RAW.tgIntegrations=r||[];render();});}
+
+/* ═══ AUTH ═══ */
+var CURRENT_USER=null;
+function authLoad(){try{var t=localStorage.getItem('sasha_session');if(t){var o=JSON.parse(t);CURRENT_USER=o;return true;}}catch(e){}return false;}
+function authSave(user){CURRENT_USER=user;localStorage.setItem('sasha_session',JSON.stringify(user));}
+function authClear(){CURRENT_USER=null;localStorage.removeItem('sasha_session');}
+function sbAuthGet(path){return fetch(SB_URL+'/auth/v1/'+path,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+(CURRENT_USER&&CURRENT_USER.access_token||SB_KEY)}}).then(function(r){return r.json();});}
+function sbAuthPost(path,data){return fetch(SB_URL+'/auth/v1/'+path,{method:'POST',headers:{'apikey':SB_KEY,'Content-Type':'application/json','Authorization':'Bearer '+(CURRENT_USER&&CURRENT_USER.access_token||SB_KEY)},body:JSON.stringify(data)}).then(function(r){return r.json();});}
+
+function showLogin(err){
+  var el=document.getElementById('login-screen');
+  el.style.display='flex';
+  el.innerHTML='<div class="login-card">'+
+    '<div class="login-brand">Sasha<span class="a">AI</span></div>'+
+    '<div class="login-field"><label>Email</label><input class="login-input" type="email" id="li-email" placeholder="name@trysasha.ru" autocomplete="email"></div>'+
+    '<div class="login-field"><label>Пароль</label><input class="login-input" type="password" id="li-pass" placeholder="••••••••" autocomplete="current-password"></div>'+
+    '<button class="login-btn" id="li-btn" onclick="doLogin()">Войти</button>'+
+    '<div class="login-err" id="li-err">'+(err||'')+'</div>'+
+    '<div class="login-sub"><a onclick="showForgot()">Забыли пароль?</a></div>'+
+    '</div>';
+  setTimeout(function(){var e=document.getElementById('li-email');if(e)e.focus();},50);
+  document.getElementById('li-pass') && document.getElementById('li-pass').addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+}
+
+function hideLogin(){document.getElementById('login-screen').style.display='none';}
+
+window.doLogin=async function(){
+  var email=(document.getElementById('li-email').value||'').trim();
+  var pass=document.getElementById('li-pass').value||'';
+  var btn=document.getElementById('li-btn');
+  var err=document.getElementById('li-err');
+  if(!email||!pass){err.textContent='Введи email и пароль';return;}
+  btn.disabled=true;btn.textContent='Входим...';
+  var r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{
+    method:'POST',
+    headers:{'apikey':SB_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({email:email,password:pass})
+  });
+  var d=await r.json();
+  if(d.error||d.error_description){err.textContent=d.error_description||'Неверный email или пароль';btn.disabled=false;btn.textContent='Войти';return;}
+  authSave({access_token:d.access_token,refresh_token:d.refresh_token,email:d.user.email,user_id:d.user.id});
+  hideLogin();
+  await loadPreferences();
+  loadData();
+};
+
+window.doLogout=async function(){
+  if(CURRENT_USER&&CURRENT_USER.access_token){
+    await fetch(SB_URL+'/auth/v1/logout',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+CURRENT_USER.access_token}}).catch(function(){});
+  }
+  authClear();
+  document.getElementById('app').innerHTML='';
+  showLogin();
+};
+
+window.doChangePassword=async function(){
+  var p1=(document.getElementById('pw-new').value||'').trim();
+  var p2=(document.getElementById('pw-conf').value||'').trim();
+  var errEl=document.getElementById('pw-err');
+  if(!p1||p1.length<6){errEl.textContent='Минимум 6 символов';return;}
+  if(p1!==p2){errEl.textContent='Пароли не совпадают';return;}
+  errEl.textContent='';
+  var r=await fetch(SB_URL+'/auth/v1/user',{method:'PUT',
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+CURRENT_USER.access_token,'Content-Type':'application/json'},
+    body:JSON.stringify({password:p1})
+  });
+  var d=await r.json();
+  if(d.error){errEl.textContent=d.error_description||'Ошибка';return;}
+  closeModal();
+  alert('Пароль изменён ✓');
+};
+
+/* ═══ PREFERENCES ═══ */
+async function loadPreferences(){
+  if(!CURRENT_USER)return;
+  try{
+    var r=await fetch(SB_URL+'/rest/v1/user_preferences?user_id=eq.'+CURRENT_USER.user_id,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    var d=await r.json();
+    if(d&&d[0]){S.theme=d[0].theme||'light';document.documentElement.setAttribute('data-theme',S.theme);}
+  }catch(e){}
+}
+async function savePreferences(){
+  if(!CURRENT_USER)return;
+  try{
+    await fetch(SB_URL+'/rest/v1/user_preferences?on_conflict=user_id',{method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify({user_id:CURRENT_USER.user_id,theme:S.theme,updated_at:new Date().toISOString()})
+    });
+  }catch(e){}
+}
+
 function sbUpsert(t,conflict,d){return fetch(SB_URL+'/rest/v1/'+t+'?on_conflict='+conflict,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify(d)});}
 
 /* ═══ CONSTANTS ═══ */
@@ -823,7 +945,7 @@ function roleBar(){
   '</div></div>';
 }
 window.setRole=function(r){S.role=r;S.dept=null;S.empView=null;S.calOpen=false;render();};
-window.toggleTheme=function(){S.theme=S.theme==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',S.theme);render();};
+window.toggleTheme=function(){S.theme=S.theme==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',S.theme);render();savePreferences();};
 function setApp(h){document.getElementById('app').innerHTML=roleBar()+h;_syncBd();}
 function _syncBd(){if(S.msOpen)_showBd();else _hideBd();}
 function _showBd(){
@@ -1422,6 +1544,19 @@ function amoMappingBlock_(){
 }
 function renderRop(){
   if(!DB){setApp('<div class="topbar"><span class="brand">⚙ Настройки</span></div>');return;}
+  // profile block
+  var email=CURRENT_USER?CURRENT_USER.email:'';
+  var initials=email?email.substring(0,2).toUpperCase():'??';
+  var profBlock='<div class="prof-card">'+
+    '<div class="prof-head">'+
+      '<div class="prof-avatar">'+initials+'</div>'+
+      '<div><div class="prof-name">'+esc(email)+'</div><div class="prof-email">Сотрудник SashaAI</div></div>'+
+    '</div>'+
+    '<div class="prof-actions">'+
+      '<button class="btn sm primary" onclick="openChangePasswordModal()">Сменить пароль</button>'+
+      '<button class="btn sm ghost" style="color:var(--red);border-color:var(--red)" onclick="doLogout()">Выйти</button>'+
+    '</div>'+
+  '</div>';
   var d=S.ropDept?DB.depts.find(function(x){return x.id===S.ropDept;}):DB.depts[0];
   if(!d&&DB.depts.length)d=DB.depts[0];
   if(d&&!S.ropDept)S.ropDept=d.id;
@@ -1456,6 +1591,7 @@ function renderRop(){
     archDeptBlock='<div class="arch-toggle'+(isOpen2?' open':'')+'" onclick="toggleRopArchDepts()"><span class="arr">›</span> Архив отделов ('+DB.archivedDepts.length+')</div><div class="arch-block'+(isOpen2?' open':'')+'">'+archList+'</div>';
   }
   setApp('<div class="topbar"><div class="nav-left"><span class="brand">⚙ Настройки</span></div></div>'+
+    profBlock+
     '<div class="panel" style="margin-bottom:14px"><div class="adm-head">'+
       '<div style="display:flex;align-items:center;gap:10px"><div class="panel-title" style="margin:0">Состав отдела</div>'+
         '<select class="sel" onchange="setRopDept(this.value)">'+deptOpts+'</select></div>'+
@@ -1905,8 +2041,125 @@ function openModalSimple(title,body){
 }
 window.closeModal=function(){var m=document.getElementById('modal');m.classList.remove('open');m.innerHTML='';};
 
+
+window.openChangePasswordModal=function(){
+  openModal('Сменить пароль',
+    '<div class="login-field"><label>Новый пароль</label><input class="login-input" type="password" id="pw-new" placeholder="Минимум 6 символов" style="width:100%;margin-top:4px"></div>'+
+    '<div class="login-field" style="margin-top:12px"><label>Повтори пароль</label><input class="login-input" type="password" id="pw-conf" placeholder="Повтори пароль" style="width:100%;margin-top:4px"></div>'+
+    '<div class="login-err" id="pw-err" style="text-align:left;margin-top:8px"></div>',
+    doChangePassword
+  );
+};
+
+
+/* ═══ PASSWORD RECOVERY ═══ */
+window.showForgot=function(){
+  var el=document.getElementById('login-screen');
+  el.innerHTML='<div class="login-card">'+
+    '<div class="login-brand">Sasha<span class="a">AI</span></div>'+
+    '<div class="login-back" onclick="showLogin()">‹ Назад</div>'+
+    '<div style="font-size:14px;font-weight:600;margin-bottom:6px">Сброс пароля</div>'+
+    '<div style="font-size:12px;color:var(--text-2);margin-bottom:18px;line-height:1.5">Введи рабочий email — пришлём ссылку для сброса пароля</div>'+
+    '<div class="login-field"><label>Email</label><input class="login-input" type="email" id="fg-email" placeholder="name@trysasha.ru"></div>'+
+    '<button class="login-btn" id="fg-btn" onclick="doForgot()">Отправить письмо</button>'+
+    '<div class="login-err" id="fg-err"></div>'+
+    '</div>';
+  setTimeout(function(){var e=document.getElementById('fg-email');if(e)e.focus();},50);
+  document.getElementById('fg-email').addEventListener('keydown',function(e){if(e.key==='Enter')doForgot();});
+};
+
+window.doForgot=async function(){
+  var email=(document.getElementById('fg-email').value||'').trim();
+  var btn=document.getElementById('fg-btn');
+  var err=document.getElementById('fg-err');
+  if(!email){err.textContent='Введи email';return;}
+  btn.disabled=true;btn.textContent='Отправляем...';
+  try{
+    var r=await fetch(SB_URL+'/auth/v1/recover',{
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({email:email})
+    });
+    // Supabase всегда возвращает 200 (не раскрывает есть ли такой email)
+    var card=document.querySelector('#login-screen .login-card');
+    if(card){
+      card.innerHTML='<div class="login-brand">Sasha<span class="a">AI</span></div>'+
+        '<div class="login-success">'+
+          '✓ Письмо отправлено на <strong>'+esc(email)+'</strong><br><br>'+
+          'Проверь почту и перейди по ссылке для сброса пароля. Ссылка действует 24 часа.'+
+        '</div>'+
+        '<div class="login-sub" style="margin-top:20px"><a onclick="showLogin()">‹ Вернуться ко входу</a></div>';
+    }
+  }catch(e){
+    err.textContent='Ошибка отправки. Попробуй ещё раз.';
+    btn.disabled=false;btn.textContent='Отправить письмо';
+  }
+};
+
+// Показываем форму для установки нового пароля (когда пришли по ссылке из письма)
+function showResetPassword(accessToken){
+  var el=document.getElementById('login-screen');
+  el.style.display='flex';
+  el.innerHTML='<div class="login-card">'+
+    '<div class="login-brand">Sasha<span class="a">AI</span></div>'+
+    '<div style="font-size:14px;font-weight:600;margin-bottom:6px">Новый пароль</div>'+
+    '<div style="font-size:12px;color:var(--text-2);margin-bottom:18px">Придумай новый пароль для входа</div>'+
+    '<div class="login-field"><label>Новый пароль</label><input class="login-input" type="password" id="rp-new" placeholder="Минимум 6 символов"></div>'+
+    '<div class="login-field" style="margin-top:12px"><label>Повтори пароль</label><input class="login-input" type="password" id="rp-conf" placeholder="Повтори пароль"></div>'+
+    '<button class="login-btn" id="rp-btn" onclick="doResetPassword(&quot;'+accessToken+'&quot;)">Сохранить пароль</button>'+
+    '<div class="login-err" id="rp-err"></div>'+
+    '</div>';
+  setTimeout(function(){var e=document.getElementById('rp-new');if(e)e.focus();},50);
+}
+
+window.doResetPassword=async function(token){
+  var p1=(document.getElementById('rp-new').value||'').trim();
+  var p2=(document.getElementById('rp-conf').value||'').trim();
+  var btn=document.getElementById('rp-btn');
+  var err=document.getElementById('rp-err');
+  if(!p1||p1.length<6){err.textContent='Минимум 6 символов';return;}
+  if(p1!==p2){err.textContent='Пароли не совпадают';return;}
+  btn.disabled=true;btn.textContent='Сохраняем...';
+  try{
+    var r=await fetch(SB_URL+'/auth/v1/user',{
+      method:'PUT',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body:JSON.stringify({password:p1})
+    });
+    var d=await r.json();
+    if(d.error){err.textContent=d.error_description||'Ошибка. Попробуй снова.';btn.disabled=false;btn.textContent='Сохранить пароль';return;}
+    // Чистим hash из URL
+    if(history.replaceState)history.replaceState(null,'',window.location.pathname);
+    showLogin('Пароль изменён — теперь войди с новым паролем');
+  }catch(e){
+    err.textContent='Ошибка. Попробуй снова.';
+    btn.disabled=false;btn.textContent='Сохранить пароль';
+  }
+};
+
+// Проверяем hash в URL при загрузке (Supabase редиректит сюда после recovery письма)
+function checkRecoveryHash(){
+  var hash=window.location.hash;
+  if(!hash)return false;
+  var params={};
+  hash.substring(1).split('&').forEach(function(p){var kv=p.split('=');params[decodeURIComponent(kv[0])]=decodeURIComponent(kv[1]||'');});
+  if(params.type==='recovery'&&params.access_token){
+    showResetPassword(params.access_token);
+    return true;
+  }
+  return false;
+}
+
+
 /* ═══ BOOT ═══ */
-loadData();
+(function(){
+  if(checkRecoveryHash()){return;} // recovery flow из email
+  if(authLoad()){
+    loadPreferences().then(function(){loadData();});
+  } else {
+    showLogin();
+  }
+})();
 </script>
 </body>
 </html>
