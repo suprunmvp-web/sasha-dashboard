@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ru" data-theme="light">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -119,7 +119,8 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .ks{font-size:12px;margin-top:8px;color:var(--text-2);}
 
 /* micro-bar — одинаковая нижняя полоска у всех карточек */
-.mbar{height:2px;background:var(--surface-3);border-radius:2px;margin-top:auto;padding-top:14px;background-clip:content-box;overflow:visible;}
+.mbar-wrap{margin-top:auto;padding-top:14px;}
+.mbar{height:3px;background:var(--surface-3);border-radius:2px;overflow:hidden;}
 .mbar-fill{height:100%;border-radius:2px;transition:width .8s cubic-bezier(.16,1,.3,1);}
 .pbar{height:3px;background:var(--surface-3);border-radius:2px;margin-top:9px;overflow:hidden;}
 .pfill{height:100%;border-radius:2px;}
@@ -1128,7 +1129,7 @@ function renderCo(){
   var totalStaff=DB.depts.reduce(function(a,d){return a+d.staff.filter(function(m){return!m.fired;}).length;},0);
   var _c=getComputedStyle(document.documentElement);var _acc2=_c.getPropertyValue('--accent').trim()||'#3D6BF5';var _grn2=_c.getPropertyValue('--green').trim()||'#16A97F';
   var _mb='<div class="mbar"></div>';
-  var _mbFill=function(p){return'<div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div>';};
+  var _mbFill=function(p){return'<div class="mbar-wrap"><div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div></div>';};
   var _lbl=function(txt,dlt){return'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><span class="ck-l" style="margin:0">'+txt+'</span>'+(dlt||'')+'</div>';};
   var kH=[
     '<div class="ck">'+_lbl('Выручка',deltaTag(c.fact,c.prevFact))+'<div class="ck-v num">'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div>'+_mbFill(cp)+'</div>',
@@ -1421,7 +1422,7 @@ function renderDept(){
   var dPaying=payingInPeriod(d.clients);if(dPaying===null)dPaying=d.paying;
   var dArpu=dPaying>0?r(d.fact/dPaying):0;
   var _mb2='<div class="mbar"></div>';
-  var _mbF2=function(p){return'<div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div>';};
+  var _mbF2=function(p){return'<div class="mbar-wrap"><div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div></div>';};
   var kpis=[
     {l:'Выручка',v:fmt(d.fact),s:'план '+fmt(d.plan)+' · '+p2+'%',dlt:deltaTag(d.fact,d.prevFact),bar:p2,raw:true},
     {l:'Ранрейт',v:rrv+'%',s:'<span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span>',raw:true},
@@ -1501,7 +1502,7 @@ function renderEmpView(){
   var empPaying=payingInPeriod(myClients.filter(function(c){return!c.foreign;}))||0;
   var empArpu=empPaying>0?r(dealAgg.fact/empPaying):0;
   var _mb3='<div class="mbar"></div>';
-  var _mbF3=function(p){return'<div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div>';};
+  var _mbF3=function(p){return'<div class="mbar-wrap"><div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div></div>';};
   var _lbl3=function(txt,dlt){return'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><span class="kl" style="margin:0">'+txt+'</span>'+(dlt||'')+'</div>';};
   var kH=[
     '<div class="kcard">'+_lbl3('Выручка',deltaTag(dealAgg.fact,S.prevByEmp[S.empView]||0))+'<div class="kv num">'+fmt(dealAgg.fact)+'</div><div class="ks"><span class="neu">план '+fmt(plan)+' · '+mp+'%</span></div>'+_mbF3(mp)+'</div>',
