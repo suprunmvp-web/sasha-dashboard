@@ -1128,7 +1128,7 @@ function renderCo(){
   var arpu2=coPaying>0?r(c.fact/coPaying):0;
   var totalStaff=DB.depts.reduce(function(a,d){return a+d.staff.filter(function(m){return!m.fired;}).length;},0);
   var _c=getComputedStyle(document.documentElement);var _acc2=_c.getPropertyValue('--accent').trim()||'#3D6BF5';var _grn2=_c.getPropertyValue('--green').trim()||'#16A97F';
-  var _mb='<div class="mbar"></div>';
+  var _mb='<div class="mbar-wrap"><div class="mbar"></div></div>';
   var _mbFill=function(p){return'<div class="mbar-wrap"><div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div></div>';};
   var _lbl=function(txt,dlt){return'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><span class="ck-l" style="margin:0">'+txt+'</span>'+(dlt||'')+'</div>';};
   var kH=[
@@ -1421,7 +1421,7 @@ function renderDept(){
   var p2=pct(d.fact,d.plan),rrv=rrPct(d.fact,d.plan);
   var dPaying=payingInPeriod(d.clients);if(dPaying===null)dPaying=d.paying;
   var dArpu=dPaying>0?r(d.fact/dPaying):0;
-  var _mb2='<div class="mbar"></div>';
+  var _mb2='<div class="mbar-wrap"><div class="mbar"></div></div>';
   var _mbF2=function(p){return'<div class="mbar-wrap"><div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div></div>';};
   var kpis=[
     {l:'Выручка',v:fmt(d.fact),s:'план '+fmt(d.plan)+' · '+p2+'%',dlt:deltaTag(d.fact,d.prevFact),bar:p2,raw:true},
@@ -1501,7 +1501,7 @@ function renderEmpView(){
   var initials=(emp.name||'?').split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase();
   var empPaying=payingInPeriod(myClients.filter(function(c){return!c.foreign;}))||0;
   var empArpu=empPaying>0?r(dealAgg.fact/empPaying):0;
-  var _mb3='<div class="mbar"></div>';
+  var _mb3='<div class="mbar-wrap"><div class="mbar"></div></div>';
   var _mbF3=function(p){return'<div class="mbar-wrap"><div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div></div>';};
   var _lbl3=function(txt,dlt){return'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><span class="kl" style="margin:0">'+txt+'</span>'+(dlt||'')+'</div>';};
   var kH=[
