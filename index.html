@@ -1618,6 +1618,7 @@ function renderEmpView(){
     var mdata=buildMonthlyData(lifeDeals);
     var empPlan=S.planByEmp[S.empView]||0;var empMonthlyPlanMap=S.empMonthlyPlan&&S.empMonthlyPlan[S.empView]||{};chartHtml='<div class="chart-block">'+buildRevenueChartSVG(mdata,{planMap:empMonthlyPlanMap})+'</div>';
   } else if(!lifeDeals){
+    loadEmpLifetime(S.empView);// автозапуск если кэш очищен refreshPeriod
     chartHtml='<div class="chart-block" style="padding:24px 22px;text-align:center;color:var(--text-3);font-size:12px">Загружаем данные...</div>';
   }
   setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUpFromEmp()">‹ '+esc(d?d.name:'Отдел')+'</button><span class="crumb-title">'+esc(emp.name)+'</span></div>'+calTrigger()+'</div>'+
