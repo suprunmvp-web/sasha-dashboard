@@ -1169,7 +1169,7 @@ function renderCo(){
   var deltaStaffCo=hiredCo-firedCo;
   var kH=[
     '<div class="ck">'+_lbl('Выручка',deltaTag(c.fact,c.prevFact))+'<div class="ck-v num">'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div>'+_mbFill(cp)+'</div>',
-    '<div class="ck">'+_lbl('Ранрейт',deltaRRco!==null?deltaAbs(Math.round(deltaRRco),'пп'):'')+'<div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span></div>'+_mb+'</div>',
+    '<div class="ck">'+_lbl('Ранрейт',deltaRRco!==null?deltaAbs(Math.round(deltaRRco),'%'):'')+'<div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span></div>'+_mb+'</div>',
     '<div class="ck">'+_lbl('ARPU',deltaArpu2!==null?deltaAbsCurrency(deltaArpu2):'')+'<div class="ck-v num">'+(arpu2?fmt(arpu2):'—')+'</div><div class="ck-s"><span class="neu">платящий клиент</span></div>'+_mb+'</div>',
     '<div class="ck">'+_lbl('Платящих',deltaPaying2!==null?deltaAbs(deltaPaying2,'клиента'):'')+'<div class="ck-v num">'+coPaying+'</div><div class="ck-s"><span class="neu">из '+c.clients+' в портфеле</span></div>'+_mb+'</div>',
     '<div class="ck">'+_lbl('Сотрудников',deltaAbs(deltaStaffCo,'чел.'))+'<div class="ck-v num">'+totalStaff+'</div><div class="ck-s"><span class="neu">'+DB.depts.length+' отделов</span></div>'+_mb+'</div>'
@@ -1252,7 +1252,7 @@ function funnelBarsHtml_(fc){
     var prev=i>0?(fc.counts[AMO_STAGES[i-1].key]||fc.total):fc.total;
     var conv=prev>0?r(cnt/prev*100):0;
     var barW=fc.total>0?Math.min(100,r(cnt/fc.total*100)):0;
-    var convRow=i>0?('<tr class="fn2-conv-row"><td></td><td colspan="2"><span class="fn2-conv">\u21b3 \u043a\u043e\u043d\u0432\u0435\u0440\u0441\u0438\u044f \u0438\u0437 \u043f\u0440\u0435\u0434\u044b\u0434\u0443\u0449\u0435\u0433\u043e <b>'+conv+'%</b></span></td></tr>'):'';
+    var convRow=i>0?('<tr class="fn2-conv-row"><td></td><td colspan="2"><span class="fn2-conv">\u21b3 \u0432 \u0441\u043b\u0435\u0434. \u044d\u0442\u0430\u043f <b>'+conv+'%</b></span></td></tr>'):'';
     return convRow+'<tr class="fn2-main">'+
       '<td class="fn2-stage-name" style="padding-right:20px;white-space:nowrap">'+esc(st.label)+'</td>'+
       '<td style="width:100%;min-width:140px"><div class="fn2-bar-wrap"><div class="fn2-bar-fill" style="width:'+barW+'%;background:var(--accent)"></div></div></td>'+
@@ -1474,7 +1474,7 @@ function renderDept(){
   var activeStaffD=d.staff.filter(function(m){return!m.fired;}).length;
   var kpis=[
     {l:'Выручка',dlt:deltaTag(d.fact,d.prevFact),v:fmt(d.fact),s:'план '+fmt(d.plan)+' · '+p2+'%',bar:p2,raw:true},
-    {l:'Ранрейт',dlt:deltaRRd!==null?deltaAbs(Math.round(deltaRRd),'пп'):'',v:rrv+'%',s:'<span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span>',raw:true},
+    {l:'Ранрейт',dlt:deltaRRd!==null?deltaAbs(Math.round(deltaRRd),'%'):'',v:rrv+'%',s:'<span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span>',raw:true},
     {l:'ARPU',dlt:deltaArpuD!==null?deltaAbsCurrency(deltaArpuD):'',v:dArpu?fmt(dArpu):'—',s:'<span class="neu">платящий клиент</span>',raw:true},
     {l:'Платящих',dlt:deltaPayingD!==null?deltaAbs(deltaPayingD,'клиента'):'',v:dPaying,s:'<span class="neu">из '+d.clients.length+' в портфеле</span>',raw:true},
     {l:'Сотрудников',dlt:deltaAbs(deltaStaffD,'чел.'),v:activeStaffD,s:'<span class="neu">в отделе</span>',raw:true}
@@ -1562,7 +1562,7 @@ function renderEmpView(){
   var deltaPayingE=prevPayingE>0?empPaying-prevPayingE:null;
   var kH=[
     '<div class="kcard">'+_lbl3('Выручка',deltaTag(dealAgg.fact,prevFactE))+'<div class="kv num">'+fmt(dealAgg.fact)+'</div><div class="ks"><span class="neu">план '+fmt(plan)+' · '+mp+'%</span></div>'+_mbF3(mp)+'</div>',
-    '<div class="kcard">'+_lbl3('Ранрейт',deltaRRe!==null?deltaAbs(Math.round(deltaRRe),'пп'):'')+'<div class="kv num">'+mr+'%</div><div class="ks"><span class="neu">'+(mr>=100?'в темпе':mr>=80?'близко к плану':'отстаём')+'</span></div>'+_mb3+'</div>',
+    '<div class="kcard">'+_lbl3('Ранрейт',deltaRRe!==null?deltaAbs(Math.round(deltaRRe),'%'):'')+'<div class="kv num">'+mr+'%</div><div class="ks"><span class="neu">'+(mr>=100?'в темпе':mr>=80?'близко к плану':'отстаём')+'</span></div>'+_mb3+'</div>',
     '<div class="kcard">'+_lbl3('ARPU',deltaArpuE!==null?deltaAbsCurrency(deltaArpuE):'')+'<div class="kv num">'+(empArpu?fmt(empArpu):'—')+'</div><div class="ks"><span class="neu">платящий клиент</span></div>'+_mb3+'</div>',
     '<div class="kcard">'+_lbl3('Платящих',deltaPayingE!==null?deltaAbs(deltaPayingE,'клиента'):'')+'<div class="kv num">'+empPaying+'</div><div class="ks"><span class="neu">из '+portfolioCount+' в портфеле</span></div>'+_mb3+'</div>',
     '<div class="kcard">'+_lbl3('Стаж')+'<div class="kv num">'+(ten!==null?ten+' мес.':'—')+'</div><div class="ks"><span class="neu">'+(emp.hired_at?'с '+fmtD(emp.hired_at):'')+'</span></div>'+_mb3+'</div>'
@@ -2117,7 +2117,7 @@ function renderPayroll(){
     '<div class="ck"><div class="ck-l">Выручка по фильтрам</div><div class="ck-v num">'+fmt(totFact)+'</div><div class="ck-s">средний чек '+fmt(avgDeal)+'</div></div>',
     '<div class="ck"><div class="ck-l">Сделок</div><div class="ck-v num">'+totCount+'</div><div class="ck-s">оплат и возвратов</div></div>',
     '<div class="ck"><div class="ck-l">Начислено мотивации</div><div class="ck-v num">'+fmt(totComm)+'</div><div class="ck-s">'+(totFact>0?r(totComm/totFact*100)+'% от выручки':'—')+'</div></div>',
-    '<div class="ck"><div class="ck-l">Сотрудников со сделками</div><div class="ck-v num">'+rowsArr.length+'</div><div class="ck-s">из '+RAW.employees.filter(function(e){return!e.fired_at&&!e.is_archived;}).length+' активных</div></div>'
+    '<div class="ck"><div class="ck-l">Участвовали</div><div class="ck-v num">'+rowsArr.length+'</div><div class="ck-s">из '+RAW.employees.filter(function(e){return!e.fired_at&&!e.is_archived;}).length+' сотрудников</div></div>'
   ].join('');
   var sorted=filtered.slice().sort(function(a,b){return(b.deal_date||'').localeCompare(a.deal_date||'');});
   var total=sorted.length,tot=Math.max(1,Math.ceil(total/S.payLimit)),page=Math.min(S.payPage,tot-1);
