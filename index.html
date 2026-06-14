@@ -482,8 +482,8 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 /* ═══ REVENUE CHARTS ═══ */
 .chart-wrap{position:relative;width:100%;margin-bottom:4px;}
 .chart-svg{width:100%;display:block;overflow:visible;}
-.chart-bar{fill:var(--accent);opacity:.85;cursor:pointer;transition:opacity .15s;}
-.chart-bar:hover{opacity:1;}
+.chart-bar-fact{cursor:pointer;transition:opacity .12s,filter .12s;}
+.chart-bar-fact:hover{opacity:1!important;filter:brightness(1.12);}
 .chart-bar-seg{cursor:pointer;transition:opacity .15s;}
 .chart-bar-seg:hover{opacity:.85;}
 .chart-tip{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 14px;font-size:12px;color:var(--text);box-shadow:var(--shadow);pointer-events:none;z-index:9000;min-width:160px;max-width:260px;display:none;}
@@ -1054,7 +1054,7 @@ function renderLb(){
     var th=colDefs.map(function(c){if(!c[0])return'<th style="width:40px">#</th>';if(c[0]==='_dlt')return'<th class="r">Δ период</th>';var a=S.sumSort===c[0];return'<th class="'+(c[2]||'')+(a?' sorted':'')+'" onclick="setSumSort(\''+c[0]+'\')">'+c[1]+si(a,S.sumSortDir)+'</th>';}).join('');
     var MEDALS=['🥇','🥈','🥉'];
     var rows=all.length?all.map(function(m,i){
-      var pctColor=m.pct>=100?'var(--green)':m.pct>=70?'var(--amber)':'var(--red)';
+      var pctColor=grad(m.pct);
       var rowBg=i===0?'background:rgba(255,193,7,.07)':i===1?'background:rgba(148,163,184,.05)':i===2?'background:rgba(205,127,50,.05)':'';
       var rowBorder=i===0?'box-shadow:inset 2px 0 0 #F5B544':i===1?'box-shadow:inset 2px 0 0 #94A3B8':i===2?'box-shadow:inset 2px 0 0 #CD7F32':'';
       var rankCell=i<3?'<span style="font-size:16px;line-height:1">'+MEDALS[i]+'</span>':'<span style="font-size:12px;font-weight:500;color:var(--text-3);display:inline-flex;align-items:center;justify-content:center;width:26px">'+(i+1)+'</span>';
@@ -1524,7 +1524,7 @@ function renderEmpView(){
   var chartHtml='';
   if(lifeDeals&&lifeDeals.length){
     var mdata=buildMonthlyData(lifeDeals);
-    chartHtml='<div class="chart-block">'+buildRevenueChartSVG(mdata)+'</div>';
+    var empPlan=S.planByEmp[S.empView]||0;chartHtml='<div class="chart-block">'+buildRevenueChartSVG(mdata,{plan:empPlan})+'</div>';
   } else if(!lifeDeals){
     chartHtml='<div class="chart-block" style="padding:24px 22px;text-align:center;color:var(--text-3);font-size:12px">Загружаем данные...</div>';
   }
@@ -2138,6 +2138,7 @@ function _positionTip(e){
 
 
 /* ═══ PREMIUM CHART ENGINE ═══ */
+function fmtRub(n){if(!n||n===0)return'0';var s=Math.round(n).toString();var result='';for(var i=0;i<s.length;i++){if(i>0&&(s.length-i)%3===0)result+=' ';result+=s[i];}return result;}
 function fmtShort(n){
   if(!n||n===0)return'0';
   if(n>=1000000)return(n/1000000).toFixed(1).replace('.0','')+'М';
@@ -2190,79 +2191,91 @@ window.showChartTip=function(e,el){
 };
 
 function buildRevenueChartSVG(monthData,opts){
+  opts=opts||{};
   var dark=document.documentElement.getAttribute('data-theme')==='dark';
   var ACC=dark?'#4D7CFE':'#3D6BF5';
+  var ACC_PLAN=dark?'rgba(77,124,254,0.25)':'rgba(61,107,245,0.2)';
   var BRD=dark?'#2d3748':'#c8d3e0';
   var T3=dark?'#718096':'#7a8ba3';
   var SF3=dark?'#1C2230':'#e8edf4';
+  var plan=opts.plan||0;
+  var hasPlan=plan>0;
 
-  var W=640,H=180,PL=0,PR=0,PT=12,PB=28;
-  var DW=W,DH=H-PT-PB;
-  var n=monthData.length;
-  if(!n)return'<div style="padding:30px;text-align:center;font-size:12px;color:'+T3+'">Нет данных</div>';
+  // Всегда 12 месяцев
+  var months12=[];
+  for(var mi=11;mi>=0;mi--){
+    var d=new Date(TODAY.getFullYear(),TODAY.getMonth()-mi,1);
+    var mk=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    months12.push(mk);
+  }
+  var dataMap={};
+  monthData.forEach(function(m){dataMap[m.month]=m;});
+  var data12=months12.map(function(mk){return dataMap[mk]||{month:mk,total:0,clients:[]};});
 
-  var mx=Math.max.apply(null,monthData.map(function(m){return m.total||0;}));
+  var W=680,H=190,PL=68,PR=12,PT=14,PB=30;
+  var DW=W-PL-PR,DH=H-PT-PB;
+  var n=12;
+  var mx=Math.max.apply(null,data12.map(function(m){return Math.max(m.total||0,hasPlan?plan:0);}));
   if(mx<=0)mx=1000;
   var p10=Math.pow(10,Math.floor(Math.log10(mx)));
-  var nice=Math.ceil(mx/p10*1.2)*p10;
+  var nice=Math.ceil(mx/p10*1.25)*p10;
 
   var out=[];
+  // Grid + Y labels
   var steps=4;
-
-  // Grid lines (горизонтальные) + Y labels ПОВЕРХ баров внутри графика
   for(var si=0;si<=steps;si++){
     var sv=Math.round(nice/steps*si);
     var sy=Math.round(PT+DH-(sv/nice*DH));
-    // Горизонтальная линия — полная ширина
-    out.push('<line x1="0" y1="'+sy+'" x2="'+W+'" y2="'+sy+'"'+
-      (si===0?' stroke="'+BRD+'" stroke-width="1"':' stroke="'+BRD+'" stroke-width="1" stroke-dasharray="3,5" opacity="0.7"')+'/>');
-    // Y label — прижат к левому краю внутри SVG
-    if(sv>0){
-      out.push('<text x="4" y="'+(sy-3)+'" font-size="9" font-family="Inter,sans-serif" fill="'+T3+'" opacity="0.9">'+fmtShort(sv)+'</text>');
-    }
+    if(si===0){out.push('<line x1="'+PL+'" y1="'+sy+'" x2="'+(W-PR)+'" y2="'+sy+'" stroke="'+BRD+'" stroke-width="1"/>');}
+    else{out.push('<line x1="'+PL+'" y1="'+sy+'" x2="'+(W-PR)+'" y2="'+sy+'" stroke="'+BRD+'" stroke-width="1" stroke-dasharray="3,5" opacity="0.7"/>');}
+    out.push('<text x="'+(PL-6)+'" y="'+(sy+3.5)+'" text-anchor="end" font-size="9" font-family="Inter,sans-serif" fill="'+T3+'">'+fmtRub(sv)+'</text>');
   }
+  out.push('<line x1="'+PL+'" y1="'+PT+'" x2="'+PL+'" y2="'+(PT+DH)+'" stroke="'+BRD+'" stroke-width="1"/>');
 
   var slot=DW/n;
-  var bw=Math.max(8,Math.min(slot*0.5,40));
-  var bars=[],xlabels=[],tpts=[];
+  var bw=hasPlan?Math.round(slot*0.34):Math.round(slot*0.62);
+  var gap=hasPlan?2:0;
+  var bars=[],xlabels=[];
 
-  monthData.forEach(function(m,i){
-    var cx=Math.round(i*slot+slot/2);
-    var bh=m.total>0?Math.max(4,Math.round(m.total/nice*DH)):0;
-    var by=PT+DH-bh;
+  data12.forEach(function(m,i){
+    var cx=Math.round(PL+i*slot+slot/2);
     var baseY=PT+DH;
-    var prev=i>0?monthData[i-1].total:0;
+    var prev=i>0?data12[i-1].total:0;
     var cl=JSON.stringify(m.clients).replace(/"/g,'&quot;');
     var hov=' data-month="'+m.month+'" data-total="'+m.total+'" data-prev="'+prev+'" data-clients="'+cl+'"'+
       ' onmouseover="showChartTip(event,this)" onmousemove="moveTip(event)" onmouseout="hideTip()"';
 
-    if(m.total>0){
-      bars.push('<rect x="'+Math.round(cx-bw/2)+'" y="'+by+'" width="'+Math.round(bw)+'" height="'+bh+'" rx="4" fill="'+ACC+'" opacity="0.75"'+hov+'/>');
-      bars.push('<rect x="'+Math.round(cx-bw/2)+'" y="'+by+'" width="'+Math.round(bw)+'" height="5" rx="4" fill="'+ACC+'" pointer-events="none"/>');
-      tpts.push([cx,by]);
-    } else {
-      bars.push('<rect x="'+Math.round(cx-bw/2)+'" y="'+(baseY-6)+'" width="'+Math.round(bw)+'" height="6" rx="3" fill="'+SF3+'"'+hov+'/>');
-      tpts.push(null);
-    }
+    // Невидимая hover зона — вся колонка
     bars.push('<rect x="'+Math.round(cx-slot/2)+'" y="'+PT+'" width="'+Math.round(slot)+'" height="'+DH+'" fill="transparent"'+hov+'/>');
 
-    var showL=n<=12||(i%Math.max(1,Math.floor(n/9))===0)||i===n-1;
-    if(showL){
-      var mp=m.month.split('-');
-      var lbl=MNS[+mp[1]-1]+(mp[1]==='01'||i===0?' \''+mp[0].slice(2):'');
-      xlabels.push('<text x="'+cx+'" y="'+(H-4)+'" text-anchor="middle" font-size="10" font-family="Inter,sans-serif" fill="'+T3+'">'+lbl+'</text>');
+    if(hasPlan){
+      var ph=Math.round(plan/nice*DH);
+      var px=Math.round(cx-gap/2-bw);
+      bars.push('<rect x="'+px+'" y="'+(baseY-ph)+'" width="'+bw+'" height="'+ph+'" rx="3" fill="'+ACC_PLAN+'"'+hov+'/>');
+      bars.push('<rect x="'+px+'" y="'+(baseY-ph)+'" width="'+bw+'" height="4" rx="3" fill="'+ACC+'" opacity="0.25" pointer-events="none"/>');
     }
+
+    if(m.total>0){
+      var fh=Math.max(4,Math.round(m.total/nice*DH));
+      var fx=hasPlan?Math.round(cx+gap/2):Math.round(cx-bw/2);
+      bars.push('<rect x="'+fx+'" y="'+(baseY-fh)+'" width="'+bw+'" height="'+fh+'" rx="3" fill="'+ACC+'" opacity="0.82" class="chart-bar-fact"'+hov+'/>');
+      bars.push('<rect x="'+fx+'" y="'+(baseY-fh)+'" width="'+bw+'" height="5" rx="3" fill="'+ACC+'" pointer-events="none"/>');
+    } else {
+      var ex=hasPlan?Math.round(cx+gap/2):Math.round(cx-bw/2);
+      bars.push('<rect x="'+ex+'" y="'+(baseY-5)+'" width="'+bw+'" height="5" rx="3" fill="'+SF3+'"'+hov+'/>');
+    }
+
+    var mp=m.month.split('-');
+    var lbl=MNS[+mp[1]-1]+(i===0||mp[1]==='01'?' \''+mp[0].slice(2):'');
+    xlabels.push('<text x="'+cx+'" y="'+(H-4)+'" text-anchor="middle" font-size="9" font-family="Inter,sans-serif" fill="'+T3+'">'+lbl+'</text>');
   });
 
-  // Trend line
-  var vp=tpts.filter(function(p){return p;});
-  if(vp.length>=2){
-    bars.push('<path d="'+buildSmoothPath(vp)+'" fill="none" stroke="'+ACC+'" stroke-width="2" stroke-opacity="0.3" stroke-linecap="round" pointer-events="none"/>');
-    vp.forEach(function(p){bars.push('<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3" fill="'+ACC+'" opacity="0.45" pointer-events="none"/>');});
-  }
-
   out=out.concat(bars).concat(xlabels);
-  return'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">'+out.join('')+'</svg>';
+  var legend=hasPlan?'<div style="display:flex;gap:14px;margin-top:10px;font-size:11px;color:'+T3+'">'
+    +'<span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:'+ACC_PLAN+';border:1px solid '+ACC+';opacity:.6;display:inline-block"></span>План</span>'
+    +'<span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:'+ACC+';display:inline-block"></span>Факт</span>'
+    +'</div>':'';
+  return'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">'+out.join('')+'</svg>'+legend;
 }
 
 function buildMonthlyData(deals){
