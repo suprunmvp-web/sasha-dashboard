@@ -911,20 +911,46 @@ function loadDeals(){
 function prevRange(){var f=S.rangeFrom,t=S.rangeTo,len=Math.round((t-f)/864e5)+1;var pt=new Date(f.getTime()-864e5);var pf=new Date(pt.getTime()-(len-1)*864e5);return{from:pf,to:pt};}
 function loadPrevDeals(){
   S.prevByEmp={};S.prevByDept={};S.prevCompany=0;
+  S.prevPayingByDept={};S.prevPayingByEmp={};S.prevPayingCompany=0;
   var pr=prevRange(),from=dateISO(pr.from),to=dateISO(pr.to);
-  return sbGet('deals?select=employee_id,dept_id,amount,event_type&deal_date=gte.'+from+'&deal_date=lte.'+to+'&limit=100000').then(function(rows){
+  return sbGet('deals?select=employee_id,dept_id,platform_org_id,amount,event_type&deal_date=gte.'+from+'&deal_date=lte.'+to+'&limit=100000').then(function(rows){
+    var orgsCo={},orgsByDept={},orgsByEmp={};
     (rows||[]).forEach(function(d){
       var sign=d.event_type==='refund'?-1:1,amt=sign*(Number(d.amount)||0);
       S.prevCompany+=amt;
       if(d.employee_id)S.prevByEmp[d.employee_id]=(S.prevByEmp[d.employee_id]||0)+amt;
       if(d.dept_id)S.prevByDept[d.dept_id]=(S.prevByDept[d.dept_id]||0)+amt;
+      // считаем уникальных платящих клиентов
+      if(d.platform_org_id&&amt>0){
+        orgsCo[d.platform_org_id]=1;
+        if(d.dept_id)(orgsByDept[d.dept_id]=orgsByDept[d.dept_id]||{})[d.platform_org_id]=1;
+        if(d.employee_id)(orgsByEmp[d.employee_id]=orgsByEmp[d.employee_id]||{})[d.platform_org_id]=1;
+      }
     });
+    S.prevPayingCompany=Object.keys(orgsCo).length;
+    Object.keys(orgsByDept).forEach(function(k){S.prevPayingByDept[k]=Object.keys(orgsByDept[k]).length;});
+    Object.keys(orgsByEmp).forEach(function(k){S.prevPayingByEmp[k]=Object.keys(orgsByEmp[k]).length;});
   }).catch(function(){});
 }
 function deltaPct(now,prev){if(prev>0)return Math.round((now-prev)/prev*100);if(now>0)return 100;return 0;}
 function deltaTag(now,prev){var dp=deltaPct(now,prev);if(prev===0)return '';var up=dp>0;var ic=dp===0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 12h18"/></svg>':(up?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 11V7h-4"/></svg>':'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 13v4h-4"/></svg>');return'<span class="dlt '+(dp>0?'dlt-up':dp<0?'dlt-down':'dlt-neu')+'">'+ic+Math.abs(dp)+'%</span>';}
 function zigIco(dp){return dp>0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 11V7h-4"/></svg>':dp<0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 13v4h-4"/></svg>':'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 12h18"/></svg>';}
 function deltaBadge(now,prev){if(prev===0)return'';var dp=deltaPct(now,prev);var cls=dp>0?'db-up':dp<0?'db-down':'db-flat';return'<span class="delta-badge '+cls+'">'+zigIco(dp)+(dp>0?'+':'')+dp+'% к пред.</span>';}
+/* абсолютная дельта — для ARPU, платящих, сотрудников */
+function deltaAbs(delta,unit,posGood){
+  if(delta===undefined||delta===null)return'';
+  var ico=delta>0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 11V7h-4"/></svg>':delta<0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 13v4h-4"/></svg>':'';
+  if(delta===0)return'<span class="dlt dlt-neu" style="opacity:.55">±0 '+unit+'</span>';
+  var good=(posGood!==false)?delta>0:delta<0;
+  var cls=good?'dlt-up':'dlt-down';
+  return'<span class="dlt '+cls+'">'+ico+(delta>0?'+':'')+delta+'\u00A0'+unit+'</span>';
+}
+function deltaAbsCurrency(delta){
+  if(!delta)return'';
+  var ico=delta>0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 11V7h-4"/></svg>':'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 13v4h-4"/></svg>';
+  var cls=delta>0?'dlt-up':'dlt-down';
+  return'<span class="dlt '+cls+'">'+ico+(delta>0?'+':'')+fmt(delta)+'</span>';
+}
 
 /* ═══ PLANS (monthly_targets) ═══ */
 function loadPlans(){
@@ -1131,12 +1157,22 @@ function renderCo(){
   var _mb='<div class="mbar-wrap"><div class="mbar"></div></div>';
   var _mbFill=function(p){return'<div class="mbar-wrap"><div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div></div>';};
   var _lbl=function(txt,dlt){return'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><span class="ck-l" style="margin:0">'+txt+'</span>'+(dlt||'')+'</div>';};
+  // Дельты для компании
+  var prevRRco=rrPct(S.prevCompany,c.plan);
+  var deltaRRco=S.prevCompany>0?rrv-prevRRco:null;
+  var prevArpu2=S.prevPayingCompany>0?r(S.prevCompany/S.prevPayingCompany):0;
+  var deltaArpu2=prevArpu2>0?r(arpu2-prevArpu2):null;
+  var deltaPaying2=S.prevPayingCompany>0?coPaying-S.prevPayingCompany:null;
+  var fromS2=dateISO(S.rangeFrom),toS2=dateISO(S.rangeTo);
+  var hiredCo=RAW.employees.filter(function(e){return e.hired_at&&e.hired_at.substring(0,10)>=fromS2&&e.hired_at.substring(0,10)<=toS2;}).length;
+  var firedCo=RAW.employees.filter(function(e){return e.fired_at&&e.fired_at.substring(0,10)>=fromS2&&e.fired_at.substring(0,10)<=toS2;}).length;
+  var deltaStaffCo=hiredCo-firedCo;
   var kH=[
     '<div class="ck">'+_lbl('Выручка',deltaTag(c.fact,c.prevFact))+'<div class="ck-v num">'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div>'+_mbFill(cp)+'</div>',
-    '<div class="ck">'+_lbl('Ранрейт')+'<div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span></div>'+_mb+'</div>',
-    '<div class="ck">'+_lbl('ARPU')+'<div class="ck-v num">'+(arpu2?fmt(arpu2):'—')+'</div><div class="ck-s"><span class="neu">платящий клиент</span></div>'+_mb+'</div>',
-    '<div class="ck">'+_lbl('Платящих')+'<div class="ck-v num">'+coPaying+'</div><div class="ck-s"><span class="neu">из '+c.clients+' в портфеле</span></div>'+_mb+'</div>',
-    '<div class="ck">'+_lbl('Отделов')+'<div class="ck-v num">'+DB.depts.length+'</div><div class="ck-s"><span class="neu">'+totalStaff+' сотрудников</span></div>'+_mb+'</div>'
+    '<div class="ck">'+_lbl('Ранрейт',deltaRRco!==null?deltaAbs(Math.round(deltaRRco),'пп'):'')+'<div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span></div>'+_mb+'</div>',
+    '<div class="ck">'+_lbl('ARPU',deltaArpu2!==null?deltaAbsCurrency(deltaArpu2):'')+'<div class="ck-v num">'+(arpu2?fmt(arpu2):'—')+'</div><div class="ck-s"><span class="neu">платящий клиент</span></div>'+_mb+'</div>',
+    '<div class="ck">'+_lbl('Платящих',deltaPaying2!==null?deltaAbs(deltaPaying2,'клиента'):'')+'<div class="ck-v num">'+coPaying+'</div><div class="ck-s"><span class="neu">из '+c.clients+' в портфеле</span></div>'+_mb+'</div>',
+    '<div class="ck">'+_lbl('Сотрудников',deltaAbs(deltaStaffCo,'чел.'))+'<div class="ck-v num">'+totalStaff+'</div><div class="ck-s"><span class="neu">'+DB.depts.length+' отделов</span></div>'+_mb+'</div>'
   ].join('');
 
   // Воронка с выбором отдела
@@ -1423,12 +1459,25 @@ function renderDept(){
   var dArpu=dPaying>0?r(d.fact/dPaying):0;
   var _mb2='<div class="mbar-wrap"><div class="mbar"></div></div>';
   var _mbF2=function(p){return'<div class="mbar-wrap"><div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div></div>';};
+  // Дельты отдела
+  var prevRRd=rrPct(S.prevByDept[d.id]||0,d.plan);
+  var deltaRRd=(S.prevByDept[d.id]||0)>0?rrv-prevRRd:null;
+  var prevArpuD=S.prevPayingByDept[d.id]>0?r((S.prevByDept[d.id]||0)/S.prevPayingByDept[d.id]):0;
+  var deltaArpuD=prevArpuD>0?r(dArpu-prevArpuD):null;
+  var prevPayingD=S.prevPayingByDept[d.id]||0;
+  var deltaPayingD=prevPayingD>0?dPaying-prevPayingD:null;
+  var fromSD=dateISO(S.rangeFrom),toSD=dateISO(S.rangeTo);
+  var deptEmps=RAW.employees.filter(function(e){return e.dept_id===d.id;});
+  var hiredD=deptEmps.filter(function(e){return e.hired_at&&e.hired_at.substring(0,10)>=fromSD&&e.hired_at.substring(0,10)<=toSD;}).length;
+  var firedD=deptEmps.filter(function(e){return e.fired_at&&e.fired_at.substring(0,10)>=fromSD&&e.fired_at.substring(0,10)<=toSD;}).length;
+  var deltaStaffD=hiredD-firedD;
+  var activeStaffD=d.staff.filter(function(m){return!m.fired;}).length;
   var kpis=[
-    {l:'Выручка',v:fmt(d.fact),s:'план '+fmt(d.plan)+' · '+p2+'%',dlt:deltaTag(d.fact,d.prevFact),bar:p2,raw:true},
-    {l:'Ранрейт',v:rrv+'%',s:'<span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span>',raw:true},
-    {l:'ARPU',v:dArpu?fmt(dArpu):'—',s:'<span class="neu">платящий клиент</span>',raw:true},
-    {l:'Платящих',v:dPaying,s:'<span class="neu">из '+d.clients.length+' в портфеле</span>',raw:true},
-    {l:'В команде',v:d.staff.filter(function(m){return!m.fired;}).length,s:'<span class="neu">сотрудников</span>',raw:true}
+    {l:'Выручка',dlt:deltaTag(d.fact,d.prevFact),v:fmt(d.fact),s:'план '+fmt(d.plan)+' · '+p2+'%',bar:p2,raw:true},
+    {l:'Ранрейт',dlt:deltaRRd!==null?deltaAbs(Math.round(deltaRRd),'пп'):'',v:rrv+'%',s:'<span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span>',raw:true},
+    {l:'ARPU',dlt:deltaArpuD!==null?deltaAbsCurrency(deltaArpuD):'',v:dArpu?fmt(dArpu):'—',s:'<span class="neu">платящий клиент</span>',raw:true},
+    {l:'Платящих',dlt:deltaPayingD!==null?deltaAbs(deltaPayingD,'клиента'):'',v:dPaying,s:'<span class="neu">из '+d.clients.length+' в портфеле</span>',raw:true},
+    {l:'Сотрудников',dlt:deltaAbs(deltaStaffD,'чел.'),v:activeStaffD,s:'<span class="neu">в отделе</span>',raw:true}
   ];
   var kH=kpis.map(function(k){
     var lbl='<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><span class="kl" style="margin:0">'+k.l+'</span>'+(k.dlt||'')+'</div>';
@@ -1504,11 +1553,18 @@ function renderEmpView(){
   var _mb3='<div class="mbar-wrap"><div class="mbar"></div></div>';
   var _mbF3=function(p){return'<div class="mbar-wrap"><div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div></div>';};
   var _lbl3=function(txt,dlt){return'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><span class="kl" style="margin:0">'+txt+'</span>'+(dlt||'')+'</div>';};
+  var prevFactE=S.prevByEmp[S.empView]||0;
+  var prevRRe=rrPct(prevFactE,plan);
+  var deltaRRe=prevFactE>0?mr-prevRRe:null;
+  var prevPayingE=S.prevPayingByEmp&&S.prevPayingByEmp[S.empView]||0;
+  var prevArpuE=prevPayingE>0?r(prevFactE/prevPayingE):0;
+  var deltaArpuE=prevArpuE>0?r(empArpu-prevArpuE):null;
+  var deltaPayingE=prevPayingE>0?empPaying-prevPayingE:null;
   var kH=[
-    '<div class="kcard">'+_lbl3('Выручка',deltaTag(dealAgg.fact,S.prevByEmp[S.empView]||0))+'<div class="kv num">'+fmt(dealAgg.fact)+'</div><div class="ks"><span class="neu">план '+fmt(plan)+' · '+mp+'%</span></div>'+_mbF3(mp)+'</div>',
-    '<div class="kcard">'+_lbl3('Ранрейт')+'<div class="kv num">'+mr+'%</div><div class="ks"><span class="neu">'+(mr>=100?'в темпе':mr>=80?'близко к плану':'отстаём')+'</span></div>'+_mb3+'</div>',
-    '<div class="kcard">'+_lbl3('ARPU')+'<div class="kv num">'+(empArpu?fmt(empArpu):'—')+'</div><div class="ks"><span class="neu">платящий клиент</span></div>'+_mb3+'</div>',
-    '<div class="kcard">'+_lbl3('Платящих')+'<div class="kv num">'+empPaying+'</div><div class="ks"><span class="neu">из '+portfolioCount+' в портфеле</span></div>'+_mb3+'</div>',
+    '<div class="kcard">'+_lbl3('Выручка',deltaTag(dealAgg.fact,prevFactE))+'<div class="kv num">'+fmt(dealAgg.fact)+'</div><div class="ks"><span class="neu">план '+fmt(plan)+' · '+mp+'%</span></div>'+_mbF3(mp)+'</div>',
+    '<div class="kcard">'+_lbl3('Ранрейт',deltaRRe!==null?deltaAbs(Math.round(deltaRRe),'пп'):'')+'<div class="kv num">'+mr+'%</div><div class="ks"><span class="neu">'+(mr>=100?'в темпе':mr>=80?'близко к плану':'отстаём')+'</span></div>'+_mb3+'</div>',
+    '<div class="kcard">'+_lbl3('ARPU',deltaArpuE!==null?deltaAbsCurrency(deltaArpuE):'')+'<div class="kv num">'+(empArpu?fmt(empArpu):'—')+'</div><div class="ks"><span class="neu">платящий клиент</span></div>'+_mb3+'</div>',
+    '<div class="kcard">'+_lbl3('Платящих',deltaPayingE!==null?deltaAbs(deltaPayingE,'клиента'):'')+'<div class="kv num">'+empPaying+'</div><div class="ks"><span class="neu">из '+portfolioCount+' в портфеле</span></div>'+_mb3+'</div>',
     '<div class="kcard">'+_lbl3('Стаж')+'<div class="kv num">'+(ten!==null?ten+' мес.':'—')+'</div><div class="ks"><span class="neu">'+(emp.hired_at?'с '+fmtD(emp.hired_at):'')+'</span></div>'+_mb3+'</div>'
   ].join('');
   // Sort clients
