@@ -565,7 +565,7 @@ window.doLogin=async function(){
     err.textContent=d&&(d.error_description||d.error||d.msg)||'Неверный email или пароль';
     btn.disabled=false;btn.textContent='Войти';return;
   }
-  authSave({access_token:d.access_token,refresh_token:d.refresh_token,email:d.user.email,user_id:d.user.id});
+  authSave({access_token:d.access_token,refresh_token:d.refresh_token,email:d.user.email,user_id:d.user.id,name:(d.user.user_metadata&&d.user.user_metadata.name)||''});
   hideLogin();
   await loadPreferences();
   loadData();
@@ -1564,7 +1564,7 @@ function renderRop(){
   if(!DB){setApp('<div class="topbar"><span class="brand">⚙ Настройки</span></div>');return;}
   // profile block
   var email=CURRENT_USER?CURRENT_USER.email:'';
-  var initials=email?email.substring(0,2).toUpperCase():'??';
+  var displayName=CURRENT_USER&&CURRENT_USER.name?CURRENT_USER.name:email;var parts=displayName.trim().split(' ');var initials=parts.length>=2?(parts[0][0]+parts[1][0]).toUpperCase():displayName.substring(0,2).toUpperCase();
   var profBlock='<div class="prof-card">'+
     '<div class="prof-head">'+
       '<div class="prof-avatar">'+initials+'</div>'+
