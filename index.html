@@ -938,9 +938,8 @@ function zigIco(dp){return dp>0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path 
 function deltaBadge(now,prev){if(prev===0)return'';var dp=deltaPct(now,prev);var cls=dp>0?'db-up':dp<0?'db-down':'db-flat';return'<span class="delta-badge '+cls+'">'+zigIco(dp)+(dp>0?'+':'')+dp+'% к пред.</span>';}
 /* абсолютная дельта — для ARPU, платящих, сотрудников */
 function deltaAbs(delta,unit,posGood){
-  if(delta===undefined||delta===null)return'';
-  var ico=delta>0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 11V7h-4"/></svg>':delta<0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 13v4h-4"/></svg>':'';
-  if(delta===0)return'<span class="dlt dlt-neu" style="opacity:.55">±0 '+unit+'</span>';
+  if(delta===undefined||delta===null||delta===0)return'';
+  var ico=delta>0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 11V7h-4"/></svg>':'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 13v4h-4"/></svg>';
   var good=(posGood!==false)?delta>0:delta<0;
   var cls=good?'dlt-up':'dlt-down';
   return'<span class="dlt '+cls+'">'+ico+(delta>0?'+':'')+delta+'\u00A0'+unit+'</span>';
@@ -1616,7 +1615,7 @@ function renderEmpView(){
   var chartHtml='';
   if(lifeDeals&&lifeDeals.length){
     var mdata=buildMonthlyData(lifeDeals);
-    var empPlan=S.planByEmp[S.empView]||0;chartHtml='<div class="chart-block">'+buildRevenueChartSVG(mdata,{plan:empPlan})+'</div>';
+    var empPlan=S.planByEmp[S.empView]||0;chartHtml='<div class="chart-block">'+buildRevenueChartSVG(mdata,{plan:0})+'</div>';
   } else if(!lifeDeals){
     chartHtml='<div class="chart-block" style="padding:24px 22px;text-align:center;color:var(--text-3);font-size:12px">Загружаем данные...</div>';
   }
@@ -2117,7 +2116,7 @@ function renderPayroll(){
     '<div class="ck"><div class="ck-l">Выручка по фильтрам</div><div class="ck-v num">'+fmt(totFact)+'</div><div class="ck-s">средний чек '+fmt(avgDeal)+'</div></div>',
     '<div class="ck"><div class="ck-l">Сделок</div><div class="ck-v num">'+totCount+'</div><div class="ck-s">оплат и возвратов</div></div>',
     '<div class="ck"><div class="ck-l">Начислено мотивации</div><div class="ck-v num">'+fmt(totComm)+'</div><div class="ck-s">'+(totFact>0?r(totComm/totFact*100)+'% от выручки':'—')+'</div></div>',
-    '<div class="ck"><div class="ck-l">Делают кассу</div><div class="ck-v num">'+rowsArr.length+'</div><div class="ck-s">из '+RAW.employees.filter(function(e){return!e.fired_at&&!e.is_archived;}).length+' сотрудников</div></div>'
+    '<div class="ck"><div class="ck-l">Участвовали</div><div class="ck-v num">'+rowsArr.length+'</div><div class="ck-s">из '+RAW.employees.filter(function(e){return!e.fired_at&&!e.is_archived;}).length+' сотрудников</div></div>'
   ].join('');
   var sorted=filtered.slice().sort(function(a,b){return(b.deal_date||'').localeCompare(a.deal_date||'');});
   var total=sorted.length,tot=Math.max(1,Math.ceil(total/S.payLimit)),page=Math.min(S.payPage,tot-1);
