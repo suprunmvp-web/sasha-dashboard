@@ -785,6 +785,7 @@ function patchEmpSync(supaId,patch,optimistic){
 }
 
 function refreshPeriod(){
+  S.empLifetime={};S.empMonthlyPlan={};// инвалидируем кэш при обновлении
   S.periodReady=false;
   return Promise.all([loadPeriodStats(),loadDeals(),loadPrevDeals(),loadPlans(),loadAmoLeads()]).then(function(){buildDB();S.periodReady=true;render();}).catch(function(e){console.error(e);S.periodReady=true;render();});
 }
@@ -1615,7 +1616,7 @@ function renderEmpView(){
   var chartHtml='';
   if(lifeDeals&&lifeDeals.length){
     var mdata=buildMonthlyData(lifeDeals);
-    var empPlan=S.planByEmp[S.empView]||0;chartHtml='<div class="chart-block">'+buildRevenueChartSVG(mdata,{plan:0})+'</div>';
+    var empPlan=S.planByEmp[S.empView]||0;var empMonthlyPlanMap=S.empMonthlyPlan&&S.empMonthlyPlan[S.empView]||{};chartHtml='<div class="chart-block">'+buildRevenueChartSVG(mdata,{planMap:empMonthlyPlanMap})+'</div>';
   } else if(!lifeDeals){
     chartHtml='<div class="chart-block" style="padding:24px 22px;text-align:center;color:var(--text-3);font-size:12px">Загружаем данные...</div>';
   }
@@ -2199,7 +2200,7 @@ window.openChangePasswordModal=function(){
 /* ═══ REVENUE CHARTS ═══ */
 var DEPT_COLORS=['#3D6BF5','#2ED3A7','#F5B544','#FB6E5B','#A78BFA','#38BDF8'];
 var MNS=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
-S.empLifetime={};
+S.empLifetime={};S.empMonthlyPlan={};
 S.companyLifetime=null;S.companyLifetimeLoading=false;
 
 // tooltip
@@ -2290,7 +2291,8 @@ function buildRevenueChartSVG(monthData,opts){
   var T3=dark?'#718096':'#7a8ba3';
   var SF3=dark?'#1C2230':'#e8edf4';
   var plan=opts.plan||0;
-  var hasPlan=plan>0;
+  var planMap=opts.planMap||{};
+  var hasPlan=plan>0||Object.keys(planMap).length>0;
 
   // Всегда 12 месяцев
   var months12=[];
@@ -2306,7 +2308,7 @@ function buildRevenueChartSVG(monthData,opts){
   var W=680,H=190,PL=68,PR=12,PT=14,PB=30;
   var DW=W-PL-PR,DH=H-PT-PB;
   var n=12;
-  var mx=Math.max.apply(null,data12.map(function(m){return Math.max(m.total||0,hasPlan?plan:0);}));
+  var mx=Math.max.apply(null,data12.map(function(m){var mp=planMap[m.month]||plan||0;return Math.max(m.total||0,hasPlan?mp:0);}));
   if(mx<=0)mx=1000;
   var p10=Math.pow(10,Math.floor(Math.log10(mx)));
   var nice=Math.ceil(mx/p10*1.25)*p10;
@@ -2340,10 +2342,13 @@ function buildRevenueChartSVG(monthData,opts){
     bars.push('<rect x="'+Math.round(cx-slot/2)+'" y="'+PT+'" width="'+Math.round(slot)+'" height="'+DH+'" fill="transparent"'+hov+'/>');
 
     if(hasPlan){
-      var ph=Math.round(plan/nice*DH);
-      var px=Math.round(cx-gap/2-bw);
-      bars.push('<rect x="'+px+'" y="'+(baseY-ph)+'" width="'+bw+'" height="'+ph+'" rx="3" fill="'+ACC_PLAN+'"'+hov+'/>');
-      bars.push('<rect x="'+px+'" y="'+(baseY-ph)+'" width="'+bw+'" height="4" rx="3" fill="'+ACC+'" opacity="0.25" pointer-events="none"/>');
+      var monthPlan=planMap[m.month]||plan||0;
+      var ph=monthPlan>0?Math.round(monthPlan/nice*DH):0;
+      if(ph>0){
+        var px=Math.round(cx-gap/2-bw);
+        bars.push('<rect x="'+px+'" y="'+(baseY-ph)+'" width="'+bw+'" height="'+ph+'" rx="3" fill="'+ACC_PLAN+'"'+hov+'/>');
+        bars.push('<rect x="'+px+'" y="'+(baseY-ph)+'" width="'+bw+'" height="4" rx="3" fill="'+ACC+'" opacity="0.25" pointer-events="none"/>');
+      }
     }
 
     if(m.total>0){
@@ -2405,8 +2410,20 @@ function buildMonthlyData(deals){
 // Загрузка lifetime данных менеджера
 window.loadEmpLifetime=function(empId){
   if(S.empLifetime[empId])return Promise.resolve();
-  return sbGet('deals?select=deal_date,amount,event_type,client_name,platform_org_id&employee_id=eq.'+empId+'&order=deal_date.asc&limit=200000')
-    .then(function(rows){S.empLifetime[empId]=rows||[];render();});
+  return Promise.all([
+    sbGet('deals?select=deal_date,amount,event_type,client_name,platform_org_id&employee_id=eq.'+empId+'&order=deal_date.asc&limit=200000'),
+    sbGet('monthly_targets?select=year,month,plan_amount&employee_id=eq.'+empId+'&limit=100')
+  ]).then(function(res){
+    S.empLifetime[empId]=res[0]||[];
+    // строим помесячный план для графика
+    var planMap={};
+    (res[1]||[]).forEach(function(t){
+      var mk=t.year+'-'+String(t.month).padStart(2,'0');
+      planMap[mk]=(Number(t.plan_amount)||0);
+    });
+    S.empMonthlyPlan[empId]=planMap;
+    render();
+  });
 };
 
 // Загрузка lifetime данных компании
