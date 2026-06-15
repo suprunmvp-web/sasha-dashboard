@@ -687,7 +687,7 @@ var S={
   rangeFrom:new Date(TODAY.getFullYear(),TODAY.getMonth(),1),
   rangeTo:new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate()),
   calLeft:new Date(TODAY.getFullYear(),TODAY.getMonth(),1),calOpen:false,pick:0,
-  dept:null,empView:null,tab:'staff',
+  dept:null,empView:null,tab:'staff',empTab:'chart',
   mgrAs:null,mgrTab:'clients',
   saveHint:false,
   periodStats:{},periodLoading:false,periodReady:false,
@@ -1240,11 +1240,16 @@ window.setTab=function(t){S.tab=t;S.msOpen=null;S.msSearch='';S.fnPendingMgrs=nu
 window.sortStaff=function(k){if(S.staffSortKey===k)S.staffSortDir*=-1;else{S.staffSortKey=k;S.staffSortDir=-1;}render();};
 window.drillEmp=function(supaId){
   S.empView=supaId;
+  S.empTab='chart';// сброс на График при каждом заходе в карточку
+  // сброс состояния воронки для чистого старта
+  S.fnMgrs=[];S.fnMgrsB=[];S.fnCompare=false;S.fnTags=[];S.msOpen=null;S.msSearch='';
+  S.fnPendingMgrs=null;S.fnPendingMgrsB=null;
   delete S.empLifetime[supaId];
   delete S.empMonthlyPlan[supaId];
   delete S._empLifetimeInFlight[supaId];
-  render();// покажет "Загружаем..." → renderEmpView вызовет loadEmpLifetime один раз
+  render();
 };
+window.setEmpTab=function(t){S.empTab=t;S.msOpen=null;S.msSearch='';render();};
 /* ═══ FUNNEL v2 — helpers ═══ */
 function empAmo_(supaId){return S.empAmoMap[supaId]||null;}
 function deptAuids_(dStaff){return (dStaff||[]).map(function(m){return empAmo_(m.supaId);}).filter(Boolean);}
@@ -1498,9 +1503,8 @@ function renderDept(){
     var mb=k.bar!=null?_mbF2(k.bar):_mb2;
     return'<div class="kcard">'+lbl+'<div class="kv num">'+k.v+'</div><div class="ks">'+(k.raw?k.s:'<span class="neu">'+k.s+'</span>')+'</div>'+mb+'</div>';
   }).join('');
-  var tabs='<div class="tab-row">'+[['staff','Сотрудники'],['funnel','Воронка']].map(function(t){return'<button class="tab'+(S.tab===t[0]?' on':'')+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>';
   var ct='';
-  if(S.tab==='staff'){
+  (function(){
     var staff=[].concat(d.staff);
     staff.forEach(function(m){m._p=pct(m.fact,m.plan);m._r=rrPct(m.fact,m.plan);});
     staff.sort(function(a,b){
@@ -1510,7 +1514,7 @@ function renderDept(){
       return S.staffSortDir*(va-vb);
     });
     var cols=[['name','Сотрудник',''],['fact','Факт','r'],['plan','План','r'],['pct','%','r'],['rr','Ранрейт','r'],['clients','Клиентов','r']];
-    var th=cols.map(function(c){var a=S.staffSortKey===c[0];return'<th class="'+(c[2])+(a?' sorted':'')+'" onclick="sortStaff(\''+c[0]+'\')">'+c[1]+si(a,S.staffSortDir)+'</th>';}).join('')+'<th class="r">Δ период</th>';
+    var th=cols.map(function(c){var a=S.staffSortKey===c[0];return'<th class="'+(c[2])+(a?' sorted':'')+'" onclick="sortStaff(\''+c[0]+'\')">'+(c[1])+si(a,S.staffSortDir)+'</th>';}).join('')+'<th class="r">Δ период</th>';
     var rows=staff.length?staff.map(function(m){
       var c3=grad(m._p);
       var subline=m.fired?'<span style="color:var(--red);font-size:11px">уволен от '+fmtD(m.firedAt)+'</span>':m.role;
@@ -1525,9 +1529,8 @@ function renderDept(){
       '</tr>';
     }).join(''):'<tr><td colspan="7"><div class="empty-state">Нет сотрудников</div></td></tr>';
     ct='<div class="panel"><p style="font-size:11px;color:var(--text-3);margin-bottom:14px">Нажми на строку — увидишь клиентов сотрудника</p><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
-  }
-  if(S.tab==='funnel'){ct=renderFunnelContent_(d);}
-  setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUp()">‹ Дашборд</button><span class="crumb-title">'+esc(d.name)+'</span><button class="btn sm ghost" onclick="archiveDept(\''+d.id+'\')" style="margin-left:4px">В архив</button></div>'+calTrigger()+'</div><div class="dept-kpi">'+kH+'</div>'+tabs+ct);
+  })();
+  setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUp()">‹ Дашборд</button><span class="crumb-title">'+esc(d.name)+'</span><button class="btn sm ghost" onclick="archiveDept(\''+d.id+'\')" style="margin-left:4px">В архив</button></div>'+calTrigger()+'</div><div class="dept-kpi">'+kH+'</div>'+ct);
 }
 
 /* ═══ EMPLOYEE VIEW ═══ */
@@ -1625,19 +1628,33 @@ function renderEmpView(){
     '<div><div class="emp-name">'+esc(emp.name)+'</div><div class="emp-meta">'+(emp.role==='lead'?'Тимлид':'Менеджер')+(d?' · '+esc(d.name):'')+'</div></div>'+
     '<div style="margin-left:auto"><button class="btn primary sm" onclick="openPlanModal(\''+S.empView+'\',\''+esc(emp.name)+'\')">Редактировать план</button></div>'+
   '</div>';
-  // График выручки лайфтайм
-  var lifeDeals=S.empLifetime[S.empView];
-  var chartHtml='';
-  if(lifeDeals&&lifeDeals.length){
-    var mdata=buildMonthlyData(lifeDeals);
-    var empPlan=S.planByEmp[S.empView]||0;var empMonthlyPlanMap=S.empMonthlyPlan&&S.empMonthlyPlan[S.empView]||{};chartHtml='<div class="chart-block">'+buildRevenueChartSVG(mdata,{planMap:empMonthlyPlanMap})+'</div>';
-  } else if(!lifeDeals){
-    loadEmpLifetime(S.empView);// автозапуск если кэш очищен refreshPeriod
-    chartHtml='<div class="chart-block" style="padding:24px 22px;text-align:center;color:var(--text-3);font-size:12px">Загружаем данные...</div>';
+  // ── Тумблер График / Воронка ──
+  if(!S.empTab)S.empTab='chart';
+  var empTabToggle='<div class="tab-row" style="margin-bottom:14px">'+
+    '<button class="tab'+(S.empTab==='chart'?' on':'')+'" onclick="setEmpTab('chart')">График</button>'+
+    '<button class="tab'+(S.empTab==='funnel'?' on':'')+'" onclick="setEmpTab('funnel')">Воронка</button>'+
+  '</div>';
+
+  var upperContent='';
+  if(S.empTab==='chart'){
+    // График выручки лайфтайм
+    var lifeDeals=S.empLifetime[S.empView];
+    if(lifeDeals&&lifeDeals.length){
+      var mdata=buildMonthlyData(lifeDeals);
+      var empMonthlyPlanMap=S.empMonthlyPlan&&S.empMonthlyPlan[S.empView]||{};
+      upperContent='<div class="chart-block">'+buildRevenueChartSVG(mdata,{planMap:empMonthlyPlanMap})+'</div>';
+    } else if(!lifeDeals){
+      loadEmpLifetime(S.empView);
+      upperContent='<div class="chart-block" style="padding:24px 22px;text-align:center;color:var(--text-3);font-size:12px">Загружаем данные...</div>';
+    }
+  } else {
+    // Воронка — полная архитектура как в отделе
+    upperContent=renderFunnelContent_(d);
   }
+
   setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUpFromEmp()">‹ '+esc(d?d.name:'Отдел')+'</button><span class="crumb-title">'+esc(emp.name)+'</span></div>'+calTrigger()+'</div>'+
     empHeader+'<div class="dept-kpi">'+kH+'</div>'+
-    chartHtml+
+    empTabToggle+upperContent+
     '<div class="panel"><div class="panel-title">Клиенты ('+myClients.length+')</div><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>'+archCliBlock+'</div>');
 }
 
