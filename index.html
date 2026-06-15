@@ -2414,7 +2414,10 @@ function buildMonthlyData(deals){
   if(!keys.length)return[];
   var first=keys[0];
   var arr=[];
-  var cur=new Date(first+'-01');
+  // ВАЖНО: new Date('YYYY-MM-01') парсит как UTC, а new Date(y,m,1) — локальное время.
+  // В UTC+ зонах (Москва) UTC-midnight текущего месяца > local-midnight, цикл обрывался до него.
+  var fp=first.split('-');
+  var cur=new Date(Number(fp[0]),Number(fp[1])-1,1);
   var now=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
   while(cur<=now){
     var mk2=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0');
@@ -2482,7 +2485,8 @@ function buildCompanyMonthlyData(deals){
   keys.forEach(function(mk){Object.keys(months[mk]).forEach(function(d){deptSet[d]=1;});});
   var depts=Object.keys(deptSet);
   var arr=[];
-  var cur=new Date(keys[0]+'-01');
+  var ck0=keys[0].split('-');
+  var cur=new Date(Number(ck0[0]),Number(ck0[1])-1,1);
   var now=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
   while(cur<=now){
     var mk2=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0');
