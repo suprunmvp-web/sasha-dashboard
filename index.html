@@ -2101,14 +2101,20 @@ function renderPayroll(){
   var deptOpts='<option value="all">Все отделы</option>'+DB.depts.concat(DB.archivedDepts.map(function(d){return{id:d.id,name:d.name+' (архив)'};})).map(function(d){return'<option value="'+d.id+'"'+(S.payDept===d.id?' selected':'')+'>'+esc(d.name)+'</option>';}).join('');
   var allEmps=RAW.employees.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
   var empOpts='<option value="all">Все сотрудники</option>'+allEmps.map(function(e){return'<option value="'+e.id+'"'+(S.payEmp===e.id?' selected':'')+'>'+esc(e.name)+(e.fired_at?' (архив)':'')+'</option>';}).join('');
+  // lookup таблицы — актуальные имена из RAW
+  var empById={};RAW.employees.forEach(function(e){empById[e.id]=e;});
+  var clientById={};RAW.clients.forEach(function(c){if(c.platform_org_id)clientById[c.platform_org_id]=c;});
+  function empName(d){return(empById[d.employee_id]||{}).name||d.employee_name||'—';}
+  function clientName(d){return(clientById[d.platform_org_id]||{}).company_name||d.client_name||'—';}
+  function deptName(d){var e=empById[d.employee_id];if(e&&e.dept_id){var dep=DB.depts.concat(DB.archivedDepts||[]).find(function(x){return x.id===e.dept_id;});if(dep)return dep.name;}return d.dept_name||'—';}
   var filtered=S.dealsRaw.filter(function(d){
     if(S.payDept!=='all'&&d.dept_id!==S.payDept)return false;
     if(S.payEmp!=='all'&&d.employee_id!==S.payEmp)return false;
-    if(S.paySearch&&!(d.client_name||'').toLowerCase().includes(S.paySearch.toLowerCase()))return false;
+    if(S.paySearch&&!clientName(d).toLowerCase().includes(S.paySearch.toLowerCase()))return false;
     return true;
   });
   var byEmp={};
-  filtered.forEach(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);var comm=amt*(Number(d.motivation_pct)||0)/100;var k=d.employee_id||'—';var e=byEmp[k]||(byEmp[k]={name:d.employee_name||'—',dept:d.dept_name||'—',fact:0,comm:0,count:0});e.fact+=amt;e.comm+=comm;e.count++;});
+  filtered.forEach(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);var comm=amt*(Number(d.motivation_pct)||0)/100;var k=d.employee_id||'—';var e=byEmp[k]||(byEmp[k]={name:empName(d),dept:deptName(d),fact:0,comm:0,count:0});e.fact+=amt;e.comm+=comm;e.count++;});
   var rowsArr=Object.keys(byEmp).map(function(k){return byEmp[k];}).sort(function(a,b){return b.comm-a.comm;});
   var totFact=rowsArr.reduce(function(a,e){return a+e.fact;},0);
   var totComm=rowsArr.reduce(function(a,e){return a+e.comm;},0);
@@ -2126,12 +2132,12 @@ function renderPayroll(){
   var q=S.paySearch;
   var dealRows=paged.map(function(d){
     var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);var comm=amt*(Number(d.motivation_pct)||0)/100;
-    var cn=esc(d.client_name||'—');
+    var cn=esc(clientName(d));
     if(q){var re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');cn=cn.replace(re,'<mark style="background:var(--accent-bg);border-radius:2px">$1</mark>');}
     return'<tr>'+
       '<td class="muted num">'+fmtD(d.deal_date)+'</td>'+
-      '<td><span class="strong">'+esc(d.employee_name||'—')+'</span></td>'+
-      '<td class="muted">'+esc(d.dept_name||'—')+'</td>'+
+      '<td><span class="strong">'+esc(empName(d))+'</span></td>'+
+      '<td class="muted">'+esc(deptName(d))+'</td>'+
       '<td>'+cn+(d.event_type==='refund'?' <span style="color:var(--red);font-size:10px">возврат</span>':'')+'</td>'+
       '<td class="r strong num"'+(amt<0?' style="color:var(--red)"':'')+'>'+fmt(amt)+'</td>'+
       '<td class="r muted num">'+(d.motivation_pct||0)+'%</td>'+
@@ -2164,7 +2170,7 @@ window.exportPayroll=function(){
     return true;
   });
   if(!filtered.length){alert('Нет сделок для выгрузки');return;}
-  var deals=filtered.map(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);return{'Дата':d.deal_date,'Событие':d.event_type==='refund'?'Возврат':'Оплата','Сотрудник':d.employee_name,'Отдел':d.dept_name,'Клиент':d.client_name,'Сумма':amt,'Мотивация %':d.motivation_pct,'Начислено':amt*(Number(d.motivation_pct)||0)/100,'Комментарий':d.note||''};});
+  var deals=filtered.map(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);return{'Дата':d.deal_date,'Событие':d.event_type==='refund'?'Возврат':'Оплата','Сотрудник':empName(d),'Отдел':deptName(d),'Клиент':clientName(d),'Сумма':amt,'Мотивация %':d.motivation_pct,'Начислено':amt*(Number(d.motivation_pct)||0)/100,'Комментарий':d.note||''};});
   var byEmp2={};filtered.forEach(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);var k=d.employee_id||'—';var e=byEmp2[k]||(byEmp2[k]={'Сотрудник':d.employee_name,'Отдел':d.dept_name,'Сделок':0,'Выручка':0,'Начислено':0});e['Сделок']++;e['Выручка']+=amt;e['Начислено']+=amt*(Number(d.motivation_pct)||0)/100;});
   var summary=Object.keys(byEmp2).map(function(k){return byEmp2[k];}).sort(function(a,b){return b['Начислено']-a['Начислено'];});
   var wb=XLSX.utils.book_new();
