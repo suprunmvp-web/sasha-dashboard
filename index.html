@@ -785,9 +785,17 @@ function patchEmpSync(supaId,patch,optimistic){
 }
 
 function refreshPeriod(){
-  S.empLifetime={};S.empMonthlyPlan={};// инвалидируем кэш при обновлении
+  S.empLifetime={};S.empMonthlyPlan={};S._empLifetimeInFlight={};// инвалидируем кэш + отменяем in-flight
   S.periodReady=false;
-  return Promise.all([loadPeriodStats(),loadDeals(),loadPrevDeals(),loadPlans(),loadAmoLeads()]).then(function(){buildDB();S.periodReady=true;render();}).catch(function(e){console.error(e);S.periodReady=true;render();});
+  return Promise.all([loadPeriodStats(),loadDeals(),loadPrevDeals(),loadPlans(),loadAmoLeads()]).then(function(){
+    buildDB();S.periodReady=true;
+    // Если открыта карточка менеджера — перезагружаем lifetime явно, чтобы график не отставал
+    if(S.empView){
+      render();// показать loading state
+      return loadEmpLifetime(S.empView);
+    }
+    render();
+  }).catch(function(e){console.error(e);S.periodReady=true;render();});
 }
 
 /* ═══ BUILD DB ═══ */
@@ -1230,7 +1238,13 @@ window.setTab=function(t){S.tab=t;S.msOpen=null;S.msSearch='';S.fnPendingMgrs=nu
 
 /* ═══ ОТДЕЛ ═══ */
 window.sortStaff=function(k){if(S.staffSortKey===k)S.staffSortDir*=-1;else{S.staffSortKey=k;S.staffSortDir=-1;}render();};
-window.drillEmp=function(supaId){S.empView=supaId;delete S.empLifetime[supaId];delete S.empMonthlyPlan[supaId];render();loadEmpLifetime(supaId);};
+window.drillEmp=function(supaId){
+  S.empView=supaId;
+  delete S.empLifetime[supaId];
+  delete S.empMonthlyPlan[supaId];
+  delete S._empLifetimeInFlight[supaId];
+  render();// покажет "Загружаем..." → renderEmpView вызовет loadEmpLifetime один раз
+};
 /* ═══ FUNNEL v2 — helpers ═══ */
 function empAmo_(supaId){return S.empAmoMap[supaId]||null;}
 function deptAuids_(dStaff){return (dStaff||[]).map(function(m){return empAmo_(m.supaId);}).filter(Boolean);}
@@ -2415,14 +2429,17 @@ function buildMonthlyData(deals){
 /* old buildRevenueChartSVG removed */
 
 // Загрузка lifetime данных менеджера
+/* _empLifetimeInFlight — дедупликация: если fetch уже летит, возвращаем тот же Promise */
+if(!S._empLifetimeInFlight)S._empLifetimeInFlight={};
 window.loadEmpLifetime=function(empId){
   if(S.empLifetime[empId])return Promise.resolve();
-  return Promise.all([
+  if(S._empLifetimeInFlight[empId])return S._empLifetimeInFlight[empId];
+  var p=Promise.all([
     sbGet('deals?select=deal_date,amount,event_type,client_name,platform_org_id&employee_id=eq.'+empId+'&order=deal_date.asc&limit=200000'),
     sbGet('monthly_targets?select=year,month,plan_amount&employee_id=eq.'+empId+'&limit=100')
   ]).then(function(res){
+    delete S._empLifetimeInFlight[empId];
     S.empLifetime[empId]=res[0]||[];
-    // строим помесячный план для графика
     var planMap={};
     (res[1]||[]).forEach(function(t){
       var mk=t.year+'-'+String(t.month).padStart(2,'0');
@@ -2430,7 +2447,12 @@ window.loadEmpLifetime=function(empId){
     });
     S.empMonthlyPlan[empId]=planMap;
     render();
+  }).catch(function(e){
+    delete S._empLifetimeInFlight[empId];
+    console.error('loadEmpLifetime error',e);
   });
+  S._empLifetimeInFlight[empId]=p;
+  return p;
 };
 
 // Загрузка lifetime данных компании
