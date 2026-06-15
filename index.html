@@ -1101,7 +1101,7 @@ function renderLb(){
   var html='';
   if(S_LB_TAB==='mgrs'){
     var all=[];
-    DB.depts.forEach(function(d){d.staff.forEach(function(m){all.push({name:m.name,dept:d.name,fact:m.fact,prevFact:m.prevFact,plan:m.plan,pct:pct(m.fact,m.plan),clients:m.clients,tenure:tenure(m.hired)});});});
+    DB.depts.forEach(function(d){d.staff.forEach(function(m){all.push({name:m.name,dept:d.name,supaId:m.supaId,deptId:d.id,fact:m.fact,prevFact:m.prevFact,plan:m.plan,pct:pct(m.fact,m.plan),clients:m.clients,tenure:tenure(m.hired)});});});
     all.sort(function(a,b){var k=S.sumSort;var va=a[k],vb=b[k];if(typeof va==='string')return S.sumSortDir*va.localeCompare(vb);return S.sumSortDir*(va-vb);});
     var colDefs=[['','#'],['name','Сотрудник'],['fact','Факт','r'],['plan','План','r'],['pct','%','r'],['_dlt','Δ период','r'],['clients','Клиентов','r'],['tenure','Стаж','r']];
     var th=colDefs.map(function(c){if(!c[0])return'<th style="width:40px">#</th>';if(c[0]==='_dlt')return'<th class="r">Δ период</th>';var a=S.sumSort===c[0];return'<th class="'+(c[2]||'')+(a?' sorted':'')+'" onclick="setSumSort(\''+c[0]+'\')">'+c[1]+si(a,S.sumSortDir)+'</th>';}).join('');
@@ -1111,7 +1111,7 @@ function renderLb(){
       var rowBg=i===0?'background:rgba(255,193,7,.07)':i===1?'background:rgba(148,163,184,.05)':i===2?'background:rgba(205,127,50,.05)':'';
       var rowBorder=i===0?'box-shadow:inset 2px 0 0 #F5B544':i===1?'box-shadow:inset 2px 0 0 #94A3B8':i===2?'box-shadow:inset 2px 0 0 #CD7F32':'';
       var rankCell=i<3?'<span style="font-size:16px;line-height:1">'+MEDALS[i]+'</span>':'<span style="font-size:12px;font-weight:500;color:var(--text-3);display:inline-flex;align-items:center;justify-content:center;width:26px">'+(i+1)+'</span>';
-      return'<tr style="'+rowBg+';'+rowBorder+'">'+
+      return'<tr class="clickable" style="'+rowBg+';'+rowBorder+'" onclick="drillEmpFromLb(\''+m.supaId+'\',\''+m.deptId+'\')">'+
         '<td style="padding-left:12px">'+rankCell+'</td>'+
         '<td><span class="strong">'+esc(m.name)+'</span><div style="font-size:11px;color:var(--text-3)">'+esc(m.dept)+'</div></td>'+
         '<td class="r strong num">'+fmt(m.fact)+'</td>'+
@@ -1233,7 +1233,18 @@ function renderCo(){
 window.toggleArchDepts=function(){S.showArchivedDepts=!S.showArchivedDepts;render();};
 window.drill=function(id){S.dept=id;S.tab='staff';S.calOpen=false;S.empView=null;S.msOpen=null;S.fnPendingMgrs=null;S.fnPendingMgrsB=null;render();};
 window.goUp=function(){S.dept=null;S.empView=null;S.msOpen=null;render();};
-window.goUpFromEmp=function(){S.empView=null;render();};
+window.goUpFromEmp=function(){
+  S.empView=null;
+  if(S._empBackTo==='lb'){S.dept=null;S.role='lb';}
+  S._empBackTo=null;
+  render();
+};
+window.drillEmpFromLb=function(supaId,deptId){
+  S._empBackTo='lb';// запоминаем откуда пришли
+  S.dept=deptId;
+  S.role='cd';// переключаем роль чтобы render() попал в renderEmpView, а не renderLb
+  drillEmp(supaId);
+};
 window.setTab=function(t){S.tab=t;S.msOpen=null;S.msSearch='';S.fnPendingMgrs=null;S.fnPendingMgrsB=null;render();};
 
 /* ═══ ОТДЕЛ ═══ */
@@ -1652,7 +1663,8 @@ function renderEmpView(){
     upperContent=renderFunnelContent_(d);
   }
 
-  setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUpFromEmp()">‹ '+esc(d?d.name:'Отдел')+'</button><span class="crumb-title">'+esc(emp.name)+'</span></div>'+calTrigger()+'</div>'+
+  var _backLabel=S._empBackTo==='lb'?'Лидерборд':(d?d.name:'Отдел');
+  setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUpFromEmp()">‹ '+esc(_backLabel)+'</button><span class="crumb-title">'+esc(emp.name)+'</span></div>'+calTrigger()+'</div>'+
     empHeader+'<div class="dept-kpi">'+kH+'</div>'+
     empTabToggle+upperContent+
     '<div class="panel"><div class="panel-title">Клиенты ('+myClients.length+')</div><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>'+archCliBlock+'</div>');
