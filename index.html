@@ -1147,7 +1147,7 @@ function renderLb(){
 if(!S.cdFunnelDept)S.cdFunnelDept='all';
 if(!S.cdFunnelTags)S.cdFunnelTags=[];
 window.setCdFunnelDept=function(id){S.cdFunnelDept=id;S.cdFunnelTags=[];render();};
-window.toggleCdFunnelTag=function(t){var i=S.cdFunnelTags.indexOf(t);if(i>=0)S.cdFunnelTags.splice(i,1);else S.cdFunnelTags.push(t);render();};
+window.toggleCdFunnelTag=function(enc){var t=decodeURIComponent(enc);var i=S.cdFunnelTags.indexOf(t);if(i>=0)S.cdFunnelTags.splice(i,1);else S.cdFunnelTags.push(t);render();};
 window.clearCdFunnelTags=function(){S.cdFunnelTags=[];render();};
 function renderCo(){
   var c=DB.company,cp=pct(c.fact,c.plan),rrv=rrPct(c.fact,c.plan);
@@ -1206,7 +1206,8 @@ function renderCo(){
     if(cdTagKeys.length){
       var _tpills=cdTagKeys.map(function(t){
         var sel=!!(S.cdFunnelTags&&S.cdFunnelTags.indexOf(t)>=0);
-        return'<button class="fn2-tag'+(sel?' on':'')+'" data-cdtag="'+esc(t)+'" onclick="toggleCdFunnelTag(this.getAttribute(\'data-cdtag\'))">'+esc(t)+'<span class="tc">'+cdTagCounts[t]+'</span></button>';
+        var enc=encodeURIComponent(t);
+        return'<button class="fn2-tag'+(sel?' on':'')+'" onclick="toggleCdFunnelTag(\''+enc+'\')" >'+esc(t)+'<span class="tc">'+cdTagCounts[t]+'</span></button>';
       }).join('');
       tagPillsHtml='<div class="fn2-tags" style="margin-bottom:10px">'+
         '<button class="fn2-tag'+((!S.cdFunnelTags||!S.cdFunnelTags.length)?' on':'')+'" onclick="clearCdFunnelTags()">Все теги</button>'+
