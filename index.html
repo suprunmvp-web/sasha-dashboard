@@ -1206,7 +1206,7 @@ function renderCo(){
     if(cdTagKeys.length){
       var _tpills=cdTagKeys.map(function(t){
         var sel=!!(S.cdFunnelTags&&S.cdFunnelTags.indexOf(t)>=0);
-        return'<button class="fn2-tag'+(sel?' on':'')+'" data-cdtag="'+esc(t)+'" onclick="toggleCdFunnelTag(this.getAttribute(\"data-cdtag\"))">'+esc(t)+'<span class="tc">'+cdTagCounts[t]+'</span></button>';
+        return'<button class="fn2-tag'+(sel?' on':'')+'" data-cdtag="'+esc(t)+'" onclick="toggleCdFunnelTag(this.getAttribute(\'data-cdtag\'))">'+esc(t)+'<span class="tc">'+cdTagCounts[t]+'</span></button>';
       }).join('');
       tagPillsHtml='<div class="fn2-tags" style="margin-bottom:10px">'+
         '<button class="fn2-tag'+((!S.cdFunnelTags||!S.cdFunnelTags.length)?' on':'')+'" onclick="clearCdFunnelTags()">Все теги</button>'+
