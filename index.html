@@ -1103,7 +1103,7 @@ function renderLb(){
       var rowBg=i===0?'background:rgba(255,193,7,.07)':i===1?'background:rgba(148,163,184,.05)':i===2?'background:rgba(205,127,50,.05)':'';
       var rowBorder=i===0?'box-shadow:inset 2px 0 0 #F5B544':i===1?'box-shadow:inset 2px 0 0 #94A3B8':i===2?'box-shadow:inset 2px 0 0 #CD7F32':'';
       var rankCell=i<3?'<span style="font-size:16px;line-height:1">'+MEDALS[i]+'</span>':'<span style="font-size:12px;font-weight:500;color:var(--text-3);display:inline-flex;align-items:center;justify-content:center;width:26px">'+(i+1)+'</span>';
-      return'<tr style="'+rowBg+';'+rowBorder+'">'+
+      return'<tr class="clickable" style="'+rowBg+';'+rowBorder+'" onclick="drillEmpFromLb(\''+m.supaId+'\',\''+m.deptId+'\')" >'+
         '<td style="padding-left:12px">'+rankCell+'</td>'+
         '<td><span class="strong">'+esc(m.name)+'</span><div style="font-size:11px;color:var(--text-3)">'+esc(m.dept)+'</div></td>'+
         '<td class="r strong num">'+fmt(m.fact)+'</td>'+
