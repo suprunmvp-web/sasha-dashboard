@@ -2427,7 +2427,10 @@ function buildMonthlyData(deals){
   if(!keys.length)return[];
   var first=keys[0];
   var arr=[];
-  var cur=new Date(first+'-01');
+  // ВАЖНО: new Date('YYYY-MM-01') парсит как UTC midnight → в UTC+3 < local now → июнь пропадает
+  // Используем new Date(y,m,1) — local time, как и now
+  var _fp=first.split('-');
+  var cur=new Date(Number(_fp[0]),Number(_fp[1])-1,1);
   var now=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
   while(cur<=now){
     var mk2=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0');
