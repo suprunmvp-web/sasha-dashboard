@@ -696,7 +696,7 @@ var S={
   fnCompare:false,fnMgrs:[],fnMgrsB:[],fnTags:[],msOpen:null,msSearch:'',empAmoMap:{},
   dealsRaw:[],dealsByEmp:{},dealsByOrg:{},dealsByDept:{},dealsByEmpOrg:{},
   prevByEmp:{},prevByDept:{},prevCompany:0,
-  amoLeads:[],amoUsers:[],
+  amoLeads:[],amoEvents:[],amoUsers:[],
   planByEmp:{},
   payDept:'all',payEmp:'all',paySearch:'',payLimit:20,payPage:0,
   staffSortKey:'fact',staffSortDir:-1,
@@ -787,7 +787,7 @@ function patchEmpSync(supaId,patch,optimistic){
 function refreshPeriod(){
   S.empLifetime={};S.empMonthlyPlan={};// инвалидируем кэш при обновлении
   S.periodReady=false;
-  return Promise.all([loadPeriodStats(),loadDeals(),loadPrevDeals(),loadPlans(),loadAmoLeads()]).then(function(){buildDB();S.periodReady=true;render();}).catch(function(e){console.error(e);S.periodReady=true;render();});
+  return Promise.all([loadPeriodStats(),loadDeals(),loadPrevDeals(),loadPlans(),loadAmoLeads(),loadAmoEvents()]).then(function(){buildDB();S.periodReady=true;render();}).catch(function(e){console.error(e);S.periodReady=true;render();});
 }
 
 /* ═══ BUILD DB ═══ */
@@ -973,6 +973,41 @@ function loadAmoLeads(){
     S.amoLeads=rows||[];
   }).catch(function(){S.amoLeads=[];});
 }
+
+/* ═══ AMO EVENTS (активность за период) ═══
+   amo_leads хранит только ТЕКУЩИЙ статус лида. Если лид побывал на стадии
+   "Встреча проведена", а потом его слили (статус 143) — это пропадает из
+   amo_leads. Также если лид создан раньше выбранного периода, а событие
+   (встреча/счёт/оплата) произошло внутри периода — фильтр по created_at_unix
+   у amo_leads его не увидит. amo_events хранит дату САМОГО события, поэтому
+   решает обе проблемы: считаем активность по датам событий, не лидов. */
+var ACTIVITY_STAGES=[
+  {key:'mset', label:'встреч назначено', sid:80336514},
+  {key:'mdone',label:'проведено',        sid:80429334},
+  {key:'inv',  label:'счетов',           sid:80336526},
+  {key:'paid', label:'оплат',            sid:142}
+];
+function loadAmoEvents(){
+  S.amoEvents=[];
+  var fromU=Math.floor(S.rangeFrom.getTime()/1000);
+  var toU=Math.floor(S.rangeTo.getTime()/1000)+86400;
+  var sids=ACTIVITY_STAGES.map(function(s){return s.sid;}).join(',');
+  return sbGet('amo_events?select=lead_id,status_after,created_by,created_at_unix&created_at_unix=gte.'+fromU+'&created_at_unix=lte.'+toU+'&status_after=in.('+sids+')&limit=20000').then(function(rows){
+    S.amoEvents=rows||[];
+  }).catch(function(){S.amoEvents=[];});
+}
+function buildActivityCounts(events){
+  var counts={};
+  ACTIVITY_STAGES.forEach(function(s){counts[s.key]=0;});
+  (events||[]).forEach(function(e){
+    ACTIVITY_STAGES.forEach(function(s){if(e.status_after===s.sid)counts[s.key]++;});
+  });
+  return counts;
+}
+function activityLineHtml_(counts){
+  return ACTIVITY_STAGES.map(function(s){return s.label+' <b style="color:var(--text)">'+(counts[s.key]||0)+'</b>';}).join(' &nbsp;\u00b7&nbsp; ');
+}
+
 /* Считает воронку по массиву лидов (с фильтром по amo_user_id если нужно) */
 function buildFunnelCounts(leads){
   var sortById={};
@@ -1201,6 +1236,8 @@ function renderCo(){
       });
     }
     var fc=buildFunnelCounts(fLeads);
+    var acEvents=S.cdFunnelDept==='all'?S.amoEvents:(dObj?eventsForMgrs_([],dObj.staff):[]);
+    var acCd=buildActivityCounts(acEvents);
     // Пилюли тегов
     var tagPillsHtml='';
     if(cdTagKeys.length){
@@ -1222,6 +1259,7 @@ function renderCo(){
       '</div>'+
       '<div class="fn2-tags" style="margin-bottom:10px">'+deptPills+'</div>'+
       tagPillsHtml+
+      '<div class="fn2-stat-row" style="margin-bottom:10px">Активность за период: '+activityLineHtml_(acCd)+'</div>'+
       '<table class="fn2-tbl" style="width:100%">'+thead+'<tbody>'+funnelBarsHtml_(fc)+'</tbody></table>'+
     '</div>';
   }
@@ -1271,6 +1309,13 @@ function leadsForMgrs_(supaIds,dStaff){
   var auids = (supaIds&&supaIds.length)? supaIds.map(empAmo_).filter(Boolean) : deptAuids_(dStaff);
   if(!auids.length)return [];
   return S.amoLeads.filter(function(l){return auids.indexOf(l.responsible_user_id)>=0;});
+}
+/* то же самое, но по amo_events: created_by — кто реально совершил действие,
+   а не responsible_user_id, который может уехать при переназначении лида */
+function eventsForMgrs_(supaIds,dStaff){
+  var auids = (supaIds&&supaIds.length)? supaIds.map(empAmo_).filter(Boolean) : deptAuids_(dStaff);
+  if(!auids.length)return [];
+  return S.amoEvents.filter(function(e){return auids.indexOf(e.created_by)>=0;});
 }
 function applyTagFilter_(leads){
   if(!S.fnTags.length)return leads;
@@ -1329,7 +1374,7 @@ function renderFunnelContent_(d){
   var allTagCounts=getTagCounts_(deptLeads);
   var tagKeys=Object.keys(allTagCounts).sort(function(a,b){return allTagCounts[b]-allTagCounts[a];}).slice(0,24);
   var tagPills='<button class="fn2-tag'+(S.fnTags.length?'':' on')+'" onclick="fnClearTags()">\u0412\u0441\u0435 \u0442\u0435\u0433\u0438</button>'+
-    tagKeys.map(function(t){var sel=S.fnTags.indexOf(t)>=0;return'<button class="fn2-tag'+(sel?' on':'')+'" onclick="fnToggleTag(\''+esc(t).replace(/'/g,"\\'")+'\')" title="'+esc(t)+'">'+esc(t.length>24?t.slice(0,22)+'\u2026':t)+'<span class="tc">'+allTagCounts[t]+'</span></button>';}).join('');
+    tagKeys.map(function(t){var sel=S.fnTags.indexOf(t)>=0;return'<button class="fn2-tag'+(sel?' on':'')+'" onclick="fnToggleTag('+esc(t).replace(/'/g,"\\'")+')" title="'+esc(t)+'">'+esc(t.length>24?t.slice(0,22)+'\u2026':t)+'<span class="tc">'+allTagCounts[t]+'</span></button>';}).join('');
   var tagBlock='<div class="fn2-tags">'+tagPills+'</div>';
 
   /* ── MANAGER MULTISELECT (grouped by dept + search) ── */
@@ -1381,25 +1426,31 @@ function renderFunnelContent_(d){
     var leadsA=applyTagFilter_(leadsForMgrs_(S.fnMgrs,d.staff));
     var leadsB=applyTagFilter_(leadsForMgrs_(S.fnMgrsB,d.staff));
     var fcA=buildFunnelCounts(leadsA),fcB=buildFunnelCounts(leadsB);
+    var acA=buildActivityCounts(eventsForMgrs_(S.fnMgrs,d.staff));
+    var acB=buildActivityCounts(eventsForMgrs_(S.fnMgrsB,d.staff));
     var nameA=S.fnMgrs.length?S.fnMgrs.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return e?(e.display_name||e.name).split(' ')[0]:'';}).join(', '):'Весь отдел';
     var nameB=S.fnMgrsB.length?S.fnMgrsB.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return e?(e.display_name||e.name).split(' ')[0]:'';}).join(', '):'Весь отдел';
-    body='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding:10px 12px;background:var(--surface-2);border-radius:10px">'+
+    body='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;padding:10px 12px;background:var(--surface-2);border-radius:10px">'+
         '<span style="font-size:11px;font-weight:700;color:'+CMP_A+';min-width:12px">А</span>'+mgrMs('fnMgrs','mgrA','dept')+
         '<span style="font-size:11px;color:var(--text-3);margin:0 4px">·</span>'+
         '<span style="font-size:11px;color:var(--text-3)">Лидов: <b style="color:var(--text)">'+fcA.total+'</b> Оплат: <b style="color:var(--text)">'+(fcA.counts.paid||0)+'</b></span>'+
       '</div>'+
-      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding:10px 12px;background:var(--surface-2);border-radius:10px">'+
+      '<div style="font-size:11px;color:var(--text-3);margin:-2px 0 14px 2px">Активность: '+activityLineHtml_(acA)+'</div>'+
+      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;padding:10px 12px;background:var(--surface-2);border-radius:10px">'+
         '<span style="font-size:11px;font-weight:700;color:'+CMP_B+';min-width:12px">Б</span>'+mgrMs('fnMgrsB','mgrB','all')+
         '<span style="font-size:11px;color:var(--text-3);margin:0 4px">·</span>'+
         '<span style="font-size:11px;color:var(--text-3)">Лидов: <b style="color:var(--text)">'+fcB.total+'</b> Оплат: <b style="color:var(--text)">'+(fcB.counts.paid||0)+'</b></span>'+
       '</div>'+
+      '<div style="font-size:11px;color:var(--text-3);margin:-2px 0 14px 2px">Активность: '+activityLineHtml_(acB)+'</div>'+
       '<div class="cmp2-legend"><span class="cmp2-leg"><span class="sw" style="background:'+CMP_A+'"></span>'+esc(nameA)+'<span class="ln">группа А</span></span>'+
         '<span class="cmp2-leg"><span class="sw" style="background:'+CMP_B+'"></span>'+esc(nameB)+'<span class="ln">группа Б</span></span></div>'+
       '<div>'+funnelCompareHtml_(fcA,fcB)+'</div>';
   } else {
     var leads1=applyTagFilter_(leadsForMgrs_(S.fnMgrs,d.staff));
     var fc1=buildFunnelCounts(leads1);
-    var statRow='<div class="fn2-stat-row">\u041b\u0438\u0434\u043e\u0432: <b>'+fc1.total+'</b> &nbsp;\u00b7&nbsp; \u041e\u0442\u043a\u0430\u0437\u043e\u0432: <b>'+fc1.rejected+'</b> &nbsp;\u00b7&nbsp; \u041e\u043f\u043b\u0430\u0442: <b>'+(fc1.counts.paid||0)+'</b></div>';
+    var ac1=buildActivityCounts(eventsForMgrs_(S.fnMgrs,d.staff));
+    var statRow='<div class="fn2-stat-row">\u041b\u0438\u0434\u043e\u0432: <b>'+fc1.total+'</b> &nbsp;\u00b7&nbsp; \u041e\u0442\u043a\u0430\u0437\u043e\u0432: <b>'+fc1.rejected+'</b> &nbsp;\u00b7&nbsp; \u041e\u043f\u043b\u0430\u0442: <b>'+(fc1.counts.paid||0)+'</b></div>'+
+      '<div class="fn2-stat-row" style="margin-top:-6px">Активность за период: '+activityLineHtml_(ac1)+'</div>';
     var thead='<thead><tr><th>\u042d\u0422\u0410\u041f</th><th>\u041e\u0411\u042a\u0415\u041c</th><th class="r">\u0424\u0410\u041a\u0422</th></tr></thead>';
     body=statRow+'<table class="fn2-tbl" style="width:100%;margin-top:10px">'+thead+'<tbody>'+funnelBarsHtml_(fc1)+'</tbody></table>';
   }
@@ -1414,7 +1465,7 @@ function renderFunnelContent_(d){
     var rev=paid.reduce(function(a,l){return a+(Number(l.price)||0);},0);
     var conv=tl.length>0?r(paid.length/tl.length*100):0;
     var active=S.fnTags.indexOf(tag)>=0;
-    return'<div class="ch-card'+(active?' on':'')+'" onclick="fnToggleTag(\''+esc(tag).replace(/'/g,"\\'")+'\')">'+
+    return'<div class="ch-card'+(active?' on':'')+'" onclick="fnToggleTag('+esc(tag).replace(/'/g,"\\'")+')">'+
       '<div class="ch-name">'+esc(tag)+'</div>'+
       '<div class="ch-stat"><span>\u041b\u0438\u0434\u043e\u0432</span><b>'+tl.length+'</b></div>'+
       '<div class="ch-stat"><span>\u041e\u043f\u043b\u0430\u0442</span><b>'+paid.length+'</b></div>'+
@@ -1616,7 +1667,7 @@ function renderEmpView(){
     var minCell=S.periodLoading?'<span style="color:var(--text-3)">···</span>':fmtMin(c._min);
     var menuId='m_'+c.platform_org_id;
     var menu='<div class="rm-wrap">'+
-      '<button class="rm-dot" onclick="toggleRowMenu(event,\''+menuId+'\')">'+ICO.dots+'</button>'+
+      '<button class="rm-dot" onclick="toggleRowMenu(event,'+menuId+')">'+ICO.dots+'</button>'+
       '<div class="rm-pop" id="'+menuId+'" data-org="'+c.platform_org_id+'" data-name="'+esc(c.name)+'">'+
         '<button class="mi" onclick="rmEditEvent(this)">'+ICO.edit+' Редактировать событие</button>'+
         (c.foreign?'':'<button class="mi" onclick="rmRename(this)">'+ICO.rename+' Переименовать компанию</button>'+
@@ -2005,7 +2056,7 @@ function renderMgr(){
     var myHidden=DB.hiddenClients?DB.hiddenClients.filter(function(c){return c.responsible_platform_user_id===S.mgrAs;}):[];
     var archCliBlock='';
     if(myHidden.length){
-      var archRows=myHidden.map(function(c){return'<tr><td class="muted">'+esc(c.company_name)+'</td><td class="r"><button class="btn sm" onclick="unhideClient(\''+c.platform_org_id+'\')">Вернуть</button></td></tr>';}).join('');
+      var archRows=myHidden.map(function(c){return'<tr><td class="muted">'+esc(c.company_name)+'</td><td class="r"><button class="btn sm" onclick="unhideClient('+c.platform_org_id+')">Вернуть</button></td></tr>';}).join('');
       archCliBlock='<div class="arch-toggle'+(S.showArchivedClients?' open':'')+'" onclick="toggleArchClients()"><span class="arr">›</span> Архив клиентов ('+myHidden.length+')</div><div class="arch-block'+(S.showArchivedClients?' open':'')+'"><table class="tbl" style="margin-top:8px"><tbody>'+archRows+'</tbody></table></div>';
     }
     content='<div class="panel"><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>'+archCliBlock+'</div>';
@@ -2270,7 +2321,7 @@ function _positionTip(e){
 
 
 /* ═══ PREMIUM CHART ENGINE ═══ */
-function fmtRub(n){if(!n||n===0)return'0';var s=Math.round(n).toString();var result='';for(var i=0;i<s.length;i++){if(i>0&&(s.length-i)%3===0)result+=' ';result+=s[i];}return result;}
+function fmtRub(n){if(!n||n===0)return'0';var s=Math.round(n).toString();var result='';for(var i=0;i<s.length;i++){if(i>0&&(s.length-i)%3===0)result+=' ';result+=s[i];}return result;}
 function fmtShort(n){
   if(!n||n===0)return'0';
   if(n>=1000000)return(n/1000000).toFixed(1).replace('.0','')+'М';
