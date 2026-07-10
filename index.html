@@ -51,6 +51,9 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .deal-btn:hover{opacity:.88;}
 .refresh-btn{font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
 .refresh-btn:hover{border-color:var(--accent);color:var(--accent);}
+.refresh-btn:disabled{opacity:.5;cursor:not-allowed;}
+.refresh-btn.spin .ico{animation:spin .8s linear infinite;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 
 /* TOP BAR */
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;gap:12px;flex-wrap:wrap;}
@@ -538,6 +541,38 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 var SB_URL='https://qhpyrlhugpqgojwmarrw.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocHlybGh1Z3BxZ29qd21hcnJ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDY1Mjg5MCwiZXhwIjoyMDk2MjI4ODkwfQ.J1KvnwrxAbfEINT4ntxz_nWQJx7ZNgD4iPC2pPdGIV4';
 var SB_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocHlybGh1Z3BxZ29qd21hcnJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NTI4OTAsImV4cCI6MjA5NjIyODg5MH0.wlEY_Nm2T6Oe-WbH4lHJxdv_1-RjqgpNtBziTTGX2OQ';
+
+/* ═══ REALTIME SYNC (кнопка «Обновить») ═══
+   SYNC_URL — вставь сюда /exec ссылку после деплоя Web App в Apps Script (тот же проект, где Код.gs + amosync.gs).
+   SYNC_SECRET — должен совпадать со Script Property SYNC_SECRET в том же проекте. */
+var SYNC_URL='ВСТАВЬ_СЮДА_URL_ПОСЛЕ_ДЕПЛОЯ';
+var SYNC_SECRET='tiZju0Sa2jEPHN_18L77Cl57h2AyQN9Y';
+window.triggerSync=function(){
+  if(S.syncing)return;
+  if(!SYNC_URL||SYNC_URL.indexOf('ВСТАВЬ_СЮДА')>=0){alert('Синк ещё не подключен: впиши SYNC_URL в index.html после деплоя Web App в Apps Script.');return;}
+  S.syncing=true;render();
+  var timedOut=false;
+  var killTimer=setTimeout(function(){timedOut=true;S.syncing=false;render();},45000);
+  fetch(SYNC_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({secret:SYNC_SECRET})})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      clearTimeout(killTimer);
+      if(timedOut)return;
+      S.syncing=false;
+      if(res&&res.status==='busy'){render();alert('Синхронизация уже идёт (запущена другим пользователем) — попробуй через минуту.');return;}
+      if(res&&res.status==='error'){render();alert('Синк не запустился: '+(res.message||'см. Apps Script → Executions.'));return;}
+      if(res&&res.errors&&res.errors.length){console.warn('sync partial errors',res.errors);}
+      loadData();
+    })
+    .catch(function(e){
+      clearTimeout(killTimer);
+      if(timedOut)return;
+      S.syncing=false;render();
+      console.error(e);
+      alert('Не удалось достучаться до синка ('+e.message+'). Данные всё равно обновлены из текущего состояния Supabase.');
+      loadData();
+    });
+};
 function sbGet(p){return fetch(SB_URL+'/rest/v1/'+p,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){return r.json();}).then(function(d){if(d&&d.code){console.error('SB',p,d.message);return[];}return Array.isArray(d)?d:[];}).catch(function(e){console.error(e);return[];});}
 function sbPatch(t,f,d){return fetch(SB_URL+'/rest/v1/'+t+'?'+f,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(d)});}
 function sbPost(t,d){return fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(d)}).then(function(r){return r.json();});}
@@ -683,7 +718,7 @@ var DOW=['пн','вт','ср','чт','пт','сб','вс'];
 /* ═══ STATE ═══ */
 var DB=null, RAW={depts:[],employees:[],clients:[],allClients:[]};
 var S={
-  role:'lb',theme:'light',loading:true,loadErr:null,
+  role:'lb',theme:'light',loading:true,loadErr:null,syncing:false,
   rangeFrom:new Date(TODAY.getFullYear(),TODAY.getMonth(),1),
   rangeTo:new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate()),
   calLeft:new Date(TODAY.getFullYear(),TODAY.getMonth(),1),calOpen:false,pick:0,
@@ -1059,7 +1094,7 @@ function roleBar(){
   var seg=tabs.map(function(t){return'<button class="role-btn'+(S.role===t[0]?' on':'')+'" onclick="setRole(\''+t[0]+'\')">'+t[1]+'</button>';}).join('');
   var eid=ctxEmpId(),did=ctxDeptId();
   return'<div class="rolebar"><div class="role-seg">'+seg+'</div><div class="bar-right">'+
-    '<button class="refresh-btn" onclick="location.reload()">'+ICO.refresh+' Обновить</button>'+
+    '<button class="refresh-btn'+(S.syncing?' spin':'')+'"'+(S.syncing?' disabled':'')+' onclick="triggerSync()">'+ICO.refresh+' '+(S.syncing?'Синхронизация…':'Обновить')+'</button>'+
     '<button class="deal-btn" onclick="addDeal(\''+eid+'\',\''+did+'\')">'+ICO.plus+' Сделка</button>'+
     '<button class="icon-btn" onclick="toggleTheme()">'+(S.theme==='dark'?ICO.sun:ICO.moon)+'</button>'+
     '<button class="icon-btn'+(S.role==='rop'?' on':'')+'" title="Настройки" onclick="setRole(\'rop\')">'+ICO.settings+'</button>'+
@@ -1255,7 +1290,7 @@ function renderCo(){
     funnelHtml='<div class="panel" style="margin-bottom:14px">'+
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'+
         '<div class="panel-title" style="margin:0">Воронка первички</div>'+
-        '<span style="font-size:12px;color:var(--text-3)">Лидов: <b style="color:var(--text)">'+fc.total+'</b> · Оплат: <b style="color:var(--text)">'+(fc.counts.paid||0)+'</b></span>'+
+        '<span style="font-size:12px;color:var(--text-3)">Лидов: <b style="color:var(--text)">'+fc.total+'</b> · Отказов: <b style="color:var(--text)">'+fc.rejected+'</b> · Оплат: <b style="color:var(--text)">'+(fc.counts.paid||0)+'</b></span>'+
       '</div>'+
       '<div class="fn2-tags" style="margin-bottom:10px">'+deptPills+'</div>'+
       tagPillsHtml+
@@ -1433,13 +1468,13 @@ function renderFunnelContent_(d){
     body='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;padding:10px 12px;background:var(--surface-2);border-radius:10px">'+
         '<span style="font-size:11px;font-weight:700;color:'+CMP_A+';min-width:12px">А</span>'+mgrMs('fnMgrs','mgrA','dept')+
         '<span style="font-size:11px;color:var(--text-3);margin:0 4px">·</span>'+
-        '<span style="font-size:11px;color:var(--text-3)">Лидов: <b style="color:var(--text)">'+fcA.total+'</b> Оплат: <b style="color:var(--text)">'+(fcA.counts.paid||0)+'</b></span>'+
+        '<span style="font-size:11px;color:var(--text-3)">Лидов: <b style="color:var(--text)">'+fcA.total+'</b> Отказов: <b style="color:var(--text)">'+fcA.rejected+'</b> Оплат: <b style="color:var(--text)">'+(fcA.counts.paid||0)+'</b></span>'+
       '</div>'+
       '<div style="font-size:11px;color:var(--text-3);margin:-2px 0 14px 2px">Активность: '+activityLineHtml_(acA)+'</div>'+
       '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;padding:10px 12px;background:var(--surface-2);border-radius:10px">'+
         '<span style="font-size:11px;font-weight:700;color:'+CMP_B+';min-width:12px">Б</span>'+mgrMs('fnMgrsB','mgrB','all')+
         '<span style="font-size:11px;color:var(--text-3);margin:0 4px">·</span>'+
-        '<span style="font-size:11px;color:var(--text-3)">Лидов: <b style="color:var(--text)">'+fcB.total+'</b> Оплат: <b style="color:var(--text)">'+(fcB.counts.paid||0)+'</b></span>'+
+        '<span style="font-size:11px;color:var(--text-3)">Лидов: <b style="color:var(--text)">'+fcB.total+'</b> Отказов: <b style="color:var(--text)">'+fcB.rejected+'</b> Оплат: <b style="color:var(--text)">'+(fcB.counts.paid||0)+'</b></span>'+
       '</div>'+
       '<div style="font-size:11px;color:var(--text-3);margin:-2px 0 14px 2px">Активность: '+activityLineHtml_(acB)+'</div>'+
       '<div class="cmp2-legend"><span class="cmp2-leg"><span class="sw" style="background:'+CMP_A+'"></span>'+esc(nameA)+'<span class="ln">группа А</span></span>'+
@@ -2247,15 +2282,22 @@ function renderPayroll(){
     '<div class="panel">'+filters+dealTable+pagHtml(page,tot,total)+'</div>'+sumBlock);
 }
 window.exportPayroll=function(){
+  /* empName/clientName/deptName были локальными внутри renderPayroll() — тут их не было видно,
+     из-за чего клик по XLSX падал с ReferenceError и файл не скачивался. Дублируем те же лукапы здесь. */
+  var empById={};RAW.employees.forEach(function(e){empById[e.id]=e;});
+  var clientById={};RAW.clients.forEach(function(c){if(c.platform_org_id)clientById[c.platform_org_id]=c;});
+  function empName(d){return(empById[d.employee_id]||{}).name||d.employee_name||'—';}
+  function clientName(d){return(clientById[d.platform_org_id]||{}).company_name||d.client_name||'—';}
+  function deptName(d){var e=empById[d.employee_id];if(e&&e.dept_id){var dep=DB.depts.concat(DB.archivedDepts||[]).find(function(x){return x.id===e.dept_id;});if(dep)return dep.name;}return d.dept_name||'—';}
   var filtered=S.dealsRaw.filter(function(d){
     if(S.payDept!=='all'&&d.dept_id!==S.payDept)return false;
     if(S.payEmp!=='all'&&d.employee_id!==S.payEmp)return false;
-    if(S.paySearch&&!(d.client_name||'').toLowerCase().includes(S.paySearch.toLowerCase()))return false;
+    if(S.paySearch&&!clientName(d).toLowerCase().includes(S.paySearch.toLowerCase()))return false;
     return true;
   });
-  if(!filtered.length){alert('Нет сделок для выгрузки');return;}
+  if(!filtered.length){alert('Нет сделок для выгрузки по текущим фильтрам');return;}
   var deals=filtered.map(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);return{'Дата':d.deal_date,'Событие':d.event_type==='refund'?'Возврат':'Оплата','Сотрудник':empName(d),'Отдел':deptName(d),'Клиент':clientName(d),'Сумма':amt,'Мотивация %':d.motivation_pct,'Начислено':amt*(Number(d.motivation_pct)||0)/100,'Комментарий':d.note||''};});
-  var byEmp2={};filtered.forEach(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);var k=d.employee_id||'—';var e=byEmp2[k]||(byEmp2[k]={'Сотрудник':d.employee_name,'Отдел':d.dept_name,'Сделок':0,'Выручка':0,'Начислено':0});e['Сделок']++;e['Выручка']+=amt;e['Начислено']+=amt*(Number(d.motivation_pct)||0)/100;});
+  var byEmp2={};filtered.forEach(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);var k=d.employee_id||'—';var e=byEmp2[k]||(byEmp2[k]={'Сотрудник':empName(d),'Отдел':deptName(d),'Сделок':0,'Выручка':0,'Начислено':0});e['Сделок']++;e['Выручка']+=amt;e['Начислено']+=amt*(Number(d.motivation_pct)||0)/100;});
   var summary=Object.keys(byEmp2).map(function(k){return byEmp2[k];}).sort(function(a,b){return b['Начислено']-a['Начислено'];});
   var wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(summary),'Свод');
