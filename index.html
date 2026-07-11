@@ -1408,7 +1408,7 @@ function renderFunnelContent_(d){
   var allTagCounts=getTagCounts_(deptLeads);
   var tagKeys=Object.keys(allTagCounts).sort(function(a,b){return allTagCounts[b]-allTagCounts[a];}).slice(0,24);
   var tagPills='<button class="fn2-tag'+(S.fnTags.length?'':' on')+'" onclick="fnClearTags()">\u0412\u0441\u0435 \u0442\u0435\u0433\u0438</button>'+
-    tagKeys.map(function(t){var sel=S.fnTags.indexOf(t)>=0;return'<button class="fn2-tag'+(sel?' on':'')+'" onclick="fnToggleTag('+esc(t).replace(/'/g,"\\'")+')" title="'+esc(t)+'">'+esc(t.length>24?t.slice(0,22)+'\u2026':t)+'<span class="tc">'+allTagCounts[t]+'</span></button>';}).join('');
+    tagKeys.map(function(t){var sel=S.fnTags.indexOf(t)>=0;return'<button class="fn2-tag'+(sel?' on':'')+'" onclick="fnToggleTag(\''+esc(t).replace(/'/g,"\\'")+'\')" title="'+esc(t)+'">'+esc(t.length>24?t.slice(0,22)+'\u2026':t)+'<span class="tc">'+allTagCounts[t]+'</span></button>';}).join('');
   var tagBlock='<div class="fn2-tags">'+tagPills+'</div>';
 
   /* ── MANAGER MULTISELECT (grouped by dept + search) ── */
@@ -1496,7 +1496,7 @@ function renderFunnelContent_(d){
     var rev=paid.reduce(function(a,l){return a+(Number(l.price)||0);},0);
     var conv=tl.length>0?r(paid.length/tl.length*100):0;
     var active=S.fnTags.indexOf(tag)>=0;
-    return'<div class="ch-card'+(active?' on':'')+'" onclick="fnToggleTag('+esc(tag).replace(/'/g,"\\'")+')">'+
+    return'<div class="ch-card'+(active?' on':'')+'" onclick="fnToggleTag(\''+esc(tag).replace(/'/g,"\\'")+'\')">'+
       '<div class="ch-name">'+esc(tag)+'</div>'+
       '<div class="ch-stat"><span>\u041b\u0438\u0434\u043e\u0432</span><b>'+tl.length+'</b></div>'+
       '<div class="ch-stat"><span>\u041e\u043f\u043b\u0430\u0442</span><b>'+paid.length+'</b></div>'+
@@ -2087,7 +2087,7 @@ function renderMgr(){
     var myHidden=DB.hiddenClients?DB.hiddenClients.filter(function(c){return c.responsible_platform_user_id===S.mgrAs;}):[];
     var archCliBlock='';
     if(myHidden.length){
-      var archRows=myHidden.map(function(c){return'<tr><td class="muted">'+esc(c.company_name)+'</td><td class="r"><button class="btn sm" onclick="unhideClient('+c.platform_org_id+')">Вернуть</button></td></tr>';}).join('');
+      var archRows=myHidden.map(function(c){return'<tr><td class="muted">'+esc(c.company_name)+'</td><td class="r"><button class="btn sm" onclick="unhideClient(\''+c.platform_org_id+'\')">Вернуть</button></td></tr>';}).join('');
       archCliBlock='<div class="arch-toggle'+(S.showArchivedClients?' open':'')+'" onclick="toggleArchClients()"><span class="arr">›</span> Архив клиентов ('+myHidden.length+')</div><div class="arch-block'+(S.showArchivedClients?' open':'')+'"><table class="tbl" style="margin-top:8px"><tbody>'+archRows+'</tbody></table></div>';
     }
     content='<div class="panel"><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>'+archCliBlock+'</div>';
