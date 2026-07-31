@@ -666,9 +666,9 @@ var S={
 /* ═══ UTILS ═══ */
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function r(n){return Math.round(n||0);}
-function fmtNum(n){n=r(n);var s=String(Math.abs(n)),res='';for(var i=0;i<s.length;i++){if(i>0&&(s.length-i)%3===0)res+=' ';res+=s[i];}return(n<0?'-':'')+res;}
-function fmt(n){return fmtNum(n)+' руб.';}
-function fmtMin(n){return fmtNum(r(n))+' мин';}
+function fmtNum(n){n=r(n);var s=String(Math.abs(n)),res='';for(var i=0;i<s.length;i++){if(i>0&&(s.length-i)%3===0)res+=' ';res+=s[i];}return(n<0?'-':'')+res;}
+function fmt(n){return fmtNum(n)+' руб.';}
+function fmtMin(n){return fmtNum(r(n))+' мин';}
 function pct(f,p){return p>0?r(f/p*100):0;}
 function grad(p){p=Math.max(0,Math.min(100,p))/100;var s=[[251,110,91],[245,181,68],[46,211,167]];var g=p<.5?0:1,t=p<.5?p/.5:(p-.5)/.5,a=s[g],b=s[g+1];return'rgb('+r(a[0]+(b[0]-a[0])*t)+','+r(a[1]+(b[1]-a[1])*t)+','+r(a[2]+(b[2]-a[2])*t)+')';}
 function daysTo(ds){if(!ds)return null;return Math.max(0,r((new Date(ds)-TODAY)/86400e3));}
@@ -714,8 +714,8 @@ function loadData(){
   return Promise.all([
     sbGet('departments?select=*&order=created_at'),
     sbGet('employees?select=*&order=name'),
-    sbGet('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,subscription_status,subscription_end,is_hidden,is_archived&responsible_platform_user_id=not.is.null&order=company_name&limit=3000'),
-    sbGet('clients?select=platform_org_id,company_name,responsible_platform_user_id,is_archived,is_hidden&responsible_platform_user_id=not.is.null&order=company_name&limit=5000'),
+    sbGet('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,subscription_status,subscription_end,platform_status,is_hidden,is_archived&order=company_name&limit=3000'),
+    sbGet('clients?select=platform_org_id,company_name,responsible_platform_user_id,is_archived,is_hidden&order=company_name&limit=5000'),
     sbGet('amo_users?select=amo_user_id,name,email&order=name&limit=500'),
     sbGet('telegram_integrations?select=*&order=created_at')
   ]).then(function(res){
@@ -1756,6 +1756,14 @@ function renderRop(){
   var unassigned=RAW.employees.filter(function(e){return!e.dept_id&&!e.fired_at&&!e.is_archived;});
   var unaBlock=unassigned.length?'<div class="panel"><div class="panel-title">Без отдела ('+unassigned.length+')</div><table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th class="r">Действие</th></tr></thead><tbody>'+
     unassigned.map(function(e){return'<tr><td>'+esc(e.name)+'</td><td><span style="font-size:11px;color:var(--text-3)">'+(e.role==='lead'?'Тимлид':'Менеджер')+'</span></td><td class="r"><button class="btn sm primary" onclick="reassignEmp(\''+e.id+'\')">→ В отдел</button></td></tr>';}).join('')+'</tbody></table></div>':'';
+  var unassignedClients=RAW.clients.filter(function(c){return !c.responsible_platform_user_id&&!c.is_archived&&!c.is_hidden;});
+  var unassignedBlock=unassignedClients.length?(
+    '<div class="panel"><div class="panel-title">Без ответственного на платформе ('+unassignedClients.length+')</div>'+
+    '<p style="font-size:12px;color:var(--text-3);margin:-8px 0 12px;line-height:1.6">Эти организации есть в базе, но на platform.trysasha.ru им не назначен ответственный менеджер — поэтому они не попадают в портфели и лидерборд. Найти их через "+Сделка" можно (раздел "⚠ Без ответственного"), но лучше проставить ответственного прямо на платформе.</p>'+
+    '<table class="tbl"><thead><tr><th>Компания</th><th>Статус на платформе</th><th class="r">Ссылка</th></tr></thead><tbody>'+
+      unassignedClients.map(function(c){return'<tr><td>'+esc(c.company_name||c.platform_org_id)+'</td><td class="muted">'+esc(c.platform_status||'—')+'</td><td class="r"><a class="ext-link" href="'+esc(c.platform_url||'#')+'" target="_blank">Открыть →</a></td></tr>';}).join('')+
+    '</tbody></table></div>'
+  ):'';
   var deptCards=DB.depts.map(function(x){return'<div class="dept-edit-card"><div><div class="strong">'+esc(x.name)+'</div><div class="muted" style="font-size:11px;margin-top:2px">'+esc(x.tl)+' · '+x.staff.length+' чел.</div></div><div style="display:flex;gap:6px"><button class="btn sm" onclick="editDept(\''+x.id+'\')">Настроить</button><button class="btn sm ghost" onclick="archiveDept(\''+x.id+'\')">В архив</button></div></div>';}).join('');
   var archDeptBlock='';
   if(DB.archivedDepts.length){
@@ -1772,6 +1780,7 @@ function renderRop(){
       '<table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th>Нанят</th><th style="text-align:center">Статус</th><th style="text-align:center">AMO</th><th class="r">Клиентов</th><th class="r">Действие</th></tr></thead><tbody>'+staffRows+'</tbody></table>'+
       firedBlock+'</div>'+
     unaBlock+
+    unassignedBlock+
     '<div class="panel"><div class="adm-head"><div class="panel-title" style="margin:0">Все отделы</div><button class="btn primary" onclick="createDept()">+ Создать отдел</button></div>'+deptCards+archDeptBlock+'</div>'+
     tgIntegrationBlock_());
 }
@@ -2055,14 +2064,15 @@ function renderCliUI(){
   var puid=emp?emp.platform_user_id:null;
   var allC=RAW.allClients||[];
   var mine=allC.filter(function(c){return c.responsible_platform_user_id===puid;});
-  var others=allC.filter(function(c){return c.responsible_platform_user_id!==puid;});
+  var unassigned=allC.filter(function(c){return !c.responsible_platform_user_id;});
+  var others=allC.filter(function(c){return c.responsible_platform_user_id&&c.responsible_platform_user_id!==puid;});
   var q=(_dc.search||'').toLowerCase();
-  if(q){var fn=function(c){return(c.company_name||'').toLowerCase().indexOf(q)>=0;};mine=mine.filter(fn);others=others.filter(fn);}
-  function makeOpts(list,sect){
+  if(q){var fn=function(c){return(c.company_name||'').toLowerCase().indexOf(q)>=0;};mine=mine.filter(fn);unassigned=unassigned.filter(fn);others=others.filter(fn);}
+  function makeOpts(list,sect,warn){
     if(!list.length)return'';
-    return'<div class="cli-ds">'+sect+'</div>'+list.slice(0,60).map(function(c){return'<div class="cli-do" data-orgid="'+c.platform_org_id+'" data-name="'+esc(c.company_name||'')+'">'+esc(c.company_name||'—')+'</div>';}).join('');
+    return'<div class="cli-ds">'+sect+'</div>'+list.slice(0,60).map(function(c){return'<div class="cli-do" data-orgid="'+c.platform_org_id+'" data-name="'+esc(c.company_name||'')+'">'+esc(c.company_name||'—')+(warn?' <span style="color:var(--amber);font-size:10px">⚠ нет ответств. на платформе</span>':'')+'</div>';}).join('');
   }
-  var dropHtml=makeOpts(mine,'Текущие клиенты сотрудника')+makeOpts(others,'Все остальные');
+  var dropHtml=makeOpts(mine,'Текущие клиенты сотрудника')+makeOpts(unassigned,'⚠ Без ответственного на платформе',true)+makeOpts(others,'Все остальные');
   if(!dropHtml)dropHtml='<div class="cli-empty">Не найдено</div>';
   wrap.innerHTML='<input id="dl-csearch" class="cli-search" placeholder="Поиск клиента..." value="'+esc(_dc.search||'')+'">'+
     '<div class="cli-drop" id="dl-cdrop">'+dropHtml+'</div>';
