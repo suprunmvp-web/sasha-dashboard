@@ -627,14 +627,19 @@ var TODAY=new Date();
 var MIN_DATE=new Date(2026,2,1);
 /* ═══ AMO CONSTANTS ═══ */
 var AMO_PIPE_SALES=10139846;
-/* sort по status_id */
+/* sort по status_id (справочно — в подсчёте воронки больше не используется, см. buildFunnelCounts) */
 var AMO_SORT={80336510:5,80940894:10,80336570:20,80494174:30,80336514:40,80429334:50,80336522:60,80376014:70,80336526:80,142:10000,143:11000};
-/* этапы воронки для дашборда */
+/* этапы воронки для дашборда.
+   ПРАВКА (полный фикс воронки): добавлены два ранее невидимых промежуточных
+   статуса (sort 60/70) — названия-заглушки, замени на реальные названия
+   стадий из AmoCRM (status_id 80336522 и 80376014). */
 var AMO_STAGES=[
   {key:'new',    label:'Новые лиды',        minSort:0,  sid:null},
   {key:'work',   label:'Взят в работу',      minSort:30, sid:80494174},
   {key:'mset',   label:'Встреча назначена',  minSort:40, sid:80336514},
   {key:'mdone',  label:'Встреча проведена',  minSort:50, sid:80429334},
+  {key:'stage60',label:'Этап 60 (уточни название в Amo)', minSort:60, sid:80336522},
+  {key:'stage70',label:'Этап 70 (уточни название в Amo)', minSort:70, sid:80376014},
   {key:'inv',    label:'Счёт выставлен',     minSort:80, sid:80336526},
   {key:'paid',   label:'Оплачено',           minSort:10000,sid:142}
 ];
@@ -676,7 +681,6 @@ function fmtD(ds){if(!ds)return'—';var p=ds.substring(0,10).split('-');return 
 function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
 function rrPct(fact,plan){
   var f=S.rangeFrom,t=S.rangeTo;
-  // tot = полный месяц rangeFrom (или rangeTo если период длиннее месяца)
   var monthEnd=new Date(f.getFullYear(),f.getMonth()+1,0);
   var fullEnd=t>monthEnd?t:monthEnd;
   var tot=Math.max(1,r((fullEnd-f)/864e5)+1);
@@ -701,7 +705,6 @@ function dateISO(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2
 function tenure(hiredAt){if(!hiredAt)return null;return Math.max(0,Math.round((TODAY-new Date(hiredAt))/(864e5*30.44)));}
 function singleMonth(){return S.rangeFrom.getMonth()===S.rangeTo.getMonth()&&S.rangeFrom.getFullYear()===S.rangeTo.getFullYear();}
 function payingInPeriod(clients){
-  // Платящие = уникальные компании с фактом > 0 в периоде (из deals)
   if(!S.periodReady)return null;
   var orgSet=new Set(clients.map(function(c){return c.platform_org_id;}));
   var count=0;
@@ -728,20 +731,18 @@ function loadData(){
     render();refreshPeriod();
   }).catch(function(e){S.loading=false;S.loadErr=e.message;render();});
 }
-/* Серверная сверка: после структурных операций перетягиваем истину из Supabase, не доверяя только локальному апдейту */
 function reloadEmployees(){
   return sbGet('employees?select=*&order=name').then(function(rows){if(rows&&rows.length)RAW.employees=rows;buildDB();});
 }
 function reloadDepts(){
   return sbGet('departments?select=*&order=created_at').then(function(rows){if(rows&&rows.length)RAW.depts=rows;buildDB();});
 }
-/* optimistic: применяем локально для мгновенного отклика, затем сверяемся с сервером */
 function patchEmpSync(supaId,patch,optimistic){
   if(optimistic){RAW.employees.forEach(function(e){if(e.id===supaId)Object.assign(e,optimistic);});buildDB();render();}
   return sbPatch('employees','id=eq.'+supaId,patch).then(reloadEmployees,reloadEmployees).then(render);
 }
 function refreshPeriod(){
-  S.empLifetime={};S.empMonthlyPlan={};// инвалидируем кэш при обновлении
+  S.empLifetime={};S.empMonthlyPlan={};
   S.periodReady=false;
   return Promise.all([loadPeriodStats(),loadDeals(),loadPrevDeals(),loadPlans(),loadAmoLeads(),loadAmoEvents()]).then(function(){buildDB();S.periodReady=true;render();}).catch(function(e){console.error(e);S.periodReady=true;render();});
 }
@@ -775,11 +776,9 @@ function buildDB(){
     var staffEmps=(allBD[d.id]||[]).filter(function(e){
       var isFired=!!(e.fired_at||e.is_archived);
       if(isFired){
-        // уволенный/архивный показывается ТОЛЬКО если заносил выручку в выбранном периоде
         var ag=S.dealsByEmp[e.id];
         return !!(ag&&ag.count>0);
       }
-      // действующий — если нанят не позже конца периода
       if(e.hired_at&&e.hired_at.substring(0,10)>_toS)return false;
       return true;
     });
@@ -795,7 +794,6 @@ function buildDB(){
     });
     staff.sort(function(a,b){return(b.role==='Тимлид')-(a.role==='Тимлид');});
     var dc=emps.reduce(function(a,e){return a.concat(cBU[e.platform_user_id]||[]);},[]);
-    // FIXED: dept fact from dealsByDept (snapshots deal's dept at write time), not sum of current staff
     var dFact=S.dealsByDept[d.id]||0;
     var dPlan=staff.reduce(function(a,m){return a+m.plan;},0);
     return{id:d.id,name:d.name,tl:lead?lead.name:'—',leadId:d.lead_employee_id,
@@ -854,9 +852,7 @@ function loadDeals(){
       var comm=amt*(Number(d.motivation_pct)||0)/100;
       if(d.employee_id){var e=S.dealsByEmp[d.employee_id]||(S.dealsByEmp[d.employee_id]={fact:0,comm:0,count:0});e.fact+=amt;e.comm+=comm;e.count++;}
       if(d.platform_org_id){var o=S.dealsByOrg[d.platform_org_id]||(S.dealsByOrg[d.platform_org_id]={fact:0});o.fact+=amt;}
-      // вклад конкретного менеджера в конкретную компанию (для списка клиентов в карточке менеджера)
       if(d.employee_id&&d.platform_org_id){var eo=S.dealsByEmpOrg[d.employee_id]||(S.dealsByEmpOrg[d.employee_id]={});eo[d.platform_org_id]=(eo[d.platform_org_id]||0)+amt;}
-      // FIXED: aggregate by deal's dept_id — historical attribution preserved when employees move
       if(d.dept_id){S.dealsByDept[d.dept_id]=(S.dealsByDept[d.dept_id]||0)+amt;}
     });
   });
@@ -873,7 +869,6 @@ function loadPrevDeals(){
       S.prevCompany+=amt;
       if(d.employee_id)S.prevByEmp[d.employee_id]=(S.prevByEmp[d.employee_id]||0)+amt;
       if(d.dept_id)S.prevByDept[d.dept_id]=(S.prevByDept[d.dept_id]||0)+amt;
-      // считаем уникальных платящих клиентов
       if(d.platform_org_id&&amt>0){
         orgsCo[d.platform_org_id]=1;
         if(d.dept_id)(orgsByDept[d.dept_id]=orgsByDept[d.dept_id]||{})[d.platform_org_id]=1;
@@ -889,7 +884,6 @@ function deltaPct(now,prev){if(prev>0)return Math.round((now-prev)/prev*100);if(
 function deltaTag(now,prev){var dp=deltaPct(now,prev);if(prev===0)return '';var up=dp>0;var ic=dp===0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 12h18"/></svg>':(up?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 11V7h-4"/></svg>':'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 13v4h-4"/></svg>');return'<span class="dlt '+(dp>0?'dlt-up':dp<0?'dlt-down':'dlt-neu')+'">'+ic+Math.abs(dp)+'%</span>';}
 function zigIco(dp){return dp>0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 11V7h-4"/></svg>':dp<0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 13v4h-4"/></svg>':'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 12h18"/></svg>';}
 function deltaBadge(now,prev){if(prev===0)return'';var dp=deltaPct(now,prev);var cls=dp>0?'db-up':dp<0?'db-down':'db-flat';return'<span class="delta-badge '+cls+'">'+zigIco(dp)+(dp>0?'+':'')+dp+'% к пред.</span>';}
-/* абсолютная дельта — для ARPU, платящих, сотрудников */
 function deltaAbs(delta,unit,posGood){
   if(delta===undefined||delta===null||delta===0)return'';
   var ico=delta>0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 11V7h-4"/></svg>':'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 13v4h-4"/></svg>';
@@ -923,13 +917,12 @@ function loadAmoLeads(){
     S.amoLeads=rows||[];
   }).catch(function(){S.amoLeads=[];});
 }
-/* ═══ AMO EVENTS (активность за период) ═══
-   amo_leads хранит только ТЕКУЩИЙ статус лида. Если лид побывал на стадии
-   "Встреча проведена", а потом его слили (статус 143) — это пропадает из
-   amo_leads. Также если лид создан раньше выбранного периода, а событие
-   (встреча/счёт/оплата) произошло внутри периода — фильтр по created_at_unix
-   у amo_leads его не увидит. amo_events хранит дату САМОГО события, поэтому
-   решает обе проблемы: считаем активность по датам событий, не лидов. */
+/* ═══ AMO EVENTS (активность за период + воронка) ═══
+   ПРАВКА (полный фикс воронки): раньше сюда тянулись события только для 4
+   стадий из ACTIVITY_STAGES (для строки "Активность за период"). Теперь
+   тянем события по ВСЕМ стадиям из AMO_STAGES — они нужны buildFunnelCounts,
+   чтобы столбцы воронки считались от тех же событий, что и активность, и
+   совпадали с ней по построению (см. buildFunnelCounts ниже). */
 var ACTIVITY_STAGES=[
   {key:'mset', label:'встреч назначено', sid:80336514},
   {key:'mdone',label:'проведено',        sid:80429334},
@@ -940,36 +933,60 @@ function loadAmoEvents(){
   S.amoEvents=[];
   var fromU=Math.floor(S.rangeFrom.getTime()/1000);
   var toU=Math.floor(S.rangeTo.getTime()/1000)+86400;
-  var sids=ACTIVITY_STAGES.map(function(s){return s.sid;}).join(',');
+  var sids=AMO_STAGES.map(function(s){return s.sid;}).filter(Boolean).join(',');
   return sbGet('amo_events?select=lead_id,status_after,created_by,created_at_unix&created_at_unix=gte.'+fromU+'&created_at_unix=lte.'+toU+'&status_after=in.('+sids+')&limit=20000').then(function(rows){
     S.amoEvents=rows||[];
   }).catch(function(){S.amoEvents=[];});
 }
+/* ПРАВКА: дедуп по lead_id — считаем уникальных лидов, дошедших до этапа в
+   периоде, а не количество переходов (иначе повторный переход того же лида
+   в тот же статус в периоде задваивал бы счётчик). */
 function buildActivityCounts(events){
-  var counts={};
-  ACTIVITY_STAGES.forEach(function(s){counts[s.key]=0;});
+  var counts={},seen={};
+  ACTIVITY_STAGES.forEach(function(s){counts[s.key]=0;seen[s.key]={};});
   (events||[]).forEach(function(e){
-    ACTIVITY_STAGES.forEach(function(s){if(e.status_after===s.sid)counts[s.key]++;});
+    ACTIVITY_STAGES.forEach(function(s){
+      if(e.status_after===s.sid&&!seen[s.key][e.lead_id]){
+        seen[s.key][e.lead_id]=1;
+        counts[s.key]++;
+      }
+    });
   });
   return counts;
 }
 function activityLineHtml_(counts){
   return ACTIVITY_STAGES.map(function(s){return s.label+' <b style="color:var(--text)">'+(counts[s.key]||0)+'</b>';}).join(' &nbsp;·&nbsp; ');
 }
-/* Считает воронку по массиву лидов (с фильтром по amo_user_id если нужно) */
-function buildFunnelCounts(leads){
-  var sortById={};
-  Object.keys(AMO_SORT).forEach(function(sid){sortById[sid]=AMO_SORT[sid];});
+/* ПРАВКА (полный фикс воронки): раньше эта функция брала ТОЛЬКО amo_leads —
+   лиды, СОЗДАННЫЕ в периоде, и считала по их ТЕКУЩЕМУ статусу (cumulative
+   по sort). Из-за этого столбцы воронки и строка "Активность за период"
+   (которая всегда считалась по amo_events, т.е. по датам самих событий)
+   расходились: встреча/счёт/оплата, случившиеся в периоде у лида, заведённого
+   раньше, в воронку не попадали. Слитые (143) лиды выкидывались целиком со
+   всех этапов, даже если у них была активность.
+   Теперь: "Новые лиды" (new) — как раньше, по дате создания лида (это
+   единственная стадия, у которой нет status_after события). Все остальные
+   стадии считаются от amo_events (тот же массив, что и buildActivityCounts),
+   дедуп по lead_id — уникальный лид на этап. Слитые лиды снова видны на тех
+   стадиях, которых реально достигли, до слива. */
+function buildFunnelCounts(leads,events){
   var counts={};
   AMO_STAGES.forEach(function(st){counts[st.key]=0;});
   var total=0,rejected=0,revenue=0;
   (leads||[]).forEach(function(l){
-    var s=sortById[l.status_id]||0;
     if(l.status_id===143){rejected++;return;}
     total++;
     revenue+=(Number(l.price)||0);
+  });
+  counts['new']=total;
+  var seenByStage={};
+  AMO_STAGES.forEach(function(st){if(st.sid)seenByStage[st.key]={};});
+  (events||[]).forEach(function(e){
     AMO_STAGES.forEach(function(st){
-      if(st.minSort===0||s>=st.minSort)counts[st.key]++;
+      if(st.sid&&e.status_after===st.sid&&!seenByStage[st.key][e.lead_id]){
+        seenByStage[st.key][e.lead_id]=1;
+        counts[st.key]++;
+      }
     });
   });
   return{counts:counts,total:total,rejected:rejected,revenue:revenue};
@@ -1152,7 +1169,6 @@ function renderCo(){
   var _mb='<div class="mbar-wrap"><div class="mbar"></div></div>';
   var _mbFill=function(p){return'<div class="mbar-wrap"><div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div></div>';};
   var _lbl=function(txt,dlt){return'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><span class="ck-l" style="margin:0">'+txt+'</span>'+(dlt||'')+'</div>';};
-  // Дельты для компании
   var prevRRco=rrPct(S.prevCompany,c.plan);
   var deltaRRco=S.prevCompany>0?Math.max(-99,Math.min(99,Math.round(rrv-prevRRco))):null;
   var prevArpu2=S.prevPayingCompany>0?r(S.prevCompany/S.prevPayingCompany):0;
@@ -1169,32 +1185,31 @@ function renderCo(){
     '<div class="ck">'+_lbl('Платящих',deltaPaying2!==null?deltaAbs(deltaPaying2,'клиента'):'')+'<div class="ck-v num">'+coPaying+'</div><div class="ck-s"><span class="neu">из '+c.clients+' в портфеле</span></div>'+_mb+'</div>',
     '<div class="ck">'+_lbl('Сотрудников',deltaAbs(deltaStaffCo,'чел.'))+'<div class="ck-v num">'+totalStaff+'</div><div class="ck-s"><span class="neu">'+DB.depts.length+' отделов</span></div>'+_mb+'</div>'
   ].join('');
-  // Воронка с выбором отдела
   var funnelHtml='';
   if(S.amoLeads&&S.amoLeads.length){
     var deptPills='<button class="fn2-tag'+(S.cdFunnelDept==='all'?' on':'')+'" onclick="setCdFunnelDept(\'all\')">Вся компания</button>'+
       DB.depts.map(function(d){return'<button class="fn2-tag'+(S.cdFunnelDept===d.id?' on':'')+'" onclick="setCdFunnelDept(\''+d.id+'\')">'+esc(d.name)+'</button>';}).join('');
-    var fLeads;
+    var fLeads,dObj;
     if(S.cdFunnelDept==='all'){
       fLeads=S.amoLeads;
     } else {
-      var dObj=DB.depts.find(function(x){return x.id===S.cdFunnelDept;});
+      dObj=DB.depts.find(function(x){return x.id===S.cdFunnelDept;});
       fLeads=dObj?leadsForMgrs_([],dObj.staff):[];
     }
-    // Tag counts (до применения фильтра)
     var cdTagCounts=getTagCounts_(fLeads);
     var cdTagKeys=Object.keys(cdTagCounts).sort(function(a,b){return cdTagCounts[b]-cdTagCounts[a];}).slice(0,20);
-    // Применяем тег-фильтр
     if(S.cdFunnelTags&&S.cdFunnelTags.length){
       fLeads=fLeads.filter(function(l){
         var tags=(l.tags||'').split(',').map(function(t){return t.trim();});
         return S.cdFunnelTags.some(function(t){return tags.indexOf(t)>=0;});
       });
     }
-    var fc=buildFunnelCounts(fLeads);
+    /* ПРАВКА: events считаем ДО fc и передаём в buildFunnelCounts, чтобы
+       столбцы воронки и строка "Активность за период" строились от одного
+       и того же набора событий и совпадали по числам. */
     var acEvents=S.cdFunnelDept==='all'?S.amoEvents:(dObj?eventsForMgrs_([],dObj.staff):[]);
     var acCd=buildActivityCounts(acEvents);
-    // Пилюли тегов
+    var fc=buildFunnelCounts(fLeads,acEvents);
     var tagPillsHtml='';
     if(cdTagKeys.length){
       var _tpills=cdTagKeys.map(function(t){
@@ -1264,8 +1279,6 @@ function leadsForMgrs_(supaIds,dStaff){
   if(!auids.length)return [];
   return S.amoLeads.filter(function(l){return auids.indexOf(l.responsible_user_id)>=0;});
 }
-/* то же самое, но по amo_events: created_by — кто реально совершил действие,
-   а не responsible_user_id, который может уехать при переназначении лида */
 function eventsForMgrs_(supaIds,dStaff){
   var auids = (supaIds&&supaIds.length)? supaIds.map(empAmo_).filter(Boolean) : deptAuids_(dStaff);
   if(!auids.length)return [];
@@ -1277,7 +1290,6 @@ function applyTagFilter_(leads){
 }
 function getTagCounts_(leads){var tc={};leads.forEach(function(l){(l.tags||'').split(',').forEach(function(t){t=t.trim();if(t)tc[t]=(tc[t]||0)+1;});});return tc;}
 function fmtK_(n){return n>=1000?r(n/1000)+'к':String(n);}
-/* визуальная мини-воронка (для compare и обычного режима) — без планов, только факт и конверсии */
 function funnelBarsHtml_(fc){
   return AMO_STAGES.map(function(st,i){
     var cnt=fc.counts[st.key]||0;
@@ -1292,7 +1304,6 @@ function funnelBarsHtml_(fc){
     '</tr>';
   }).join('');
 }
-/* ── COMPARE: единый график, группированные бары A/B ── */
 var CMP_A='var(--accent)',CMP_B='#A98BFF';
 function funnelCompareHtml_(fcA,fcB){
   var maxAll=1;
@@ -1322,17 +1333,14 @@ function msOptHtml_(stateKey,id,name,hasAmo){
 function renderFunnelContent_(d){
   var hasAmo=S.amoLeads.length>0;
   var deptLeads=leadsForMgrs_([],d.staff);
-  /* ── TAG PILLS (inline, multi-select) ── */
   var allTagCounts=getTagCounts_(deptLeads);
   var tagKeys=Object.keys(allTagCounts).sort(function(a,b){return allTagCounts[b]-allTagCounts[a];}).slice(0,24);
   var tagPills='<button class="fn2-tag'+(S.fnTags.length?'':' on')+'" onclick="fnClearTags()">Все теги</button>'+
     tagKeys.map(function(t){var sel=S.fnTags.indexOf(t)>=0;return'<button class="fn2-tag'+(sel?' on':'')+'" onclick="fnToggleTag('+esc(t).replace(/'/g,"\\'")+')" title="'+esc(t)+'">'+esc(t.length>24?t.slice(0,22)+'…':t)+'<span class="tc">'+allTagCounts[t]+'</span></button>';}).join('');
   var tagBlock='<div class="fn2-tags">'+tagPills+'</div>';
-  /* ── MANAGER MULTISELECT (grouped by dept + search) ── */
   function mgrMs(stateKey,msId,scope){
     var sel=S[stateKey];
     var open=S.msOpen===msId;
-    // Chips: показываем первые 2 + "+N"
     var dispArr=open?(stateKey==='fnMgrs'?(S.fnPendingMgrs||sel):(S.fnPendingMgrsB||sel)):sel;
     var MAX_CHIPS=2;
     var chips;
@@ -1374,9 +1382,12 @@ function renderFunnelContent_(d){
   } else if(S.fnCompare){
     var leadsA=applyTagFilter_(leadsForMgrs_(S.fnMgrs,d.staff));
     var leadsB=applyTagFilter_(leadsForMgrs_(S.fnMgrsB,d.staff));
-    var fcA=buildFunnelCounts(leadsA),fcB=buildFunnelCounts(leadsB);
-    var acA=buildActivityCounts(eventsForMgrs_(S.fnMgrs,d.staff));
-    var acB=buildActivityCounts(eventsForMgrs_(S.fnMgrsB,d.staff));
+    /* ПРАВКА: считаем события один раз, используем и для activity, и для funnel — числа совпадают. */
+    var evA=eventsForMgrs_(S.fnMgrs,d.staff);
+    var evB=eventsForMgrs_(S.fnMgrsB,d.staff);
+    var fcA=buildFunnelCounts(leadsA,evA),fcB=buildFunnelCounts(leadsB,evB);
+    var acA=buildActivityCounts(evA);
+    var acB=buildActivityCounts(evB);
     var nameA=S.fnMgrs.length?S.fnMgrs.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return e?(e.display_name||e.name).split(' ')[0]:'';}).join(', '):'Весь отдел';
     var nameB=S.fnMgrsB.length?S.fnMgrsB.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return e?(e.display_name||e.name).split(' ')[0]:'';}).join(', '):'Весь отдел';
     body='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;padding:10px 12px;background:var(--surface-2);border-radius:10px">'+
@@ -1396,14 +1407,14 @@ function renderFunnelContent_(d){
       '<div>'+funnelCompareHtml_(fcA,fcB)+'</div>';
   } else {
     var leads1=applyTagFilter_(leadsForMgrs_(S.fnMgrs,d.staff));
-    var fc1=buildFunnelCounts(leads1);
-    var ac1=buildActivityCounts(eventsForMgrs_(S.fnMgrs,d.staff));
+    var ev1=eventsForMgrs_(S.fnMgrs,d.staff);
+    var ac1=buildActivityCounts(ev1);
+    var fc1=buildFunnelCounts(leads1,ev1);
     var statRow='<div class="fn2-stat-row">Лидов: <b>'+fc1.total+'</b> &nbsp;·&nbsp; Отказов: <b>'+fc1.rejected+'</b> &nbsp;·&nbsp; Оплат: <b>'+(fc1.counts.paid||0)+'</b></div>'+
       '<div class="fn2-stat-row" style="margin-top:-6px">Активность за период: '+activityLineHtml_(ac1)+'</div>';
     var thead='<thead><tr><th>ЭТАП</th><th>ОБЪЕМ</th><th class="r">ФАКТ</th></tr></thead>';
     body=statRow+'<table class="fn2-tbl" style="width:100%;margin-top:10px">'+thead+'<tbody>'+funnelBarsHtml_(fc1)+'</tbody></table>';
   }
-  /* ── CHANNEL CARDS ── */
   var SKIP={'platform.trysasha.ru':1,'sasha ai':1,'sasha ai krutyak':1,'sashaai':1,'off':1};
   var SKIPPRE=['импорт_','wazzup','ооо '];
   var tagForCards=Object.keys(allTagCounts).filter(function(t){if(SKIP[t.toLowerCase()])return false;for(var i=0;i<SKIPPRE.length;i++){if(t.toLowerCase().indexOf(SKIPPRE[i])===0)return false;}return allTagCounts[t]>=3;}).sort(function(a,b){return allTagCounts[b]-allTagCounts[a];}).slice(0,12);
@@ -1428,7 +1439,6 @@ function renderFunnelContent_(d){
     '<div class="panel"><div class="fn2-head"><div class="fn2-title">Воронка первички</div>'+headerRight+'</div>'+body+'</div>'+
     channelSection;
 }
-/* Pending state для мультиселекта — render только при закрытии */
 S.fnPendingMgrs=null;S.fnPendingMgrsB=null;
 function applyFnPending(){
   if(S.fnPendingMgrs!==null){S.fnMgrs=S.fnPendingMgrs;S.fnPendingMgrs=null;}
@@ -1454,12 +1464,10 @@ window.fnClearTags=function(){S.fnTags=[];render();};
 window.fnMsSearch=function(v){S.msSearch=v;render();setTimeout(function(){var el=document.querySelector('.ms-drop.on .ms-search');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}},0);};
 window.fnToggleTag=function(t){var i=S.fnTags.indexOf(t);if(i>=0)S.fnTags.splice(i,1);else S.fnTags.push(t);render();};
 window.fnRemoveTag=function(t){var i=S.fnTags.indexOf(t);if(i>=0)S.fnTags.splice(i,1);render();};
-/* Сбросить всех — "Весь отдел" */
 window.fnClearMgrs=function(key){
   if(key==='fnMgrs')S.fnPendingMgrs=[];else S.fnPendingMgrsB=[];
   render();
 };
-/* Выбрать / снять весь отдел */
 window.fnSelectDept=function(key,deptId){
   var dept=DB.depts.find(function(x){return x.id===deptId;});
   if(!dept)return;
@@ -1489,7 +1497,6 @@ function renderDept(){
   var dArpu=dPaying>0?r(d.fact/dPaying):0;
   var _mb2='<div class="mbar-wrap"><div class="mbar"></div></div>';
   var _mbF2=function(p){return'<div class="mbar-wrap"><div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div></div>';};
-  // Дельты отдела
   var prevRRd=rrPct(S.prevByDept[d.id]||0,d.plan);
   var deltaRRd=(S.prevByDept[d.id]||0)>0?Math.max(-99,Math.min(99,Math.round(rrv-prevRRd))):null;
   var prevArpuD=S.prevPayingByDept[d.id]>0?r((S.prevByDept[d.id]||0)/S.prevPayingByDept[d.id]):0;
@@ -1554,10 +1561,8 @@ function renderEmpView(){
   var dealAgg=S.dealsByEmp[S.empView]||{fact:0,comm:0,count:0};
   var plan=S.planByEmp[S.empView]||0;
   var mp=pct(dealAgg.fact,plan),mr=rrPct(dealAgg.fact,plan);
-  // вклад менеджера по компаниям + справочник клиентов по org
   var empOrg=S.dealsByEmpOrg[S.empView]||{};
   var cliByOrg={};RAW.clients.forEach(function(c){cliByOrg[c.platform_org_id]=c;});
-  // 1) портфельные клиенты (responsible = этот менеджер), факт = его вклад
   var portfolioOrgs={};
   var myClients=RAW.clients.filter(function(c){return!c.is_hidden&&c.responsible_platform_user_id===emp.platform_user_id;}).map(function(c){
     portfolioOrgs[c.platform_org_id]=1;
@@ -1566,7 +1571,6 @@ function renderEmpView(){
       expiry:c.subscription_end||null,foreign:false};
   });
   var portfolioCount=myClients.length;
-  // 2) «чужие» компании — есть оплата от менеджера в периоде, но клиент не в его портфеле; уйдут сами на след. период если оплат нет
   Object.keys(empOrg).forEach(function(org){
     if(portfolioOrgs[org]||!empOrg[org])return;
     var ci=cliByOrg[org];var nm=ci?ci.company_name:null;
@@ -1596,7 +1600,6 @@ function renderEmpView(){
     '<div class="kcard">'+_lbl3('Платящих',deltaPayingE!==null?deltaAbs(deltaPayingE,'клиента'):'')+'<div class="kv num">'+empPaying+'</div><div class="ks"><span class="neu">из '+portfolioCount+' в портфеле</span></div>'+_mb3+'</div>',
     '<div class="kcard">'+_lbl3('Стаж')+'<div class="kv num">'+(ten!==null?ten+' мес.':'—')+'</div><div class="ks"><span class="neu">'+(emp.hired_at?'с '+fmtD(emp.hired_at):'')+'</span></div>'+_mb3+'</div>'
   ].join('');
-  // Sort clients
   myClients.forEach(function(c){c._min=S.periodStats[c.platform_org_id]||0;c._d=daysTo(c.expiry);});
   myClients.sort(function(a,b){
     var k=S.cliSortKey;
@@ -1640,14 +1643,13 @@ function renderEmpView(){
     '<div><div class="emp-name">'+esc(emp.name)+'</div><div class="emp-meta">'+(emp.role==='lead'?'Тимлид':'Менеджер')+(d?' · '+esc(d.name):'')+'</div></div>'+
     '<div style="margin-left:auto"><button class="btn primary sm" onclick="openPlanModal(\''+S.empView+'\',\''+esc(emp.name)+'\')">Редактировать план</button></div>'+
   '</div>';
-  // График выручки лайфтайм
   var lifeDeals=S.empLifetime[S.empView];
   var chartHtml='';
   if(lifeDeals&&lifeDeals.length){
     var mdata=buildMonthlyData(lifeDeals);
     var empPlan=S.planByEmp[S.empView]||0;var empMonthlyPlanMap=S.empMonthlyPlan&&S.empMonthlyPlan[S.empView]||{};chartHtml='<div class="chart-block">'+buildRevenueChartSVG(mdata,{planMap:empMonthlyPlanMap})+'</div>';
   } else if(!lifeDeals){
-    loadEmpLifetime(S.empView);// автозапуск если кэш очищен refreshPeriod
+    loadEmpLifetime(S.empView);
     chartHtml='<div class="chart-block" style="padding:24px 22px;text-align:center;color:var(--text-3);font-size:12px">Загружаем данные...</div>';
   }
   setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUpFromEmp()">‹ '+esc(d?d.name:'Отдел')+'</button><span class="crumb-title">'+esc(emp.name)+'</span></div>'+calTrigger()+'</div>'+
@@ -1717,7 +1719,6 @@ function amoMappingBlock_(){
 }
 function renderRop(){
   if(!DB){setApp('<div class="topbar"><span class="brand">⚙ Настройки</span></div>');return;}
-  // profile block
   var email=CURRENT_USER?CURRENT_USER.email:'';
   var displayName=CURRENT_USER&&CURRENT_USER.name?CURRENT_USER.name:email;var parts=displayName.trim().split(' ');var initials=parts.length>=2?(parts[0][0]+parts[1][0]).toUpperCase():displayName.substring(0,2).toUpperCase();
   var profBlock='<div class="prof-card">'+
@@ -1756,14 +1757,10 @@ function renderRop(){
   var unassigned=RAW.employees.filter(function(e){return!e.dept_id&&!e.fired_at&&!e.is_archived;});
   var unaBlock=unassigned.length?'<div class="panel"><div class="panel-title">Без отдела ('+unassigned.length+')</div><table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th class="r">Действие</th></tr></thead><tbody>'+
     unassigned.map(function(e){return'<tr><td>'+esc(e.name)+'</td><td><span style="font-size:11px;color:var(--text-3)">'+(e.role==='lead'?'Тимлид':'Менеджер')+'</span></td><td class="r"><button class="btn sm primary" onclick="reassignEmp(\''+e.id+'\')">→ В отдел</button></td></tr>';}).join('')+'</tbody></table></div>':'';
-  var unassignedClients=RAW.clients.filter(function(c){return !c.responsible_platform_user_id&&!c.is_archived&&!c.is_hidden;});
-  var unassignedBlock=unassignedClients.length?(
-    '<div class="panel"><div class="panel-title">Без ответственного на платформе ('+unassignedClients.length+')</div>'+
-    '<p style="font-size:12px;color:var(--text-3);margin:-8px 0 12px;line-height:1.6">Эти организации есть в базе, но на platform.trysasha.ru им не назначен ответственный менеджер — поэтому они не попадают в портфели и лидерборд. Найти их через "+Сделка" можно (раздел "⚠ Без ответственного"), но лучше проставить ответственного прямо на платформе.</p>'+
-    '<table class="tbl"><thead><tr><th>Компания</th><th>Статус на платформе</th><th class="r">Ссылка</th></tr></thead><tbody>'+
-      unassignedClients.map(function(c){return'<tr><td>'+esc(c.company_name||c.platform_org_id)+'</td><td class="muted">'+esc(c.platform_status||'—')+'</td><td class="r"><a class="ext-link" href="'+esc(c.platform_url||'#')+'" target="_blank">Открыть →</a></td></tr>';}).join('')+
-    '</tbody></table></div>'
-  ):'';
+  /* ПРАВКА (баг #2): блок "Без ответственного на платформе" убран из настроек —
+     это был чисто отображаемый список, ни на один расчёт не влиял. Клиентов без
+     ответственного по-прежнему можно найти через "+Сделка" (раздел
+     "⚠ Без ответственного на платформе" в поиске клиента). */
   var deptCards=DB.depts.map(function(x){return'<div class="dept-edit-card"><div><div class="strong">'+esc(x.name)+'</div><div class="muted" style="font-size:11px;margin-top:2px">'+esc(x.tl)+' · '+x.staff.length+' чел.</div></div><div style="display:flex;gap:6px"><button class="btn sm" onclick="editDept(\''+x.id+'\')">Настроить</button><button class="btn sm ghost" onclick="archiveDept(\''+x.id+'\')">В архив</button></div></div>';}).join('');
   var archDeptBlock='';
   if(DB.archivedDepts.length){
@@ -1780,7 +1777,6 @@ function renderRop(){
       '<table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th>Нанят</th><th style="text-align:center">Статус</th><th style="text-align:center">AMO</th><th class="r">Клиентов</th><th class="r">Действие</th></tr></thead><tbody>'+staffRows+'</tbody></table>'+
       firedBlock+'</div>'+
     unaBlock+
-    unassignedBlock+
     '<div class="panel"><div class="adm-head"><div class="panel-title" style="margin:0">Все отделы</div><button class="btn primary" onclick="createDept()">+ Создать отдел</button></div>'+deptCards+archDeptBlock+'</div>'+
     tgIntegrationBlock_());
 }
@@ -1788,7 +1784,6 @@ window.setRopDept=function(id){S.ropDept=id;render();};
 window.toggleRopFired=function(){S.ropShowFired=!S.ropShowFired;render();};
 window.toggleRopArchDepts=function(){S.ropShowArchivedDepts=!S.ropShowArchivedDepts;render();};
 window.changeEmpRole=function(supaId,role){patchEmpSync(supaId,{role:role},{role:role});};
-/* Edit emp modal: single button → actions */
 window.editEmpModal=function(supaId){
   var emp=RAW.employees.find(function(e){return e.id===supaId;});
   if(!emp)return;
@@ -2096,7 +2091,7 @@ function validateDeal(){
 }
 function saveDeal(existing,preDeptId){
   var btn=document.getElementById('msave');
-  if(btn&&btn.disabled&&btn.dataset.saving)return; // защита от даблклика/даблтапа — не даём отправить вторую сделку пока первая ещё летит
+  if(btn&&btn.disabled&&btn.dataset.saving)return;
   var type=document.getElementById('dl-type').value;
   var empId=document.getElementById('dl-emp').value;
   var orgId=_dc.orgId||null;
@@ -2134,16 +2129,25 @@ function pagHtml(cur,tot,total){
     '<button class="pag-btn"'+(cur>=tot-1?' disabled':'')+' onclick="setPayPage('+(cur+1)+')">›</button>'+
     '<select class="sel" onchange="setPayLimit(this.value)" style="margin-left:4px">'+[10,20,50].map(function(n){return'<option value="'+n+'"'+(S.payLimit===n?' selected':'')+'>'+n+'/стр.</option>';}).join('')+'</select></div>';
 }
+/* ПРАВКА (баг #1, XLSX): раньше empName/clientName/deptName и вспомогательные
+   карты empById/clientById создавались ЛОКАЛЬНО внутри renderPayroll() —
+   exportPayroll() (объявлена отдельно) их не видела и падала с
+   ReferenceError при клике на "↓ XLSX". Теперь это глобальные функции с
+   общим кэшем, который обновляется вызовом _refreshPayLookups() и в
+   renderPayroll(), и в exportPayroll(). */
+var _payEmpById={},_payClientById={};
+function _refreshPayLookups(){
+  _payEmpById={};RAW.employees.forEach(function(e){_payEmpById[e.id]=e;});
+  _payClientById={};RAW.clients.forEach(function(c){if(c.platform_org_id)_payClientById[c.platform_org_id]=c;});
+}
+function empName(d){return(_payEmpById[d.employee_id]||{}).name||d.employee_name||'—';}
+function clientName(d){return(_payClientById[d.platform_org_id]||{}).company_name||d.client_name||'—';}
+function deptName(d){var e=_payEmpById[d.employee_id];if(e&&e.dept_id){var dep=(DB.depts||[]).concat(DB.archivedDepts||[]).find(function(x){return x.id===e.dept_id;});if(dep)return dep.name;}return d.dept_name||'—';}
 function renderPayroll(){
+  _refreshPayLookups();
   var deptOpts='<option value="all">Все отделы</option>'+DB.depts.concat(DB.archivedDepts.map(function(d){return{id:d.id,name:d.name+' (архив)'};})).map(function(d){return'<option value="'+d.id+'"'+(S.payDept===d.id?' selected':'')+'>'+esc(d.name)+'</option>';}).join('');
   var allEmps=RAW.employees.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
   var empOpts='<option value="all">Все сотрудники</option>'+allEmps.map(function(e){return'<option value="'+e.id+'"'+(S.payEmp===e.id?' selected':'')+'>'+esc(e.name)+(e.fired_at?' (архив)':'')+'</option>';}).join('');
-  // lookup таблицы — актуальные имена из RAW
-  var empById={};RAW.employees.forEach(function(e){empById[e.id]=e;});
-  var clientById={};RAW.clients.forEach(function(c){if(c.platform_org_id)clientById[c.platform_org_id]=c;});
-  function empName(d){return(empById[d.employee_id]||{}).name||d.employee_name||'—';}
-  function clientName(d){return(clientById[d.platform_org_id]||{}).company_name||d.client_name||'—';}
-  function deptName(d){var e=empById[d.employee_id];if(e&&e.dept_id){var dep=DB.depts.concat(DB.archivedDepts||[]).find(function(x){return x.id===e.dept_id;});if(dep)return dep.name;}return d.dept_name||'—';}
   var filtered=S.dealsRaw.filter(function(d){
     if(S.payDept!=='all'&&d.dept_id!==S.payDept)return false;
     if(S.payEmp!=='all'&&d.employee_id!==S.payEmp)return false;
@@ -2200,15 +2204,16 @@ function renderPayroll(){
     '<div class="panel">'+filters+dealTable+pagHtml(page,tot,total)+'</div>'+sumBlock);
 }
 window.exportPayroll=function(){
+  _refreshPayLookups();
   var filtered=S.dealsRaw.filter(function(d){
     if(S.payDept!=='all'&&d.dept_id!==S.payDept)return false;
     if(S.payEmp!=='all'&&d.employee_id!==S.payEmp)return false;
-    if(S.paySearch&&!(d.client_name||'').toLowerCase().includes(S.paySearch.toLowerCase()))return false;
+    if(S.paySearch&&!clientName(d).toLowerCase().includes(S.paySearch.toLowerCase()))return false;
     return true;
   });
   if(!filtered.length){alert('Нет сделок для выгрузки');return;}
   var deals=filtered.map(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);return{'Дата':d.deal_date,'Событие':d.event_type==='refund'?'Возврат':'Оплата','Сотрудник':empName(d),'Отдел':deptName(d),'Клиент':clientName(d),'Сумма':amt,'Мотивация %':d.motivation_pct,'Начислено':amt*(Number(d.motivation_pct)||0)/100,'Комментарий':d.note||''};});
-  var byEmp2={};filtered.forEach(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);var k=d.employee_id||'—';var e=byEmp2[k]||(byEmp2[k]={'Сотрудник':d.employee_name,'Отдел':d.dept_name,'Сделок':0,'Выручка':0,'Начислено':0});e['Сделок']++;e['Выручка']+=amt;e['Начислено']+=amt*(Number(d.motivation_pct)||0)/100;});
+  var byEmp2={};filtered.forEach(function(d){var sign=d.event_type==='refund'?-1:1;var amt=sign*(Number(d.amount)||0);var k=d.employee_id||'—';var e=byEmp2[k]||(byEmp2[k]={'Сотрудник':empName(d),'Отдел':deptName(d),'Сделок':0,'Выручка':0,'Начислено':0});e['Сделок']++;e['Выручка']+=amt;e['Начислено']+=amt*(Number(d.motivation_pct)||0)/100;});
   var summary=Object.keys(byEmp2).map(function(k){return byEmp2[k];}).sort(function(a,b){return b['Начислено']-a['Начислено'];});
   var wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(summary),'Свод');
@@ -2240,21 +2245,8 @@ var DEPT_COLORS=['#3D6BF5','#2ED3A7','#F5B544','#FB6E5B','#A78BFA','#38BDF8'];
 var MNS=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
 S.empLifetime={};S.empMonthlyPlan={};
 S.companyLifetime=null;S.companyLifetimeLoading=false;
-// tooltip
 var _tip=null;
 function _getTip(){if(!_tip){_tip=document.createElement('div');_tip.className='chart-tip';document.body.appendChild(_tip);}return _tip;}
-window.showChartTip=function(e,el){
-  var t=_getTip();
-  var month=el.getAttribute('data-month')||'';
-  var clients=[];try{clients=JSON.parse(el.getAttribute('data-clients')||'[]');}catch(x){}
-  var total=Number(el.getAttribute('data-total')||0);
-  var mParts=month.split('-');var mLabel=(mParts[2]?'':'')+MNS[Number(mParts[1]||1)-1]+' '+mParts[0];
-  var rows=clients.slice(0,8).map(function(c){return'<div class="chart-tip-row"><span class="chart-tip-name">'+esc(c.n)+'</span><span class="chart-tip-amt">'+fmt(c.a)+'</span></div>';}).join('');
-  if(clients.length>8)rows+='<div style="font-size:10px;color:var(--text-3);margin-top:2px">+ещё '+(clients.length-8)+'</div>';
-  t.innerHTML='<div class="chart-tip-month">'+mLabel+'</div>'+rows+'<div class="chart-tip-total"><span>Итого</span><span>'+fmt(total)+'</span></div>';
-  t.style.display='block';
-  _positionTip(e);
-};
 window.moveTip=function(e){_positionTip(e);};
 window.hideTip=function(){var t=_getTip();t.style.display='none';};
 function _positionTip(e){
@@ -2264,7 +2256,6 @@ function _positionTip(e){
   if(y<8)y=8;if(y+th>window.innerHeight-8)y=window.innerHeight-th-8;
   t.style.left=x+'px';t.style.top=y+'px';
 }
-/* ═══ PREMIUM CHART ENGINE ═══ */
 function fmtRub(n){if(!n||n===0)return'0';var s=Math.round(n).toString();var result='';for(var i=0;i<s.length;i++){if(i>0&&(s.length-i)%3===0)result+=' ';result+=s[i];}return result;}
 function fmtShort(n){
   if(!n||n===0)return'0';
@@ -2282,7 +2273,6 @@ function buildSmoothPath(pts){
   }
   return d;
 }
-// Улучшенный tooltip — с динамикой к предыдущему месяцу
 window.showChartTip=function(e,el){
   var t=_getTip();
   var month=el.getAttribute('data-month')||'';
@@ -2325,7 +2315,6 @@ function buildRevenueChartSVG(monthData,opts){
   var plan=opts.plan||0;
   var planMap=opts.planMap||{};
   var hasPlan=plan>0||Object.keys(planMap).length>0;
-  // Всегда 12 месяцев
   var months12=[];
   for(var mi=11;mi>=0;mi--){
     var d=new Date(TODAY.getFullYear(),TODAY.getMonth()-mi,1);
@@ -2343,7 +2332,6 @@ function buildRevenueChartSVG(monthData,opts){
   var p10=Math.pow(10,Math.floor(Math.log10(mx)));
   var nice=Math.ceil(mx/p10*1.25)*p10;
   var out=[];
-  // Grid + Y labels
   var steps=4;
   for(var si=0;si<=steps;si++){
     var sv=Math.round(nice/steps*si);
@@ -2364,7 +2352,6 @@ function buildRevenueChartSVG(monthData,opts){
     var cl=JSON.stringify(m.clients).replace(/"/g,'&quot;');
     var hov=' data-month="'+m.month+'" data-total="'+m.total+'" data-prev="'+prev+'" data-clients="'+cl+'"'+
       ' onmouseover="showChartTip(event,this)" onmousemove="moveTip(event)" onmouseout="hideTip()"';
-    // Невидимая hover зона — вся колонка
     bars.push('<rect x="'+Math.round(cx-slot/2)+'" y="'+PT+'" width="'+Math.round(slot)+'" height="'+DH+'" fill="transparent"'+hov+'/>');
     if(hasPlan){
       var monthPlan=planMap[m.month]||plan||0;
@@ -2396,7 +2383,6 @@ function buildRevenueChartSVG(monthData,opts){
   return'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block" xmlns="http://www.w3.org/2000/svg">'+out.join('')+'</svg>'+legend;
 }
 function buildMonthlyData(deals){
-  // Группируем по YYYY-MM
   var months={};
   deals.forEach(function(d){
     if(!d.deal_date)return;
@@ -2409,13 +2395,10 @@ function buildMonthlyData(deals){
     var cn=d.client_name||d.platform_org_id||'—';
     months[mk].clients[cn]=(months[mk].clients[cn]||0)+amt;
   });
-  // Заполняем все месяцы от первого до текущего
   var keys=Object.keys(months).sort();
   if(!keys.length)return[];
   var first=keys[0];
   var arr=[];
-  // ВАЖНО: new Date('YYYY-MM-01') парсит как UTC midnight → в UTC+3 < local now → июнь пропадает
-  // Используем new Date(y,m,1) — local time, как и now
   var _fp=first.split('-');
   var cur=new Date(Number(_fp[0]),Number(_fp[1])-1,1);
   var now=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
@@ -2428,7 +2411,6 @@ function buildMonthlyData(deals){
   }
   return arr;
 }
-// Загрузка lifetime данных менеджера
 window.loadEmpLifetime=function(empId){
   if(S.empLifetime[empId])return Promise.resolve();
   return Promise.all([
@@ -2436,7 +2418,6 @@ window.loadEmpLifetime=function(empId){
     sbGet('monthly_targets?select=year,month,plan_amount&employee_id=eq.'+empId+'&limit=100')
   ]).then(function(res){
     S.empLifetime[empId]=res[0]||[];
-    // строим помесячный план для графика
     var planMap={};
     (res[1]||[]).forEach(function(t){
       var mk=t.year+'-'+String(t.month).padStart(2,'0');
@@ -2446,7 +2427,6 @@ window.loadEmpLifetime=function(empId){
     render();
   });
 };
-// Загрузка lifetime данных компании
 window.loadCompanyLifetime=function(){
   if(S.companyLifetime||S.companyLifetimeLoading)return Promise.resolve();
   S.companyLifetimeLoading=true;
@@ -2454,7 +2434,6 @@ window.loadCompanyLifetime=function(){
     .then(function(rows){S.companyLifetime=rows||[];S.companyLifetimeLoading=false;render();});
 };
 function buildCompanyMonthlyData(deals){
-  // Группируем по YYYY-MM + dept
   var months={};
   deals.forEach(function(d){
     if(!d.deal_date)return;
@@ -2496,7 +2475,6 @@ function buildCompanyChartSVG(compData){
     var totalH=m.total>0?Math.max(3,r(m.total/maxV*drawH)):0;
     var yBase=padT+drawH;
     var curY=yBase;
-    // stacked segments bottom-up
     depts.forEach(function(dept,di){
       var v=m.byDept[dept]||0;if(!v)return;
       var segH=r(v/maxV*drawH);if(!segH)return;
@@ -2507,7 +2485,6 @@ function buildCompanyChartSVG(compData){
         ' data-month="'+m.month+'" data-total="'+m.total+'" data-clients="'+tip+'"'+
         ' onmouseover="showChartTip(event,this)" onmousemove="moveTip(event)" onmouseout="hideTip()"/>';
     });
-    // Rounded top
     if(totalH>0){bars+='<rect x="'+x+'" y="'+(yBase-totalH)+'" width="'+bw+'" height="4" rx="3" fill="'+(DEPT_COLORS[(depts.findIndex(function(d){return m.byDept[d]>0;}))%DEPT_COLORS.length]+'" pointer-events="none"/>');}
     var show=n<=12||(i%3===0)||i===n-1;
     if(show){var mp=m.month.split('-');var lbl=MNS[Number(mp[1])-1]+(n>12&&(i===0||mp[1]==='01')?' '+mp[0]:'');labels+='<text x="'+(padL+i*slot+slot/2)+'" y="'+(H-6)+'" text-anchor="middle" font-size="9" fill="var(--text-3)">'+lbl+'</text>';}
@@ -2541,7 +2518,6 @@ window.doForgot=async function(){
       headers:{'apikey':SB_ANON,'Content-Type':'application/json'},
       body:JSON.stringify({email:email})
     });
-    // Supabase всегда возвращает 200 (не раскрывает есть ли такой email)
     var card=document.querySelector('#login-screen .login-card');
     if(card){
       card.innerHTML='<div class="login-brand">Sasha<span class="a">AI</span></div>'+
@@ -2556,7 +2532,6 @@ window.doForgot=async function(){
     btn.disabled=false;btn.textContent='Отправить письмо';
   }
 };
-// Показываем форму для установки нового пароля (когда пришли по ссылке из письма)
 function showResetPassword(accessToken){
   var el=document.getElementById('login-screen');
   el.style.display='flex';
@@ -2587,7 +2562,6 @@ window.doResetPassword=async function(token){
     });
     var d=await r.json();
     if(d.error){err.textContent=d.error_description||'Ошибка. Попробуй снова.';btn.disabled=false;btn.textContent='Сохранить пароль';return;}
-    // Чистим hash из URL
     if(history.replaceState)history.replaceState(null,'',window.location.pathname);
     showLogin('Пароль изменён — теперь войди с новым паролем');
   }catch(e){
@@ -2595,7 +2569,6 @@ window.doResetPassword=async function(token){
     btn.disabled=false;btn.textContent='Сохранить пароль';
   }
 };
-// Проверяем hash в URL при загрузке (Supabase редиректит сюда после recovery письма)
 function checkRecoveryHash(){
   var hash=window.location.hash;
   if(!hash)return false;
@@ -2609,7 +2582,7 @@ function checkRecoveryHash(){
 }
 /* ═══ BOOT ═══ */
 (function(){
-  if(checkRecoveryHash()){return;} // recovery flow из email
+  if(checkRecoveryHash()){return;}
   if(authLoad()){
     loadPreferences().then(function(){loadCurrentEmployee().then(function(){loadData();});});
   } else {
