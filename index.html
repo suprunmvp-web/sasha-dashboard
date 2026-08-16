@@ -471,7 +471,6 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .chart-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px;gap:12px;}
 .chart-total{font-size:24px;font-weight:700;letter-spacing:-.03em;color:var(--text);line-height:1;}
 .chart-total-sub{font-size:11px;color:var(--text-3);margin-top:3px;}
-.chart-tip{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;font-size:12px;color:var(--text);box-shadow:var(--shadow);pointer-events:none;z-index:9000;min-width:180px;max-width:260px;display:none;backdrop-filter:blur(8px);}
 .dept-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;}
 .dept-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-2);}
 .dept-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
@@ -495,6 +494,36 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .prof-name{font-size:15px;font-weight:600;}
 .prof-email{font-size:12px;color:var(--text-3);margin-top:2px;}
 .prof-actions{display:flex;gap:8px;flex-wrap:wrap;}
+/* ═══ ВОРОНКА (matrix + channel cards) ═══ */
+.mtx-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.mtx-tbl{width:100%;border-collapse:collapse;font-size:13px;min-width:520px;}
+.mtx-tbl th{text-align:right;font-size:11px;font-weight:600;color:var(--text-2);padding:8px 12px;white-space:nowrap;border-bottom:1px solid var(--border-soft);}
+.mtx-tbl th:first-child{text-align:left;}
+.mtx-tbl td{text-align:right;padding:8px 12px;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.mtx-tbl td.lbl{text-align:left;color:var(--text-2);font-size:12px;}
+.mtx-tbl tr.mtx-key td{font-weight:600;color:var(--text);border-top:1px solid var(--border-soft);}
+.mtx-tbl tr.mtx-key td.lbl{color:var(--text);}
+.mtx-tbl tr.mtx-cr td{color:var(--text-3);font-size:12px;font-style:italic;}
+.mtx-tbl tr.mtx-spacer td{padding:6px 0;}
+.mtx-tbl th.mtx-total-h{color:var(--accent);}
+.mtx-tbl td.mtx-total{color:var(--accent);font-weight:700;}
+.ch-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:10px;}
+.ch-card-head .ch-name{margin-bottom:0;}
+.ch-actions{display:flex;gap:2px;flex-shrink:0;}
+.ch-icon-btn{width:22px;height:22px;border-radius:6px;border:none;background:transparent;color:var(--text-3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;}
+.ch-icon-btn:hover{background:var(--surface-3);color:var(--text);}
+.ch-icon-btn.danger:hover{background:var(--red-bg);color:var(--red);}
+.also-in{font-size:10px;color:var(--amber);background:var(--amber-bg);padding:2px 7px;border-radius:8px;margin-left:auto;flex-shrink:0;}
+.ungrouped-chip{font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-2);display:inline-flex;align-items:center;gap:4px;}
+.ungrouped-chip .tc{font-size:11px;opacity:.8;}
+.tag-check-list{display:flex;flex-direction:column;gap:2px;max-height:280px;overflow-y:auto;border:1px solid var(--border-soft);border-radius:10px;padding:6px;}
+.tag-check{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;font-size:13px;cursor:pointer;}
+.tag-check:hover{background:var(--surface-2);}
+.tag-check input{flex-shrink:0;}
+.tag-check .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tag-check .cnt{font-size:11px;color:var(--text-3);flex-shrink:0;}
+.tag-check .already{font-size:10px;color:var(--amber);flex-shrink:0;}
+.modal-sub{font-size:12px;color:var(--text-3);margin:-6px 0 12px;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -627,26 +656,24 @@ var TODAY=new Date();
 var MIN_DATE=new Date(2026,2,1);
 /* ═══ AMO CONSTANTS ═══ */
 var AMO_PIPE_SALES=10139846;
-/* sort по status_id (справочно — в подсчёте воронки больше не используется, см. buildFunnelCounts) */
-var AMO_SORT={80336510:5,80940894:10,80336570:20,80494174:30,80336514:40,80429334:50,80336522:60,80376014:70,80336526:80,142:10000,143:11000};
-/* этапы воронки для дашборда.
-   ПРАВКА (полный фикс воронки): добавлены два ранее невидимых промежуточных
-   статуса (sort 60/70) — названия-заглушки, замени на реальные названия
-   стадий из AmoCRM (status_id 80336522 и 80376014). */
+var AMO_LOST_SID=143;
+/* этапы воронки — 6 подтверждённых реальных статусов AmoCRM, ранжированные
+   по порядку прохождения (см. buildFunnelCounts — furthestRank/backfill).
+   "Лид распределён" (dist) в этот массив НЕ входит — это просто количество
+   лидов у менеджера, без status_id, см. renderVoronka. */
 var AMO_STAGES=[
-  {key:'new',    label:'Новые лиды',        minSort:0,  sid:null},
-  {key:'work',   label:'Взят в работу',      minSort:30, sid:80494174},
-  {key:'mset',   label:'Встреча назначена',  minSort:40, sid:80336514},
-  {key:'mdone',  label:'Встреча проведена',  minSort:50, sid:80429334},
-  {key:'stage60',label:'Этап 60 (уточни название в Amo)', minSort:60, sid:80336522},
-  {key:'stage70',label:'Этап 70 (уточни название в Amo)', minSort:70, sid:80376014},
-  {key:'inv',    label:'Счёт выставлен',     minSort:80, sid:80336526},
-  {key:'paid',   label:'Оплачено',           minSort:10000,sid:142}
+  {key:'qual',   label:'Квалифицирован',     sid:80494174},
+  {key:'mset',   label:'Встреча назначена',  sid:80336514},
+  {key:'mdone',  label:'Встреча проведена',  sid:80429334},
+  {key:'demo',   label:'Демо собрано',       sid:80336522},
+  {key:'inv',    label:'Счёт выставлен',     sid:80336526},
+  {key:'paid',   label:'Оплачено',           sid:142}
 ];
+function stageRank_(sid){for(var i=0;i<AMO_STAGES.length;i++){if(AMO_STAGES[i].sid===sid)return i;}return -1;}
 var MN=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 var DOW=['пн','вт','ср','чт','пт','сб','вс'];
 /* ═══ STATE ═══ */
-var DB=null, RAW={depts:[],employees:[],clients:[],allClients:[]};
+var DB=null, RAW={depts:[],employees:[],clients:[],allClients:[],tagGroups:[],tagGroupMembers:[]};
 var S={
   role:'lb',theme:'light',loading:true,loadErr:null,
   rangeFrom:new Date(TODAY.getFullYear(),TODAY.getMonth(),1),
@@ -661,12 +688,13 @@ var S={
   fnCompare:false,fnMgrs:[],fnMgrsB:[],fnTags:[],msOpen:null,msSearch:'',empAmoMap:{},
   dealsRaw:[],dealsByEmp:{},dealsByOrg:{},dealsByDept:{},dealsByEmpOrg:{},
   prevByEmp:{},prevByDept:{},prevCompany:0,
-  amoLeads:[],amoEvents:[],amoUsers:[],
+  amoLeads:[],amoEvents:[],amoEventsAll:[],amoUsers:[],
   planByEmp:{},
   payDept:'all',payEmp:'all',paySearch:'',payLimit:20,payPage:0,
   staffSortKey:'fact',staffSortDir:-1,
   cliSortKey:'minLeft',cliSortDir:1,
   sumSort:'fact',sumSortDir:-1,
+  vDept:'all',vChGroup:null,vUngroupedOpen:false,
 };
 /* ═══ UTILS ═══ */
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
@@ -720,10 +748,13 @@ function loadData(){
     sbGet('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,subscription_status,subscription_end,platform_status,is_hidden,is_archived&order=company_name&limit=3000'),
     sbGet('clients?select=platform_org_id,company_name,responsible_platform_user_id,is_archived,is_hidden&order=company_name&limit=5000'),
     sbGet('amo_users?select=amo_user_id,name,email&order=name&limit=500'),
-    sbGet('telegram_integrations?select=*&order=created_at')
+    sbGet('telegram_integrations?select=*&order=created_at'),
+    sbGet('amo_tag_groups?select=*&order=created_at').catch(function(){return [];}),
+    sbGet('amo_tag_group_members?select=*').catch(function(){return [];})
   ]).then(function(res){
     RAW.depts=res[0];RAW.employees=res[1];RAW.clients=res[2];RAW.allClients=res[3]||[];S.amoUsers=res[4]||[];
     RAW.tgIntegrations=res[5]||[];
+    RAW.tagGroups=res[6]||[];RAW.tagGroupMembers=res[7]||[];
     if(!RAW.depts.length&&!RAW.employees.length)S.loadErr='В Supabase нет ни одного отдела и сотрудника — проверь таблицы departments/employees напрямую в Supabase.';
     buildDB();S.loading=false;
     if(!S.ropDept&&DB.depts.length)S.ropDept=DB.depts[0].id;
@@ -737,6 +768,12 @@ function reloadEmployees(){
 function reloadDepts(){
   return sbGet('departments?select=*&order=created_at').then(function(rows){if(rows&&rows.length)RAW.depts=rows;buildDB();});
 }
+function reloadTagGroups(){
+  return Promise.all([
+    sbGet('amo_tag_groups?select=*&order=created_at').catch(function(){return [];}),
+    sbGet('amo_tag_group_members?select=*').catch(function(){return [];})
+  ]).then(function(res){RAW.tagGroups=res[0]||[];RAW.tagGroupMembers=res[1]||[];render();});
+}
 function patchEmpSync(supaId,patch,optimistic){
   if(optimistic){RAW.employees.forEach(function(e){if(e.id===supaId)Object.assign(e,optimistic);});buildDB();render();}
   return sbPatch('employees','id=eq.'+supaId,patch).then(reloadEmployees,reloadEmployees).then(render);
@@ -744,7 +781,7 @@ function patchEmpSync(supaId,patch,optimistic){
 function refreshPeriod(){
   S.empLifetime={};S.empMonthlyPlan={};
   S.periodReady=false;
-  return Promise.all([loadPeriodStats(),loadDeals(),loadPrevDeals(),loadPlans(),loadAmoLeads(),loadAmoEvents()]).then(function(){buildDB();S.periodReady=true;render();}).catch(function(e){console.error(e);S.periodReady=true;render();});
+  return Promise.all([loadPeriodStats(),loadDeals(),loadPrevDeals(),loadPlans(),loadAmoLeads(),loadAmoEvents(),loadAmoEventsAll()]).then(function(){buildDB();S.periodReady=true;render();}).catch(function(e){console.error(e);S.periodReady=true;render();});
 }
 /* ═══ BUILD DB ═══ */
 function resolveEmpAmo_(emp){
@@ -918,11 +955,11 @@ function loadAmoLeads(){
   }).catch(function(){S.amoLeads=[];});
 }
 /* ═══ AMO EVENTS (активность за период + воронка) ═══
-   ПРАВКА (полный фикс воронки): раньше сюда тянулись события только для 4
-   стадий из ACTIVITY_STAGES (для строки "Активность за период"). Теперь
-   тянем события по ВСЕМ стадиям из AMO_STAGES — они нужны buildFunnelCounts,
-   чтобы столбцы воронки считались от тех же событий, что и активность, и
-   совпадали с ней по построению (см. buildFunnelCounts ниже). */
+   Источник — таблица amo_lead_events (заполняется amosync.gs), колонка
+   status_after_id. loadAmoEvents() тянет события ТОЛЬКО за выбранный период
+   (для строки "Активность за период"). loadAmoEventsAll() тянет ВСЮ историю
+   без ограничения по датам — нужна buildFunnelCounts для furthestRank/backfill:
+   лид мог дойти до этапа до начала или после конца периода отображения. */
 var ACTIVITY_STAGES=[
   {key:'mset', label:'встреч назначено', sid:80336514},
   {key:'mdone',label:'проведено',        sid:80429334},
@@ -934,13 +971,20 @@ function loadAmoEvents(){
   var fromU=Math.floor(S.rangeFrom.getTime()/1000);
   var toU=Math.floor(S.rangeTo.getTime()/1000)+86400;
   var sids=AMO_STAGES.map(function(s){return s.sid;}).filter(Boolean).join(',');
-  return sbGet('amo_events?select=lead_id,status_after,created_by,created_at_unix&created_at_unix=gte.'+fromU+'&created_at_unix=lte.'+toU+'&status_after=in.('+sids+')&limit=20000').then(function(rows){
-    S.amoEvents=rows||[];
+  return sbGet('amo_lead_events?select=lead_id,status_after_id,created_by,created_at_unix&created_at_unix=gte.'+fromU+'&created_at_unix=lte.'+toU+'&status_after_id=in.('+sids+')&limit=20000').then(function(rows){
+    S.amoEvents=(rows||[]).map(function(e){return{lead_id:e.lead_id,status_after:e.status_after_id,created_by:e.created_by,created_at_unix:e.created_at_unix};});
   }).catch(function(){S.amoEvents=[];});
 }
-/* ПРАВКА: дедуп по lead_id — считаем уникальных лидов, дошедших до этапа в
-   периоде, а не количество переходов (иначе повторный переход того же лида
-   в тот же статус в периоде задваивал бы счётчик). */
+function loadAmoEventsAll(){
+  S.amoEventsAll=[];
+  var sids=AMO_STAGES.map(function(s){return s.sid;}).filter(Boolean).join(',');
+  return sbGet('amo_lead_events?select=lead_id,status_after_id,created_by,created_at_unix&status_after_id=in.('+sids+')&limit=100000').then(function(rows){
+    S.amoEventsAll=(rows||[]).map(function(e){return{lead_id:e.lead_id,status_after:e.status_after_id,created_by:e.created_by,created_at_unix:e.created_at_unix};});
+  }).catch(function(){S.amoEventsAll=[];});
+}
+/* дедуп по lead_id — считаем уникальных лидов, дошедших до этапа в периоде,
+   а не количество переходов (иначе повторный переход того же лида в тот же
+   статус в периоде задваивал бы счётчик). */
 function buildActivityCounts(events){
   var counts={},seen={};
   ACTIVITY_STAGES.forEach(function(s){counts[s.key]=0;seen[s.key]={};});
@@ -957,37 +1001,41 @@ function buildActivityCounts(events){
 function activityLineHtml_(counts){
   return ACTIVITY_STAGES.map(function(s){return s.label+' <b style="color:var(--text)">'+(counts[s.key]||0)+'</b>';}).join(' &nbsp;·&nbsp; ');
 }
-/* ПРАВКА (полный фикс воронки): раньше эта функция брала ТОЛЬКО amo_leads —
-   лиды, СОЗДАННЫЕ в периоде, и считала по их ТЕКУЩЕМУ статусу (cumulative
-   по sort). Из-за этого столбцы воронки и строка "Активность за период"
-   (которая всегда считалась по amo_events, т.е. по датам самих событий)
-   расходились: встреча/счёт/оплата, случившиеся в периоде у лида, заведённого
-   раньше, в воронку не попадали. Слитые (143) лиды выкидывались целиком со
-   всех этапов, даже если у них была активность.
-   Теперь: "Новые лиды" (new) — как раньше, по дате создания лида (это
-   единственная стадия, у которой нет status_after события). Все остальные
-   стадии считаются от amo_events (тот же массив, что и buildActivityCounts),
-   дедуп по lead_id — уникальный лид на этап. Слитые лиды снова видны на тех
-   стадиях, которых реально достигли, до слива. */
-function buildFunnelCounts(leads,events){
+/* ═══ ВОРОНКА: furthestRank + backfill ═══
+   Для каждого лида считаем максимальный ранг (индекс в AMO_STAGES), которого
+   он когда-либо достигал — либо по текущему status_id, либо по любому
+   историческому событию status_after_id (из ПОЛНОЙ истории eventsAll, без
+   привязки к периоду — лид мог дойти до этапа до/после выбранного периода).
+   Лид засчитывается на каждый этап от 0 до furthest включительно — так
+   лиды, перескочившие этапы (звонок КЦ, передача от уволенного), задним
+   числом получают зачёт за пропущенные этапы без превышения 100% конверсии.
+   Слитые (143) лиды не исключаются из подсчёта: они просто не имеют ранга
+   от текущего статуса (143 не входит в AMO_STAGES), но сохраняют зачёт за
+   этапы, реально достигнутые до слива — через события eventsAll. */
+function buildFunnelCounts(leads,eventsAll){
   var counts={};
   AMO_STAGES.forEach(function(st){counts[st.key]=0;});
   var total=0,rejected=0,revenue=0;
+  var leadIds={};
   (leads||[]).forEach(function(l){
-    if(l.status_id===143){rejected++;return;}
-    total++;
-    revenue+=(Number(l.price)||0);
+    leadIds[l.id]=1;
+    if(l.status_id===AMO_LOST_SID){rejected++;}
+    else{total++;revenue+=(Number(l.price)||0);}
   });
-  counts['new']=total;
-  var seenByStage={};
-  AMO_STAGES.forEach(function(st){if(st.sid)seenByStage[st.key]={};});
-  (events||[]).forEach(function(e){
-    AMO_STAGES.forEach(function(st){
-      if(st.sid&&e.status_after===st.sid&&!seenByStage[st.key][e.lead_id]){
-        seenByStage[st.key][e.lead_id]=1;
-        counts[st.key]++;
-      }
-    });
+  var furthest={};
+  (leads||[]).forEach(function(l){
+    var rk=stageRank_(l.status_id);
+    if(rk>=0)furthest[l.id]=rk;
+  });
+  (eventsAll||[]).forEach(function(e){
+    if(!leadIds.hasOwnProperty(e.lead_id))return;
+    var rk=stageRank_(e.status_after);
+    if(rk<0)return;
+    if(furthest[e.lead_id]===undefined||rk>furthest[e.lead_id])furthest[e.lead_id]=rk;
+  });
+  Object.keys(furthest).forEach(function(leadId){
+    var rk=furthest[leadId];
+    for(var i=0;i<=rk;i++)counts[AMO_STAGES[i].key]++;
   });
   return{counts:counts,total:total,rejected:rejected,revenue:revenue};
 }
@@ -1017,7 +1065,7 @@ function ctxEmpId(){
 }
 function ctxDeptId(){return(S.role==='cd'&&S.dept&&!S.empView)?S.dept:null;}
 function roleBar(){
-  var tabs=[['lb','Лидерборд'],['cd','Дашборд'],['pay','Логи']];
+  var tabs=[['lb','Лидерборд'],['cd','Дашборд'],['voronka','Воронка'],['pay','Логи']];
   var seg=tabs.map(function(t){return'<button class="role-btn'+(S.role===t[0]?' on':'')+'" onclick="setRole(\''+t[0]+'\')">'+t[1]+'</button>';}).join('');
   var eid=ctxEmpId(),did=ctxDeptId();
   return'<div class="rolebar"><div class="role-seg">'+seg+'</div><div class="bar-right">'+
@@ -1071,6 +1119,7 @@ function render(){
   if(S.role==='rop'){renderRop();return;}
   if(S.role==='lb'){renderLb();return;}
   if(S.role==='pay'){renderPayroll();return;}
+  if(S.role==='voronka'){renderVoronka();return;}
   if(S.dept&&S.empView){renderEmpView();return;}
   if(S.dept){renderDept();return;}
   renderCo();
@@ -1154,11 +1203,6 @@ function renderLb(){
     (S.loadErr?'<div class="err-banner">⚠ '+esc(S.loadErr)+'</div>':'')+tabBar+html);
 }
 /* ═══ ДАШБОРД ═══ */
-if(!S.cdFunnelDept)S.cdFunnelDept='all';
-if(!S.cdFunnelTags)S.cdFunnelTags=[];
-window.setCdFunnelDept=function(id){S.cdFunnelDept=id;S.cdFunnelTags=[];render();};
-window.toggleCdFunnelTag=function(enc){var t=decodeURIComponent(enc);var i=S.cdFunnelTags.indexOf(t);if(i>=0)S.cdFunnelTags.splice(i,1);else S.cdFunnelTags.push(t);render();};
-window.clearCdFunnelTags=function(){S.cdFunnelTags=[];render();};
 function renderCo(){
   var c=DB.company,cp=pct(c.fact,c.plan),rrv=rrPct(c.fact,c.plan);
   var allClients=DB.depts.reduce(function(a,d){return a.concat(d.clients);},[]);
@@ -1185,55 +1229,6 @@ function renderCo(){
     '<div class="ck">'+_lbl('Платящих',deltaPaying2!==null?deltaAbs(deltaPaying2,'клиента'):'')+'<div class="ck-v num">'+coPaying+'</div><div class="ck-s"><span class="neu">из '+c.clients+' в портфеле</span></div>'+_mb+'</div>',
     '<div class="ck">'+_lbl('Сотрудников',deltaAbs(deltaStaffCo,'чел.'))+'<div class="ck-v num">'+totalStaff+'</div><div class="ck-s"><span class="neu">'+DB.depts.length+' отделов</span></div>'+_mb+'</div>'
   ].join('');
-  var funnelHtml='';
-  if(S.amoLeads&&S.amoLeads.length){
-    var deptPills='<button class="fn2-tag'+(S.cdFunnelDept==='all'?' on':'')+'" onclick="setCdFunnelDept(\'all\')">Вся компания</button>'+
-      DB.depts.map(function(d){return'<button class="fn2-tag'+(S.cdFunnelDept===d.id?' on':'')+'" onclick="setCdFunnelDept(\''+d.id+'\')">'+esc(d.name)+'</button>';}).join('');
-    var fLeads,dObj;
-    if(S.cdFunnelDept==='all'){
-      fLeads=S.amoLeads;
-    } else {
-      dObj=DB.depts.find(function(x){return x.id===S.cdFunnelDept;});
-      fLeads=dObj?leadsForMgrs_([],dObj.staff):[];
-    }
-    var cdTagCounts=getTagCounts_(fLeads);
-    var cdTagKeys=Object.keys(cdTagCounts).sort(function(a,b){return cdTagCounts[b]-cdTagCounts[a];}).slice(0,20);
-    if(S.cdFunnelTags&&S.cdFunnelTags.length){
-      fLeads=fLeads.filter(function(l){
-        var tags=(l.tags||'').split(',').map(function(t){return t.trim();});
-        return S.cdFunnelTags.some(function(t){return tags.indexOf(t)>=0;});
-      });
-    }
-    /* ПРАВКА: events считаем ДО fc и передаём в buildFunnelCounts, чтобы
-       столбцы воронки и строка "Активность за период" строились от одного
-       и того же набора событий и совпадали по числам. */
-    var acEvents=S.cdFunnelDept==='all'?S.amoEvents:(dObj?eventsForMgrs_([],dObj.staff):[]);
-    var acCd=buildActivityCounts(acEvents);
-    var fc=buildFunnelCounts(fLeads,acEvents);
-    var tagPillsHtml='';
-    if(cdTagKeys.length){
-      var _tpills=cdTagKeys.map(function(t){
-        var sel=!!(S.cdFunnelTags&&S.cdFunnelTags.indexOf(t)>=0);
-        var enc=encodeURIComponent(t);
-        return'<button class="fn2-tag'+(sel?' on':'')+'" onclick="toggleCdFunnelTag(\''+enc+'\')" >'+esc(t)+'<span class="tc">'+cdTagCounts[t]+'</span></button>';
-      }).join('');
-      tagPillsHtml='<div class="fn2-tags" style="margin-bottom:10px">'+
-        '<button class="fn2-tag'+((!S.cdFunnelTags||!S.cdFunnelTags.length)?' on':'')+'" onclick="clearCdFunnelTags()">Все теги</button>'+
-        _tpills+
-      '</div>';
-    }
-    var thead='<thead><tr><th>Этап</th><th>Объём</th><th class="r">Факт</th></tr></thead>';
-    funnelHtml='<div class="panel" style="margin-bottom:14px">'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'+
-        '<div class="panel-title" style="margin:0">Воронка первички</div>'+
-        '<span style="font-size:12px;color:var(--text-3)">Лидов: <b style="color:var(--text)">'+fc.total+'</b> · Оплат: <b style="color:var(--text)">'+(fc.counts.paid||0)+'</b></span>'+
-      '</div>'+
-      '<div class="fn2-tags" style="margin-bottom:10px">'+deptPills+'</div>'+
-      tagPillsHtml+
-      '<div class="fn2-stat-row" style="margin-bottom:10px">Активность за период: '+activityLineHtml_(acCd)+'</div>'+
-      '<table class="fn2-tbl" style="width:100%">'+thead+'<tbody>'+funnelBarsHtml_(fc)+'</tbody></table>'+
-    '</div>';
-  }
   var cards=DB.depts.length?DB.depts.map(function(d){
     var p2=pct(d.fact,d.plan),rr2=rrPct(d.fact,d.plan),c2=grad(p2);
     var bT=d.plan>0?(rr2>=100?'В темпе':rr2>=80?'Отстаём':'Критично'):'Нет плана',bC=d.plan>0?(rr2>=100?'bg':rr2>=80?'ba':'br'):'br';
@@ -1254,7 +1249,6 @@ function renderCo(){
   setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="a">AI</span> · Дашборд</span></div>'+calTrigger()+'</div>'+
     (S.loadErr?'<div class="err-banner">⚠ '+esc(S.loadErr)+'</div>':'')+
     '<div class="ckpi">'+kH+'</div>'+
-    funnelHtml+
     '<div class="dept-grid">'+cards+'</div>'+archHtml);
 }
 window.toggleArchDepts=function(){S.showArchivedDepts=!S.showArchivedDepts;render();};
@@ -1279,10 +1273,16 @@ function leadsForMgrs_(supaIds,dStaff){
   if(!auids.length)return [];
   return S.amoLeads.filter(function(l){return auids.indexOf(l.responsible_user_id)>=0;});
 }
+/* ПРАВКА: раньше фильтровали события по created_by (автору перехода), из-за
+   чего события, сделанные call-центром/роботом/другим сотрудником по чужому
+   лиду, не засчитывались менеджеру-владельцу лида. Теперь фильтруем по
+   принадлежности лида (тот же список, что leadsForMgrs_), а не по автору. */
 function eventsForMgrs_(supaIds,dStaff){
-  var auids = (supaIds&&supaIds.length)? supaIds.map(empAmo_).filter(Boolean) : deptAuids_(dStaff);
-  if(!auids.length)return [];
-  return S.amoEvents.filter(function(e){return auids.indexOf(e.created_by)>=0;});
+  var leads=leadsForMgrs_(supaIds,dStaff);
+  if(!leads.length)return [];
+  var leadIdSet={};
+  leads.forEach(function(l){leadIdSet[l.id]=1;});
+  return S.amoEvents.filter(function(e){return leadIdSet.hasOwnProperty(e.lead_id);});
 }
 function applyTagFilter_(leads){
   if(!S.fnTags.length)return leads;
@@ -1382,10 +1382,9 @@ function renderFunnelContent_(d){
   } else if(S.fnCompare){
     var leadsA=applyTagFilter_(leadsForMgrs_(S.fnMgrs,d.staff));
     var leadsB=applyTagFilter_(leadsForMgrs_(S.fnMgrsB,d.staff));
-    /* ПРАВКА: считаем события один раз, используем и для activity, и для funnel — числа совпадают. */
     var evA=eventsForMgrs_(S.fnMgrs,d.staff);
     var evB=eventsForMgrs_(S.fnMgrsB,d.staff);
-    var fcA=buildFunnelCounts(leadsA,evA),fcB=buildFunnelCounts(leadsB,evB);
+    var fcA=buildFunnelCounts(leadsA,S.amoEventsAll),fcB=buildFunnelCounts(leadsB,S.amoEventsAll);
     var acA=buildActivityCounts(evA);
     var acB=buildActivityCounts(evB);
     var nameA=S.fnMgrs.length?S.fnMgrs.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return e?(e.display_name||e.name).split(' ')[0]:'';}).join(', '):'Весь отдел';
@@ -1409,7 +1408,7 @@ function renderFunnelContent_(d){
     var leads1=applyTagFilter_(leadsForMgrs_(S.fnMgrs,d.staff));
     var ev1=eventsForMgrs_(S.fnMgrs,d.staff);
     var ac1=buildActivityCounts(ev1);
-    var fc1=buildFunnelCounts(leads1,ev1);
+    var fc1=buildFunnelCounts(leads1,S.amoEventsAll);
     var statRow='<div class="fn2-stat-row">Лидов: <b>'+fc1.total+'</b> &nbsp;·&nbsp; Отказов: <b>'+fc1.rejected+'</b> &nbsp;·&nbsp; Оплат: <b>'+(fc1.counts.paid||0)+'</b></div>'+
       '<div class="fn2-stat-row" style="margin-top:-6px">Активность за период: '+activityLineHtml_(ac1)+'</div>';
     var thead='<thead><tr><th>ЭТАП</th><th>ОБЪЕМ</th><th class="r">ФАКТ</th></tr></thead>';
@@ -1521,7 +1520,7 @@ function renderDept(){
     var mb=k.bar!=null?_mbF2(k.bar):_mb2;
     return'<div class="kcard">'+lbl+'<div class="kv num">'+k.v+'</div><div class="ks">'+(k.raw?k.s:'<span class="neu">'+k.s+'</span>')+'</div>'+mb+'</div>';
   }).join('');
-  var tabs='<div class="tab-row">'+[['staff','Сотрудники'],['funnel','Воронка']].map(function(t){return'<button class="tab'+(S.tab===t[0]?' on':'')+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>';
+  var tabs='<div class="tab-row">'+[['staff','Сотрудники']].map(function(t){return'<button class="tab'+(S.tab===t[0]?' on':'')+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>';
   var ct='';
   if(S.tab==='staff'){
     var staff=[].concat(d.staff);
@@ -1549,7 +1548,6 @@ function renderDept(){
     }).join(''):'<tr><td colspan="7"><div class="empty-state">Нет сотрудников</div></td></tr>';
     ct='<div class="panel"><p style="font-size:11px;color:var(--text-3);margin-bottom:14px">Нажми на строку — увидишь клиентов сотрудника</p><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
   }
-  if(S.tab==='funnel'){ct=renderFunnelContent_(d);}
   setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUp()">‹ Дашборд</button><span class="crumb-title">'+esc(d.name)+'</span><button class="btn sm ghost" onclick="archiveDept(\''+d.id+'\')" style="margin-left:4px">В архив</button></div>'+calTrigger()+'</div><div class="dept-kpi">'+kH+'</div>'+tabs+ct);
 }
 /* ═══ EMPLOYEE VIEW ═══ */
@@ -1657,6 +1655,158 @@ function renderEmpView(){
     chartHtml+
     '<div class="panel"><div class="panel-title">Клиенты ('+myClients.length+')</div><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>'+archCliBlock+'</div>');
 }
+/* ═══ ВОРОНКА (менеджерская матрица + каналы по тегам) ═══
+   Модель — mockup voronka_mockup.html, согласованный с Ильёй: строки-метрики,
+   менеджеры-столбцы, колонка "Итого". "Распределено лидов" — это просто
+   S.amoLeads.length у менеджера (без status_id), остальные строки (кроме
+   Демо/Счёт, которых в матрице по мокапу нет) — из buildFunnelCounts. */
+function vDeptStaff_(){
+  if(S.vDept==='all')return DB.depts.reduce(function(a,d){return a.concat(d.staff);},[]);
+  var d=DB.depts.find(function(x){return x.id===S.vDept;});
+  return d?d.staff:[];
+}
+function vDeptLeads_(){return leadsForMgrs_([],vDeptStaff_());}
+function tagGroupTags_(g){return(RAW.tagGroupMembers||[]).filter(function(m){return m.group_id===g.id;}).map(function(m){return m.tag;});}
+function leadsHaveAnyTag_(l,tagSet){var tags=(l.tags||'').split(',').map(function(t){return t.trim();});return tags.some(function(t){return tagSet.indexOf(t)>=0;});}
+function renderVoronka(){
+  var deptPills='<button class="fn2-tag'+(S.vDept==='all'?' on':'')+'" onclick="setVDept(\'all\')">Вся компания</button>'+
+    DB.depts.map(function(d){return'<button class="fn2-tag'+(S.vDept===d.id?' on':'')+'" onclick="setVDept(\''+d.id+'\')">'+esc(d.name)+'</button>';}).join('');
+  var staffList=vDeptStaff_();
+  var deptLeads=leadsForMgrs_([],staffList);
+  var hasAmo=S.amoLeads.length>0;
+  var activeGroup=S.vChGroup?(RAW.tagGroups||[]).find(function(g){return g.id===S.vChGroup;}):null;
+  var chTags=activeGroup?tagGroupTags_(activeGroup):null;
+  var mgrTblHtml='';
+  if(!hasAmo){
+    mgrTblHtml='<div class="panel"><div class="fn-empty">🔒 Запусти <code>amoSyncAll()</code> в GAS — данные появятся здесь.</div></div>';
+  } else if(!staffList.length){
+    mgrTblHtml='<div class="panel"><div class="empty-state">В этом отделе нет сотрудников.</div></div>';
+  } else {
+    var viewStaff=staffList.map(function(m){
+      var leads=leadsForMgrs_([m.supaId],null);
+      if(chTags)leads=leads.filter(function(l){return leadsHaveAnyTag_(l,chTags);});
+      var fc=buildFunnelCounts(leads,S.amoEventsAll);
+      var paidLeads=leads.filter(function(l){return l.status_id===142;});
+      var revenue=paidLeads.reduce(function(a,l){return a+(Number(l.price)||0);},0);
+      return{name:m.name,dist:leads.length,qual:fc.counts.qual||0,mset:fc.counts.mset||0,mdone:fc.counts.mdone||0,paid:fc.counts.paid||0,revenue:revenue};
+    });
+    function sumF(k){return viewStaff.reduce(function(a,m){return a+m[k];},0);}
+    var tot={dist:sumF('dist'),qual:sumF('qual'),mset:sumF('mset'),mdone:sumF('mdone'),paid:sumF('paid'),revenue:sumF('revenue')};
+    function pf(f,p){return p>0?(f/p*100).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—';}
+    var headCells='<th>Метрика</th><th class="mtx-total-h">Итого</th>'+viewStaff.map(function(m){return'<th>'+esc(m.name)+'</th>';}).join('');
+    function metricRow(label,totCellHtml,fn,cls){return'<tr class="'+(cls||'')+'"><td class="lbl">'+label+'</td><td class="mtx-total">'+totCellHtml+'</td>'+viewStaff.map(function(m){return'<td>'+fn(m)+'</td>';}).join('')+'</tr>';}
+    var bodyRows=
+      metricRow('Распределено лидов',fmtNum(tot.dist),function(m){return fmtNum(m.dist);},'mtx-key')+
+      metricRow('CR в квал. лида',pf(tot.qual,tot.dist),function(m){return pf(m.qual,m.dist);})+
+      metricRow('Лидов квалифицированно',fmtNum(tot.qual),function(m){return fmtNum(m.qual);},'mtx-key')+
+      metricRow('CR во встречу',pf(tot.mset,tot.qual),function(m){return pf(m.mset,m.qual);})+
+      metricRow('Назначено встреч',fmtNum(tot.mset),function(m){return fmtNum(m.mset);},'mtx-key')+
+      metricRow('CR в проведённую',pf(tot.mdone,tot.mset),function(m){return pf(m.mdone,m.mset);})+
+      metricRow('Проведено встреч',fmtNum(tot.mdone),function(m){return fmtNum(m.mdone);},'mtx-key')+
+      metricRow('CR в оплату',pf(tot.paid,tot.mdone),function(m){return pf(m.paid,m.mdone);})+
+      metricRow('Оплат получено',fmtNum(tot.paid),function(m){return fmtNum(m.paid);},'mtx-key')+
+      metricRow('Средний чек',tot.paid>0?fmt(Math.round(tot.revenue/tot.paid)):'—',function(m){return m.paid>0?fmt(Math.round(m.revenue/m.paid)):'—';})+
+      metricRow('Выручка',fmt(tot.revenue),function(m){return fmt(m.revenue);},'mtx-key')+
+      '<tr class="mtx-spacer"><td colspan="'+(viewStaff.length+2)+'"></td></tr>'+
+      metricRow('CR лид — оплата',pf(tot.paid,tot.dist),function(m){return pf(m.paid,m.dist);},'mtx-cr')+
+      metricRow('CR встреча — оплата',pf(tot.paid,tot.mdone),function(m){return pf(m.paid,m.mdone);},'mtx-cr');
+    var filterChip=activeGroup?'<span class="fn2-tag on" style="cursor:pointer" onclick="setVChGroup(null)">'+esc(activeGroup.name)+' ✕</span>':'';
+    mgrTblHtml='<div class="panel"><div class="adm-head" style="margin-bottom:12px"><div class="panel-title" style="margin:0">Менеджеры'+(S.vDept==='all'?' · вся компания':'')+'</div>'+filterChip+'</div>'+
+      '<div class="mtx-wrap"><table class="mtx-tbl"><thead><tr>'+headCells+'</tr></thead><tbody>'+bodyRows+'</tbody></table></div>'+
+    '</div>';
+  }
+  var allTagCounts=getTagCounts_(deptLeads);
+  var assignedTags={};
+  (RAW.tagGroups||[]).forEach(function(g){tagGroupTags_(g).forEach(function(t){assignedTags[t]=1;});});
+  var groupCards=(RAW.tagGroups||[]).map(function(g){
+    var tags=tagGroupTags_(g);
+    var gLeads=deptLeads.filter(function(l){return leadsHaveAnyTag_(l,tags);});
+    var paid=gLeads.filter(function(l){return l.status_id===142;});
+    var revenue=paid.reduce(function(a,l){return a+(Number(l.price)||0);},0);
+    var conv=gLeads.length>0?r(paid.length/gLeads.length*100):0;
+    return{id:g.id,name:g.name,leads:gLeads.length,paid:paid.length,revenue:revenue,conv:conv,on:S.vChGroup===g.id};
+  }).sort(function(a,b){return b.revenue-a.revenue;});
+  var groupCardsHtml=groupCards.map(function(g){
+    return'<div class="ch-card'+(g.on?' on':'')+'" onclick="setVChGroup(\''+g.id+'\')">'+
+      '<div class="ch-card-head"><div class="ch-name" style="margin-bottom:0">'+esc(g.name)+'</div>'+
+        '<div class="ch-actions"><button class="ch-icon-btn" title="Редактировать" onclick="event.stopPropagation();openTagGroupModal(\''+g.id+'\')">'+ICO.edit+'</button></div>'+
+      '</div>'+
+      '<div class="ch-stat"><span>Лидов</span><b>'+fmtNum(g.leads)+'</b></div>'+
+      '<div class="ch-stat"><span>Оплат</span><b>'+fmtNum(g.paid)+'</b></div>'+
+      '<div class="ch-stat"><span>Выручка</span><b>'+fmtK_(g.revenue)+'</b></div>'+
+      '<div class="ch-conv" style="color:'+grad(g.conv*3.3)+'">'+g.conv+'%</div>'+
+      '<div style="font-size:10px;color:var(--text-3)">конверсия</div>'+
+    '</div>';
+  }).join('');
+  var ungroupedTags=Object.keys(allTagCounts).filter(function(t){return!assignedTags[t];}).sort(function(a,b){return allTagCounts[b]-allTagCounts[a];});
+  var ungroupedChips=ungroupedTags.map(function(t){return'<span class="ungrouped-chip">'+esc(t)+'<span class="tc">'+allTagCounts[t]+'</span></span>';}).join('');
+  var channelsPanel='<div class="panel">'+
+    '<div class="adm-head" style="margin-bottom:12px"><div class="panel-title" style="margin:0">Каналы</div>'+
+      '<button class="btn primary sm" onclick="openTagGroupModal()">+ Группа</button></div>'+
+    '<div class="ch-grid">'+(groupCardsHtml||'<div class="empty-state">Пока нет групп тегов. Нажми «+ Группа», чтобы собрать теги в канал.</div>')+'</div>'+
+    (ungroupedTags.length?('<div class="arch-toggle'+(S.vUngroupedOpen?' open':'')+'" onclick="toggleVUngrouped()"><span class="arr">›</span> Без группы ('+ungroupedTags.length+')</div><div class="arch-block'+(S.vUngroupedOpen?' open':'')+'">'+ungroupedChips+'</div>'):'')+
+  '</div>';
+  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="a">AI</span> · Воронка</span></div>'+calTrigger()+'</div>'+
+    (S.loadErr?'<div class="err-banner">⚠ '+esc(S.loadErr)+'</div>':'')+
+    '<div class="fn2-tags">'+deptPills+'</div>'+mgrTblHtml+channelsPanel);
+}
+window.setVDept=function(id){S.vDept=id;S.vChGroup=null;render();};
+window.setVChGroup=function(id){S.vChGroup=(S.vChGroup===id)?null:id;render();};
+window.toggleVUngrouped=function(){S.vUngroupedOpen=!S.vUngroupedOpen;render();};
+/* ═══ группы тегов (каналы) — CRUD на amo_tag_groups / amo_tag_group_members ═══
+   ВНИМАНИЕ: схема этих двух таблиц не была подтверждена напрямую в Supabase —
+   предполагается amo_tag_groups(id,name,created_at) и
+   amo_tag_group_members(id,group_id,tag). Если названия колонок другие —
+   поправь тут и в loadData(). */
+window.openTagGroupModal=function(groupId){
+  var isEdit=groupId!==undefined&&groupId!==null;
+  var g=isEdit?(RAW.tagGroups||[]).find(function(x){return x.id===groupId;}):null;
+  var dLeads=vDeptLeads_();
+  var allTagCounts=getTagCounts_(dLeads);
+  var otherGroups={};
+  (RAW.tagGroups||[]).forEach(function(gg){
+    if(isEdit&&gg.id===groupId)return;
+    tagGroupTags_(gg).forEach(function(t){(otherGroups[t]=otherGroups[t]||[]).push(gg.name);});
+  });
+  var myTags=isEdit?tagGroupTags_(g):[];
+  var tagKeys=Object.keys(allTagCounts).sort(function(a,b){return allTagCounts[b]-allTagCounts[a];});
+  var rows=tagKeys.map(function(t){
+    var checked=myTags.indexOf(t)>=0;
+    var elsewhere=otherGroups[t];
+    return'<label class="tag-check"><input type="checkbox" data-tag="'+esc(t)+'" '+(checked?'checked':'')+'><span class="nm">'+esc(t)+'</span><span class="cnt">'+allTagCounts[t]+'</span>'+(elsewhere?'<span class="also-in">также в «'+esc(elsewhere.join('», «'))+'»</span>':'')+'</label>';
+  }).join('');
+  var body='<div class="modal-sub">Тег может входить сразу в несколько групп — при выборе он просто прибавится к обеим.</div>'+
+    '<div class="field"><label>Название группы</label><input id="tgm-name" placeholder="например, Партнёрка" value="'+(isEdit?esc(g.name):'')+'"></div>'+
+    '<div class="tag-check-list">'+(rows||'<div class="ms-empty">Тегов не найдено в текущем отделе</div>')+'</div>'+
+    (isEdit?'<div style="margin-bottom:4px"><button class="btn sm" style="color:var(--red)" onclick="deleteTagGroup(\''+groupId+'\')">Удалить группу</button></div>':'');
+  openModal(isEdit?'Группа тегов':'Новая группа тегов',body,function(){saveTagGroup(isEdit?groupId:null);});
+};
+window.saveTagGroup=function(groupId){
+  var name=(document.getElementById('tgm-name').value||'').trim();
+  var checked=[].slice.call(document.querySelectorAll('.tag-check input:checked')).map(function(i){return i.dataset.tag;});
+  if(!name||!checked.length){alert('Впиши название и выбери хотя бы один тег');return;}
+  if(groupId){
+    sbPatch('amo_tag_groups','id=eq.'+groupId,{name:name})
+      .then(function(){return sbDelete('amo_tag_group_members','group_id=eq.'+groupId);})
+      .then(function(){return Promise.all(checked.map(function(t){return sbPost('amo_tag_group_members',{group_id:groupId,tag:t});}));})
+      .then(function(){closeModal();reloadTagGroups();});
+  } else {
+    sbPost('amo_tag_groups',{name:name}).then(function(res){
+      var ng=Array.isArray(res)?res[0]:res;
+      if(!ng||!ng.id){closeModal();return null;}
+      return Promise.all(checked.map(function(t){return sbPost('amo_tag_group_members',{group_id:ng.id,tag:t});}));
+    }).then(function(){closeModal();reloadTagGroups();});
+  }
+};
+window.deleteTagGroup=function(groupId){
+  closeModal();
+  openModal('Удалить группу?','<p style="font-size:13px;color:var(--text-2);line-height:1.7">Теги вернутся в «Без группы».</p>',function(){
+    closeModal();
+    sbDelete('amo_tag_group_members','group_id=eq.'+groupId)
+      .then(function(){return sbDelete('amo_tag_groups','id=eq.'+groupId);})
+      .then(reloadTagGroups);
+  });
+};
 /* ═══ РОП / НАСТРОЙКИ ═══ */
 function tgDays_(arr){var N=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];return(arr||[]).slice().sort(function(a,b){return a-b;}).map(function(d){return N[d-1]||d;}).join(', ')||'—';}
 function tgIntegrationBlock_(){
@@ -1757,10 +1907,6 @@ function renderRop(){
   var unassigned=RAW.employees.filter(function(e){return!e.dept_id&&!e.fired_at&&!e.is_archived;});
   var unaBlock=unassigned.length?'<div class="panel"><div class="panel-title">Без отдела ('+unassigned.length+')</div><table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th class="r">Действие</th></tr></thead><tbody>'+
     unassigned.map(function(e){return'<tr><td>'+esc(e.name)+'</td><td><span style="font-size:11px;color:var(--text-3)">'+(e.role==='lead'?'Тимлид':'Менеджер')+'</span></td><td class="r"><button class="btn sm primary" onclick="reassignEmp(\''+e.id+'\')">→ В отдел</button></td></tr>';}).join('')+'</tbody></table></div>':'';
-  /* ПРАВКА (баг #2): блок "Без ответственного на платформе" убран из настроек —
-     это был чисто отображаемый список, ни на один расчёт не влиял. Клиентов без
-     ответственного по-прежнему можно найти через "+Сделка" (раздел
-     "⚠ Без ответственного на платформе" в поиске клиента). */
   var deptCards=DB.depts.map(function(x){return'<div class="dept-edit-card"><div><div class="strong">'+esc(x.name)+'</div><div class="muted" style="font-size:11px;margin-top:2px">'+esc(x.tl)+' · '+x.staff.length+' чел.</div></div><div style="display:flex;gap:6px"><button class="btn sm" onclick="editDept(\''+x.id+'\')">Настроить</button><button class="btn sm ghost" onclick="archiveDept(\''+x.id+'\')">В архив</button></div></div>';}).join('');
   var archDeptBlock='';
   if(DB.archivedDepts.length){
@@ -1965,7 +2111,7 @@ function renderMgr(){
     '<div class="kcard"><div class="kl">Сделок за период</div><div class="kv num">'+myDeals+'</div><div class="ks"><span class="neu">'+myClients.length+' клиентов</span></div></div>'+
     '<div class="kcard"><div class="kl">Ранрейт</div><div class="kv num">'+mr+'%</div><div class="ks"><span class="neu">'+(mr>=100?'в темпе':mr>=80?'близко к плану':'отстаём')+'</span></div></div>';
   var tabs='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">'+
-    '<div class="tab-row" style="margin-bottom:0">'+[['clients','Клиенты'],['funnel','Воронка']].map(function(t){return'<button class="tab'+(S.mgrTab===t[0]?' on':'')+'" onclick="setMgrTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>'+
+    '<div class="tab-row" style="margin-bottom:0">'+[['clients','Клиенты']].map(function(t){return'<button class="tab'+(S.mgrTab===t[0]?' on':'')+'" onclick="setMgrTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>'+
     (meSupaId?'<button class="btn sm primary" onclick="openPlanModal(\''+meSupaId+'\',\''+esc(me?me.name:'')+'\')">Редактировать план</button>':'')+'</div>';
   var content='';
   if(S.mgrTab==='clients'){
@@ -2004,7 +2150,6 @@ function renderMgr(){
     }
     content='<div class="panel"><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>'+archCliBlock+'</div>';
   }
-  if(S.mgrTab==='funnel'){var prevMgrs=S.fnMgrs?S.fnMgrs.slice():[];S.fnMgrs=[S.mgrAs];try{content=renderFunnelContent_(d);}finally{S.fnMgrs=prevMgrs;}}
   setApp('<div class="topbar"><div class="nav-left"><span class="brand">Кабинет менеджера</span>'+asSel+'</div>'+calTrigger()+'</div>'+
     '<div class="dept-kpi" style="grid-template-columns:repeat(3,1fr)">'+kH+'</div>'+tabs+content);
 }
@@ -2129,12 +2274,6 @@ function pagHtml(cur,tot,total){
     '<button class="pag-btn"'+(cur>=tot-1?' disabled':'')+' onclick="setPayPage('+(cur+1)+')">›</button>'+
     '<select class="sel" onchange="setPayLimit(this.value)" style="margin-left:4px">'+[10,20,50].map(function(n){return'<option value="'+n+'"'+(S.payLimit===n?' selected':'')+'>'+n+'/стр.</option>';}).join('')+'</select></div>';
 }
-/* ПРАВКА (баг #1, XLSX): раньше empName/clientName/deptName и вспомогательные
-   карты empById/clientById создавались ЛОКАЛЬНО внутри renderPayroll() —
-   exportPayroll() (объявлена отдельно) их не видела и падала с
-   ReferenceError при клике на "↓ XLSX". Теперь это глобальные функции с
-   общим кэшем, который обновляется вызовом _refreshPayLookups() и в
-   renderPayroll(), и в exportPayroll(). */
 var _payEmpById={},_payClientById={};
 function _refreshPayLookups(){
   _payEmpById={};RAW.employees.forEach(function(e){_payEmpById[e.id]=e;});
