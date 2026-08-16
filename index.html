@@ -496,17 +496,17 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .prof-actions{display:flex;gap:8px;flex-wrap:wrap;}
 /* ═══ ВОРОНКА (matrix + channel cards) ═══ */
 .mtx-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-.mtx-tbl{width:100%;border-collapse:collapse;font-size:13px;min-width:520px;}
-.mtx-tbl th{text-align:right;font-size:11px;font-weight:600;color:var(--text-2);padding:8px 12px;white-space:nowrap;border-bottom:1px solid var(--border-soft);}
-.mtx-tbl th:first-child{text-align:left;}
-.mtx-tbl td{text-align:right;padding:8px 12px;white-space:nowrap;font-variant-numeric:tabular-nums;}
-.mtx-tbl td.lbl{text-align:left;color:var(--text-2);font-size:12px;}
-.mtx-tbl tr.mtx-key td{font-weight:600;color:var(--text);border-top:1px solid var(--border-soft);}
-.mtx-tbl tr.mtx-key td.lbl{color:var(--text);}
-.mtx-tbl tr.mtx-cr td{color:var(--text-3);font-size:12px;font-style:italic;}
-.mtx-tbl tr.mtx-spacer td{padding:6px 0;}
-.mtx-tbl th.mtx-total-h{color:var(--accent);}
-.mtx-tbl td.mtx-total{color:var(--accent);font-weight:700;}
+.mtx-tbl{border-collapse:collapse;width:100%;font-size:13px;}
+.mtx-tbl th,.mtx-tbl td{border:1px solid var(--border-soft);padding:9px 16px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.mtx-tbl th:first-child,.mtx-tbl td:first-child{text-align:left;position:sticky;left:0;background:var(--surface);z-index:1;}
+.mtx-tbl thead th{background:var(--surface-2);font-weight:600;color:var(--text);font-size:12px;}
+.mtx-tbl thead th:first-child{background:var(--surface-2);}
+.mtx-tbl td.lbl{color:var(--text-2);font-weight:500;}
+.mtx-tbl tr.mtx-cr td{color:var(--text-2);font-size:12.5px;}
+.mtx-tbl tr.mtx-key td{font-weight:700;color:var(--text);}
+.mtx-tbl tr.mtx-spacer td{border:none;padding:5px 0;background:transparent;}
+.mtx-tbl th.mtx-total-h{background:var(--surface-3);color:var(--text);}
+.mtx-tbl td.mtx-total{background:var(--surface-2);font-weight:700;color:var(--text);}
 .ch-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:10px;}
 .ch-card-head .ch-name{margin-bottom:0;}
 .ch-actions{display:flex;gap:2px;flex-shrink:0;}
@@ -1677,41 +1677,45 @@ function renderVoronka(){
   var activeGroup=S.vChGroup?(RAW.tagGroups||[]).find(function(g){return g.id===S.vChGroup;}):null;
   var chTags=activeGroup?tagGroupTags_(activeGroup):null;
   var mgrTblHtml='';
+  /* "Вся компания" — колонки это ОТДЕЛЫ (сравнение конверсий между отделами).
+     Конкретный отдел выбран — колонки это менеджеры этого отдела (как раньше). */
+  var isAllView=S.vDept==='all';
+  var cols=isAllView?DB.depts.map(function(d){return{name:d.name,staff:d.staff};}):staffList.map(function(m){return{name:m.name,staff:[m]};});
   if(!hasAmo){
     mgrTblHtml='<div class="panel"><div class="fn-empty">🔒 Запусти <code>amoSyncAll()</code> в GAS — данные появятся здесь.</div></div>';
-  } else if(!staffList.length){
-    mgrTblHtml='<div class="panel"><div class="empty-state">В этом отделе нет сотрудников.</div></div>';
+  } else if(!cols.length){
+    mgrTblHtml='<div class="panel"><div class="empty-state">Нет данных для отображения.</div></div>';
   } else {
-    var viewStaff=staffList.map(function(m){
-      var leads=leadsForMgrs_([m.supaId],null);
+    var viewCols=cols.map(function(col){
+      var leads=leadsForMgrs_([],col.staff);
       if(chTags)leads=leads.filter(function(l){return leadsHaveAnyTag_(l,chTags);});
       var fc=buildFunnelCounts(leads,S.amoEventsAll);
       var paidLeads=leads.filter(function(l){return l.status_id===142;});
       var revenue=paidLeads.reduce(function(a,l){return a+(Number(l.price)||0);},0);
-      return{name:m.name,dist:leads.length,qual:fc.counts.qual||0,mset:fc.counts.mset||0,mdone:fc.counts.mdone||0,paid:fc.counts.paid||0,revenue:revenue};
+      return{name:col.name,dist:leads.length,qual:fc.counts.qual||0,mset:fc.counts.mset||0,mdone:fc.counts.mdone||0,paid:fc.counts.paid||0,revenue:revenue};
     });
-    function sumF(k){return viewStaff.reduce(function(a,m){return a+m[k];},0);}
+    function sumF(k){return viewCols.reduce(function(a,c){return a+c[k];},0);}
     var tot={dist:sumF('dist'),qual:sumF('qual'),mset:sumF('mset'),mdone:sumF('mdone'),paid:sumF('paid'),revenue:sumF('revenue')};
     function pf(f,p){return p>0?(f/p*100).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—';}
-    var headCells='<th>Метрика</th><th class="mtx-total-h">Итого</th>'+viewStaff.map(function(m){return'<th>'+esc(m.name)+'</th>';}).join('');
-    function metricRow(label,totCellHtml,fn,cls){return'<tr class="'+(cls||'')+'"><td class="lbl">'+label+'</td><td class="mtx-total">'+totCellHtml+'</td>'+viewStaff.map(function(m){return'<td>'+fn(m)+'</td>';}).join('')+'</tr>';}
+    var headCells='<th>Метрика</th><th class="mtx-total-h">Итого</th>'+viewCols.map(function(c){return'<th>'+esc(c.name)+'</th>';}).join('');
+    function metricRow(label,totCellHtml,fn,cls){return'<tr class="'+(cls||'')+'"><td class="lbl">'+label+'</td><td class="mtx-total">'+totCellHtml+'</td>'+viewCols.map(function(c){return'<td>'+fn(c)+'</td>';}).join('')+'</tr>';}
     var bodyRows=
-      metricRow('Распределено лидов',fmtNum(tot.dist),function(m){return fmtNum(m.dist);},'mtx-key')+
-      metricRow('CR в квал. лида',pf(tot.qual,tot.dist),function(m){return pf(m.qual,m.dist);})+
-      metricRow('Лидов квалифицированно',fmtNum(tot.qual),function(m){return fmtNum(m.qual);},'mtx-key')+
-      metricRow('CR во встречу',pf(tot.mset,tot.qual),function(m){return pf(m.mset,m.qual);})+
-      metricRow('Назначено встреч',fmtNum(tot.mset),function(m){return fmtNum(m.mset);},'mtx-key')+
-      metricRow('CR в проведённую',pf(tot.mdone,tot.mset),function(m){return pf(m.mdone,m.mset);})+
-      metricRow('Проведено встреч',fmtNum(tot.mdone),function(m){return fmtNum(m.mdone);},'mtx-key')+
-      metricRow('CR в оплату',pf(tot.paid,tot.mdone),function(m){return pf(m.paid,m.mdone);})+
-      metricRow('Оплат получено',fmtNum(tot.paid),function(m){return fmtNum(m.paid);},'mtx-key')+
-      metricRow('Средний чек',tot.paid>0?fmt(Math.round(tot.revenue/tot.paid)):'—',function(m){return m.paid>0?fmt(Math.round(m.revenue/m.paid)):'—';})+
-      metricRow('Выручка',fmt(tot.revenue),function(m){return fmt(m.revenue);},'mtx-key')+
-      '<tr class="mtx-spacer"><td colspan="'+(viewStaff.length+2)+'"></td></tr>'+
-      metricRow('CR лид — оплата',pf(tot.paid,tot.dist),function(m){return pf(m.paid,m.dist);},'mtx-cr')+
-      metricRow('CR встреча — оплата',pf(tot.paid,tot.mdone),function(m){return pf(m.paid,m.mdone);},'mtx-cr');
+      metricRow('Распределено лидов',fmtNum(tot.dist),function(c){return fmtNum(c.dist);},'mtx-key')+
+      metricRow('CR в квал. лида',pf(tot.qual,tot.dist),function(c){return pf(c.qual,c.dist);})+
+      metricRow('Лидов квалифицированно',fmtNum(tot.qual),function(c){return fmtNum(c.qual);},'mtx-key')+
+      metricRow('CR во встречу',pf(tot.mset,tot.qual),function(c){return pf(c.mset,c.qual);})+
+      metricRow('Назначено встреч',fmtNum(tot.mset),function(c){return fmtNum(c.mset);},'mtx-key')+
+      metricRow('CR в проведённую',pf(tot.mdone,tot.mset),function(c){return pf(c.mdone,c.mset);})+
+      metricRow('Проведено встреч',fmtNum(tot.mdone),function(c){return fmtNum(c.mdone);},'mtx-key')+
+      metricRow('CR в оплату',pf(tot.paid,tot.mdone),function(c){return pf(c.paid,c.mdone);})+
+      metricRow('Оплат получено',fmtNum(tot.paid),function(c){return fmtNum(c.paid);},'mtx-key')+
+      metricRow('Средний чек',tot.paid>0?fmt(Math.round(tot.revenue/tot.paid)):'—',function(c){return c.paid>0?fmt(Math.round(c.revenue/c.paid)):'—';})+
+      metricRow('Выручка',fmt(tot.revenue),function(c){return fmt(c.revenue);},'mtx-key')+
+      '<tr class="mtx-spacer"><td colspan="'+(viewCols.length+2)+'"></td></tr>'+
+      metricRow('CR лид — оплата',pf(tot.paid,tot.dist),function(c){return pf(c.paid,c.dist);},'mtx-cr')+
+      metricRow('CR встреча — оплата',pf(tot.paid,tot.mdone),function(c){return pf(c.paid,c.mdone);},'mtx-cr');
     var filterChip=activeGroup?'<span class="fn2-tag on" style="cursor:pointer" onclick="setVChGroup(null)">'+esc(activeGroup.name)+' ✕</span>':'';
-    mgrTblHtml='<div class="panel"><div class="adm-head" style="margin-bottom:12px"><div class="panel-title" style="margin:0">Менеджеры'+(S.vDept==='all'?' · вся компания':'')+'</div>'+filterChip+'</div>'+
+    mgrTblHtml='<div class="panel"><div class="adm-head" style="margin-bottom:12px"><div class="panel-title" style="margin:0">'+(isAllView?'Отделы · вся компания':'Менеджеры')+'</div>'+filterChip+'</div>'+
       '<div class="mtx-wrap"><table class="mtx-tbl"><thead><tr>'+headCells+'</tr></thead><tbody>'+bodyRows+'</tbody></table></div>'+
     '</div>';
   }
