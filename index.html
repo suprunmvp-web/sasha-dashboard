@@ -688,7 +688,7 @@ var S={
   fnCompare:false,fnMgrs:[],fnMgrsB:[],fnTags:[],msOpen:null,msSearch:'',empAmoMap:{},
   dealsRaw:[],dealsByEmp:{},dealsByOrg:{},dealsByDept:{},dealsByEmpOrg:{},
   prevByEmp:{},prevByDept:{},prevCompany:0,
-  amoLeads:[],amoEvents:[],amoEventsAll:[],amoUsers:[],amoLeadOwners:{},
+  amoLeads:[],amoEvents:[],amoEventsAll:[],amoUsers:[],amoLeadOwners:{},amoLeadPrices:{},
   planByEmp:{},
   payDept:'all',payEmp:'all',paySearch:'',payLimit:20,payPage:0,
   staffSortKey:'fact',staffSortDir:-1,
@@ -964,10 +964,10 @@ function loadAmoLeads(){
    вся его история задним числом "переезжает" за новым владельцем. Это
    осознанно принятое упрощение, не баг. */
 function loadAmoLeadOwners(){
-  S.amoLeadOwners={};
-  return sbGet('amo_leads?select=id,responsible_user_id&pipeline_id=eq.'+AMO_PIPE_SALES+'&is_deleted=is.false&limit=20000').then(function(rows){
-    (rows||[]).forEach(function(l){S.amoLeadOwners[l.id]=l.responsible_user_id;});
-  }).catch(function(){S.amoLeadOwners={};});
+  S.amoLeadOwners={};S.amoLeadPrices={};
+  return sbGet('amo_leads?select=id,responsible_user_id,price&pipeline_id=eq.'+AMO_PIPE_SALES+'&is_deleted=is.false&limit=20000').then(function(rows){
+    (rows||[]).forEach(function(l){S.amoLeadOwners[l.id]=l.responsible_user_id;S.amoLeadPrices[l.id]=l.price||0;});
+  }).catch(function(){S.amoLeadOwners={};S.amoLeadPrices={};});
 }
 /* ═══ AMO EVENTS (активность за период + воронка) ═══
    Источник — таблица amo_lead_events (заполняется amosync.gs), колонка
@@ -1077,7 +1077,7 @@ function buildStageFactCounts_(events,ownerMap,amoIdSet){
       }
     });
   });
-  return counts;
+  return{counts:counts,seen:seen};
 }
 /* ═══ CALENDAR ═══ */
 function buildMonth(base){var y=base.getFullYear(),m=base.getMonth(),first=new Date(y,m,1),sd=(first.getDay()+6)%7,days=[];for(var i=0;i<sd;i++)days.push({d:new Date(y,m,1-(sd-i)),other:true});var dim=new Date(y,m+1,0).getDate();for(var k=1;k<=dim;k++)days.push({d:new Date(y,m,k),other:false});while(days.length%7){var l=days[days.length-1].d;days.push({d:new Date(l.getFullYear(),l.getMonth(),l.getDate()+1),other:true});}return days;}
@@ -1726,17 +1726,25 @@ function renderVoronka(){
   } else if(!cols.length){
     mgrTblHtml='<div class="panel"><div class="empty-state">Нет данных для отображения.</div></div>';
   } else {
-    /* ФАКТ по периоду (не когорта): этапы qual/mset/mdone/paid считаются по
-       событиям amo_lead_events, случившимся В ВЫБРАННОМ ПЕРИОДЕ (S.amoEvents),
-       независимо от того, когда лид был создан — см. buildStageFactCounts_.
-       "Распределено лидов" — по-прежнему когорта (лиды, СОЗДАННЫЕ в периоде),
-       это здесь корректно, т.к. момент создания однозначен.
-       Выручка/Средний чек — из deals (реальные деньги, тот же источник, что
-       в Payroll/экспортах), а не из amo lead.price (это просто поле CRM).
-       Если включён фильтр по тегам канала (chTags) — события ограничиваются
-       лидами из когорты периода с этим тегом (тег известен только для лидов,
-       загруженных в S.amoLeads, т.е. созданных в периоде) — это осознанное
-       ограничение, а не баг. */
+    /* Два параллельных расчёта на одних и тех же событиях:
+       — ФАКТ (fc, buildStageFactCounts_): сколько раз лид перешёл в этап
+         ИМЕННО в выбранном периоде, независимо от даты создания лида и от
+         того, в периоде ли случился ПРЕДЫДУЩИЙ этап. Отсюда — числа в
+         "жирных" строках (Квалифицировано/Встречи/Оплат получено) и
+         Выручка (цена amo-лидов, которые в периоде получили статус
+         "Оплачено" — те же лиды, что и в счётчике "Оплат получено", ничего
+         постороннего типа допродаж из deals сюда не подмешивается).
+       — КОГОРТА (cf, buildFunnelCounts): лид создан в периоде → докуда
+         когда-либо дошёл (в т.ч. в будущем). Используется ТОЛЬКО для CR% —
+         потому что при факте числитель и знаменатель этапов могут не
+         совпадать по времени (met в июне, paid в июле) и % улетает за 100.
+         Когорта гарантированно монотонна (0-100%), это честная конверсия.
+       То есть проценты в этой таблице — НЕ результат деления соседних
+       строк, это два разных среза. Так и должно быть.
+       Если включён фильтр по тегам канала (chTags) — события ограничены
+       лидами из когорты периода с этим тегом (тег известен только у лидов,
+       загруженных в S.amoLeads, т.е. созданных в периоде) — осознанное
+       ограничение, не баг. */
     var viewCols=cols.map(function(col){
       var leads=leadsForMgrs_([],col.staff);
       if(chTags)leads=leads.filter(function(l){return leadsHaveAnyTag_(l,chTags);});
@@ -1747,37 +1755,39 @@ function renderVoronka(){
         events=events.filter(function(e){return tagLeadIds.hasOwnProperty(e.lead_id);});
       }
       var fc=buildStageFactCounts_(events,S.amoLeadOwners,amoIds);
-      var dealRows=isAllView
-        ?S.dealsRaw.filter(function(d){return d.dept_id===col.deptId;})
-        :S.dealsRaw.filter(function(d){return col.staff.some(function(m){return m.supaId===d.employee_id;});});
-      var paidDealsCount=dealRows.filter(function(d){return d.event_type==='payment';}).length;
-      var revenue=dealRows.reduce(function(a,d){var sign=d.event_type==='refund'?-1:1;return a+sign*(Number(d.amount)||0);},0);
-      return{name:col.name,dist:leads.length,qual:fc.qual||0,mset:fc.mset||0,mdone:fc.mdone||0,paid:fc.paid||0,paidDealsCount:paidDealsCount,revenue:revenue};
+      var cf=buildFunnelCounts(leads,S.amoEventsAll);
+      var paidLeadIds=Object.keys(fc.seen.paid);
+      var revenue=paidLeadIds.reduce(function(a,id){return a+(Number(S.amoLeadPrices[id])||0);},0);
+      return{name:col.name,dist:leads.length,
+        qual:fc.counts.qual||0,mset:fc.counts.mset||0,mdone:fc.counts.mdone||0,paid:fc.counts.paid||0,
+        qualC:cf.counts.qual||0,msetC:cf.counts.mset||0,mdoneC:cf.counts.mdone||0,paidC:cf.counts.paid||0,
+        revenue:revenue};
     });
     function sumF(k){return viewCols.reduce(function(a,c){return a+c[k];},0);}
-    var tot={dist:sumF('dist'),qual:sumF('qual'),mset:sumF('mset'),mdone:sumF('mdone'),paid:sumF('paid'),paidDealsCount:sumF('paidDealsCount'),revenue:sumF('revenue')};
+    var tot={dist:sumF('dist'),qual:sumF('qual'),mset:sumF('mset'),mdone:sumF('mdone'),paid:sumF('paid'),
+      qualC:sumF('qualC'),msetC:sumF('msetC'),mdoneC:sumF('mdoneC'),paidC:sumF('paidC'),revenue:sumF('revenue')};
     function pf(f,p){return p>0?(f/p*100).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—';}
     var headCells='<th>Метрика</th><th class="mtx-total-h">Итого</th>'+viewCols.map(function(c){return'<th>'+esc(c.name)+'</th>';}).join('');
     function metricRow(label,totCellHtml,fn,cls){return'<tr class="'+(cls||'')+'"><td class="lbl">'+label+'</td><td class="mtx-total">'+totCellHtml+'</td>'+viewCols.map(function(c){return'<td>'+fn(c)+'</td>';}).join('')+'</tr>';}
     var bodyRows=
       metricRow('Распределено лидов',fmtNum(tot.dist),function(c){return fmtNum(c.dist);},'mtx-key')+
-      metricRow('CR в квал. лида',pf(tot.qual,tot.dist),function(c){return pf(c.qual,c.dist);})+
+      metricRow('CR в квал. лида',pf(tot.qualC,tot.dist),function(c){return pf(c.qualC,c.dist);})+
       metricRow('Лидов квалифицированно',fmtNum(tot.qual),function(c){return fmtNum(c.qual);},'mtx-key')+
-      metricRow('CR во встречу',pf(tot.mset,tot.qual),function(c){return pf(c.mset,c.qual);})+
+      metricRow('CR во встречу',pf(tot.msetC,tot.qualC),function(c){return pf(c.msetC,c.qualC);})+
       metricRow('Назначено встреч',fmtNum(tot.mset),function(c){return fmtNum(c.mset);},'mtx-key')+
-      metricRow('CR в проведённую',pf(tot.mdone,tot.mset),function(c){return pf(c.mdone,c.mset);})+
+      metricRow('CR в проведённую',pf(tot.mdoneC,tot.msetC),function(c){return pf(c.mdoneC,c.msetC);})+
       metricRow('Проведено встреч',fmtNum(tot.mdone),function(c){return fmtNum(c.mdone);},'mtx-key')+
-      metricRow('CR в оплату',pf(tot.paid,tot.mdone),function(c){return pf(c.paid,c.mdone);})+
+      metricRow('CR в оплату',pf(tot.paidC,tot.mdoneC),function(c){return pf(c.paidC,c.mdoneC);})+
       metricRow('Оплат получено',fmtNum(tot.paid),function(c){return fmtNum(c.paid);},'mtx-key')+
-      metricRow('Средний чек',tot.paidDealsCount>0?fmt(Math.round(tot.revenue/tot.paidDealsCount)):'—',function(c){return c.paidDealsCount>0?fmt(Math.round(c.revenue/c.paidDealsCount)):'—';})+
+      metricRow('Средний чек',tot.paid>0?fmt(Math.round(tot.revenue/tot.paid)):'—',function(c){return c.paid>0?fmt(Math.round(c.revenue/c.paid)):'—';})+
       metricRow('Выручка',fmt(tot.revenue),function(c){return fmt(c.revenue);},'mtx-key')+
       '<tr class="mtx-spacer"><td colspan="'+(viewCols.length+2)+'"></td></tr>'+
-      metricRow('CR лид — оплата',pf(tot.paid,tot.dist),function(c){return pf(c.paid,c.dist);},'mtx-cr')+
-      metricRow('CR встреча — оплата',pf(tot.paid,tot.mdone),function(c){return pf(c.paid,c.mdone);},'mtx-cr');
+      metricRow('CR лид — оплата',pf(tot.paidC,tot.dist),function(c){return pf(c.paidC,c.dist);},'mtx-cr')+
+      metricRow('CR встреча — оплата',pf(tot.paidC,tot.mdoneC),function(c){return pf(c.paidC,c.mdoneC);},'mtx-cr');
     var filterChip=activeGroup?'<span class="fn2-tag on" style="cursor:pointer" onclick="setVChGroup(null)">'+esc(activeGroup.name)+' ✕</span>':'';
     mgrTblHtml='<div class="panel"><div class="adm-head" style="margin-bottom:12px"><div class="panel-title" style="margin:0">'+(isAllView?'Отделы · вся компания':'Менеджеры')+'</div>'+filterChip+'</div>'+
       '<div class="mtx-wrap"><table class="mtx-tbl"><thead><tr>'+headCells+'</tr></thead><tbody>'+bodyRows+'</tbody></table></div>'+
-      '<div style="font-size:11px;color:var(--text-3);margin-top:10px;line-height:1.5">Этапы воронки и «Оплат получено» — факт AmoCRM за период (лид перешёл в этап именно в эти даты, отдел — по текущему ответственному). «Выручка»/«Средний чек» — из данных о платежах (deals), не из цены сделки в CRM.</div>'+
+      '<div style="font-size:11px;color:var(--text-3);margin-top:10px;line-height:1.5">Числа в жирных строках — факт AmoCRM за период (лид перешёл в этап именно в эти даты; отдел — по текущему ответственному). CR% — конверсия по когорте лидов, созданных в периоде (докуда доехали когда-либо) — поэтому % не равен делению соседних чисел, это разные срезы. Выручка/Средний чек — цена amo-лидов из «Первички», получивших оплату в периоде; допродажи и прочие deals сюда не входят.</div>'+
     '</div>';
   }
   var allTagCounts=getTagCounts_(deptLeads);
