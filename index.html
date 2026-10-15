@@ -372,32 +372,19 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 @keyframes fadein{from{opacity:0;}to{opacity:1;}}
 @keyframes growbar{from{width:0 !important;}}
 @media(prefers-reduced-motion:no-preference){
-  .dept-card{animation:rise .5s cubic-bezier(.16,1,.3,1) backwards;}
-  .dept-grid .dept-card:nth-child(1){animation-delay:.04s;}
-  .dept-grid .dept-card:nth-child(2){animation-delay:.10s;}
-  .dept-grid .dept-card:nth-child(3){animation-delay:.16s;}
-  .dept-grid .dept-card:nth-child(4){animation-delay:.22s;}
-  .dept-grid .dept-card:nth-child(5){animation-delay:.28s;}
-  .dept-grid .dept-card:nth-child(n+6){animation-delay:.32s;}
-  .ck{animation:rise .45s cubic-bezier(.16,1,.3,1) backwards;}
-  .ckpi .ck:nth-child(1){animation-delay:.02s;}.ckpi .ck:nth-child(2){animation-delay:.07s;}
-  .ckpi .ck:nth-child(3){animation-delay:.12s;}.ckpi .ck:nth-child(4){animation-delay:.17s;}
-  .dept-kpi .kcard{animation:rise .45s cubic-bezier(.16,1,.3,1) backwards;}
-  .dept-kpi .kcard:nth-child(1){animation-delay:.02s;}.dept-kpi .kcard:nth-child(2){animation-delay:.06s;}
-  .dept-kpi .kcard:nth-child(3){animation-delay:.10s;}.dept-kpi .kcard:nth-child(4){animation-delay:.14s;}.dept-kpi .kcard:nth-child(5){animation-delay:.18s;}
-  .panel{animation:rise .5s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.05s;}
-  .progress-fill,.pfill,.inbar-f,.fn2-bar-fill,.cmp-fill{animation:growbar 1s cubic-bezier(.16,1,.3,1);}
-  .tbl tbody tr{animation:fadein .4s ease backwards;}
-  .tbl tbody tr:nth-child(1){animation-delay:.04s;}.tbl tbody tr:nth-child(2){animation-delay:.07s;}
-  .tbl tbody tr:nth-child(3){animation-delay:.10s;}.tbl tbody tr:nth-child(4){animation-delay:.13s;}
-  .tbl tbody tr:nth-child(5){animation-delay:.16s;}.tbl tbody tr:nth-child(6){animation-delay:.19s;}
-  .tbl tbody tr:nth-child(7){animation-delay:.22s;}.tbl tbody tr:nth-child(n+8){animation-delay:.25s;}
-  .ch-card{animation:rise .45s cubic-bezier(.16,1,.3,1) backwards;}
-  .fn2-main{animation:fadein .45s ease backwards;}
+  /* анимации появления — ТОЛЬКО при переходе на новый экран (класс .anim ставит setApp) */.app.anim .dept-card{animation:rise .5s cubic-bezier(.16,1,.3,1) backwards;}.app.anim .dept-grid .dept-card:nth-child(1){animation-delay:.04s;}.app.anim .dept-grid .dept-card:nth-child(2){animation-delay:.10s;}.app.anim .dept-grid .dept-card:nth-child(3){animation-delay:.16s;}.app.anim .dept-grid .dept-card:nth-child(4){animation-delay:.22s;}.app.anim .dept-grid .dept-card:nth-child(5){animation-delay:.28s;}.app.anim .dept-grid .dept-card:nth-child(n+6){animation-delay:.32s;}.app.anim .ck{animation:rise .45s cubic-bezier(.16,1,.3,1) backwards;}.app.anim .ckpi .ck:nth-child(1){animation-delay:.02s;}.app.anim .ckpi .ck:nth-child(2){animation-delay:.07s;}.app.anim .ckpi .ck:nth-child(3){animation-delay:.12s;}.app.anim .ckpi .ck:nth-child(4){animation-delay:.17s;}.app.anim .dept-kpi .kcard{animation:rise .45s cubic-bezier(.16,1,.3,1) backwards;}.app.anim .dept-kpi .kcard:nth-child(1){animation-delay:.02s;}.app.anim .dept-kpi .kcard:nth-child(2){animation-delay:.06s;}.app.anim .dept-kpi .kcard:nth-child(3){animation-delay:.10s;}.app.anim .dept-kpi .kcard:nth-child(4){animation-delay:.14s;}.app.anim .dept-kpi .kcard:nth-child(5){animation-delay:.18s;}.app.anim .panel{animation:rise .5s cubic-bezier(.16,1,.3,1) backwards;animation-delay:.05s;}.app.anim .progress-fill,.app.anim .pfill,.app.anim .inbar-f,.app.anim .fn2-bar-fill,.app.anim .cmp-fill{animation:growbar 1s cubic-bezier(.16,1,.3,1);}.app.anim .tbl tbody tr{animation:fadein .4s ease backwards;}.app.anim .tbl tbody tr:nth-child(1){animation-delay:.04s;}.app.anim .tbl tbody tr:nth-child(2){animation-delay:.07s;}.app.anim .tbl tbody tr:nth-child(3){animation-delay:.10s;}.app.anim .tbl tbody tr:nth-child(4){animation-delay:.13s;}.app.anim .tbl tbody tr:nth-child(5){animation-delay:.16s;}.app.anim .tbl tbody tr:nth-child(6){animation-delay:.19s;}.app.anim .tbl tbody tr:nth-child(7){animation-delay:.22s;}.app.anim .tbl tbody tr:nth-child(n+8){animation-delay:.25s;}.app.anim .ch-card{animation:rise .45s cubic-bezier(.16,1,.3,1) backwards;}.app.anim .fn2-main{animation:fadein .45s ease backwards;}
   .modal{animation:rise .28s cubic-bezier(.16,1,.3,1);}
 }
 .dept-card,.ck,.kcard{transition:.18s cubic-bezier(.16,1,.3,1);}
 .ck:hover,.kcard:hover{transform:translateY(-2px);border-color:var(--border);}
+/* ═══ BUSY / KPI 3×2 ═══ */
+.ck-v,.kv,.dc-fact,.dc-stat-v{transition:opacity .2s;}
+.app.busy .ck-v,.app.busy .kv,.app.busy .dc-fact,.app.busy .dc-stat-v,.app.busy .tbl td.num{opacity:.4;}
+.busy-dot{display:none;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:8px;animation:pulse 1s ease-in-out infinite;}
+.app.busy .busy-dot{display:inline-block;}
+@keyframes pulse{0%,100%{opacity:.25}50%{opacity:1}}
+.k6{grid-template-columns:repeat(3,1fr)!important;}
+@media(max-width:760px){.k6{grid-template-columns:1fr 1fr!important;}.k6 .kcard:nth-child(5),.k6 .ck:nth-child(5){grid-column:auto!important;}}
 /* ═══ ICONS (inline svg, минималистичные) ═══ */
 .ico{width:15px;height:15px;display:inline-block;vertical-align:-2px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 .ico-sm{width:14px;height:14px;}
@@ -542,6 +529,40 @@ function sbGet(p){return fetch(SB_URL+'/rest/v1/'+p,{headers:{'apikey':SB_KEY,'A
   if(d&&d.code)throw new Error('Supabase: '+(d.message||d.code)+' ('+p.split('?')[0]+')');
   return Array.isArray(d)?d:[];
 });}
+/* Постраничная загрузка. Supabase режет ответ по max-rows (по умолчанию 1000) —
+   раньше часть клиентов/минут/сделок молча отрезалась. Первый запрос узнаёт total
+   (Prefer: count=exact) и реальный размер страницы, остальные — параллельно по 6.
+   В path ОБЯЗАТЕЛЕН детерминированный order, иначе страницы могут пересечься. */
+function sbGetAll(p){
+  p=p.replace(/&limit=\d+/,'');
+  var PAGE=1000;
+  function page(from,to,count){
+    var h={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Range-Unit':'items','Range':from+'-'+to};
+    if(count)h['Prefer']='count=exact';
+    return fetch(SB_URL+'/rest/v1/'+p,{headers:h}).then(function(r){
+      if(!r.ok)return r.text().then(function(t){throw new Error('Supabase HTTP '+r.status+' на '+p.split('?')[0]+(t?': '+t.substring(0,200):''));});
+      var cr=r.headers.get('content-range')||'';
+      return r.json().then(function(d){
+        if(d&&d.code)throw new Error('Supabase: '+(d.message||d.code)+' ('+p.split('?')[0]+')');
+        var tot=parseInt(cr.split('/')[1],10);
+        return{rows:Array.isArray(d)?d:[],total:isNaN(tot)?null:tot};
+      });
+    });
+  }
+  return page(0,PAGE-1,true).then(function(first){
+    var rows=first.rows,total=first.total,step=rows.length;
+    if(total===null){if(step>=PAGE)console.warn('sbGetAll: нет Content-Range, возможна неполная выборка: '+p.split('?')[0]);return rows;}
+    if(!step||step>=total)return rows;
+    var starts=[];for(var st=step;st<total;st+=step)starts.push(st);
+    var out=[rows],i=0;
+    function next(){
+      if(i>=starts.length)return Promise.resolve();
+      var batch=starts.slice(i,i+6);i+=6;
+      return Promise.all(batch.map(function(x){return page(x,x+step-1,false);})).then(function(res){res.forEach(function(y){out.push(y.rows);});return next();});
+    }
+    return next().then(function(){return [].concat.apply([],out);});
+  });
+}
 function sbPatch(t,f,d){return fetch(SB_URL+'/rest/v1/'+t+'?'+f,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(d)});}
 function sbPost(t,d){return fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(d)}).then(function(r){return r.json();});}
 function sbDelete(t,f){return fetch(SB_URL+'/rest/v1/'+t+'?'+f,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'}});}
@@ -682,7 +703,7 @@ var S={
   dept:null,empView:null,tab:'staff',
   mgrAs:null,mgrTab:'clients',
   saveHint:false,
-  periodStats:{},periodLoading:false,periodReady:false,
+  periodStats:{},prevPeriodStats:{},periodLoading:true,periodReady:false,cliByUser:{},
   showArchivedDepts:false,showArchivedClients:false,showHiddenLb:false,
   ropDept:null,ropShowFired:false,ropShowArchivedDepts:false,
   fnCompare:false,fnMgrs:[],fnMgrsB:[],fnTags:[],msOpen:null,msSearch:'',empAmoMap:{},
@@ -741,12 +762,12 @@ function payingInPeriod(clients){
 }
 /* ═══ LOAD DATA ═══ */
 function loadData(){
-  S.loading=true;S.loadErr=null;render();
+  S.loading=true;S.loadErr=null;S._amoAllLoaded=false;S._amoOwnersLoaded=false;render();
   return Promise.all([
     sbGet('departments?select=*&order=created_at'),
     sbGet('employees?select=*&order=name'),
-    sbGet('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,subscription_status,subscription_end,platform_status,is_hidden,is_archived&order=company_name&limit=3000'),
-    sbGet('clients?select=platform_org_id,company_name,responsible_platform_user_id,is_archived,is_hidden&order=company_name&limit=5000'),
+    sbGetAll('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,subscription_status,subscription_end,platform_status,is_hidden,is_archived&order=company_name,platform_org_id'),
+    sbGetAll('clients?select=platform_org_id,company_name,responsible_platform_user_id,is_archived,is_hidden&order=company_name,platform_org_id'),
     sbGet('amo_users?select=amo_user_id,name,email&order=name&limit=500'),
     sbGet('telegram_integrations?select=*&order=created_at'),
     sbGet('amo_tag_groups?select=*&order=created_at').catch(function(){return [];}),
@@ -778,16 +799,36 @@ function patchEmpSync(supaId,patch,optimistic){
   if(optimistic){RAW.employees.forEach(function(e){if(e.id===supaId)Object.assign(e,optimistic);});buildDB();render();}
   return sbPatch('employees','id=eq.'+supaId,patch).then(reloadEmployees,reloadEmployees).then(render);
 }
-function refreshPeriod(){
-  S.empLifetime={};S.empMonthlyPlan={};
-  S.periodReady=false;
-  return Promise.all([loadPeriodStats(),loadDeals(),loadPrevDeals(),loadPlans(),loadAmoLeads(),loadAmoEvents(),loadAmoEventsAll(),loadAmoLeadOwners()]).then(function(){buildDB();S.periodReady=true;render();}).catch(function(e){console.error(e);S.periodReady=true;render();});
+/* Все загрузчики периода возвращают функцию-«применить». Старые данные остаются
+   на экране (чуть притушены, класс .busy), пока новые не придут целиком — без
+   мигания нулями. Токен отсекает устаревший ответ, если период успели сменить.
+   invalidateLifetime=true — после сохранения сделки/плана (пересобрать графики). */
+function refreshPeriod(invalidateLifetime){
+  if(invalidateLifetime){S.empLifetime={};S.empMonthlyPlan={};S.companyLifetime=null;S._lifeLoading={};}
+  var tok=S._periodTok=(S._periodTok||0)+1;
+  S.periodReady=false;S.periodLoading=true;
+  return Promise.all([loadPeriodStats(),loadDeals(),loadPrevDeals(),loadPlans(),loadAmoLeads(),loadAmoEvents(),loadAmoEventsAll(),loadAmoLeadOwners()]).then(function(apply){
+    if(tok!==S._periodTok)return;
+    apply.forEach(function(f){if(typeof f==='function')f();});
+    buildDB();S.periodReady=true;S.periodLoading=false;render();
+  }).catch(function(e){
+    console.error(e);if(tok!==S._periodTok)return;
+    S.periodReady=true;S.periodLoading=false;S.loadErr='Не удалось обновить данные за период: '+e.message;render();
+  });
 }
 /* ═══ BUILD DB ═══ */
 function resolveEmpAmo_(emp){
   if(!emp)return null;
   if(emp.email){var e=emp.email.toLowerCase().trim();var u=(S.amoUsers||[]).find(function(x){return x.email&&x.email.toLowerCase().trim()===e;});if(u)return u.amo_user_id;}
   return emp.amo_user_id||null;
+}
+/* «Скручено минут»: сумма минут за период по клиентам портфеля сотрудника
+   (текущий ответственный на платформе, без скрытых/архивных и без «разовых»).
+   Отдел = сумма по сотрудникам, компания = сумма по отделам. */
+function minutesOfUser(puid,map){
+  var s=0,n=0;map=map||{};
+  ((S.cliByUser||{})[puid]||[]).forEach(function(c){var v=map[c.platform_org_id]||0;if(v>0){s+=v;n++;}});
+  return{sum:s,n:n};
 }
 function buildDB(){
   S.empAmoMap={};
@@ -807,6 +848,7 @@ function buildDB(){
   }
   var visibleClients=RAW.clients.filter(function(c){return!c.is_hidden;});
   visibleClients.forEach(function(c){var u=c.responsible_platform_user_id;if(u)(cBU[u]=cBU[u]||[]).push(c);});
+  S.cliByUser=cBU;
   var depts=activeDepts.map(function(d){
     var emps=eBD[d.id]||[];
     var lead=RAW.employees.find(function(e){return e.id===d.lead_employee_id;});
@@ -821,13 +863,15 @@ function buildDB(){
     });
     var staff=staffEmps.map(function(e){
       var dealAgg=S.dealsByEmp[e.id]||{fact:0,comm:0,count:0};
+      var _mn=minutesOfUser(e.platform_user_id,S.periodStats),_mnp=minutesOfUser(e.platform_user_id,S.prevPeriodStats);
       var planAmt=S.planByEmp[e.id]||0;
       return{id:e.platform_user_id,supaId:e.id,name:e.display_name||e.name,
         role:e.role==='lead'?'Тимлид':'Менеджер',hired:e.hired_at||null,
         fired:!!(e.fired_at||e.is_archived),firedAt:e.fired_at||null,
         hideLb:!!e.hide_from_lb,
         fact:dealAgg.fact,prevFact:S.prevByEmp[e.id]||0,plan:planAmt,comm:dealAgg.comm,deals:dealAgg.count,
-        clients:(cBU[e.platform_user_id]||[]).length};
+        clients:(cBU[e.platform_user_id]||[]).length,
+        minutes:_mn.sum,prevMinutes:_mnp.sum,minActive:_mn.n};
     });
     staff.sort(function(a,b){return(b.role==='Тимлид')-(a.role==='Тимлид');});
     var dc=emps.reduce(function(a,e){return a.concat(cBU[e.platform_user_id]||[]);},[]);
@@ -835,6 +879,9 @@ function buildDB(){
     var dPlan=staff.reduce(function(a,m){return a+m.plan;},0);
     return{id:d.id,name:d.name,tl:lead?lead.name:'—',leadId:d.lead_employee_id,
       fact:dFact,prevFact:S.prevByDept[d.id]||0,plan:dPlan,
+      minutes:staff.reduce(function(a,m){return a+m.minutes;},0),
+      prevMinutes:staff.reduce(function(a,m){return a+m.prevMinutes;},0),
+      minActive:staff.reduce(function(a,m){return a+m.minActive;},0),
       paying:dc.filter(function(c){return c.subscription_status==='active';}).length,
       arpu:(function(){var paying=dc.filter(function(c){return c.subscription_status==='active';}).length;return paying>0?r(dFact/paying):0;})(),
       staff:staff,
@@ -852,70 +899,112 @@ function buildDB(){
   });
   var companyFact=S.dealsRaw.reduce(function(a,d){var sign=d.event_type==='refund'?-1:1;return a+sign*(Number(d.amount)||0);},0);
   DB={
-    company:{fact:companyFact,prevFact:S.prevCompany,plan:depts.reduce(function(a,d){return a+d.plan;},0),clients:depts.reduce(function(a,d){return a+d.clients.length;},0),paying:depts.reduce(function(a,d){return a+d.paying;},0)},
+    company:{fact:companyFact,prevFact:S.prevCompany,
+      minutes:depts.reduce(function(a,d){return a+d.minutes;},0),prevMinutes:depts.reduce(function(a,d){return a+d.prevMinutes;},0),minActive:depts.reduce(function(a,d){return a+d.minActive;},0),plan:depts.reduce(function(a,d){return a+d.plan;},0),clients:depts.reduce(function(a,d){return a+d.clients.length;},0),paying:depts.reduce(function(a,d){return a+d.paying;},0)},
     depts:depts,archivedDepts:RAW.depts.filter(function(d){return d.is_archived;}),
     firedEmps:firedEmps,hiddenClients:RAW.clients.filter(function(c){return c.is_hidden;})
   };
 }
 /* ═══ PERIOD STATS ═══ */
 function loadPeriodStats(){
-  S.periodStats={};S.periodLoading=true;
-  var from=S.rangeFrom,to=S.rangeTo;
-  var curMonthStart=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
+  var pr=prevRange();
+  return Promise.all([fetchMinutesMap(S.rangeFrom,S.rangeTo),fetchMinutesMap(pr.from,pr.to)]).then(function(res){
+    return function(){S.periodStats=res[0];S.prevPeriodStats=res[1];};
+  });
+}
+/* Минуты по оргам за произвольный период. Источники в client_stats:
+   period_type=day (точно по дням) и period_type=month (целый месяц).
+   Для каждого месяца периода:
+   • месяц покрыт целиком и есть month-запись → берём месяц;
+   • дневные записи покрывают все прошедшие дни окна → суммируем дни;
+   • иначе есть month-запись → пропорция месяца по числу дней окна (≈);
+   • иначе — что есть по дням. */
+function fetchMinutesMap(from,to){
+  var fromS=dateISO(from),toS=dateISO(to);
+  var today0=new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate());
   var months=[],cur=new Date(from.getFullYear(),from.getMonth(),1);
   while(cur<=to){months.push(new Date(cur.getTime()));cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);}
-  var pastMonths=months.filter(function(m){return m<curMonthStart;});
-  var hasCurrent=months.some(function(m){return m.getTime()===curMonthStart.getTime();});
-  var promises=[];
-  if(pastMonths.length){
-    var dates=pastMonths.map(function(m){return m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-01';});
-    promises.push(sbGet('client_stats?select=platform_org_id,used_minutes&period_type=eq.month&stat_date=in.('+dates.join(',')+')'+'&limit=50000').then(function(rows){rows.forEach(function(row){S.periodStats[row.platform_org_id]=(S.periodStats[row.platform_org_id]||0)+(row.used_minutes||0);});}));
-  }
-  if(hasCurrent){
-    var mStart=curMonthStart.getFullYear()+'-'+String(curMonthStart.getMonth()+1).padStart(2,'0')+'-01';
-    promises.push(sbGet('client_stats?select=platform_org_id,used_minutes&period_type=eq.day&stat_date=gte.'+mStart+'&stat_date=lte.'+todayISO()+'&limit=500000').then(function(rows){rows.forEach(function(row){S.periodStats[row.platform_org_id]=(S.periodStats[row.platform_org_id]||0)+(row.used_minutes||0);});}));
-  }
-  return Promise.all(promises).then(function(){S.periodLoading=false;}).catch(function(){S.periodLoading=false;});
+  if(!months.length)return Promise.resolve({});
+  var info={};
+  months.forEach(function(m){
+    var key=m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0');
+    var first=new Date(m.getFullYear(),m.getMonth(),1),last=new Date(m.getFullYear(),m.getMonth()+1,0);
+    var a=first<from?from:first,b=last>to?to:last;
+    a=new Date(a.getFullYear(),a.getMonth(),a.getDate());b=new Date(b.getFullYear(),b.getMonth(),b.getDate());
+    var covered=Math.round((b-a)/864e5)+1;
+    var bPast=b>today0?today0:b;
+    var pastDays=bPast<a?0:Math.round((bPast-a)/864e5)+1;
+    info[key]={full:covered>=last.getDate(),frac:covered/last.getDate(),pastDays:pastDays};
+  });
+  var monthKeys=Object.keys(info).map(function(k){return k+'-01';});
+  return Promise.all([
+    sbGetAll('client_stats?select=platform_org_id,stat_date,used_minutes&period_type=eq.month&stat_date=in.('+monthKeys.join(',')+')&order=platform_org_id,stat_date'),
+    sbGetAll('client_stats?select=platform_org_id,stat_date,used_minutes&period_type=eq.day&stat_date=gte.'+fromS+'&stat_date=lte.'+toS+'&order=platform_org_id,stat_date')
+  ]).then(function(res){
+    var monthRows=res[0]||[],dayRows=res[1]||[];
+    var hasMonth={},dayDates={};
+    monthRows.forEach(function(r){hasMonth[r.stat_date.substring(0,7)]=1;});
+    dayRows.forEach(function(r){var k=r.stat_date.substring(0,7);(dayDates[k]=dayDates[k]||{})[r.stat_date]=1;});
+    var mode={};
+    Object.keys(info).forEach(function(k){
+      var x=info[k],nDays=dayDates[k]?Object.keys(dayDates[k]).length:0;
+      if(x.full&&hasMonth[k])mode[k]='month';
+      else if(nDays&&nDays>=x.pastDays)mode[k]='day';
+      else if(hasMonth[k])mode[k]='prorate';
+      else mode[k]='day';
+    });
+    var out={};
+    monthRows.forEach(function(r){
+      var k=r.stat_date.substring(0,7),v;
+      if(mode[k]==='month')v=r.used_minutes||0;else if(mode[k]==='prorate')v=(r.used_minutes||0)*info[k].frac;else return;
+      out[r.platform_org_id]=(out[r.platform_org_id]||0)+v;
+    });
+    dayRows.forEach(function(r){
+      if(mode[r.stat_date.substring(0,7)]!=='day')return;
+      out[r.platform_org_id]=(out[r.platform_org_id]||0)+(r.used_minutes||0);
+    });
+    Object.keys(out).forEach(function(k){out[k]=Math.round(out[k]);});
+    return out;
+  });
 }
 /* ═══ DEALS ═══ */
 function loadDeals(){
-  S.dealsRaw=[];S.dealsByEmp={};S.dealsByOrg={};S.dealsByDept={};S.dealsByEmpOrg={};
   var from=dateISO(S.rangeFrom),to=dateISO(S.rangeTo);
-  return sbGet('deals?select=*&deal_date=gte.'+from+'&deal_date=lte.'+to+'&order=deal_date.desc&limit=100000').then(function(rows){
-    S.dealsRaw=rows||[];
-    S.dealsRaw.forEach(function(d){
+  return sbGetAll('deals?select=*&deal_date=gte.'+from+'&deal_date=lte.'+to+'&order=deal_date.desc,id').then(function(rows){
+    var raw=rows||[],byEmp={},byOrg={},byDept={},byEmpOrg={};
+    raw.forEach(function(d){
       var sign=d.event_type==='refund'?-1:1;
       var amt=sign*(Number(d.amount)||0);
       var comm=amt*(Number(d.motivation_pct)||0)/100;
-      if(d.employee_id){var e=S.dealsByEmp[d.employee_id]||(S.dealsByEmp[d.employee_id]={fact:0,comm:0,count:0});e.fact+=amt;e.comm+=comm;e.count++;}
-      if(d.platform_org_id){var o=S.dealsByOrg[d.platform_org_id]||(S.dealsByOrg[d.platform_org_id]={fact:0});o.fact+=amt;}
-      if(d.employee_id&&d.platform_org_id){var eo=S.dealsByEmpOrg[d.employee_id]||(S.dealsByEmpOrg[d.employee_id]={});eo[d.platform_org_id]=(eo[d.platform_org_id]||0)+amt;}
-      if(d.dept_id){S.dealsByDept[d.dept_id]=(S.dealsByDept[d.dept_id]||0)+amt;}
+      if(d.employee_id){var e=byEmp[d.employee_id]||(byEmp[d.employee_id]={fact:0,comm:0,count:0});e.fact+=amt;e.comm+=comm;e.count++;}
+      if(d.platform_org_id){var o=byOrg[d.platform_org_id]||(byOrg[d.platform_org_id]={fact:0});o.fact+=amt;}
+      if(d.employee_id&&d.platform_org_id){var eo=byEmpOrg[d.employee_id]||(byEmpOrg[d.employee_id]={});eo[d.platform_org_id]=(eo[d.platform_org_id]||0)+amt;}
+      if(d.dept_id){byDept[d.dept_id]=(byDept[d.dept_id]||0)+amt;}
     });
+    return function(){S.dealsRaw=raw;S.dealsByEmp=byEmp;S.dealsByOrg=byOrg;S.dealsByDept=byDept;S.dealsByEmpOrg=byEmpOrg;};
   });
 }
 function prevRange(){var f=S.rangeFrom,t=S.rangeTo,len=Math.round((t-f)/864e5)+1;var pt=new Date(f.getTime()-864e5);var pf=new Date(pt.getTime()-(len-1)*864e5);return{from:pf,to:pt};}
 function loadPrevDeals(){
-  S.prevByEmp={};S.prevByDept={};S.prevCompany=0;
-  S.prevPayingByDept={};S.prevPayingByEmp={};S.prevPayingCompany=0;
   var pr=prevRange(),from=dateISO(pr.from),to=dateISO(pr.to);
-  return sbGet('deals?select=employee_id,dept_id,platform_org_id,amount,event_type&deal_date=gte.'+from+'&deal_date=lte.'+to+'&limit=100000').then(function(rows){
-    var orgsCo={},orgsByDept={},orgsByEmp={};
+  return sbGetAll('deals?select=id,employee_id,dept_id,platform_org_id,amount,event_type&deal_date=gte.'+from+'&deal_date=lte.'+to+'&order=id').then(function(rows){
+    var byEmp={},byDept={},co=0,orgsCo={},orgsByDept={},orgsByEmp={};
     (rows||[]).forEach(function(d){
       var sign=d.event_type==='refund'?-1:1,amt=sign*(Number(d.amount)||0);
-      S.prevCompany+=amt;
-      if(d.employee_id)S.prevByEmp[d.employee_id]=(S.prevByEmp[d.employee_id]||0)+amt;
-      if(d.dept_id)S.prevByDept[d.dept_id]=(S.prevByDept[d.dept_id]||0)+amt;
+      co+=amt;
+      if(d.employee_id)byEmp[d.employee_id]=(byEmp[d.employee_id]||0)+amt;
+      if(d.dept_id)byDept[d.dept_id]=(byDept[d.dept_id]||0)+amt;
       if(d.platform_org_id&&amt>0){
         orgsCo[d.platform_org_id]=1;
         if(d.dept_id)(orgsByDept[d.dept_id]=orgsByDept[d.dept_id]||{})[d.platform_org_id]=1;
         if(d.employee_id)(orgsByEmp[d.employee_id]=orgsByEmp[d.employee_id]||{})[d.platform_org_id]=1;
       }
     });
-    S.prevPayingCompany=Object.keys(orgsCo).length;
-    Object.keys(orgsByDept).forEach(function(k){S.prevPayingByDept[k]=Object.keys(orgsByDept[k]).length;});
-    Object.keys(orgsByEmp).forEach(function(k){S.prevPayingByEmp[k]=Object.keys(orgsByEmp[k]).length;});
-  }).catch(function(){});
+    var payDept={},payEmp={};
+    Object.keys(orgsByDept).forEach(function(k){payDept[k]=Object.keys(orgsByDept[k]).length;});
+    Object.keys(orgsByEmp).forEach(function(k){payEmp[k]=Object.keys(orgsByEmp[k]).length;});
+    return function(){S.prevByEmp=byEmp;S.prevByDept=byDept;S.prevCompany=co;S.prevPayingCompany=Object.keys(orgsCo).length;S.prevPayingByDept=payDept;S.prevPayingByEmp=payEmp;};
+  }).catch(function(){return function(){S.prevByEmp={};S.prevByDept={};S.prevCompany=0;S.prevPayingByDept={};S.prevPayingByEmp={};S.prevPayingCompany=0;};});
 }
 function deltaPct(now,prev){if(prev>0)return Math.round((now-prev)/prev*100);if(now>0)return 100;return 0;}
 function deltaTag(now,prev){var dp=deltaPct(now,prev);if(prev===0)return '';var up=dp>0;var ic=dp===0?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 12h18"/></svg>':(up?'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 11V7h-4"/></svg>':'<svg class="dlt-ico" viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 13v4h-4"/></svg>');return'<span class="dlt '+(dp>0?'dlt-up':dp<0?'dlt-down':'dlt-neu')+'">'+ic+Math.abs(dp)+'%</span>';}
@@ -936,23 +1025,23 @@ function deltaAbsCurrency(delta){
 }
 /* ═══ PLANS (monthly_targets) ═══ */
 function loadPlans(){
-  S.planByEmp={};
   var months=[],cur=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),1);
   while(cur<=S.rangeTo){months.push({y:cur.getFullYear(),m:cur.getMonth()+1});cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);}
-  if(!months.length)return Promise.resolve();
+  if(!months.length)return Promise.resolve(function(){S.planByEmp={};});
   var orParts=months.map(function(mm){return'and(year.eq.'+mm.y+',month.eq.'+mm.m+')';}).join(',');
-  return sbGet('monthly_targets?select=employee_id,plan_amount,year,month&or=('+orParts+')&limit=100000').then(function(rows){
-    (rows||[]).forEach(function(t){S.planByEmp[t.employee_id]=(S.planByEmp[t.employee_id]||0)+(Number(t.plan_amount)||0);});
+  return sbGetAll('monthly_targets?select=employee_id,plan_amount,year,month&or=('+orParts+')&order=employee_id,year,month').then(function(rows){
+    var plan={};
+    (rows||[]).forEach(function(t){plan[t.employee_id]=(plan[t.employee_id]||0)+(Number(t.plan_amount)||0);});
+    return function(){S.planByEmp=plan;};
   });
 }
 /* ═══ AMO LEADS ═══ */
 function loadAmoLeads(){
-  S.amoLeads=[];
   var fromU=Math.floor(S.rangeFrom.getTime()/1000);
   var toU=Math.floor(S.rangeTo.getTime()/1000)+86400;
-  return sbGet('amo_leads?select=id,price,responsible_user_id,status_id,pipeline_id,created_at_unix,source,package,tags&pipeline_id=eq.'+AMO_PIPE_SALES+'&created_at_unix=gte.'+fromU+'&created_at_unix=lte.'+toU+'&is_deleted=is.false&limit=5000').then(function(rows){
-    S.amoLeads=rows||[];
-  }).catch(function(){S.amoLeads=[];});
+  return sbGetAll('amo_leads?select=id,price,responsible_user_id,status_id,pipeline_id,created_at_unix,source,package,tags&pipeline_id=eq.'+AMO_PIPE_SALES+'&created_at_unix=gte.'+fromU+'&created_at_unix=lte.'+toU+'&is_deleted=is.false&order=id').then(function(rows){
+    return function(){S.amoLeads=rows||[];};
+  }).catch(function(){return function(){S.amoLeads=[];};});
 }
 /* Владельцы ВСЕХ лидов воронки "Продажи", без ограничения по дате создания
    (в отличие от loadAmoLeads, который фильтрует по created_at в периоде).
@@ -963,11 +1052,14 @@ function loadAmoLeads(){
    в этом файле, см. eventsForMgrs_): если лида перекинули в другой отдел,
    вся его история задним числом "переезжает" за новым владельцем. Это
    осознанно принятое упрощение, не баг. */
+/* От периода не зависит — грузим один раз за сессию (сброс в loadData). */
 function loadAmoLeadOwners(){
-  S.amoLeadOwners={};S.amoLeadPrices={};
-  return sbGet('amo_leads?select=id,responsible_user_id,price&pipeline_id=eq.'+AMO_PIPE_SALES+'&is_deleted=is.false&limit=20000').then(function(rows){
-    (rows||[]).forEach(function(l){S.amoLeadOwners[l.id]=l.responsible_user_id;S.amoLeadPrices[l.id]=l.price||0;});
-  }).catch(function(){S.amoLeadOwners={};S.amoLeadPrices={};});
+  if(S._amoOwnersLoaded)return Promise.resolve(null);
+  return sbGetAll('amo_leads?select=id,responsible_user_id,price&pipeline_id=eq.'+AMO_PIPE_SALES+'&is_deleted=is.false&order=id').then(function(rows){
+    var own={},pr={};
+    (rows||[]).forEach(function(l){own[l.id]=l.responsible_user_id;pr[l.id]=l.price||0;});
+    return function(){S.amoLeadOwners=own;S.amoLeadPrices=pr;S._amoOwnersLoaded=true;};
+  }).catch(function(){return function(){S.amoLeadOwners={};S.amoLeadPrices={};};});
 }
 /* ═══ AMO EVENTS (активность за период + воронка) ═══
    Источник — таблица amo_lead_events (заполняется amosync.gs), колонка
@@ -982,20 +1074,23 @@ var ACTIVITY_STAGES=[
   {key:'paid', label:'оплат',            sid:142}
 ];
 function loadAmoEvents(){
-  S.amoEvents=[];
   var fromU=Math.floor(S.rangeFrom.getTime()/1000);
   var toU=Math.floor(S.rangeTo.getTime()/1000)+86400;
   var sids=AMO_STAGES.map(function(s){return s.sid;}).filter(Boolean).join(',');
-  return sbGet('amo_lead_events?select=lead_id,status_after_id,created_by,created_at_unix&created_at_unix=gte.'+fromU+'&created_at_unix=lte.'+toU+'&status_after_id=in.('+sids+')&limit=20000').then(function(rows){
-    S.amoEvents=(rows||[]).map(function(e){return{lead_id:e.lead_id,status_after:e.status_after_id,created_by:e.created_by,created_at_unix:e.created_at_unix};});
-  }).catch(function(){S.amoEvents=[];});
+  return sbGetAll('amo_lead_events?select=lead_id,status_after_id,created_by,created_at_unix&created_at_unix=gte.'+fromU+'&created_at_unix=lte.'+toU+'&status_after_id=in.('+sids+')&order=lead_id,created_at_unix,status_after_id').then(function(rows){
+    var ev=(rows||[]).map(function(e){return{lead_id:e.lead_id,status_after:e.status_after_id,created_by:e.created_by,created_at_unix:e.created_at_unix};});
+    return function(){S.amoEvents=ev;};
+  }).catch(function(){return function(){S.amoEvents=[];};});
 }
+/* Вся история — от периода не зависит, грузим один раз за сессию (сброс в loadData).
+   Раньше перекачивалась целиком при КАЖДОЙ смене периода. */
 function loadAmoEventsAll(){
-  S.amoEventsAll=[];
+  if(S._amoAllLoaded)return Promise.resolve(null);
   var sids=AMO_STAGES.map(function(s){return s.sid;}).filter(Boolean).join(',');
-  return sbGet('amo_lead_events?select=lead_id,status_after_id,created_by,created_at_unix&status_after_id=in.('+sids+')&limit=100000').then(function(rows){
-    S.amoEventsAll=(rows||[]).map(function(e){return{lead_id:e.lead_id,status_after:e.status_after_id,created_by:e.created_by,created_at_unix:e.created_at_unix};});
-  }).catch(function(){S.amoEventsAll=[];});
+  return sbGetAll('amo_lead_events?select=lead_id,status_after_id,created_by,created_at_unix&status_after_id=in.('+sids+')&order=lead_id,created_at_unix,status_after_id').then(function(rows){
+    var ev=(rows||[]).map(function(e){return{lead_id:e.lead_id,status_after:e.status_after_id,created_by:e.created_by,created_at_unix:e.created_at_unix};});
+    return function(){S.amoEventsAll=ev;S._amoAllLoaded=true;};
+  }).catch(function(){return function(){S.amoEventsAll=[];};});
 }
 /* дедуп по lead_id — считаем уникальных лидов, дошедших до этапа в периоде,
    а не количество переходов (иначе повторный переход того же лида в тот же
@@ -1094,7 +1189,7 @@ function buildStageFactCounts_(events,ownerMap,amoIdSet){
 function buildMonth(base){var y=base.getFullYear(),m=base.getMonth(),first=new Date(y,m,1),sd=(first.getDay()+6)%7,days=[];for(var i=0;i<sd;i++)days.push({d:new Date(y,m,1-(sd-i)),other:true});var dim=new Date(y,m+1,0).getDate();for(var k=1;k<=dim;k++)days.push({d:new Date(y,m,k),other:false});while(days.length%7){var l=days[days.length-1].d;days.push({d:new Date(l.getFullYear(),l.getMonth(),l.getDate()+1),other:true});}return days;}
 function renderCalMonth(base){var days=buildMonth(base);var cells=DOW.map(function(d){return'<div class="cal-dow">'+d+'</div>';}).join('');days.forEach(function(o){var disabled=o.d<MIN_DATE;var cls='cal-day'+(o.other?' other':'')+(disabled?' disabled':'');var t=o.d.getTime(),f=S.rangeFrom.getTime(),tt=S.rangeTo.getTime();if(!disabled){if(sameDay(o.d,S.rangeFrom)&&sameDay(o.d,S.rangeTo))cls+=' range-single';else if(sameDay(o.d,S.rangeFrom))cls+=' range-start';else if(sameDay(o.d,S.rangeTo))cls+=' range-end';else if(t>f&&t<tt)cls+=' in-range';}cells+='<div class="'+cls+'"'+(disabled?'':' onclick="pickDay('+o.d.getFullYear()+','+o.d.getMonth()+','+o.d.getDate()+')"')+'>'+o.d.getDate()+'</div>';});return'<div class="cal-grid">'+cells+'</div>';}
 function calHtml(){var L=S.calLeft,R=new Date(L.getFullYear(),L.getMonth()+1,1);var prNames=['7 дней','30 дней','Этот месяц','Квартал','За всё время'];var ph=prNames.map(function(p,i){return'<button class="cal-preset" onclick="applyPreset('+i+')">'+p+'</button>';}).join('');return'<div class="cal-presets">'+ph+'</div><div class="cal-months"><div><div class="cal-mhead"><button class="cal-nav" onclick="calShift(-1)">‹</button><span class="cal-mtitle">'+MN[L.getMonth()]+' '+L.getFullYear()+'</span><span style="width:28px"></span></div>'+renderCalMonth(L)+'</div><div><div class="cal-mhead"><span style="width:28px"></span><span class="cal-mtitle">'+MN[R.getMonth()]+' '+R.getFullYear()+'</span><button class="cal-nav" onclick="calShift(1)">›</button></div>'+renderCalMonth(R)+'</div></div>';}
-function calTrigger(){return'<div class="cal-wrap"><div class="cal-trigger" onclick="toggleCal(event)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>'+calLabel()+'</div><div class="cal-pop'+(S.calOpen?' open':'')+'">'+calHtml()+'</div></div>';}
+function calTrigger(){return'<div class="cal-wrap"><div class="cal-trigger" onclick="toggleCal(event)"><span class="busy-dot" title="Обновляю данные…"></span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>'+calLabel()+'</div><div class="cal-pop'+(S.calOpen?' open':'')+'">'+calHtml()+'</div></div>';}
 window.calShift=function(d){S.calLeft=new Date(S.calLeft.getFullYear(),S.calLeft.getMonth()+d,1);render();};
 window.pickDay=function(y,m,d){var p=new Date(y,m,d);if(p<MIN_DATE)return;if(S.pick===0){S.rangeFrom=p;S.rangeTo=p;S.pick=1;}else{if(p<S.rangeFrom){S.rangeTo=S.rangeFrom;S.rangeFrom=p;}else S.rangeTo=p;S.pick=0;refreshPeriod();}render();};
 window.applyPreset=function(i){
@@ -1129,7 +1224,18 @@ function roleBar(){
 }
 window.setRole=function(r){S.role=r;S.dept=null;S.empView=null;S.calOpen=false;render();};
 window.toggleTheme=function(){S.theme=S.theme==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',S.theme);render();savePreferences();};
-function setApp(h){document.getElementById('app').innerHTML=roleBar()+h;_syncBd();}
+var _lastViewKey=null,_animTimer=null;
+function _viewKey(){return [S.role,S.dept||'',S.empView||'',S.tab||'',S_LB_TAB||'',S.mgrAs||''].join('|');}
+function setApp(h){
+  var app=document.getElementById('app');
+  var k=_viewKey(),nav=k!==_lastViewKey;_lastViewKey=k;
+  app.innerHTML=roleBar()+h;
+  app.classList.toggle('busy',!S.periodReady);
+  clearTimeout(_animTimer);
+  if(nav){app.classList.add('anim');_animTimer=setTimeout(function(){app.classList.remove('anim');},1100);}
+  else app.classList.remove('anim');
+  _syncBd();
+}
 function _syncBd(){if(S.msOpen)_showBd();else _hideBd();}
 function _showBd(){
   var bd=document.getElementById('_ms_bd');
@@ -1278,7 +1384,8 @@ function renderCo(){
     '<div class="ck">'+_lbl('Ранрейт',deltaRRco!==null?deltaAbs(Math.round(deltaRRco),'%'):'')+'<div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span></div>'+_mb+'</div>',
     '<div class="ck">'+_lbl('ARPU',deltaArpu2!==null?deltaAbsCurrency(deltaArpu2):'')+'<div class="ck-v num">'+(arpu2?fmt(arpu2):'—')+'</div><div class="ck-s"><span class="neu">платящий клиент</span></div>'+_mb+'</div>',
     '<div class="ck">'+_lbl('Платящих',deltaPaying2!==null?deltaAbs(deltaPaying2,'клиента'):'')+'<div class="ck-v num">'+coPaying+'</div><div class="ck-s"><span class="neu">из '+c.clients+' в портфеле</span></div>'+_mb+'</div>',
-    '<div class="ck">'+_lbl('Сотрудников',deltaAbs(deltaStaffCo,'чел.'))+'<div class="ck-v num">'+totalStaff+'</div><div class="ck-s"><span class="neu">'+DB.depts.length+' отделов</span></div>'+_mb+'</div>'
+    '<div class="ck">'+_lbl('Сотрудников',deltaAbs(deltaStaffCo,'чел.'))+'<div class="ck-v num">'+totalStaff+'</div><div class="ck-s"><span class="neu">'+DB.depts.length+' отделов</span></div>'+_mb+'</div>',
+    '<div class="ck">'+_lbl('Скручено минут',deltaTag(c.minutes,c.prevMinutes))+'<div class="ck-v num">'+fmtMin(c.minutes)+'</div><div class="ck-s"><span class="neu">у '+c.minActive+' клиентов</span></div>'+_mb+'</div>'
   ].join('');
   var cards=DB.depts.length?DB.depts.map(function(d){
     var p2=pct(d.fact,d.plan),rr2=rrPct(d.fact,d.plan),c2=grad(p2);
@@ -1289,7 +1396,7 @@ function renderCo(){
       '<div class="dc-top"><div><div class="dc-name">'+esc(d.name)+'</div><div class="dc-meta">'+esc(d.tl)+' · '+d.staff.length+' чел. · '+d.clients.length+' клиентов</div></div>'+statusBadge+'</div>'+
       '<div class="dc-fact num">'+fmt(d.fact)+'</div><div class="dc-plan">из '+fmt(d.plan)+' плана</div>'+
       '<div class="progress" style="margin-top:14px"><div class="progress-fill" style="width:'+Math.min(p2,100)+'%;background:'+c2+'"></div></div>'+
-      '<div class="dc-stats"><div><div class="dc-stat-l">Выполнено</div><div class="dc-stat-v num" style="color:'+c2+'">'+p2+'%</div></div><div><div class="dc-stat-l">Ранрейт</div><div class="dc-stat-v num" style="color:'+grad(rr2)+'">'+rr2+'%</div></div><div><div class="dc-stat-l">Платящих</div><div class="dc-stat-v num">'+dPaying+'</div></div></div>'+
+      '<div class="dc-stats"><div><div class="dc-stat-l">Выполнено</div><div class="dc-stat-v num" style="color:'+c2+'">'+p2+'%</div></div><div><div class="dc-stat-l">Ранрейт</div><div class="dc-stat-v num" style="color:'+grad(rr2)+'">'+rr2+'%</div></div><div><div class="dc-stat-l">Платящих</div><div class="dc-stat-v num">'+dPaying+'</div></div><div><div class="dc-stat-l">Минут</div><div class="dc-stat-v num">'+fmtNum(d.minutes)+'</div></div></div>'+
     '</div>';
   }).join(''):'<div class="empty-state">Нет отделов. Зайди в <b>⚙ Настройки</b> → Создать отдел.</div>';
   var archHtml='';
@@ -1299,7 +1406,7 @@ function renderCo(){
   }
   setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="a">AI</span> · Дашборд</span></div>'+calTrigger()+'</div>'+
     (S.loadErr?'<div class="err-banner">⚠ '+esc(S.loadErr)+'</div>':'')+
-    '<div class="ckpi">'+kH+'</div>'+
+    '<div class="ckpi k6">'+kH+'</div>'+
     '<div class="dept-grid">'+cards+'</div>'+archHtml);
 }
 window.toggleArchDepts=function(){S.showArchivedDepts=!S.showArchivedDepts;render();};
@@ -1315,7 +1422,7 @@ window.drillEmpFromLb=function(supaId,deptId){
   S.role='cd';
   drillEmp(supaId);
 };
-window.drillEmp=function(supaId){S.empView=supaId;delete S.empLifetime[supaId];delete S.empMonthlyPlan[supaId];render();loadEmpLifetime(supaId);};
+window.drillEmp=function(supaId){S.empView=supaId;render();loadEmpLifetime(supaId);};
 /* ═══ FUNNEL v2 — helpers ═══ */
 function empAmo_(supaId){return S.empAmoMap[supaId]||null;}
 function deptAuids_(dStaff){return (dStaff||[]).map(function(m){return empAmo_(m.supaId);}).filter(Boolean);}
@@ -1564,7 +1671,8 @@ function renderDept(){
     {l:'Ранрейт',dlt:deltaRRd!==null?deltaAbs(Math.round(deltaRRd),'%'):'',v:rrv+'%',s:'<span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span>',raw:true},
     {l:'ARPU',dlt:deltaArpuD!==null?deltaAbsCurrency(deltaArpuD):'',v:dArpu?fmt(dArpu):'—',s:'<span class="neu">платящий клиент</span>',raw:true},
     {l:'Платящих',dlt:deltaPayingD!==null?deltaAbs(deltaPayingD,'клиента'):'',v:dPaying,s:'<span class="neu">из '+d.clients.length+' в портфеле</span>',raw:true},
-    {l:'Сотрудников',dlt:deltaAbs(deltaStaffD,'чел.'),v:activeStaffD,s:'<span class="neu">в отделе</span>',raw:true}
+    {l:'Сотрудников',dlt:deltaAbs(deltaStaffD,'чел.'),v:activeStaffD,s:'<span class="neu">в отделе</span>',raw:true},
+    {l:'Скручено минут',dlt:deltaTag(d.minutes,d.prevMinutes),v:fmtMin(d.minutes),s:'<span class="neu">у '+d.minActive+' клиентов</span>',raw:true}
   ];
   var kH=kpis.map(function(k){
     var lbl='<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><span class="kl" style="margin:0">'+k.l+'</span>'+(k.dlt||'')+'</div>';
@@ -1582,7 +1690,7 @@ function renderDept(){
       if(typeof va==='string')return S.staffSortDir*va.localeCompare(vb);
       return S.staffSortDir*(va-vb);
     });
-    var cols=[['name','Сотрудник',''],['fact','Факт','r'],['plan','План','r'],['pct','%','r'],['rr','Ранрейт','r'],['clients','Клиентов','r']];
+    var cols=[['name','Сотрудник',''],['fact','Факт','r'],['plan','План','r'],['pct','%','r'],['rr','Ранрейт','r'],['minutes','Минут','r'],['clients','Клиентов','r']];
     var th=cols.map(function(c){var a=S.staffSortKey===c[0];return'<th class="'+(c[2])+(a?' sorted':'')+'" onclick="sortStaff(\''+c[0]+'\')">'+c[1]+si(a,S.staffSortDir)+'</th>';}).join('')+'<th class="r">Δ период</th>';
     var rows=staff.length?staff.map(function(m){
       var c3=grad(m._p);
@@ -1593,13 +1701,14 @@ function renderDept(){
         '<td class="r muted num">'+fmt(m.plan)+'</td>'+
         '<td class="r"><span style="color:'+c3+';font-weight:600" class="num">'+m._p+'%</span><div class="inbar"><div class="inbar-f" style="width:'+Math.min(m._p,100)+'%;background:'+c3+'"></div></div></td>'+
         '<td class="r"><span style="color:'+grad(m._r)+'" class="num">'+m._r+'%</span></td>'+
+        '<td class="r muted num">'+fmtNum(m.minutes)+'</td>'+
         '<td class="r muted num">'+m.clients+' <span style="color:var(--accent);font-size:10px">→</span></td>'+
         '<td class="r">'+deltaTag(m.fact,m.prevFact)+'</td>'+
       '</tr>';
-    }).join(''):'<tr><td colspan="7"><div class="empty-state">Нет сотрудников</div></td></tr>';
+    }).join(''):'<tr><td colspan="8"><div class="empty-state">Нет сотрудников</div></td></tr>';
     ct='<div class="panel"><p style="font-size:11px;color:var(--text-3);margin-bottom:14px">Нажми на строку — увидишь клиентов сотрудника</p><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
   }
-  setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUp()">‹ Дашборд</button><span class="crumb-title">'+esc(d.name)+'</span><button class="btn sm ghost" onclick="archiveDept(\''+d.id+'\')" style="margin-left:4px">В архив</button></div>'+calTrigger()+'</div><div class="dept-kpi">'+kH+'</div>'+tabs+ct);
+  setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUp()">‹ Дашборд</button><span class="crumb-title">'+esc(d.name)+'</span><button class="btn sm ghost" onclick="archiveDept(\''+d.id+'\')" style="margin-left:4px">В архив</button></div>'+calTrigger()+'</div><div class="dept-kpi k6">'+kH+'</div>'+tabs+ct);
 }
 /* ═══ EMPLOYEE VIEW ═══ */
 window.sortCli=function(k){if(S.cliSortKey===k)S.cliSortDir*=-1;else{S.cliSortKey=k;S.cliSortDir=1;}render();};
@@ -1642,11 +1751,13 @@ function renderEmpView(){
   var prevArpuE=prevPayingE>0?r(prevFactE/prevPayingE):0;
   var deltaArpuE=prevArpuE>0?r(empArpu-prevArpuE):null;
   var deltaPayingE=prevPayingE>0?empPaying-prevPayingE:null;
+  var empMin=minutesOfUser(emp.platform_user_id,S.periodStats),empMinPrev=minutesOfUser(emp.platform_user_id,S.prevPeriodStats);
   var kH=[
     '<div class="kcard">'+_lbl3('Выручка',deltaTag(dealAgg.fact,prevFactE))+'<div class="kv num">'+fmt(dealAgg.fact)+'</div><div class="ks"><span class="neu">план '+fmt(plan)+' · '+mp+'%</span></div>'+_mbF3(mp)+'</div>',
     '<div class="kcard">'+_lbl3('Ранрейт',deltaRRe!==null?deltaAbs(Math.round(deltaRRe),'%'):'')+'<div class="kv num">'+mr+'%</div><div class="ks"><span class="neu">'+(mr>=100?'в темпе':mr>=80?'близко к плану':'отстаём')+'</span></div>'+_mb3+'</div>',
     '<div class="kcard">'+_lbl3('ARPU',deltaArpuE!==null?deltaAbsCurrency(deltaArpuE):'')+'<div class="kv num">'+(empArpu?fmt(empArpu):'—')+'</div><div class="ks"><span class="neu">платящий клиент</span></div>'+_mb3+'</div>',
     '<div class="kcard">'+_lbl3('Платящих',deltaPayingE!==null?deltaAbs(deltaPayingE,'клиента'):'')+'<div class="kv num">'+empPaying+'</div><div class="ks"><span class="neu">из '+portfolioCount+' в портфеле</span></div>'+_mb3+'</div>',
+    '<div class="kcard">'+_lbl3('Скручено минут',deltaTag(empMin.sum,empMinPrev.sum))+'<div class="kv num">'+fmtMin(empMin.sum)+'</div><div class="ks"><span class="neu">у '+empMin.n+' из '+portfolioCount+' клиентов</span></div>'+_mb3+'</div>',
     '<div class="kcard">'+_lbl3('Стаж')+'<div class="kv num">'+(ten!==null?ten+' мес.':'—')+'</div><div class="ks"><span class="neu">'+(emp.hired_at?'с '+fmtD(emp.hired_at):'')+'</span></div>'+_mb3+'</div>'
   ].join('');
   myClients.forEach(function(c){c._min=S.periodStats[c.platform_org_id]||0;c._d=daysTo(c.expiry);});
@@ -1702,7 +1813,7 @@ function renderEmpView(){
     chartHtml='<div class="chart-block" style="padding:24px 22px;text-align:center;color:var(--text-3);font-size:12px">Загружаем данные...</div>';
   }
   setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUpFromEmp()">‹ '+esc(d?d.name:'Отдел')+'</button><span class="crumb-title">'+esc(emp.name)+'</span></div>'+calTrigger()+'</div>'+
-    empHeader+'<div class="dept-kpi">'+kH+'</div>'+
+    empHeader+'<div class="dept-kpi k6">'+kH+'</div>'+
     chartHtml+
     '<div class="panel"><div class="panel-title">Клиенты ('+myClients.length+')</div><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>'+archCliBlock+'</div>');
 }
@@ -2172,7 +2283,7 @@ window.openPlanModal=function(supaId,empName){
     function(){
       var val=Number(document.getElementById('plan-v').value)||0;
       var ps=months.map(function(mm){return sbUpsert('monthly_targets','employee_id,year,month',{employee_id:supaId,year:mm.y,month:mm.m,plan_amount:val});});
-      Promise.all(ps).then(function(){closeModal();refreshPeriod();flashSave();});
+      Promise.all(ps).then(function(){closeModal();refreshPeriod(true);flashSave();});
     });
 };
 /* ═══ МЕНЕДЖЕР ═══ */
@@ -2244,7 +2355,7 @@ window.editDeal=function(id){var dl=S.dealsRaw.find(function(d){return d.id===id
 window.deleteDeal=function(id){
   var dl=S.dealsRaw.find(function(d){return d.id===id;});
   openModal('Удалить сделку?','<p style="font-size:13px;color:var(--text-2);line-height:1.7">'+(dl?esc(dl.client_name||'—')+' · '+fmt(dl.amount):'')+'<br>Это нельзя отменить.</p>',
-    function(){fetch(SB_URL+'/rest/v1/deals?id=eq.'+id,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'}}).then(function(){closeModal();refreshPeriod();});});
+    function(){fetch(SB_URL+'/rest/v1/deals?id=eq.'+id,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'}}).then(function(){closeModal();refreshPeriod(true);});});
 };
 function openDealModal(existing,preEmpId,preDeptId){
   var emps=RAW.employees.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
@@ -2336,7 +2447,7 @@ function saveDeal(existing,preDeptId){
   var dept=RAW.depts.find(function(x){return x.id===deptId;});
   var row={event_type:type,employee_id:empId,employee_name:emp?emp.name:'',platform_org_id:orgId,client_name:clientName,dept_id:deptId,dept_name:dept?dept.name:'',amount:amount,motivation_pct:pct2,deal_date:date,note:note};
   var req=existing?sbPatch('deals','id=eq.'+existing.id,row):sbPost('deals',row);
-  req.then(function(){closeModal();refreshPeriod();flashSave();}).catch(function(e){
+  req.then(function(){closeModal();refreshPeriod(true);flashSave();}).catch(function(e){
     if(btn){btn.disabled=false;delete btn.dataset.saving;btn.textContent='Сохранить';}
     alert('Не удалось сохранить сделку, попробуй ещё раз.'+(e&&e.message?'\n'+e.message:''));
   });
@@ -2635,11 +2746,14 @@ function buildMonthlyData(deals){
   return arr;
 }
 window.loadEmpLifetime=function(empId){
-  if(S.empLifetime[empId])return Promise.resolve();
+  S._lifeLoading=S._lifeLoading||{};
+  if(S.empLifetime[empId]||S._lifeLoading[empId])return Promise.resolve();
+  S._lifeLoading[empId]=true;
   return Promise.all([
-    sbGet('deals?select=deal_date,amount,event_type,client_name,platform_org_id&employee_id=eq.'+empId+'&order=deal_date.asc&limit=200000'),
-    sbGet('monthly_targets?select=year,month,plan_amount&employee_id=eq.'+empId+'&limit=100')
+    sbGetAll('deals?select=id,deal_date,amount,event_type,client_name,platform_org_id&employee_id=eq.'+empId+'&order=deal_date.asc,id'),
+    sbGet('monthly_targets?select=year,month,plan_amount&employee_id=eq.'+empId+'&limit=1000')
   ]).then(function(res){
+    S._lifeLoading[empId]=false;
     S.empLifetime[empId]=res[0]||[];
     var planMap={};
     (res[1]||[]).forEach(function(t){
@@ -2653,7 +2767,7 @@ window.loadEmpLifetime=function(empId){
 window.loadCompanyLifetime=function(){
   if(S.companyLifetime||S.companyLifetimeLoading)return Promise.resolve();
   S.companyLifetimeLoading=true;
-  return sbGet('deals?select=deal_date,amount,event_type,dept_id,dept_name&order=deal_date.asc&limit=500000')
+  return sbGetAll('deals?select=id,deal_date,amount,event_type,dept_id,dept_name&order=deal_date.asc,id')
     .then(function(rows){S.companyLifetime=rows||[];S.companyLifetimeLoading=false;render();});
 };
 function buildCompanyMonthlyData(deals){
