@@ -385,6 +385,23 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 @keyframes pulse{0%,100%{opacity:.25}50%{opacity:1}}
 .k6{grid-template-columns:repeat(3,1fr)!important;}
 @media(max-width:760px){.k6{grid-template-columns:1fr 1fr!important;}.k6 .kcard:nth-child(5),.k6 .ck:nth-child(5){grid-column:auto!important;}}
+/* ═══ ТУЛТИП «ПЕРВИЧКА / ПОВТОРНЫЕ» ═══ */
+[data-rev]{cursor:help;}
+.chart-tip.rev-tip{max-width:440px;min-width:340px;padding:12px 14px;}
+.rt-title{font-size:11px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;}
+.rt-bar{height:4px;border-radius:2px;background:var(--accent);overflow:hidden;margin-bottom:10px;}
+.rt-bar-new{height:100%;background:var(--green);}
+.rt-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.rt-h{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.rt-h.new{color:var(--green);}.rt-h.rep{color:var(--accent);}
+.rt-n{font-size:18px;font-weight:700;line-height:1.1;}.rt-n span{font-size:11px;font-weight:500;color:var(--text-3);}
+.rt-s{font-size:12px;font-weight:600;color:var(--text-2);margin:2px 0 8px;font-variant-numeric:tabular-nums;}
+.rt-row{display:flex;justify-content:space-between;gap:8px;font-size:11px;padding:2px 0;}
+.rt-nm{color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px;}
+.rt-am{font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums;}
+.rt-more{font-size:10px;color:var(--text-3);margin-top:2px;}
+.rt-ref{margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--red);}
+.rt-wait{font-size:12px;color:var(--text-3);}
 /* ═══ ICONS (inline svg, минималистичные) ═══ */
 .ico{width:15px;height:15px;display:inline-block;vertical-align:-2px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 .ico-sm{width:14px;height:14px;}
@@ -762,7 +779,7 @@ function payingInPeriod(clients){
 }
 /* ═══ LOAD DATA ═══ */
 function loadData(){
-  S.loading=true;S.loadErr=null;S._amoAllLoaded=false;S._amoOwnersLoaded=false;render();
+  S.loading=true;S.loadErr=null;S._amoAllLoaded=false;S._amoOwnersLoaded=false;S._firstPayLoaded=false;render();
   return Promise.all([
     sbGet('departments?select=*&order=created_at'),
     sbGet('employees?select=*&order=name'),
@@ -804,10 +821,10 @@ function patchEmpSync(supaId,patch,optimistic){
    мигания нулями. Токен отсекает устаревший ответ, если период успели сменить.
    invalidateLifetime=true — после сохранения сделки/плана (пересобрать графики). */
 function refreshPeriod(invalidateLifetime){
-  if(invalidateLifetime){S.empLifetime={};S.empMonthlyPlan={};S.companyLifetime=null;S._lifeLoading={};}
+  if(invalidateLifetime){S.empLifetime={};S.empMonthlyPlan={};S.companyLifetime=null;S._lifeLoading={};S._firstPayLoaded=false;}
   var tok=S._periodTok=(S._periodTok||0)+1;
   S.periodReady=false;S.periodLoading=true;
-  return Promise.all([loadPeriodStats(),loadDeals(),loadPrevDeals(),loadPlans(),loadAmoLeads(),loadAmoEvents(),loadAmoEventsAll(),loadAmoLeadOwners()]).then(function(apply){
+  return Promise.all([loadPeriodStats(),loadDeals(),loadPrevDeals(),loadPlans(),loadAmoLeads(),loadAmoEvents(),loadAmoEventsAll(),loadAmoLeadOwners(),loadFirstPayments()]).then(function(apply){
     if(tok!==S._periodTok)return;
     apply.forEach(function(f){if(typeof f==='function')f();});
     buildDB();S.periodReady=true;S.periodLoading=false;render();
@@ -906,6 +923,20 @@ function buildDB(){
   };
 }
 /* ═══ PERIOD STATS ═══ */
+/* Первая оплата каждого клиента за ВСЮ историю deals — по ней делим выручку
+   на первичку (первая оплата клиента) и повторные (клиент уже платил раньше,
+   в любой период). Ключ клиента — platform_org_id, без него — имя клиента.
+   Грузится один раз за сессию; refreshPeriod(true) после сохранения сделки
+   сбрасывает флаг и пересчитывает. */
+function dealOrgKey_(d){return d.platform_org_id||('name:'+String(d.client_name||'').trim().toLowerCase());}
+function loadFirstPayments(){
+  if(S._firstPayLoaded)return Promise.resolve(null);
+  return sbGetAll('deals?select=id,platform_org_id,client_name,deal_date,event_type&order=deal_date.asc,id').then(function(rows){
+    var first={};
+    (rows||[]).forEach(function(d){if(d.event_type==='refund')return;var k=dealOrgKey_(d);if(!(k in first))first[k]=d.id;});
+    return function(){S.firstPayByOrg=first;S._firstPayLoaded=true;};
+  }).catch(function(e){console.error('loadFirstPayments',e);return null;});
+}
 function loadPeriodStats(){
   var pr=prevRange();
   return Promise.all([fetchMinutesMap(S.rangeFrom,S.rangeTo),fetchMinutesMap(pr.from,pr.to)]).then(function(res){
@@ -1230,6 +1261,7 @@ function setApp(h){
   var app=document.getElementById('app');
   var k=_viewKey(),nav=k!==_lastViewKey;_lastViewKey=k;
   app.innerHTML=roleBar()+h;
+  if(typeof _tip!=='undefined'&&_tip)_tip.style.display='none';
   app.classList.toggle('busy',!S.periodReady);
   clearTimeout(_animTimer);
   if(nav){app.classList.add('anim');_animTimer=setTimeout(function(){app.classList.remove('anim');},1100);}
@@ -1315,7 +1347,7 @@ function renderLb(){
       return'<tr class="clickable" style="'+rowBg+';'+rowBorder+'" onclick="drillEmpFromLb(\''+m.supaId+'\',\''+m.deptId+'\')" >'+
         '<td style="padding-left:12px">'+rankCell+'</td>'+
         '<td><span class="strong">'+esc(m.name)+'</span><div style="font-size:11px;color:var(--text-3)">'+esc(m.dept)+'</div></td>'+
-        '<td class="r strong num">'+fmt(m.fact)+'</td>'+
+        '<td class="r strong num"'+revAttr('e:'+m.supaId)+'>'+fmt(m.fact)+'</td>'+
         '<td class="r muted num">'+fmt(m.plan)+'</td>'+
         '<td class="r"><span style="font-weight:600;color:'+pctColor+'" class="num">'+m.pct+'%</span><div class="inbar"><div class="inbar-f" style="width:'+Math.min(m.pct,100)+'%;background:'+pctColor+'"></div></div></td>'+
         '<td class="r">'+deltaTag(m.fact,m.prevFact)+'</td>'+
@@ -1380,7 +1412,7 @@ function renderCo(){
   var firedCo=RAW.employees.filter(function(e){return e.fired_at&&e.fired_at.substring(0,10)>=fromS2&&e.fired_at.substring(0,10)<=toS2;}).length;
   var deltaStaffCo=hiredCo-firedCo;
   var kH=[
-    '<div class="ck">'+_lbl('Выручка',deltaTag(c.fact,c.prevFact))+'<div class="ck-v num">'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div>'+_mbFill(cp)+'</div>',
+    '<div class="ck">'+_lbl('Выручка',deltaTag(c.fact,c.prevFact))+'<div class="ck-v num"'+revAttr('co')+'>'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div>'+_mbFill(cp)+'</div>',
     '<div class="ck">'+_lbl('Ранрейт',deltaRRco!==null?deltaAbs(Math.round(deltaRRco),'%'):'')+'<div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span></div>'+_mb+'</div>',
     '<div class="ck">'+_lbl('ARPU',deltaArpu2!==null?deltaAbsCurrency(deltaArpu2):'')+'<div class="ck-v num">'+(arpu2?fmt(arpu2):'—')+'</div><div class="ck-s"><span class="neu">платящий клиент</span></div>'+_mb+'</div>',
     '<div class="ck">'+_lbl('Платящих',deltaPaying2!==null?deltaAbs(deltaPaying2,'клиента'):'')+'<div class="ck-v num">'+coPaying+'</div><div class="ck-s"><span class="neu">из '+c.clients+' в портфеле</span></div>'+_mb+'</div>',
@@ -1394,7 +1426,7 @@ function renderCo(){
     var statusBadge=(d.prevFact===0&&d.fact===0)?'<span class="dc-badge '+bC+'">'+bT+'</span>':deltaBadge(d.fact,d.prevFact);
     return'<div class="dept-card" onclick="drill(\''+d.id+'\')">'+
       '<div class="dc-top"><div><div class="dc-name">'+esc(d.name)+'</div><div class="dc-meta">'+esc(d.tl)+' · '+d.staff.length+' чел. · '+d.clients.length+' клиентов</div></div>'+statusBadge+'</div>'+
-      '<div class="dc-fact num">'+fmt(d.fact)+'</div><div class="dc-plan">из '+fmt(d.plan)+' плана</div>'+
+      '<div class="dc-fact num"'+revAttr('d:'+d.id)+'>'+fmt(d.fact)+'</div><div class="dc-plan">из '+fmt(d.plan)+' плана</div>'+
       '<div class="progress" style="margin-top:14px"><div class="progress-fill" style="width:'+Math.min(p2,100)+'%;background:'+c2+'"></div></div>'+
       '<div class="dc-stats"><div><div class="dc-stat-l">Выполнено</div><div class="dc-stat-v num" style="color:'+c2+'">'+p2+'%</div></div><div><div class="dc-stat-l">Ранрейт</div><div class="dc-stat-v num" style="color:'+grad(rr2)+'">'+rr2+'%</div></div><div><div class="dc-stat-l">Платящих</div><div class="dc-stat-v num">'+dPaying+'</div></div><div><div class="dc-stat-l">Минут</div><div class="dc-stat-v num">'+fmtNum(d.minutes)+'</div></div></div>'+
     '</div>';
@@ -1667,7 +1699,7 @@ function renderDept(){
   var deltaStaffD=hiredD-firedD;
   var activeStaffD=d.staff.filter(function(m){return!m.fired;}).length;
   var kpis=[
-    {l:'Выручка',dlt:deltaTag(d.fact,d.prevFact),v:fmt(d.fact),s:'план '+fmt(d.plan)+' · '+p2+'%',bar:p2,raw:true},
+    {l:'Выручка',dlt:deltaTag(d.fact,d.prevFact),v:fmt(d.fact),s:'план '+fmt(d.plan)+' · '+p2+'%',bar:p2,raw:true,rev:'d:'+d.id},
     {l:'Ранрейт',dlt:deltaRRd!==null?deltaAbs(Math.round(deltaRRd),'%'):'',v:rrv+'%',s:'<span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span>',raw:true},
     {l:'ARPU',dlt:deltaArpuD!==null?deltaAbsCurrency(deltaArpuD):'',v:dArpu?fmt(dArpu):'—',s:'<span class="neu">платящий клиент</span>',raw:true},
     {l:'Платящих',dlt:deltaPayingD!==null?deltaAbs(deltaPayingD,'клиента'):'',v:dPaying,s:'<span class="neu">из '+d.clients.length+' в портфеле</span>',raw:true},
@@ -1677,7 +1709,7 @@ function renderDept(){
   var kH=kpis.map(function(k){
     var lbl='<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><span class="kl" style="margin:0">'+k.l+'</span>'+(k.dlt||'')+'</div>';
     var mb=k.bar!=null?_mbF2(k.bar):_mb2;
-    return'<div class="kcard">'+lbl+'<div class="kv num">'+k.v+'</div><div class="ks">'+(k.raw?k.s:'<span class="neu">'+k.s+'</span>')+'</div>'+mb+'</div>';
+    return'<div class="kcard">'+lbl+'<div class="kv num"'+(k.rev?revAttr(k.rev):'')+'>'+k.v+'</div><div class="ks">'+(k.raw?k.s:'<span class="neu">'+k.s+'</span>')+'</div>'+mb+'</div>';
   }).join('');
   var tabs='<div class="tab-row">'+[['staff','Сотрудники']].map(function(t){return'<button class="tab'+(S.tab===t[0]?' on':'')+'" onclick="setTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>';
   var ct='';
@@ -1697,7 +1729,7 @@ function renderDept(){
       var subline=m.fired?'<span style="color:var(--red);font-size:11px">уволен от '+fmtD(m.firedAt)+'</span>':m.role;
       return'<tr class="clickable'+(m.fired?' fired-soft':'')+'" onclick="drillEmp(\''+m.supaId+'\')">'+
         '<td><span class="strong">'+esc(m.name)+'</span><div style="font-size:11px;color:var(--text-3)">'+subline+'</div></td>'+
-        '<td class="r strong num" style="color:var(--text)">'+fmt(m.fact)+'</td>'+
+        '<td class="r strong num" style="color:var(--text)"'+revAttr('e:'+m.supaId)+'>'+fmt(m.fact)+'</td>'+
         '<td class="r muted num">'+fmt(m.plan)+'</td>'+
         '<td class="r"><span style="color:'+c3+';font-weight:600" class="num">'+m._p+'%</span><div class="inbar"><div class="inbar-f" style="width:'+Math.min(m._p,100)+'%;background:'+c3+'"></div></div></td>'+
         '<td class="r"><span style="color:'+grad(m._r)+'" class="num">'+m._r+'%</span></td>'+
@@ -1753,7 +1785,7 @@ function renderEmpView(){
   var deltaPayingE=prevPayingE>0?empPaying-prevPayingE:null;
   var empMin=minutesOfUser(emp.platform_user_id,S.periodStats),empMinPrev=minutesOfUser(emp.platform_user_id,S.prevPeriodStats);
   var kH=[
-    '<div class="kcard">'+_lbl3('Выручка',deltaTag(dealAgg.fact,prevFactE))+'<div class="kv num">'+fmt(dealAgg.fact)+'</div><div class="ks"><span class="neu">план '+fmt(plan)+' · '+mp+'%</span></div>'+_mbF3(mp)+'</div>',
+    '<div class="kcard">'+_lbl3('Выручка',deltaTag(dealAgg.fact,prevFactE))+'<div class="kv num"'+revAttr('e:'+S.empView)+'>'+fmt(dealAgg.fact)+'</div><div class="ks"><span class="neu">план '+fmt(plan)+' · '+mp+'%</span></div>'+_mbF3(mp)+'</div>',
     '<div class="kcard">'+_lbl3('Ранрейт',deltaRRe!==null?deltaAbs(Math.round(deltaRRe),'%'):'')+'<div class="kv num">'+mr+'%</div><div class="ks"><span class="neu">'+(mr>=100?'в темпе':mr>=80?'близко к плану':'отстаём')+'</span></div>'+_mb3+'</div>',
     '<div class="kcard">'+_lbl3('ARPU',deltaArpuE!==null?deltaAbsCurrency(deltaArpuE):'')+'<div class="kv num">'+(empArpu?fmt(empArpu):'—')+'</div><div class="ks"><span class="neu">платящий клиент</span></div>'+_mb3+'</div>',
     '<div class="kcard">'+_lbl3('Платящих',deltaPayingE!==null?deltaAbs(deltaPayingE,'клиента'):'')+'<div class="kv num">'+empPaying+'</div><div class="ks"><span class="neu">из '+portfolioCount+' в портфеле</span></div>'+_mb3+'</div>',
@@ -2582,6 +2614,48 @@ S.companyLifetime=null;S.companyLifetimeLoading=false;
 var _tip=null;
 function _getTip(){if(!_tip){_tip=document.createElement('div');_tip.className='chart-tip';document.body.appendChild(_tip);}return _tip;}
 window.moveTip=function(e){_positionTip(e);};
+/* key: 'co' | 'd:<dept_id>' | 'e:<employee_id>' — атрибуция как у выручки (deals.dept_id / employee_id) */
+function revAttr(key){return' data-rev="'+key+'" onmouseenter="showRevTip(event,this)" onmousemove="moveTip(event)" onmouseleave="hideTip()"';}
+function revBreakdown(key){
+  var f;
+  if(key==='co')f=function(){return true;};
+  else if(key.indexOf('d:')===0){var did=key.slice(2);f=function(d){return d.dept_id===did;};}
+  else{var eid=key.slice(2);f=function(d){return d.employee_id===eid;};}
+  var names={};(RAW.allClients||[]).forEach(function(c){names[c.platform_org_id]=c.company_name;});
+  var R={neu:{n:0,sum:0,cl:{}},rep:{n:0,sum:0,cl:{}},refund:0};
+  (S.dealsRaw||[]).forEach(function(d){
+    if(!f(d))return;
+    var amt=Number(d.amount)||0;
+    if(d.event_type==='refund'){R.refund+=amt;return;}
+    var b=(S.firstPayByOrg||{})[dealOrgKey_(d)]===d.id?R.neu:R.rep;
+    var nm=names[d.platform_org_id]||d.client_name||'—';
+    b.n++;b.sum+=amt;b.cl[nm]=(b.cl[nm]||0)+amt;
+  });
+  return R;
+}
+function dealsWord_(n){var a=n%10,b=n%100;if(a===1&&b!==11)return'сделка';if(a>=2&&a<=4&&(b<12||b>14))return'сделки';return'сделок';}
+window.showRevTip=function(e,el){
+  var t=_getTip();t.classList.add('rev-tip');
+  var key=el.getAttribute('data-rev')||'co';
+  var title=key==='co'?'Вся компания':key.indexOf('d:')===0?((DB.depts.find(function(x){return x.id===key.slice(2);})||{}).name||'Отдел'):((RAW.employees.find(function(x){return x.id===key.slice(2);})||{}).name||'Сотрудник');
+  if(!S._firstPayLoaded){t.innerHTML='<div class="rt-wait">Считаю первичку…</div>';}
+  else{
+    var R=revBreakdown(key);
+    var col=function(head,b,cls){
+      var list=Object.keys(b.cl).map(function(n){return[n,b.cl[n]];}).sort(function(x,y){return y[1]-x[1];});
+      var rows=list.slice(0,6).map(function(x){return'<div class="rt-row"><span class="rt-nm">'+esc(x[0])+'</span><span class="rt-am">'+fmtShort(x[1])+'</span></div>';}).join('');
+      if(list.length>6)rows+='<div class="rt-more">+ ещё '+(list.length-6)+' клиентов</div>';
+      if(!list.length)rows='<div class="rt-more">нет</div>';
+      return'<div><div class="rt-h '+cls+'">'+head+'</div><div class="rt-n">'+b.n+' <span>'+dealsWord_(b.n)+'</span></div><div class="rt-s">'+fmt(b.sum)+'</div>'+rows+'</div>';
+    };
+    var tot=R.neu.sum+R.rep.sum,pn=tot>0?Math.round(R.neu.sum/tot*100):0;
+    t.innerHTML='<div class="rt-title">'+esc(title)+' · первичка '+pn+'%</div>'+
+      '<div class="rt-bar"><div class="rt-bar-new" style="width:'+pn+'%"></div></div>'+
+      '<div class="rt-grid">'+col('Первичные',R.neu,'new')+col('Повторные',R.rep,'rep')+'</div>'+
+      (R.refund?'<div class="rt-ref">Возвраты: −'+fmt(R.refund)+'</div>':'');
+  }
+  t.style.display='block';_positionTip(e);
+};
 window.hideTip=function(){var t=_getTip();t.style.display='none';};
 function _positionTip(e){
   var t=_getTip();var tw=t.offsetWidth||200,th=t.offsetHeight||100;
@@ -2608,7 +2682,7 @@ function buildSmoothPath(pts){
   return d;
 }
 window.showChartTip=function(e,el){
-  var t=_getTip();
+  var t=_getTip();t.classList.remove('rev-tip');
   var month=el.getAttribute('data-month')||'';
   var clients=[];try{clients=JSON.parse(el.getAttribute('data-clients')||'[]');}catch(x){}
   var total=Number(el.getAttribute('data-total')||0);
