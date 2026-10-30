@@ -24,8 +24,6 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .tg-days{display:flex;gap:6px;flex-wrap:wrap;}
 .tg-day{font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid var(--border,#e2e6ee);background:transparent;color:var(--text-3);cursor:pointer;transition:.15s;}
 .tg-day.on{background:var(--accent);border-color:var(--accent);color:#fff;}
-.amo-dot-btn{background:none;border:none;cursor:pointer;padding:4px;display:inline-flex;align-items:center;justify-content:center;}
-.amo-dot{display:inline-block;width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 3px rgba(127,127,127,.12);}
 .dlt{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;font-variant-numeric:tabular-nums;white-space:nowrap;}
 .dlt-ico{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
 .dlt-up{color:var(--green);background:var(--green-bg);}
@@ -212,105 +210,6 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .arch-block.open{display:block;}
 .fired-row{opacity:.5;}
 .fired-row td{font-style:italic;}
-/* FUNNEL v2 */
-.fn2-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
-.fn2-tag{font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;transition:.15s;white-space:nowrap;}
-.fn2-tag:hover{border-color:var(--accent);color:var(--accent);}
-.fn2-tag.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
-.fn2-tag .tc{font-size:11px;opacity:.8;margin-left:3px;}
-.fn2-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
-.fn2-title{font-size:15px;font-weight:700;flex:1;}
-.fn2-cmp-btn{font-size:12px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;transition:.15s;}
-.fn2-cmp-btn:hover,.fn2-cmp-btn.on{border-color:var(--accent);color:var(--accent);}
-.fn2-cmp-btn.on{background:var(--accent-bg);}
-.fn2-tbl{width:100%;border-collapse:collapse;}
-.fn2-tbl th{text-align:left;font-size:10px;font-weight:600;color:var(--text-3);padding:0 16px 14px 0;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
-.fn2-tbl th.r{text-align:right;}
-.fn2-tbl td{padding:9px 16px 9px 0;vertical-align:middle;}
-.fn2-tbl td.r{text-align:right;}
-.fn2-tbl tr.fn2-main td{border-top:1px solid var(--border-soft);}
-.fn2-tbl tr.fn2-main:first-child td{border-top:none;}
-.fn2-stage-name{font-size:14px;color:var(--text);font-weight:600;white-space:nowrap;}
-.fn2-bar-wrap{height:14px;background:var(--surface-3);border-radius:7px;overflow:hidden;}
-.fn2-bar-fill{height:100%;border-radius:7px;transition:width .4s ease;}
-.fn2-planpct{font-size:11px;color:var(--text-3);margin-top:5px;padding-left:1px;}
-.fn2-pct{font-size:13px;font-weight:700;min-width:44px;text-align:right;}
-.fn2-num{font-size:15px;font-weight:600;color:var(--text);min-width:40px;text-align:right;font-variant-numeric:tabular-nums;}
-.fn2-plan-num{font-size:14px;color:var(--text-3);min-width:40px;text-align:right;font-variant-numeric:tabular-nums;}
-.fn2-conv-row td{padding:0 16px 9px 0;}
-.fn2-conv{font-size:11px;color:var(--text-3);display:inline-flex;align-items:center;gap:5px;}
-.fn2-conv b{color:var(--text-2);font-weight:600;}
-.fn2-stat-row{display:flex;gap:6px;margin-bottom:6px;align-items:center;font-size:12px;color:var(--text-3);}
-.fn2-stat-row b{color:var(--text);font-weight:600;}
-/* channel cards */
-.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:4px;}
-.ch-card{background:var(--surface-2);border:1px solid var(--border-soft);border-radius:12px;padding:14px;cursor:pointer;transition:.15s;display:flex;flex-direction:column;}
-.ch-card:hover{border-color:var(--accent);transform:translateY(-1px);}
-.ch-card.on{border-color:var(--accent);background:var(--accent-bg);}
-.ch-name{font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text);}
-.ch-stat{display:flex;justify-content:space-between;font-size:12px;color:var(--text-2);margin-bottom:3px;}
-.ch-stat b{color:var(--text);}
-.ch-conv{margin-top:auto;padding-top:10px;font-size:14px;font-weight:700;}
-/* compare mode */
-.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.cmp-head{text-align:center;font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px;}
-.cmp-tbl{width:100%;border-collapse:collapse;}
-.cmp-tbl th{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.04em;padding:0 8px 8px 0;}
-.cmp-tbl td{font-size:13px;padding:6px 8px 6px 0;border-bottom:1px solid var(--border-soft);vertical-align:middle;}
-.cmp-tbl tr:last-child td{border-bottom:none;}
-.cmp-bar{height:8px;background:var(--surface-3);border-radius:4px;overflow:hidden;margin-top:4px;}
-.cmp-fill{height:100%;border-radius:4px;}
-.fn-empty{font-size:13px;color:var(--text-3);padding:24px;text-align:center;}
-/* COMPARE — grouped bars (A vs B) */
-.cmp2-legend{display:flex;gap:18px;align-items:center;margin:4px 0 18px;flex-wrap:wrap;}
-.cmp2-leg{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--text);}
-.cmp2-leg .sw{width:12px;height:12px;border-radius:4px;flex-shrink:0;}
-.cmp2-leg .ln{font-size:11px;color:var(--text-3);font-weight:500;margin-left:4px;}
-.cmp2-stage{padding:14px 0;border-top:1px solid var(--border-soft);}
-.cmp2-stage:first-child{border-top:none;}
-.cmp2-name{font-size:14px;font-weight:600;margin-bottom:11px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
-.cmp2-conv{font-size:11px;color:var(--text-3);font-weight:500;}
-.cmp2-conv b{color:var(--text-2);}
-.cmp2-track{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
-.cmp2-track:last-child{margin-bottom:0;}
-.cmp2-tag{font-size:11px;font-weight:700;width:16px;flex-shrink:0;color:var(--text-3);}
-.cmp2-barwrap{flex:1;height:18px;background:var(--surface-3);border-radius:6px;overflow:hidden;min-width:60px;}
-.cmp2-bar{height:100%;border-radius:6px;transition:width .5s cubic-bezier(.16,1,.3,1);}
-.cmp2-val{font-size:13px;font-weight:600;min-width:32px;text-align:right;font-variant-numeric:tabular-nums;}
-.cmp2-plan{font-size:11px;color:var(--text-3);min-width:54px;text-align:right;font-variant-numeric:tabular-nums;}
-/* MULTISELECT */
-.ms{position:relative;display:inline-block;min-width:200px;}
-.ms-trig{display:flex;align-items:center;gap:6px;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:30px;background:var(--surface-2);cursor:pointer;transition:.15s;overflow:hidden;}
-.ms-trig:hover{border-color:var(--accent);}
-.ms-trig.open{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg);}
-.ms-ph{font-size:13px;color:var(--text-2);padding:2px 4px;}
-.ms-chip{display:inline-flex;align-items:center;gap:5px;background:var(--accent-bg);color:var(--accent);font-size:12px;font-weight:600;padding:3px 6px 3px 10px;border-radius:20px;}
-.ms-chip button{border:none;background:transparent;color:var(--accent);cursor:pointer;font-size:13px;line-height:1;padding:0;opacity:.7;}
-.ms-chip button:hover{opacity:1;}
-.ms-arrow{margin-left:auto;color:var(--text-3);font-size:11px;padding:0 2px;}
-.ms-drop{position:absolute;left:0;top:100%;margin-top:6px;min-width:260px;max-width:340px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:7px;z-index:70;max-height:340px;overflow:auto;display:none;}
-.ms-drop.on{display:block;animation:rise .22s cubic-bezier(.16,1,.3,1);}
-.ms-search{width:100%;border:1px solid var(--border);border-radius:9px;background:var(--surface-2);color:var(--text);font-size:13px;padding:9px 11px;margin-bottom:6px;}
-.ms-search:focus{outline:none;border-color:var(--accent);}
-.ms-opt{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;color:var(--text);cursor:pointer;line-height:1.3;transition:background .12s;}
-.ms-opt:hover{background:var(--surface-2);}
-.ms-opt.sel{background:var(--accent-bg);}
-.ms-opt-dot{width:8px;height:8px;min-width:8px;border-radius:50%;background:var(--border);flex-shrink:0;transition:.12s;}
-.ms-opt.sel .ms-opt-dot{background:var(--accent);}
-.ms-opt-chk{margin-left:auto;flex-shrink:0;opacity:0;color:var(--accent);}
-.ms-opt.sel .ms-opt-chk{opacity:1;}
-.ms-opt.sel .ms-nm{color:var(--accent);font-weight:500;}
-.ms-nm{flex:1;min-width:0;}
-.ms-opt .sub{font-size:10px;color:var(--amber);margin-left:auto;flex-shrink:0;background:var(--amber-bg);padding:2px 7px;border-radius:10px;}
-.ms-group{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;padding:10px 11px 5px;}
-.ms-empty{font-size:12px;color:var(--text-3);padding:12px 11px;}
-/* participant chips (in plan modal) */
-.pc-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;}
-.pc-chip{font-size:12px;padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;transition:.15s;}
-.pc-chip:hover{border-color:var(--accent);}
-.pc-chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
-.fn-prev{font-size:10px;color:var(--text-3);margin-top:3px;}
-.fn-txt code{background:var(--surface-3);padding:1px 6px;border-radius:5px;font-size:11px;}
 /* LEADERBOARD */
 .lb-title{font-size:20px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px;}
 .lb-sub{font-size:13px;color:var(--text-2);margin-bottom:22px;}
@@ -337,14 +236,6 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .lb-tbl .med{width:30px;height:30px;font-size:12px;box-shadow:0 2px 6px rgba(0,0,0,.18);}
 .lb-tbl .rank-n{width:30px;height:30px;font-size:12px;}
 .fired-soft td{opacity:.62;}.fired-soft:hover td{opacity:.8;}
-/* FUNNEL GRID */
-.fn-grid{display:grid;grid-template-columns:1fr 260px;gap:14px;align-items:start;}
-@media(max-width:700px){.fn-grid{grid-template-columns:1fr;}}
-.src-list{display:flex;flex-direction:column;gap:2px;}
-.src-row{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:8px;font-size:13px;}
-.src-row:hover{background:var(--surface-2);}
-.src-name{color:var(--text-2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.src-cnt{font-weight:600;color:var(--accent);min-width:28px;text-align:right;font-variant-numeric:tabular-nums;}
 .rm-wrap{position:relative;display:inline-block;}
 .rm-dot{border:none;background:transparent;color:var(--text-3);cursor:pointer;font-size:18px;line-height:1;padding:4px 8px;border-radius:7px;transition:.15s;}
 .rm-dot:hover{background:var(--surface-3);color:var(--text);}
@@ -498,36 +389,65 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 .prof-name{font-size:15px;font-weight:600;}
 .prof-email{font-size:12px;color:var(--text-3);margin-top:2px;}
 .prof-actions{display:flex;gap:8px;flex-wrap:wrap;}
-/* ═══ ВОРОНКА (matrix + channel cards) ═══ */
-.mtx-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-.mtx-tbl{border-collapse:collapse;width:100%;font-size:13px;}
-.mtx-tbl th,.mtx-tbl td{border:1px solid var(--border-soft);padding:9px 16px;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;}
-.mtx-tbl th:first-child,.mtx-tbl td:first-child{text-align:left;position:sticky;left:0;background:var(--surface);z-index:1;}
-.mtx-tbl thead th{background:var(--surface-2);font-weight:600;color:var(--text);font-size:12px;}
-.mtx-tbl thead th:first-child{background:var(--surface-2);}
-.mtx-tbl td.lbl{color:var(--text-2);font-weight:500;}
-.mtx-tbl tr.mtx-cr td{color:var(--text-2);font-size:12.5px;}
-.mtx-tbl tr.mtx-key td{font-weight:700;color:var(--text);}
-.mtx-tbl tr.mtx-spacer td{border:none;padding:5px 0;background:transparent;}
-.mtx-tbl th.mtx-total-h{background:var(--surface-3);color:var(--text);}
-.mtx-tbl td.mtx-total{background:var(--surface-2);font-weight:700;color:var(--text);}
-.ch-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:10px;}
-.ch-card-head .ch-name{margin-bottom:0;}
-.ch-actions{display:flex;gap:2px;flex-shrink:0;}
-.ch-icon-btn{width:22px;height:22px;border-radius:6px;border:none;background:transparent;color:var(--text-3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;}
-.ch-icon-btn:hover{background:var(--surface-3);color:var(--text);}
-.ch-icon-btn.danger:hover{background:var(--red-bg);color:var(--red);}
-.also-in{font-size:10px;color:var(--amber);background:var(--amber-bg);padding:2px 7px;border-radius:8px;margin-left:auto;flex-shrink:0;}
-.ungrouped-chip{font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-2);display:inline-flex;align-items:center;gap:4px;}
-.ungrouped-chip .tc{font-size:11px;opacity:.8;}
-.tag-check-list{display:flex;flex-direction:column;gap:2px;max-height:280px;overflow-y:auto;border:1px solid var(--border-soft);border-radius:10px;padding:6px;}
-.tag-check{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;font-size:13px;cursor:pointer;}
-.tag-check:hover{background:var(--surface-2);}
-.tag-check input{flex-shrink:0;}
-.tag-check .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.tag-check .cnt{font-size:11px;color:var(--text-3);flex-shrink:0;}
-.tag-check .already{font-size:10px;color:var(--amber);flex-shrink:0;}
 .modal-sub{font-size:12px;color:var(--text-3);margin:-6px 0 12px;line-height:1.5;}
+/* ═══ 2026-10-30: встречи, доступы, тосты, плашка обновления ═══ */
+.deal-btn.ghost-acc{background:transparent;color:var(--accent);}
+.deal-btn.ghost-acc:hover{background:var(--accent-bg);opacity:1;}
+.refresh-btn:disabled{opacity:.6;cursor:wait;}
+.pill-row{display:flex;flex-wrap:wrap;gap:6px;}
+.pill{font-size:12px;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-2);cursor:pointer;transition:.15s;white-space:nowrap;font-family:inherit;}
+.pill:hover{border-color:var(--accent);color:var(--accent);}
+.pill.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+.m-filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+.mbadge{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:6px;white-space:nowrap;}
+.mb-won{background:var(--green-bg);color:var(--green);}
+.mb-wait{background:var(--amber-bg);color:var(--amber);}
+.mb-lost{background:var(--red-bg);color:var(--red);}
+.mb-neu{background:var(--surface-3);color:var(--text-2);}
+.unl{font-size:10px;font-weight:600;color:var(--amber);background:var(--amber-bg);padding:2px 7px;border-radius:8px;margin-left:8px;white-space:nowrap;}
+.lnk-btn{border:none;background:none;color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;padding:0 0 0 8px;font-family:inherit;}
+.lnk-btn:hover{text-decoration:underline;}
+.rec-a{color:var(--accent);display:inline-flex;}
+.mt-pick{display:grid;gap:10px;}
+.mt-opt{display:flex;flex-direction:column;gap:4px;text-align:left;padding:16px 18px;border-radius:14px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);cursor:pointer;font-family:inherit;transition:.15s;}
+.mt-opt b{font-size:14px;font-weight:600;}
+.mt-opt span{font-size:12px;color:var(--text-2);line-height:1.5;}
+.mt-opt:hover{border-color:var(--accent);background:var(--accent-bg);}
+.cli-do.cli-new{color:var(--accent);font-weight:600;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border-soft);}
+.modal.wide{width:760px;max-height:90vh;overflow-y:auto;}
+.mc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;}
+.mc-title{font-size:18px;font-weight:600;}
+.mc-meta{font-size:12px;color:var(--text-2);margin-top:4px;line-height:1.5;}
+.mc-warn{background:var(--amber-bg);color:var(--text);border-radius:10px;padding:10px 12px;font-size:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;line-height:1.5;}
+.mc-ok{background:var(--green-bg);color:var(--green);border-radius:10px;padding:10px 12px;font-size:12px;font-weight:600;margin-bottom:12px;}
+.mc-sec{border:1px solid var(--border-soft);border-radius:12px;padding:14px;margin-bottom:10px;}
+.mc-sec-t{font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;}
+.mc-soon{font-size:9px;font-weight:600;padding:1px 6px;border-radius:6px;background:var(--surface-3);color:var(--text-3);margin-left:4px;letter-spacing:.04em;}
+.mc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.mc-video{aspect-ratio:16/9;max-height:300px;width:100%;background:#0B0E14;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#9AA4B8;margin-bottom:10px;}
+.mc-play{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;}
+.mc-video-t{font-size:12px;}
+.mc-row-btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.mc-row-btns a.btn{text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.mc-stub{font-size:12px;color:var(--text-3);line-height:1.6;margin-bottom:8px;}
+.mc-text{font-size:13px;line-height:1.6;white-space:pre-wrap;max-height:220px;overflow-y:auto;}
+.mc-next{font-size:12px;color:var(--text-2);margin-top:8px;}
+.mc-fu{width:100%;min-height:90px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-family:inherit;font-size:13px;margin-bottom:8px;resize:vertical;}
+.mc-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.mc-chip{font-size:12px;padding:6px 11px;border-radius:8px;background:var(--surface-2);border:1px dashed var(--border);color:var(--text-2);}
+.mc-details{font-size:12px;color:var(--text-2);display:grid;gap:4px;margin:6px 0 4px;}
+.mc-muted{color:var(--text-3);font-size:12px;}
+.acc{font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--surface-3);color:var(--text-3);white-space:nowrap;}
+.acc-ok{background:var(--green-bg);color:var(--green);}
+.acc-wait{background:var(--amber-bg);color:var(--amber);}
+.acc-no{background:var(--red-bg);color:var(--red);}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:11px 18px;border-radius:12px;font-size:13px;z-index:10000;box-shadow:var(--shadow);max-width:92vw;transition:opacity .3s,transform .3s;}
+.toast.err{background:var(--red);color:#fff;}
+.toast.ok{background:var(--green);color:#fff;}
+.toast.out{opacity:0;transform:translateX(-50%) translateY(8px);}
+.upd-banner{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9500;background:var(--accent);color:#fff;font-size:13px;font-weight:500;padding:9px 10px 9px 16px;border-radius:12px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;}
+.upd-banner button{border:none;background:#fff;color:var(--accent);font-weight:600;font-size:12px;padding:6px 12px;border-radius:8px;cursor:pointer;font-family:inherit;}
+@media(max-width:760px){.mc-grid{grid-template-columns:1fr;}.modal.wide{width:100%;max-height:88vh;}.ckpi[style]{grid-template-columns:1fr 1fr!important;}}
 </style>
 </head>
 <body>
@@ -535,29 +455,92 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
 <div class="app" id="app"></div>
 <div class="modal-bg" id="modal"></div>
 <script>
-/* ═══ SUPABASE ═══ */
+var ICO_EYE='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+var ICO_EYE_OFF='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+window.togglePw=function(id,btn){var inp=document.getElementById(id);if(!inp)return;var show=inp.type==='password';inp.type=show?'text':'password';btn.innerHTML=show?ICO_EYE:ICO_EYE_OFF;};
+/* ═══ SUPABASE ═══
+   Безопасность: в браузере только publishable-ключ (публичный по определению)
+   + токен залогиненного сотрудника. Без логина RLS не отдаёт ничего.
+   Сервисный ключ живёт только в GAS и Edge Functions. */
+var APP_VERSION='2026-10-30.1';
 var SB_URL='https://qhpyrlhugpqgojwmarrw.supabase.co';
-var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocHlybGh1Z3BxZ29qd21hcnJ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDY1Mjg5MCwiZXhwIjoyMDk2MjI4ODkwfQ.J1KvnwrxAbfEINT4ntxz_nWQJx7ZNgD4iPC2pPdGIV4';
-var SB_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocHlybGh1Z3BxZ29qd21hcnJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NTI4OTAsImV4cCI6MjA5NjIyODg5MH0.wlEY_Nm2T6Oe-WbH4lHJxdv_1-RjqgpNtBziTTGX2OQ';
-function sbGet(p){return fetch(SB_URL+'/rest/v1/'+p,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}}).then(function(r){
-  if(!r.ok)return r.text().then(function(t){throw new Error('Supabase HTTP '+r.status+' на '+p.split('?')[0]+(t?': '+t.substring(0,200):''));});
+var SB_PUB='sb_publishable_0YlWIjJNZqw0pIv3vV4ifQ_X9pCRaHc';
+/* URL веб-приложения GAS (Код.gs → doPost). Пусто — «Обновить» просто перезагружает страницу. */
+var SYNC_URL='https://script.google.com/macros/s/AKfycbyBM6pjXqYcRGilZ2QEVNlF5gHHvqkkc63PKSvXHSgdCUFN8wYuAofPn09OEwlN1zPs/exec';
+var ADMIN_FN=SB_URL+'/functions/v1/admin-users';
+var DEFAULT_PASSWORD='12345678';
+/* ═══ AUTH / СЕССИЯ ═══ */
+var CURRENT_USER=null;
+function authLoad(){try{var t=localStorage.getItem('sasha_session');if(t){CURRENT_USER=JSON.parse(t);return !!(CURRENT_USER&&CURRENT_USER.refresh_token);}}catch(e){}return false;}
+function authSave(user){CURRENT_USER=user;try{localStorage.setItem('sasha_session',JSON.stringify(user));}catch(e){}}
+function authClear(){CURRENT_USER=null;try{localStorage.removeItem('sasha_session');}catch(e){}}
+function sessionFromAuth_(d){
+  var u=d.user||{},md=u.user_metadata||{};
+  return{access_token:d.access_token,refresh_token:d.refresh_token,
+    expires_at:d.expires_at||(Math.floor(Date.now()/1000)+(d.expires_in||3600)),
+    email:u.email||(CURRENT_USER&&CURRENT_USER.email)||'',user_id:u.id||(CURRENT_USER&&CURRENT_USER.user_id)||'',
+    name:md.name||'',mustChange:!!md.must_change_password};
+}
+var _refreshing=null;
+function refreshSession_(){
+  if(_refreshing)return _refreshing;
+  if(!CURRENT_USER||!CURRENT_USER.refresh_token)return Promise.reject(new Error('no_session'));
+  _refreshing=fetch(SB_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',
+    headers:{'apikey':SB_PUB,'Content-Type':'application/json'},
+    body:JSON.stringify({refresh_token:CURRENT_USER.refresh_token})
+  }).then(function(r){return r.json().then(function(d){
+    if(!r.ok||!d.access_token)throw new Error('session_expired');
+    authSave(Object.assign({},CURRENT_USER,sessionFromAuth_(d)));
+    return CURRENT_USER.access_token;
+  });}).then(function(t){_refreshing=null;return t;},function(e){_refreshing=null;throw e;});
+  return _refreshing;
+}
+/* токен живёт час — обновляем заранее, за 90 сек до конца */
+function ensureToken(){
+  if(!CURRENT_USER||!CURRENT_USER.access_token)return Promise.reject(new Error('no_session'));
+  if((CURRENT_USER.expires_at||0)-Math.floor(Date.now()/1000)>90)return Promise.resolve(CURRENT_USER.access_token);
+  return refreshSession_();
+}
+var _sessionLostShown=false;
+function sessionLost_(){
+  if(_sessionLostShown)return;_sessionLostShown=true;
+  authClear();document.getElementById('app').innerHTML='';closeModal();
+  showLogin('Сессия истекла — войди заново');
+}
+/* Единая точка запросов: publishable-ключ + токен пользователя, 401 → обновить токен и повторить */
+function sbFetch(url,opts,_retried){
+  opts=opts||{};
+  return ensureToken().then(function(tok){
+    var h=Object.assign({'apikey':SB_PUB,'Authorization':'Bearer '+tok},opts.headers||{});
+    return fetch(url,Object.assign({},opts,{headers:h}));
+  }).then(function(r){
+    if(r.status===401&&!_retried)return refreshSession_().then(function(){return sbFetch(url,opts,true);});
+    return r;
+  }).catch(function(e){
+    if(e&&(e.message==='no_session'||e.message==='session_expired'))sessionLost_();
+    throw e;
+  });
+}
+function rest_(p){return SB_URL+'/rest/v1/'+p;}
+function sbErr_(r,p){return r.text().then(function(t){throw new Error('Supabase HTTP '+r.status+' на '+String(p).split('?')[0]+(t?': '+t.substring(0,200):''));});}
+function sbGet(p){return sbFetch(rest_(p)).then(function(r){
+  if(!r.ok)return sbErr_(r,p);
   return r.json();
 }).then(function(d){
   if(d&&d.code)throw new Error('Supabase: '+(d.message||d.code)+' ('+p.split('?')[0]+')');
   return Array.isArray(d)?d:[];
 });}
 /* Постраничная загрузка. Supabase режет ответ по max-rows (по умолчанию 1000) —
-   раньше часть клиентов/минут/сделок молча отрезалась. Первый запрос узнаёт total
-   (Prefer: count=exact) и реальный размер страницы, остальные — параллельно по 6.
-   В path ОБЯЗАТЕЛЕН детерминированный order, иначе страницы могут пересечься. */
+   первый запрос узнаёт total (Prefer: count=exact) и реальный размер страницы,
+   остальные — параллельно по 6. В path ОБЯЗАТЕЛЕН детерминированный order. */
 function sbGetAll(p){
   p=p.replace(/&limit=\d+/,'');
   var PAGE=1000;
   function page(from,to,count){
-    var h={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Range-Unit':'items','Range':from+'-'+to};
+    var h={'Range-Unit':'items','Range':from+'-'+to};
     if(count)h['Prefer']='count=exact';
-    return fetch(SB_URL+'/rest/v1/'+p,{headers:h}).then(function(r){
-      if(!r.ok)return r.text().then(function(t){throw new Error('Supabase HTTP '+r.status+' на '+p.split('?')[0]+(t?': '+t.substring(0,200):''));});
+    return sbFetch(rest_(p),{headers:h}).then(function(r){
+      if(!r.ok)return sbErr_(r,p);
       var cr=r.headers.get('content-range')||'';
       return r.json().then(function(d){
         if(d&&d.code)throw new Error('Supabase: '+(d.message||d.code)+' ('+p.split('?')[0]+')');
@@ -580,20 +563,57 @@ function sbGetAll(p){
     return next().then(function(){return [].concat.apply([],out);});
   });
 }
-function sbPatch(t,f,d){return fetch(SB_URL+'/rest/v1/'+t+'?'+f,{method:'PATCH',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(d)});}
-function sbPost(t,d){return fetch(SB_URL+'/rest/v1/'+t,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(d)}).then(function(r){return r.json();});}
-function sbDelete(t,f){return fetch(SB_URL+'/rest/v1/'+t+'?'+f,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'}});}
-function reloadTg(){return sbGet('telegram_integrations?select=*&order=created_at').then(function(r){RAW.tgIntegrations=r||[];render();});}
-var ICO_EYE='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
-var ICO_EYE_OFF='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
-window.togglePw=function(id,btn){var inp=document.getElementById(id);if(!inp)return;var show=inp.type==='password';inp.type=show?'text':'password';btn.innerHTML=show?ICO_EYE:ICO_EYE_OFF;};
-/* ═══ AUTH ═══ */
-var CURRENT_USER=null;
-function authLoad(){try{var t=localStorage.getItem('sasha_session');if(t){var o=JSON.parse(t);CURRENT_USER=o;return true;}}catch(e){}return false;}
-function authSave(user){CURRENT_USER=user;localStorage.setItem('sasha_session',JSON.stringify(user));}
-function authClear(){CURRENT_USER=null;localStorage.removeItem('sasha_session');}
-function sbAuthGet(path){return fetch(SB_URL+'/auth/v1/'+path,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+(CURRENT_USER&&CURRENT_USER.access_token||SB_KEY)}}).then(function(r){return r.json();});}
-function sbAuthPost(path,data){return fetch(SB_URL+'/auth/v1/'+path,{method:'POST',headers:{'apikey':SB_KEY,'Content-Type':'application/json','Authorization':'Bearer '+(CURRENT_USER&&CURRENT_USER.access_token||SB_KEY)},body:JSON.stringify(data)}).then(function(r){return r.json();});}
+/* Запись. Ошибка RLS/сети → промис отклоняется, тост покажет глобальный обработчик. */
+function sbPatch(t,f,d){return sbFetch(rest_(t+'?'+f),{method:'PATCH',headers:{'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(d)}).then(function(r){if(!r.ok)return sbErr_(r,t);return r;});}
+/* sbPost отдаёт JSON как есть: на ошибке там {code,message} — вызывающий код это проверяет */
+function sbPost(t,d){return sbFetch(rest_(t),{method:'POST',headers:{'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(d)}).then(function(r){return r.json();});}
+function sbDelete(t,f){return sbFetch(rest_(t+'?'+f),{method:'DELETE',headers:{'Prefer':'return=minimal'}}).then(function(r){if(!r.ok)return sbErr_(r,t);return r;});}
+function sbUpsert(t,conflict,d){return sbFetch(rest_(t+'?on_conflict='+conflict),{method:'POST',headers:{'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(d)}).then(function(r){if(!r.ok)return sbErr_(r,t);return r;});}
+/* Edge Function admin-users (выдача доступов) */
+function adminCall(action,payload){
+  return sbFetch(ADMIN_FN,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({action:action},payload||{}))})
+    .then(function(r){return r.json().catch(function(){return{};}).then(function(d){if(!r.ok)throw new Error(d.message||d.error||('HTTP '+r.status));return d;});});
+}
+/* ═══ ТОСТЫ + глобальный перехват ошибок записи ═══ */
+function toast(msg,kind){
+  var t=document.createElement('div');t.className='toast'+(kind?' '+kind:'');t.textContent=msg;
+  document.body.appendChild(t);setTimeout(function(){t.classList.add('out');},3600);setTimeout(function(){t.remove();},4000);
+}
+window.addEventListener('unhandledrejection',function(e){
+  var m=(e.reason&&e.reason.message)||String(e.reason||'');
+  if(/no_session|session_expired/.test(m))return;
+  toast('Не сохранилось: '+m.substring(0,160),'err');
+});
+/* ═══ ВЕРСИЯ: плашка «вышло обновление» + жёсткая перезагрузка мимо кэша ═══ */
+window.hardReload=function(){location.replace(location.pathname+'?v='+Date.now());};
+function showUpdateBanner(){
+  if(document.getElementById('upd-banner'))return;
+  var b=document.createElement('div');b.id='upd-banner';b.className='upd-banner';
+  b.innerHTML='Вышло обновление дашборда <button onclick="hardReload()">Обновить</button>';
+  document.body.appendChild(b);
+}
+function startVersionWatch(){
+  setInterval(function(){
+    fetch(location.pathname+'?vcheck='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():'';}).then(function(t){
+      var m=t.match(/var APP_VERSION='([^']+)'/);
+      if(m&&m[1]!==APP_VERSION)showUpdateBanner();
+    }).catch(function(){});
+  },5*60*1000);
+}
+/* «Обновить»: синк организаций с платформы (GAS) → перезагрузка мимо кэша */
+window.syncAndReload=function(btn){
+  if(!SYNC_URL){hardReload();return;}
+  if(btn){btn.disabled=true;btn.innerHTML=ICO.refresh+' Синхронизирую…';}
+  var done=false,guard=setTimeout(function(){if(!done)hardReload();},45000);
+  ensureToken().then(function(tok){
+    /* без своих заголовков → «простой» запрос, без CORS-preflight к Google */
+    return fetch(SYNC_URL,{method:'POST',body:JSON.stringify({access_token:tok})});
+  }).then(function(r){return r.json();}).catch(function(){return null;}).then(function(res){
+    done=true;clearTimeout(guard);
+    if(res&&res.status==='error')toast('Синк не прошёл: '+(res.message||''),'err');
+    setTimeout(hardReload,res&&res.status==='error'?1500:0);
+  });
+};
 function showLogin(err){
   var el=document.getElementById('login-screen');
   el.style.display='flex';
@@ -620,119 +640,137 @@ window.doLogin=async function(){
   try{
     var r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{
       method:'POST',
-      headers:{'apikey':SB_ANON,'Content-Type':'application/json'},
+      headers:{'apikey':SB_PUB,'Content-Type':'application/json'},
       body:JSON.stringify({email:email,password:pass})
     });
     d=await r.json();
   }catch(e){err.textContent='Ошибка сети. Проверь соединение.';btn.disabled=false;btn.textContent='Войти';return;}
   if(!d||!d.access_token){
-    err.textContent=d&&(d.error_description||d.error||d.msg)||'Неверный email или пароль';
+    var m=d&&(d.error_description||d.msg||d.error)||'';
+    err.textContent=/invalid/i.test(m)?'Неверный email или пароль':(m||'Неверный email или пароль');
     btn.disabled=false;btn.textContent='Войти';return;
   }
-  authSave({access_token:d.access_token,refresh_token:d.refresh_token,email:d.user.email,user_id:d.user.id,name:(d.user.user_metadata&&d.user.user_metadata.name)||''});
+  _sessionLostShown=false;
+  authSave(sessionFromAuth_(d));
+  if(CURRENT_USER.mustChange){showForceChange();return;}
   hideLogin();
+  afterLogin_();
+};
+async function afterLogin_(){
   await loadPreferences();
   await loadCurrentEmployee();
   loadData();
-};
+}
 window.doLogout=async function(){
   if(CURRENT_USER&&CURRENT_USER.access_token){
-    await fetch(SB_URL+'/auth/v1/logout',{method:'POST',headers:{'apikey':SB_ANON,'Authorization':'Bearer '+CURRENT_USER.access_token}}).catch(function(){});
+    await fetch(SB_URL+'/auth/v1/logout',{method:'POST',headers:{'apikey':SB_PUB,'Authorization':'Bearer '+CURRENT_USER.access_token}}).catch(function(){});
   }
   authClear();
   document.getElementById('app').innerHTML='';
   showLogin();
 };
-window.doChangePassword=async function(){
-  var p1=(document.getElementById('pw-new').value||'').trim();
-  var p2=(document.getElementById('pw-conf').value||'').trim();
-  var errEl=document.getElementById('pw-err');
-  if(!p1||p1.length<6){errEl.textContent='Минимум 6 символов';return;}
-  if(p1!==p2){errEl.textContent='Пароли не совпадают';return;}
-  errEl.textContent='';
-  var r=await fetch(SB_URL+'/auth/v1/user',{method:'PUT',
-    headers:{'apikey':SB_ANON,'Authorization':'Bearer '+CURRENT_USER.access_token,'Content-Type':'application/json'},
-    body:JSON.stringify({password:p1})
-  });
-  var d=await r.json();
-  if(d.error){errEl.textContent=d.error_description||'Ошибка';return;}
-  closeModal();
-  alert('Пароль изменён ✓');
+function pwProblem_(p1,p2){
+  if(!p1||p1.length<8)return'Минимум 8 символов';
+  if(p1===DEFAULT_PASSWORD)return'Стартовый пароль не подойдёт — придумай свой';
+  if(p1!==p2)return'Пароли не совпадают';
+  return'';
+}
+function setPassword_(p1){
+  return sbFetch(SB_URL+'/auth/v1/user',{method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({password:p1,data:{must_change_password:false}})
+  }).then(function(r){return r.json().then(function(d){
+    if(!r.ok)throw new Error(d.msg||d.error_description||d.message||('HTTP '+r.status));
+    return d;
+  });});
+}
+/* Первый вход со стартовым паролем — без смены пароля дальше не пускаем */
+function showForceChange(){
+  var el=document.getElementById('login-screen');
+  el.style.display='flex';
+  el.innerHTML='<div class="login-card">'+
+    '<div class="login-brand">Sasha<span class="a">AI</span></div>'+
+    '<div style="font-size:14px;font-weight:600;margin-bottom:6px">Придумай свой пароль</div>'+
+    '<div style="font-size:12px;color:var(--text-2);margin-bottom:18px;line-height:1.5">Ты вошёл со стартовым паролем. Поставь свой — минимум 8 символов. Дальше входишь с ним.</div>'+
+    '<div class="login-field"><label>Новый пароль</label><input class="login-input" type="password" id="fc-new" autocomplete="new-password"></div>'+
+    '<div class="login-field"><label>Повтори пароль</label><input class="login-input" type="password" id="fc-conf" autocomplete="new-password"></div>'+
+    '<button class="login-btn" id="fc-btn" onclick="doForceChange()">Сохранить и войти</button>'+
+    '<div class="login-err" id="fc-err"></div>'+
+    '<div class="login-sub"><a onclick="doLogout()">Выйти</a></div>'+
+  '</div>';
+  setTimeout(function(){var e=document.getElementById('fc-new');if(e)e.focus();},50);
+  document.getElementById('fc-conf').addEventListener('keydown',function(e){if(e.key==='Enter')doForceChange();});
+}
+window.doForceChange=async function(){
+  var p1=document.getElementById('fc-new').value||'',p2=document.getElementById('fc-conf').value||'';
+  var err=document.getElementById('fc-err'),btn=document.getElementById('fc-btn');
+  var bad=pwProblem_(p1,p2);if(bad){err.textContent=bad;return;}
+  btn.disabled=true;btn.textContent='Сохраняю…';
+  try{await setPassword_(p1);}catch(e){err.textContent=e.message;btn.disabled=false;btn.textContent='Сохранить и войти';return;}
+  CURRENT_USER.mustChange=false;authSave(CURRENT_USER);
+  hideLogin();
+  afterLogin_();
 };
-/* ═══ PREFERENCES ═══ */
+window.doChangePassword=async function(){
+  var p1=document.getElementById('pw-new').value||'',p2=document.getElementById('pw-conf').value||'';
+  var errEl=document.getElementById('pw-err');
+  var bad=pwProblem_(p1,p2);if(bad){errEl.textContent=bad;return;}
+  errEl.textContent='';
+  try{await setPassword_(p1);}catch(e){errEl.textContent=e.message;return;}
+  closeModal();
+  toast('Пароль изменён','ok');
+};
+/* ═══ ТЕКУЩИЙ СОТРУДНИК + НАСТРОЙКИ ═══ */
 async function loadCurrentEmployee(){
   if(!CURRENT_USER||!CURRENT_USER.email)return;
   try{
-    var rows=await sbGet('employees?email=eq.'+encodeURIComponent(CURRENT_USER.email)+'&select=id,name,role&limit=1');
+    var rows=await sbGet('employees?email=ilike.'+encodeURIComponent(CURRENT_USER.email)+'&select=id,name,role,is_admin&limit=1');
     if(rows&&rows[0]){
       CURRENT_USER.displayName=rows[0].name;
       CURRENT_USER.empRole=rows[0].role;
-      localStorage.setItem('sasha_session',JSON.stringify(CURRENT_USER));
+      CURRENT_USER.empId=rows[0].id;
+      CURRENT_USER.isAdmin=!!rows[0].is_admin;
+      authSave(CURRENT_USER);
     }
-  }catch(e){}
+  }catch(e){console.error('loadCurrentEmployee',e);}
 }
 async function loadPreferences(){
   if(!CURRENT_USER)return;
   try{
-    var r=await fetch(SB_URL+'/rest/v1/user_preferences?user_id=eq.'+CURRENT_USER.user_id,{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
-    var d=await r.json();
+    var d=await sbGet('user_preferences?user_id=eq.'+CURRENT_USER.user_id+'&select=theme');
     if(d&&d[0]){S.theme=d[0].theme||'light';document.documentElement.setAttribute('data-theme',S.theme);}
   }catch(e){}
 }
-async function savePreferences(){
+function savePreferences(){
   if(!CURRENT_USER)return;
-  try{
-    await fetch(SB_URL+'/rest/v1/user_preferences?on_conflict=user_id',{method:'POST',
-      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
-      body:JSON.stringify({user_id:CURRENT_USER.user_id,theme:S.theme,updated_at:new Date().toISOString()})
-    });
-  }catch(e){}
+  sbUpsert('user_preferences','user_id',{user_id:CURRENT_USER.user_id,theme:S.theme,updated_at:new Date().toISOString()}).catch(function(){});
 }
-function sbUpsert(t,conflict,d){return fetch(SB_URL+'/rest/v1/'+t+'?on_conflict='+conflict,{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify(d)});}
 /* ═══ CONSTANTS ═══ */
 var TODAY=new Date();
 var MIN_DATE=new Date(2026,2,1);
-/* ═══ AMO CONSTANTS ═══ */
-var AMO_PIPE_SALES=10139846;
-var AMO_LOST_SID=143;
-/* этапы воронки — 6 подтверждённых реальных статусов AmoCRM, ранжированные
-   по порядку прохождения (см. buildFunnelCounts — furthestRank/backfill).
-   "Лид распределён" (dist) в этот массив НЕ входит — это просто количество
-   лидов у менеджера, без status_id, см. renderVoronka. */
-var AMO_STAGES=[
-  {key:'qual',   label:'Квалифицирован',     sid:80494174},
-  {key:'mset',   label:'Встреча назначена',  sid:80336514},
-  {key:'mdone',  label:'Встреча проведена',  sid:80429334},
-  {key:'demo',   label:'Демо собрано',       sid:80336522},
-  {key:'inv',    label:'Счёт выставлен',     sid:80336526},
-  {key:'paid',   label:'Оплачено',           sid:142}
-];
-function stageRank_(sid){for(var i=0;i<AMO_STAGES.length;i++){if(AMO_STAGES[i].sid===sid)return i;}return -1;}
 var MN=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 var DOW=['пн','вт','ср','чт','пт','сб','вс'];
 /* ═══ STATE ═══ */
-var DB=null, RAW={depts:[],employees:[],clients:[],allClients:[],tagGroups:[],tagGroupMembers:[]};
+var DB=null, RAW={depts:[],employees:[],clients:[],allClients:[]};
 var S={
   role:'lb',theme:'light',loading:true,loadErr:null,
   rangeFrom:new Date(TODAY.getFullYear(),TODAY.getMonth(),1),
   rangeTo:new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate()),
   calLeft:new Date(TODAY.getFullYear(),TODAY.getMonth(),1),calOpen:false,pick:0,
   dept:null,empView:null,tab:'staff',
-  mgrAs:null,mgrTab:'clients',
   saveHint:false,
   periodStats:{},prevPeriodStats:{},periodLoading:true,periodReady:false,cliByUser:{},
   showArchivedDepts:false,showArchivedClients:false,showHiddenLb:false,
   ropDept:null,ropShowFired:false,ropShowArchivedDepts:false,
-  fnCompare:false,fnMgrs:[],fnMgrsB:[],fnTags:[],msOpen:null,msSearch:'',empAmoMap:{},
   dealsRaw:[],dealsByEmp:{},dealsByOrg:{},dealsByDept:{},dealsByEmpOrg:{},
   prevByEmp:{},prevByDept:{},prevCompany:0,
-  amoLeads:[],amoEvents:[],amoEventsAll:[],amoUsers:[],amoLeadOwners:{},amoLeadPrices:{},
   planByEmp:{},
   payDept:'all',payEmp:'all',paySearch:'',payLimit:20,payPage:0,
   staffSortKey:'fact',staffSortDir:-1,
-  cliSortKey:'minLeft',cliSortDir:1,
+  cliSortKey:'fact',cliSortDir:-1,
   sumSort:'fact',sumSortDir:-1,
-  vDept:'all',vChGroup:null,vUngroupedOpen:false,
+  meetings:[],meetPays:{},
+  mDept:'all',mEmp:'all',mType:'all',mStatus:'all',mSearch:'',mLimit:50,
+  authUsers:null,
 };
 /* ═══ UTILS ═══ */
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
@@ -745,15 +783,6 @@ function grad(p){p=Math.max(0,Math.min(100,p))/100;var s=[[251,110,91],[245,181,
 function daysTo(ds){if(!ds)return null;return Math.max(0,r((new Date(ds)-TODAY)/86400e3));}
 function fmtD(ds){if(!ds)return'—';var p=ds.substring(0,10).split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
-function rrPct(fact,plan){
-  var f=S.rangeFrom,t=S.rangeTo;
-  var monthEnd=new Date(f.getFullYear(),f.getMonth()+1,0);
-  var fullEnd=t>monthEnd?t:monthEnd;
-  var tot=Math.max(1,r((fullEnd-f)/864e5)+1);
-  var el=Math.max(1,r((Math.min(TODAY,fullEnd)-f)/864e5)+1);
-  var ex=plan*(el/tot);
-  return ex>0?r(fact/ex*100):0;
-}
 function calLabel(){var f=S.rangeFrom,t=S.rangeTo;if(f.getFullYear()===t.getFullYear()&&f.getMonth()===t.getMonth()&&f.getDate()===t.getDate())return MN[f.getMonth()]+' '+f.getDate()+', '+f.getFullYear();return MN[f.getMonth()]+' '+f.getDate()+' — '+MN[t.getMonth()]+' '+t.getDate()+', '+t.getFullYear();}
 function daysBadge(dn){if(dn===null)return'<span class="days-badge db-neu">—</span>';if(dn<=3)return'<span class="days-badge db-red">'+dn+'д</span>';if(dn<=7)return'<span class="days-badge db-amb">'+dn+'д</span>';if(dn<=14)return'<span class="days-badge db-neu">'+dn+'д</span>';return'<span class="days-badge db-grn">'+dn+'д</span>';}
 function expiryBadge(ds){
@@ -779,26 +808,19 @@ function payingInPeriod(clients){
 }
 /* ═══ LOAD DATA ═══ */
 function loadData(){
-  S.loading=true;S.loadErr=null;S._amoAllLoaded=false;S._amoOwnersLoaded=false;S._firstPayLoaded=false;render();
+  S.loading=true;S.loadErr=null;S._firstPayLoaded=false;render();
   return Promise.all([
     sbGet('departments?select=*&order=created_at'),
     sbGet('employees?select=*&order=name'),
     sbGetAll('clients?select=platform_org_id,company_name,platform_url,responsible_platform_user_id,minutes_total,minutes_left,subscription_status,subscription_end,platform_status,is_hidden,is_archived&order=company_name,platform_org_id'),
-    sbGetAll('clients?select=platform_org_id,company_name,responsible_platform_user_id,is_archived,is_hidden&order=company_name,platform_org_id'),
-    sbGet('amo_users?select=amo_user_id,name,email&order=name&limit=500'),
-    sbGet('telegram_integrations?select=*&order=created_at'),
-    sbGet('amo_tag_groups?select=*&order=created_at').catch(function(){return [];}),
-    sbGet('amo_tag_group_members?select=*').catch(function(){return [];})
+    sbGetAll('clients?select=platform_org_id,company_name,responsible_platform_user_id,is_archived,is_hidden&order=company_name,platform_org_id')
   ]).then(function(res){
-    RAW.depts=res[0];RAW.employees=res[1];RAW.clients=res[2];RAW.allClients=res[3]||[];S.amoUsers=res[4]||[];
-    RAW.tgIntegrations=res[5]||[];
-    RAW.tagGroups=res[6]||[];RAW.tagGroupMembers=res[7]||[];
-    if(!RAW.depts.length&&!RAW.employees.length)S.loadErr='В Supabase нет ни одного отдела и сотрудника — проверь таблицы departments/employees напрямую в Supabase.';
+    RAW.depts=res[0];RAW.employees=res[1];RAW.clients=res[2];RAW.allClients=res[3]||[];
+    if(!RAW.depts.length&&!RAW.employees.length)S.loadErr='В Supabase нет ни одного отдела и сотрудника — проверь таблицы departments/employees и что ты залогинен.';
     buildDB();S.loading=false;
     if(!S.ropDept&&DB.depts.length)S.ropDept=DB.depts[0].id;
-    if(!S.mgrAs){DB.depts.forEach(function(d){if(!S.mgrAs&&d.staff.length)S.mgrAs=d.staff[0].id;});}
     render();refreshPeriod();
-  }).catch(function(e){S.loading=false;S.loadErr=e.message;render();});
+  }).catch(function(e){S.loading=false;S.loadErr=e.message;DB=DB||{company:{},depts:[],archivedDepts:[],firedEmps:[],hiddenClients:[]};render();});
 }
 function reloadEmployees(){
   return sbGet('employees?select=*&order=name').then(function(rows){if(rows&&rows.length)RAW.employees=rows;buildDB();});
@@ -806,15 +828,9 @@ function reloadEmployees(){
 function reloadDepts(){
   return sbGet('departments?select=*&order=created_at').then(function(rows){if(rows&&rows.length)RAW.depts=rows;buildDB();});
 }
-function reloadTagGroups(){
-  return Promise.all([
-    sbGet('amo_tag_groups?select=*&order=created_at').catch(function(){return [];}),
-    sbGet('amo_tag_group_members?select=*').catch(function(){return [];})
-  ]).then(function(res){RAW.tagGroups=res[0]||[];RAW.tagGroupMembers=res[1]||[];render();});
-}
 function patchEmpSync(supaId,patch,optimistic){
   if(optimistic){RAW.employees.forEach(function(e){if(e.id===supaId)Object.assign(e,optimistic);});buildDB();render();}
-  return sbPatch('employees','id=eq.'+supaId,patch).then(reloadEmployees,reloadEmployees).then(render);
+  return sbPatch('employees','id=eq.'+supaId,patch).then(reloadEmployees,function(e){toast('Не сохранилось: '+e.message,'err');return reloadEmployees();}).then(render);
 }
 /* Все загрузчики периода возвращают функцию-«применить». Старые данные остаются
    на экране (чуть притушены, класс .busy), пока новые не придут целиком — без
@@ -824,7 +840,7 @@ function refreshPeriod(invalidateLifetime){
   if(invalidateLifetime){S.empLifetime={};S.empMonthlyPlan={};S.companyLifetime=null;S._lifeLoading={};S._firstPayLoaded=false;}
   var tok=S._periodTok=(S._periodTok||0)+1;
   S.periodReady=false;S.periodLoading=true;
-  return Promise.all([loadPeriodStats(),loadDeals(),loadPrevDeals(),loadPlans(),loadAmoLeads(),loadAmoEvents(),loadAmoEventsAll(),loadAmoLeadOwners(),loadFirstPayments()]).then(function(apply){
+  return Promise.all([loadPeriodStats(),loadDeals(),loadPrevDeals(),loadPlans(),loadFirstPayments(),loadMeetings()]).then(function(apply){
     if(tok!==S._periodTok)return;
     apply.forEach(function(f){if(typeof f==='function')f();});
     buildDB();S.periodReady=true;S.periodLoading=false;render();
@@ -833,12 +849,11 @@ function refreshPeriod(invalidateLifetime){
     S.periodReady=true;S.periodLoading=false;S.loadErr='Не удалось обновить данные за период: '+e.message;render();
   });
 }
-/* ═══ BUILD DB ═══ */
-function resolveEmpAmo_(emp){
-  if(!emp)return null;
-  if(emp.email){var e=emp.email.toLowerCase().trim();var u=(S.amoUsers||[]).find(function(x){return x.email&&x.email.toLowerCase().trim()===e;});if(u)return u.amo_user_id;}
-  return emp.amo_user_id||null;
+/* Только встречи — после добавления/правки встречи не перегружаем всё остальное */
+function refreshMeetings(){
+  return loadMeetings().then(function(apply){if(typeof apply==='function')apply();buildDB();render();});
 }
+/* ═══ BUILD DB ═══ */
 /* «Скручено минут»: сумма минут за период по клиентам портфеля сотрудника
    (текущий ответственный на платформе, без скрытых/архивных и без «разовых»).
    Отдел = сумма по сотрудникам, компания = сумма по отделам. */
@@ -848,8 +863,6 @@ function minutesOfUser(puid,map){
   return{sum:s,n:n};
 }
 function buildDB(){
-  S.empAmoMap={};
-  RAW.employees.forEach(function(e){S.empAmoMap[e.id]=resolveEmpAmo_(e);});
   var activeDepts=RAW.depts.filter(function(d){return!d.is_archived;});
   var firedEmps=RAW.employees.filter(function(e){return e.fired_at||e.is_archived;});
   var activeEmps=RAW.employees.filter(function(e){return!e.fired_at&&!e.is_archived;});
@@ -882,13 +895,15 @@ function buildDB(){
       var dealAgg=S.dealsByEmp[e.id]||{fact:0,comm:0,count:0};
       var _mn=minutesOfUser(e.platform_user_id,S.periodStats),_mnp=minutesOfUser(e.platform_user_id,S.prevPeriodStats);
       var planAmt=S.planByEmp[e.id]||0;
+      var _mt=meetAgg_(function(x){return x.employee_id===e.id;});
       return{id:e.platform_user_id,supaId:e.id,name:e.display_name||e.name,
         role:e.role==='lead'?'Тимлид':'Менеджер',hired:e.hired_at||null,
         fired:!!(e.fired_at||e.is_archived),firedAt:e.fired_at||null,
         hideLb:!!e.hide_from_lb,
         fact:dealAgg.fact,prevFact:S.prevByEmp[e.id]||0,plan:planAmt,comm:dealAgg.comm,deals:dealAgg.count,
         clients:(cBU[e.platform_user_id]||[]).length,
-        minutes:_mn.sum,prevMinutes:_mnp.sum,minActive:_mn.n};
+        minutes:_mn.sum,prevMinutes:_mnp.sum,minActive:_mn.n,
+        meet:_mt.total,meetPrim:_mt.prim,meetRep:_mt.rep,meetWon:_mt.won};
     });
     staff.sort(function(a,b){return(b.role==='Тимлид')-(a.role==='Тимлид');});
     var dc=emps.reduce(function(a,e){return a.concat(cBU[e.platform_user_id]||[]);},[]);
@@ -901,6 +916,7 @@ function buildDB(){
       minActive:staff.reduce(function(a,m){return a+m.minActive;},0),
       paying:dc.filter(function(c){return c.subscription_status==='active';}).length,
       arpu:(function(){var paying=dc.filter(function(c){return c.subscription_status==='active';}).length;return paying>0?r(dFact/paying):0;})(),
+      meet:meetAgg_(function(x){return x.dept_id===d.id;}),
       staff:staff,
       fired:firedEmps.filter(function(e){return e.dept_id===d.id;}),
       clients:dc.map(function(c){
@@ -917,7 +933,7 @@ function buildDB(){
   var companyFact=S.dealsRaw.reduce(function(a,d){var sign=d.event_type==='refund'?-1:1;return a+sign*(Number(d.amount)||0);},0);
   DB={
     company:{fact:companyFact,prevFact:S.prevCompany,
-      minutes:depts.reduce(function(a,d){return a+d.minutes;},0),prevMinutes:depts.reduce(function(a,d){return a+d.prevMinutes;},0),minActive:depts.reduce(function(a,d){return a+d.minActive;},0),plan:depts.reduce(function(a,d){return a+d.plan;},0),clients:depts.reduce(function(a,d){return a+d.clients.length;},0),paying:depts.reduce(function(a,d){return a+d.paying;},0)},
+      minutes:depts.reduce(function(a,d){return a+d.minutes;},0),prevMinutes:depts.reduce(function(a,d){return a+d.prevMinutes;},0),minActive:depts.reduce(function(a,d){return a+d.minActive;},0),plan:depts.reduce(function(a,d){return a+d.plan;},0),meet:meetAgg_(null),clients:depts.reduce(function(a,d){return a+d.clients.length;},0),paying:depts.reduce(function(a,d){return a+d.paying;},0)},
     depts:depts,archivedDepts:RAW.depts.filter(function(d){return d.is_archived;}),
     firedEmps:firedEmps,hiddenClients:RAW.clients.filter(function(c){return c.is_hidden;})
   };
@@ -1066,156 +1082,6 @@ function loadPlans(){
     return function(){S.planByEmp=plan;};
   });
 }
-/* ═══ AMO LEADS ═══ */
-function loadAmoLeads(){
-  var fromU=Math.floor(S.rangeFrom.getTime()/1000);
-  var toU=Math.floor(S.rangeTo.getTime()/1000)+86400;
-  return sbGetAll('amo_leads?select=id,price,responsible_user_id,status_id,pipeline_id,created_at_unix,source,package,tags&pipeline_id=eq.'+AMO_PIPE_SALES+'&created_at_unix=gte.'+fromU+'&created_at_unix=lte.'+toU+'&is_deleted=is.false&order=id').then(function(rows){
-    return function(){S.amoLeads=rows||[];};
-  }).catch(function(){return function(){S.amoLeads=[];};});
-}
-/* Владельцы ВСЕХ лидов воронки "Продажи", без ограничения по дате создания
-   (в отличие от loadAmoLeads, который фильтрует по created_at в периоде).
-   Нужно чтобы правильно относить к отделу событие по лиду, который был
-   создан ДО выбранного периода, но прошёл этап (например, оплатил) внутри
-   периода — такой лид не попадёт в S.amoLeads, но событие по нему должно
-   учитываться. Атрибуция — по ТЕКУЩЕМУ responsible_user_id (как и везде
-   в этом файле, см. eventsForMgrs_): если лида перекинули в другой отдел,
-   вся его история задним числом "переезжает" за новым владельцем. Это
-   осознанно принятое упрощение, не баг. */
-/* От периода не зависит — грузим один раз за сессию (сброс в loadData). */
-function loadAmoLeadOwners(){
-  if(S._amoOwnersLoaded)return Promise.resolve(null);
-  return sbGetAll('amo_leads?select=id,responsible_user_id,price&pipeline_id=eq.'+AMO_PIPE_SALES+'&is_deleted=is.false&order=id').then(function(rows){
-    var own={},pr={};
-    (rows||[]).forEach(function(l){own[l.id]=l.responsible_user_id;pr[l.id]=l.price||0;});
-    return function(){S.amoLeadOwners=own;S.amoLeadPrices=pr;S._amoOwnersLoaded=true;};
-  }).catch(function(){return function(){S.amoLeadOwners={};S.amoLeadPrices={};};});
-}
-/* ═══ AMO EVENTS (активность за период + воронка) ═══
-   Источник — таблица amo_lead_events (заполняется amosync.gs), колонка
-   status_after_id. loadAmoEvents() тянет события ТОЛЬКО за выбранный период
-   (для строки "Активность за период"). loadAmoEventsAll() тянет ВСЮ историю
-   без ограничения по датам — нужна buildFunnelCounts для furthestRank/backfill:
-   лид мог дойти до этапа до начала или после конца периода отображения. */
-var ACTIVITY_STAGES=[
-  {key:'mset', label:'встреч назначено', sid:80336514},
-  {key:'mdone',label:'проведено',        sid:80429334},
-  {key:'inv',  label:'счетов',           sid:80336526},
-  {key:'paid', label:'оплат',            sid:142}
-];
-function loadAmoEvents(){
-  var fromU=Math.floor(S.rangeFrom.getTime()/1000);
-  var toU=Math.floor(S.rangeTo.getTime()/1000)+86400;
-  var sids=AMO_STAGES.map(function(s){return s.sid;}).filter(Boolean).join(',');
-  return sbGetAll('amo_lead_events?select=lead_id,status_after_id,created_by,created_at_unix&created_at_unix=gte.'+fromU+'&created_at_unix=lte.'+toU+'&status_after_id=in.('+sids+')&order=lead_id,created_at_unix,status_after_id').then(function(rows){
-    var ev=(rows||[]).map(function(e){return{lead_id:e.lead_id,status_after:e.status_after_id,created_by:e.created_by,created_at_unix:e.created_at_unix};});
-    return function(){S.amoEvents=ev;};
-  }).catch(function(){return function(){S.amoEvents=[];};});
-}
-/* Вся история — от периода не зависит, грузим один раз за сессию (сброс в loadData).
-   Раньше перекачивалась целиком при КАЖДОЙ смене периода. */
-function loadAmoEventsAll(){
-  if(S._amoAllLoaded)return Promise.resolve(null);
-  var sids=AMO_STAGES.map(function(s){return s.sid;}).filter(Boolean).join(',');
-  return sbGetAll('amo_lead_events?select=lead_id,status_after_id,created_by,created_at_unix&status_after_id=in.('+sids+')&order=lead_id,created_at_unix,status_after_id').then(function(rows){
-    var ev=(rows||[]).map(function(e){return{lead_id:e.lead_id,status_after:e.status_after_id,created_by:e.created_by,created_at_unix:e.created_at_unix};});
-    return function(){S.amoEventsAll=ev;S._amoAllLoaded=true;};
-  }).catch(function(){return function(){S.amoEventsAll=[];};});
-}
-/* дедуп по lead_id — считаем уникальных лидов, дошедших до этапа в периоде,
-   а не количество переходов (иначе повторный переход того же лида в тот же
-   статус в периоде задваивал бы счётчик). */
-function buildActivityCounts(events){
-  var counts={},seen={};
-  ACTIVITY_STAGES.forEach(function(s){counts[s.key]=0;seen[s.key]={};});
-  (events||[]).forEach(function(e){
-    ACTIVITY_STAGES.forEach(function(s){
-      if(e.status_after===s.sid&&!seen[s.key][e.lead_id]){
-        seen[s.key][e.lead_id]=1;
-        counts[s.key]++;
-      }
-    });
-  });
-  return counts;
-}
-function activityLineHtml_(counts){
-  return ACTIVITY_STAGES.map(function(s){return s.label+' <b style="color:var(--text)">'+(counts[s.key]||0)+'</b>';}).join(' &nbsp;·&nbsp; ');
-}
-/* ═══ ВОРОНКА: furthestRank + backfill ═══
-   Для каждого лида считаем максимальный ранг (индекс в AMO_STAGES), которого
-   он когда-либо достигал — либо по текущему status_id, либо по любому
-   историческому событию status_after_id (из ПОЛНОЙ истории eventsAll, без
-   привязки к периоду — лид мог дойти до этапа до/после выбранного периода).
-   Лид засчитывается на каждый этап от 0 до furthest включительно — так
-   лиды, перескочившие этапы (звонок КЦ, передача от уволенного), задним
-   числом получают зачёт за пропущенные этапы без превышения 100% конверсии.
-   Слитые (143) лиды не исключаются из подсчёта: они просто не имеют ранга
-   от текущего статуса (143 не входит в AMO_STAGES), но сохраняют зачёт за
-   этапы, реально достигнутые до слива — через события eventsAll. */
-function buildFunnelCounts(leads,eventsAll){
-  var counts={};
-  AMO_STAGES.forEach(function(st){counts[st.key]=0;});
-  var total=0,rejected=0,revenue=0;
-  var leadIds={};
-  (leads||[]).forEach(function(l){
-    leadIds[l.id]=1;
-    if(l.status_id===AMO_LOST_SID){rejected++;}
-    else{total++;revenue+=(Number(l.price)||0);}
-  });
-  var furthest={};
-  (leads||[]).forEach(function(l){
-    var rk=stageRank_(l.status_id);
-    if(rk>=0)furthest[l.id]=rk;
-  });
-  (eventsAll||[]).forEach(function(e){
-    if(!leadIds.hasOwnProperty(e.lead_id))return;
-    var rk=stageRank_(e.status_after);
-    if(rk<0)return;
-    if(furthest[e.lead_id]===undefined||rk>furthest[e.lead_id])furthest[e.lead_id]=rk;
-  });
-  Object.keys(furthest).forEach(function(leadId){
-    var rk=furthest[leadId];
-    for(var i=0;i<=rk;i++)counts[AMO_STAGES[i].key]++;
-  });
-  return{counts:counts,total:total,rejected:rejected,revenue:revenue};
-}
-/* ФАКТ по периоду — в отличие от buildFunnelCounts (когорта: лид СОЗДАН в
-   периоде → максимум когда-либо достигнутого этапа, хоть в будущем), здесь
-   считаем ровно то, что произошло В ПЕРИОДЕ: лид перешёл в этап — засчитан,
-   когда бы он ни был создан. Отдел/менеджер определяется через ownerMap
-   (текущий responsible_user_id, см. loadAmoLeadOwners) — если amoIdSet
-   передан, событие учитывается только если владелец лида входит в набор.
-   БЭКФИЛЛ: если у лида в периоде есть событие, но нет события какого-то из
-   более ранних этапов (проскочил стадию — типовая ситуация: звонок КЦ сразу
-   в "встречу провёл", передача от уволенного и т.п.), более ранние этапы
-   всё равно засчитываются — иначе "Проведено встреч" может оказаться
-   больше "Назначено встреч", что физически бессмысленно. Берём МАКСИМАЛЬНЫЙ
-   ранг, которого лид достиг СРЕДИ СОБЫТИЙ ЭТОГО ЖЕ ПЕРИОДА (events уже
-   отфильтрован по датам до вызова этой функции), и досчитываем все стадии
-   от 0 до него — то есть бэкфилл не "утекает" за границы периода. */
-function buildStageFactCounts_(events,ownerMap,amoIdSet){
-  var counts={},seen={};
-  AMO_STAGES.forEach(function(s){counts[s.key]=0;seen[s.key]={};});
-  var furthest={};
-  (events||[]).forEach(function(e){
-    if(amoIdSet){
-      var owner=ownerMap?ownerMap[e.lead_id]:null;
-      if(!owner||amoIdSet.indexOf(owner)<0)return;
-    }
-    var rk=stageRank_(e.status_after);
-    if(rk<0)return;
-    if(furthest[e.lead_id]===undefined||rk>furthest[e.lead_id])furthest[e.lead_id]=rk;
-  });
-  Object.keys(furthest).forEach(function(leadId){
-    var rk=furthest[leadId];
-    for(var i=0;i<=rk;i++){
-      seen[AMO_STAGES[i].key][leadId]=1;
-      counts[AMO_STAGES[i].key]++;
-    }
-  });
-  return{counts:counts,seen:seen};
-}
 /* ═══ CALENDAR ═══ */
 function buildMonth(base){var y=base.getFullYear(),m=base.getMonth(),first=new Date(y,m,1),sd=(first.getDay()+6)%7,days=[];for(var i=0;i<sd;i++)days.push({d:new Date(y,m,1-(sd-i)),other:true});var dim=new Date(y,m+1,0).getDate();for(var k=1;k<=dim;k++)days.push({d:new Date(y,m,k),other:false});while(days.length%7){var l=days[days.length-1].d;days.push({d:new Date(l.getFullYear(),l.getMonth(),l.getDate()+1),other:true});}return days;}
 function renderCalMonth(base){var days=buildMonth(base);var cells=DOW.map(function(d){return'<div class="cal-dow">'+d+'</div>';}).join('');days.forEach(function(o){var disabled=o.d<MIN_DATE;var cls='cal-day'+(o.other?' other':'')+(disabled?' disabled':'');var t=o.d.getTime(),f=S.rangeFrom.getTime(),tt=S.rangeTo.getTime();if(!disabled){if(sameDay(o.d,S.rangeFrom)&&sameDay(o.d,S.rangeTo))cls+=' range-single';else if(sameDay(o.d,S.rangeFrom))cls+=' range-start';else if(sameDay(o.d,S.rangeTo))cls+=' range-end';else if(t>f&&t<tt)cls+=' in-range';}cells+='<div class="'+cls+'"'+(disabled?'':' onclick="pickDay('+o.d.getFullYear()+','+o.d.getMonth()+','+o.d.getDate()+')"')+'>'+o.d.getDate()+'</div>';});return'<div class="cal-grid">'+cells+'</div>';}
@@ -1237,17 +1103,17 @@ document.addEventListener('click',function(e){if(S.calOpen&&!e.target.closest('.
 /* ═══ ROLE BAR ═══ */
 function ctxEmpId(){
   if(S.role==='cd'&&S.empView)return S.empView;
-  if(S.role==='mgr'&&S.mgrAs){var e=RAW.employees.find(function(e){return e.platform_user_id===S.mgrAs;});return e?e.id:null;}
   return null;
 }
 function ctxDeptId(){return(S.role==='cd'&&S.dept&&!S.empView)?S.dept:null;}
 function roleBar(){
-  var tabs=[['lb','Лидерборд'],['cd','Дашборд'],['voronka','Воронка'],['pay','Логи']];
+  var tabs=[['lb','Лидерборд'],['cd','Дашборд'],['meet','Встречи'],['pay','Логи']];
   var seg=tabs.map(function(t){return'<button class="role-btn'+(S.role===t[0]?' on':'')+'" onclick="setRole(\''+t[0]+'\')">'+t[1]+'</button>';}).join('');
   var eid=ctxEmpId(),did=ctxDeptId();
   return'<div class="rolebar"><div class="role-seg">'+seg+'</div><div class="bar-right">'+
-    '<button class="refresh-btn" onclick="location.reload()">'+ICO.refresh+' Обновить</button>'+
+    '<button class="refresh-btn" onclick="syncAndReload(this)" title="Подтянуть новые организации с платформы и перезагрузить">'+ICO.refresh+' Обновить</button>'+
     '<button class="deal-btn" onclick="addDeal(\''+eid+'\',\''+did+'\')">'+ICO.plus+' Сделка</button>'+
+    '<button class="deal-btn ghost-acc" onclick="addMeeting(\''+eid+'\')">'+ICO.plus+' Встреча</button>'+
     '<button class="icon-btn" onclick="toggleTheme()">'+(S.theme==='dark'?ICO.sun:ICO.moon)+'</button>'+
     '<button class="icon-btn'+(S.role==='rop'?' on':'')+'" title="Настройки" onclick="setRole(\'rop\')">'+ICO.settings+'</button>'+
     '<span class="save-hint'+(S.saveHint?' show':'')+'" style="font-size:11px;color:var(--green);margin-left:4px">✓ сохранено</span>'+
@@ -1256,7 +1122,7 @@ function roleBar(){
 window.setRole=function(r){S.role=r;S.dept=null;S.empView=null;S.calOpen=false;render();};
 window.toggleTheme=function(){S.theme=S.theme==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',S.theme);render();savePreferences();};
 var _lastViewKey=null,_animTimer=null;
-function _viewKey(){return [S.role,S.dept||'',S.empView||'',S.tab||'',S_LB_TAB||'',S.mgrAs||''].join('|');}
+function _viewKey(){return [S.role,S.dept||'',S.empView||'',S.tab||'',S_LB_TAB||''].join('|');}
 function setApp(h){
   var app=document.getElementById('app');
   var k=_viewKey(),nav=k!==_lastViewKey;_lastViewKey=k;
@@ -1266,20 +1132,7 @@ function setApp(h){
   clearTimeout(_animTimer);
   if(nav){app.classList.add('anim');_animTimer=setTimeout(function(){app.classList.remove('anim');},1100);}
   else app.classList.remove('anim');
-  _syncBd();
 }
-function _syncBd(){if(S.msOpen)_showBd();else _hideBd();}
-function _showBd(){
-  var bd=document.getElementById('_ms_bd');
-  if(!bd){
-    bd=document.createElement('div');
-    bd.id='_ms_bd';
-    bd.style.cssText='position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.001)';
-    document.body.appendChild(bd);
-  }
-  bd.onclick=function(){applyFnPending();S.msOpen=null;S.msSearch='';_hideBd();render();};
-}
-function _hideBd(){var bd=document.getElementById('_ms_bd');if(bd)bd.remove();}
 function flashSave(){S.saveHint=true;render();setTimeout(function(){S.saveHint=false;render();},1500);}
 /* ═══ ICON LIBRARY (минималистичные line-иконки) ═══ */
 var ICO={
@@ -1308,7 +1161,7 @@ function render(){
   if(S.role==='rop'){renderRop();return;}
   if(S.role==='lb'){renderLb();return;}
   if(S.role==='pay'){renderPayroll();return;}
-  if(S.role==='voronka'){renderVoronka();return;}
+  if(S.role==='meet'){renderMeetings();return;}
   if(S.dept&&S.empView){renderEmpView();return;}
   if(S.dept){renderDept();return;}
   renderCo();
@@ -1393,7 +1246,7 @@ function renderLb(){
 }
 /* ═══ ДАШБОРД ═══ */
 function renderCo(){
-  var c=DB.company,cp=pct(c.fact,c.plan),rrv=rrPct(c.fact,c.plan);
+  var c=DB.company,cp=pct(c.fact,c.plan);
   var allClients=DB.depts.reduce(function(a,d){return a.concat(d.clients);},[]);
   var coPaying=payingInPeriod(allClients);if(coPaying===null)coPaying=c.paying;
   var arpu2=coPaying>0?r(c.fact/coPaying):0;
@@ -1402,8 +1255,6 @@ function renderCo(){
   var _mb='<div class="mbar-wrap"><div class="mbar"></div></div>';
   var _mbFill=function(p){return'<div class="mbar-wrap"><div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div></div>';};
   var _lbl=function(txt,dlt){return'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><span class="ck-l" style="margin:0">'+txt+'</span>'+(dlt||'')+'</div>';};
-  var prevRRco=rrPct(S.prevCompany,c.plan);
-  var deltaRRco=S.prevCompany>0?Math.max(-99,Math.min(99,Math.round(rrv-prevRRco))):null;
   var prevArpu2=S.prevPayingCompany>0?r(S.prevCompany/S.prevPayingCompany):0;
   var deltaArpu2=prevArpu2>0?r(arpu2-prevArpu2):null;
   var deltaPaying2=S.prevPayingCompany>0?coPaying-S.prevPayingCompany:null;
@@ -1413,22 +1264,22 @@ function renderCo(){
   var deltaStaffCo=hiredCo-firedCo;
   var kH=[
     '<div class="ck">'+_lbl('Выручка',deltaTag(c.fact,c.prevFact))+'<div class="ck-v num"'+revAttr('co')+'>'+fmt(c.fact)+'</div><div class="ck-s">план '+fmt(c.plan)+' · '+cp+'%</div>'+_mbFill(cp)+'</div>',
-    '<div class="ck">'+_lbl('Ранрейт',deltaRRco!==null?deltaAbs(Math.round(deltaRRco),'%'):'')+'<div class="ck-v num">'+rrv+'%</div><div class="ck-s"><span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span></div>'+_mb+'</div>',
+    '<div class="ck">'+_lbl('Встречи',c.meet.prevTotal>0?deltaAbs(c.meet.total-c.meet.prevTotal,'встр.'):'')+'<div class="ck-v num">'+c.meet.total+'</div><div class="ck-s"><span class="neu">'+meetSub_(c.meet)+'</span></div>'+_mb+'</div>',
     '<div class="ck">'+_lbl('ARPU',deltaArpu2!==null?deltaAbsCurrency(deltaArpu2):'')+'<div class="ck-v num">'+(arpu2?fmt(arpu2):'—')+'</div><div class="ck-s"><span class="neu">платящий клиент</span></div>'+_mb+'</div>',
     '<div class="ck">'+_lbl('Платящих',deltaPaying2!==null?deltaAbs(deltaPaying2,'клиента'):'')+'<div class="ck-v num">'+coPaying+'</div><div class="ck-s"><span class="neu">из '+c.clients+' в портфеле</span></div>'+_mb+'</div>',
     '<div class="ck">'+_lbl('Сотрудников',deltaAbs(deltaStaffCo,'чел.'))+'<div class="ck-v num">'+totalStaff+'</div><div class="ck-s"><span class="neu">'+DB.depts.length+' отделов</span></div>'+_mb+'</div>',
     '<div class="ck">'+_lbl('Скручено минут',deltaTag(c.minutes,c.prevMinutes))+'<div class="ck-v num">'+fmtMin(c.minutes)+'</div><div class="ck-s"><span class="neu">у '+c.minActive+' клиентов</span></div>'+_mb+'</div>'
   ].join('');
   var cards=DB.depts.length?DB.depts.map(function(d){
-    var p2=pct(d.fact,d.plan),rr2=rrPct(d.fact,d.plan),c2=grad(p2);
-    var bT=d.plan>0?(rr2>=100?'В темпе':rr2>=80?'Отстаём':'Критично'):'Нет плана',bC=d.plan>0?(rr2>=100?'bg':rr2>=80?'ba':'br'):'br';
+    var p2=pct(d.fact,d.plan),c2=grad(p2);
+    var bT=d.plan>0?'Нет оплат':'Нет плана',bC=d.plan>0?'ba':'br';
     var dPaying=payingInPeriod(d.clients);if(dPaying===null)dPaying=d.paying;
     var statusBadge=(d.prevFact===0&&d.fact===0)?'<span class="dc-badge '+bC+'">'+bT+'</span>':deltaBadge(d.fact,d.prevFact);
     return'<div class="dept-card" onclick="drill(\''+d.id+'\')">'+
       '<div class="dc-top"><div><div class="dc-name">'+esc(d.name)+'</div><div class="dc-meta">'+esc(d.tl)+' · '+d.staff.length+' чел. · '+d.clients.length+' клиентов</div></div>'+statusBadge+'</div>'+
       '<div class="dc-fact num"'+revAttr('d:'+d.id)+'>'+fmt(d.fact)+'</div><div class="dc-plan">из '+fmt(d.plan)+' плана</div>'+
       '<div class="progress" style="margin-top:14px"><div class="progress-fill" style="width:'+Math.min(p2,100)+'%;background:'+c2+'"></div></div>'+
-      '<div class="dc-stats"><div><div class="dc-stat-l">Выполнено</div><div class="dc-stat-v num" style="color:'+c2+'">'+p2+'%</div></div><div><div class="dc-stat-l">Ранрейт</div><div class="dc-stat-v num" style="color:'+grad(rr2)+'">'+rr2+'%</div></div><div><div class="dc-stat-l">Платящих</div><div class="dc-stat-v num">'+dPaying+'</div></div><div><div class="dc-stat-l">Минут</div><div class="dc-stat-v num">'+fmtNum(d.minutes)+'</div></div></div>'+
+      '<div class="dc-stats"><div><div class="dc-stat-l">Выполнено</div><div class="dc-stat-v num" style="color:'+c2+'">'+p2+'%</div></div><div><div class="dc-stat-l">Встречи</div><div class="dc-stat-v num">'+d.meet.total+'</div></div><div><div class="dc-stat-l">Платящих</div><div class="dc-stat-v num">'+dPaying+'</div></div><div><div class="dc-stat-l">Минут</div><div class="dc-stat-v num">'+fmtNum(d.minutes)+'</div></div></div>'+
     '</div>';
   }).join(''):'<div class="empty-state">Нет отделов. Зайди в <b>⚙ Настройки</b> → Создать отдел.</div>';
   var archHtml='';
@@ -1442,10 +1293,10 @@ function renderCo(){
     '<div class="dept-grid">'+cards+'</div>'+archHtml);
 }
 window.toggleArchDepts=function(){S.showArchivedDepts=!S.showArchivedDepts;render();};
-window.drill=function(id){S.dept=id;S.tab='staff';S.calOpen=false;S.empView=null;S.msOpen=null;S.fnPendingMgrs=null;S.fnPendingMgrsB=null;render();};
-window.goUp=function(){S.dept=null;S.empView=null;S.msOpen=null;render();};
+window.drill=function(id){S.dept=id;S.tab='staff';S.calOpen=false;S.empView=null;render();};
+window.goUp=function(){S.dept=null;S.empView=null;render();};
 window.goUpFromEmp=function(){S.empView=null;render();};
-window.setTab=function(t){S.tab=t;S.msOpen=null;S.msSearch='';S.fnPendingMgrs=null;S.fnPendingMgrsB=null;render();};
+window.setTab=function(t){S.tab=t;render();};
 /* ═══ ОТДЕЛ ═══ */
 window.sortStaff=function(k){if(S.staffSortKey===k)S.staffSortDir*=-1;else{S.staffSortKey=k;S.staffSortDir=-1;}render();};
 window.drillEmpFromLb=function(supaId,deptId){
@@ -1455,239 +1306,14 @@ window.drillEmpFromLb=function(supaId,deptId){
   drillEmp(supaId);
 };
 window.drillEmp=function(supaId){S.empView=supaId;render();loadEmpLifetime(supaId);};
-/* ═══ FUNNEL v2 — helpers ═══ */
-function empAmo_(supaId){return S.empAmoMap[supaId]||null;}
-function deptAuids_(dStaff){return (dStaff||[]).map(function(m){return empAmo_(m.supaId);}).filter(Boolean);}
-function leadsForMgrs_(supaIds,dStaff){
-  var auids = (supaIds&&supaIds.length)? supaIds.map(empAmo_).filter(Boolean) : deptAuids_(dStaff);
-  if(!auids.length)return [];
-  return S.amoLeads.filter(function(l){return auids.indexOf(l.responsible_user_id)>=0;});
-}
-/* ПРАВКА: раньше фильтровали события по created_by (автору перехода), из-за
-   чего события, сделанные call-центром/роботом/другим сотрудником по чужому
-   лиду, не засчитывались менеджеру-владельцу лида. Теперь фильтруем по
-   принадлежности лида (тот же список, что leadsForMgrs_), а не по автору. */
-function eventsForMgrs_(supaIds,dStaff){
-  var leads=leadsForMgrs_(supaIds,dStaff);
-  if(!leads.length)return [];
-  var leadIdSet={};
-  leads.forEach(function(l){leadIdSet[l.id]=1;});
-  return S.amoEvents.filter(function(e){return leadIdSet.hasOwnProperty(e.lead_id);});
-}
-function applyTagFilter_(leads){
-  if(!S.fnTags.length)return leads;
-  return leads.filter(function(l){var tags=(l.tags||'').split(',').map(function(t){return t.trim();});return S.fnTags.some(function(t){return tags.indexOf(t)>=0;});});
-}
-function getTagCounts_(leads){var tc={};leads.forEach(function(l){(l.tags||'').split(',').forEach(function(t){t=t.trim();if(t)tc[t]=(tc[t]||0)+1;});});return tc;}
-function fmtK_(n){return n>=1000?r(n/1000)+'к':String(n);}
-function funnelBarsHtml_(fc){
-  return AMO_STAGES.map(function(st,i){
-    var cnt=fc.counts[st.key]||0;
-    var prev=i>0?(fc.counts[AMO_STAGES[i-1].key]||fc.total):fc.total;
-    var conv=prev>0?r(cnt/prev*100):0;
-    var barW=fc.total>0?Math.min(100,r(cnt/fc.total*100)):0;
-    var convRow=i>0?('<tr class="fn2-conv-row"><td></td><td colspan="2"><span class="fn2-conv">↳ в след. этап <b>'+conv+'%</b></span></td></tr>'):'';
-    return convRow+'<tr class="fn2-main">'+
-      '<td class="fn2-stage-name" style="padding-right:20px;white-space:nowrap">'+esc(st.label)+'</td>'+
-      '<td style="width:100%;min-width:140px"><div class="fn2-bar-wrap"><div class="fn2-bar-fill" style="width:'+barW+'%;background:var(--accent)"></div></div></td>'+
-      '<td class="fn2-num r">'+cnt+'</td>'+
-    '</tr>';
-  }).join('');
-}
-var CMP_A='var(--accent)',CMP_B='#A98BFF';
-function funnelCompareHtml_(fcA,fcB){
-  var maxAll=1;
-  AMO_STAGES.forEach(function(st){maxAll=Math.max(maxAll,fcA.counts[st.key]||0,fcB.counts[st.key]||0);});
-  return AMO_STAGES.map(function(st,i){
-    var a=fcA.counts[st.key]||0,b=fcB.counts[st.key]||0;
-    var prevA=i>0?(fcA.counts[AMO_STAGES[i-1].key]||fcA.total):fcA.total;
-    var prevB=i>0?(fcB.counts[AMO_STAGES[i-1].key]||fcB.total):fcB.total;
-    var convA=prevA>0?r(a/prevA*100):0,convB=prevB>0?r(b/prevB*100):0;
-    var convLine=i>0?'<span class="cmp2-conv">конв. <b style="color:'+CMP_A+'">'+convA+'%</b> / <b style="color:'+CMP_B+'">'+convB+'%</b></span>':'';
-    return'<div class="cmp2-stage">'+
-      '<div class="cmp2-name"><span>'+esc(st.label)+'</span>'+convLine+'</div>'+
-      '<div class="cmp2-track"><span class="cmp2-tag" style="color:'+CMP_A+'">А</span><div class="cmp2-barwrap"><div class="cmp2-bar" style="width:'+(a/maxAll*100)+'%;background:'+CMP_A+'"></div></div><span class="cmp2-val">'+a+'</span></div>'+
-      '<div class="cmp2-track"><span class="cmp2-tag" style="color:'+CMP_B+'">Б</span><div class="cmp2-barwrap"><div class="cmp2-bar" style="width:'+(b/maxAll*100)+'%;background:'+CMP_B+'"></div></div><span class="cmp2-val">'+b+'</span></div>'+
-    '</div>';
-  }).join('');
-}
-function msOptHtml_(stateKey,id,name,hasAmo){
-  var pendArr=stateKey==='fnMgrs'?(S.fnPendingMgrs||S.fnMgrs):(S.fnPendingMgrsB||S.fnMgrsB);
-  var sl=pendArr.indexOf(id)>=0;
-  return'<div class="ms-opt'+(sl?' sel':'')+'" data-id="'+id+'" onclick="event.stopPropagation();fnToggleMgr(\''+stateKey+'\',\''+id+'\')">'+
-    '<span class="ms-opt-dot"></span>'+
-    '<span class="ms-nm">'+esc(name)+'</span>'+
-    (hasAmo?'':'<span class="sub">нет Amo</span>')+
-    '<svg class="ms-opt-chk" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg></div>';
-}
-function renderFunnelContent_(d){
-  var hasAmo=S.amoLeads.length>0;
-  var deptLeads=leadsForMgrs_([],d.staff);
-  var allTagCounts=getTagCounts_(deptLeads);
-  var tagKeys=Object.keys(allTagCounts).sort(function(a,b){return allTagCounts[b]-allTagCounts[a];}).slice(0,24);
-  var tagPills='<button class="fn2-tag'+(S.fnTags.length?'':' on')+'" onclick="fnClearTags()">Все теги</button>'+
-    tagKeys.map(function(t){var sel=S.fnTags.indexOf(t)>=0;return'<button class="fn2-tag'+(sel?' on':'')+'" onclick="fnToggleTag('+esc(t).replace(/'/g,"\\'")+')" title="'+esc(t)+'">'+esc(t.length>24?t.slice(0,22)+'…':t)+'<span class="tc">'+allTagCounts[t]+'</span></button>';}).join('');
-  var tagBlock='<div class="fn2-tags">'+tagPills+'</div>';
-  function mgrMs(stateKey,msId,scope){
-    var sel=S[stateKey];
-    var open=S.msOpen===msId;
-    var dispArr=open?(stateKey==='fnMgrs'?(S.fnPendingMgrs||sel):(S.fnPendingMgrsB||sel)):sel;
-    var MAX_CHIPS=2;
-    var chips;
-    if(!dispArr.length){
-      chips='<span class="ms-ph">Весь отдел</span>';
-    } else if(dispArr.length<=MAX_CHIPS){
-      chips=dispArr.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return'<span class="ms-chip">'+esc((e?(e.display_name||e.name):'?').split(' ')[0])+'<button onclick="event.stopPropagation();fnRemoveMgr(\''+stateKey+'\',\''+id+'\')">×</button></span>';}).join('');
-    } else {
-      var first=RAW.employees.find(function(x){return x.id===dispArr[0];});
-      chips='<span class="ms-chip">'+esc((first?(first.display_name||first.name):'?').split(' ')[0])+'<button onclick="event.stopPropagation();fnRemoveMgr(\''+stateKey+'\',\''+dispArr[0]+'\')">×</button></span>'+
-        '<span style="font-size:12px;font-weight:600;color:var(--accent);white-space:nowrap">+' +(dispArr.length-1)+'</span>';
-    }
-    var dropInner='';
-    if(open){
-      var q=(S.msSearch||'').toLowerCase();
-      var optHtml='';
-      var pendArr2=stateKey==='fnMgrs'?(S.fnPendingMgrs||sel):(S.fnPendingMgrsB||sel);
-      if(scope==='dept'){
-        var list=d.staff.filter(function(m){return!q||m.name.toLowerCase().indexOf(q)>=0;});
-        optHtml=list.length?list.map(function(m){return msOptHtml_(stateKey,m.supaId,m.name,empAmo_(m.supaId));}).join(''):'<div class="ms-empty">Ничего не найдено</div>';
-      } else {
-        DB.depts.forEach(function(dd){
-          var staff=dd.staff.filter(function(m){return!q||m.name.toLowerCase().indexOf(q)>=0;});
-          if(!staff.length)return;
-          var deptAllSel=staff.every(function(m){return pendArr2.indexOf(m.supaId)>=0;});
-          optHtml+='<div class="ms-group" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="event.stopPropagation();fnSelectDept(\''+stateKey+'\',\''+dd.id+'\')">'+esc(dd.name)+'<span style="font-size:10px;color:var(--accent);font-weight:600">'+(deptAllSel?'снять':'выбрать всех')+'</span></div>'+
-            staff.map(function(m){return msOptHtml_(stateKey,m.supaId,m.name,empAmo_(m.supaId));}).join('');
-        });
-        if(!optHtml)optHtml='<div class="ms-empty">Ничего не найдено</div>';
-      }
-      dropInner='<div style="padding:8px 8px 4px;border-bottom:0.5px solid var(--border-soft)"><input class="ms-search" id="ms-search-'+msId+'" placeholder="Поиск..." value="'+esc(S.msSearch||'')+'" oninput="fnMsSearch(this.value)" onclick="event.stopPropagation()" style="margin:0"></div><div style="padding:4px;max-height:280px;overflow-y:auto">'+optHtml+'</div>';
-    }
-    return'<div class="ms"><div class="ms-trig'+(open?' open':'')+'" onclick="fnToggleMs(event,\''+msId+'\')">'+chips+'<span class="ms-arrow">▾</span></div><div class="ms-drop'+(open?' on':'')+'">'+dropInner+'</div></div>';
-  }
-  var cmpToggle='<button class="fn2-cmp-btn'+(S.fnCompare?' on':'')+'" onclick="toggleFnCompare()">⇄ Сравнить</button>';
-  var body='';
-  if(!hasAmo){
-    body='<div class="fn-empty">🔒 Запусти <code>amoSyncAll()</code> в GAS — данные появятся здесь.</div>';
-  } else if(S.fnCompare){
-    var leadsA=applyTagFilter_(leadsForMgrs_(S.fnMgrs,d.staff));
-    var leadsB=applyTagFilter_(leadsForMgrs_(S.fnMgrsB,d.staff));
-    var evA=eventsForMgrs_(S.fnMgrs,d.staff);
-    var evB=eventsForMgrs_(S.fnMgrsB,d.staff);
-    var fcA=buildFunnelCounts(leadsA,S.amoEventsAll),fcB=buildFunnelCounts(leadsB,S.amoEventsAll);
-    var acA=buildActivityCounts(evA);
-    var acB=buildActivityCounts(evB);
-    var nameA=S.fnMgrs.length?S.fnMgrs.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return e?(e.display_name||e.name).split(' ')[0]:'';}).join(', '):'Весь отдел';
-    var nameB=S.fnMgrsB.length?S.fnMgrsB.map(function(id){var e=RAW.employees.find(function(x){return x.id===id;});return e?(e.display_name||e.name).split(' ')[0]:'';}).join(', '):'Весь отдел';
-    body='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;padding:10px 12px;background:var(--surface-2);border-radius:10px">'+
-        '<span style="font-size:11px;font-weight:700;color:'+CMP_A+';min-width:12px">А</span>'+mgrMs('fnMgrs','mgrA','dept')+
-        '<span style="font-size:11px;color:var(--text-3);margin:0 4px">·</span>'+
-        '<span style="font-size:11px;color:var(--text-3)">Лидов: <b style="color:var(--text)">'+fcA.total+'</b> Оплат: <b style="color:var(--text)">'+(fcA.counts.paid||0)+'</b></span>'+
-      '</div>'+
-      '<div style="font-size:11px;color:var(--text-3);margin:-2px 0 14px 2px">Активность: '+activityLineHtml_(acA)+'</div>'+
-      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px;padding:10px 12px;background:var(--surface-2);border-radius:10px">'+
-        '<span style="font-size:11px;font-weight:700;color:'+CMP_B+';min-width:12px">Б</span>'+mgrMs('fnMgrsB','mgrB','all')+
-        '<span style="font-size:11px;color:var(--text-3);margin:0 4px">·</span>'+
-        '<span style="font-size:11px;color:var(--text-3)">Лидов: <b style="color:var(--text)">'+fcB.total+'</b> Оплат: <b style="color:var(--text)">'+(fcB.counts.paid||0)+'</b></span>'+
-      '</div>'+
-      '<div style="font-size:11px;color:var(--text-3);margin:-2px 0 14px 2px">Активность: '+activityLineHtml_(acB)+'</div>'+
-      '<div class="cmp2-legend"><span class="cmp2-leg"><span class="sw" style="background:'+CMP_A+'"></span>'+esc(nameA)+'<span class="ln">группа А</span></span>'+
-        '<span class="cmp2-leg"><span class="sw" style="background:'+CMP_B+'"></span>'+esc(nameB)+'<span class="ln">группа Б</span></span></div>'+
-      '<div>'+funnelCompareHtml_(fcA,fcB)+'</div>';
-  } else {
-    var leads1=applyTagFilter_(leadsForMgrs_(S.fnMgrs,d.staff));
-    var ev1=eventsForMgrs_(S.fnMgrs,d.staff);
-    var ac1=buildActivityCounts(ev1);
-    var fc1=buildFunnelCounts(leads1,S.amoEventsAll);
-    var statRow='<div class="fn2-stat-row">Лидов: <b>'+fc1.total+'</b> &nbsp;·&nbsp; Отказов: <b>'+fc1.rejected+'</b> &nbsp;·&nbsp; Оплат: <b>'+(fc1.counts.paid||0)+'</b></div>'+
-      '<div class="fn2-stat-row" style="margin-top:-6px">Активность за период: '+activityLineHtml_(ac1)+'</div>';
-    var thead='<thead><tr><th>ЭТАП</th><th>ОБЪЕМ</th><th class="r">ФАКТ</th></tr></thead>';
-    body=statRow+'<table class="fn2-tbl" style="width:100%;margin-top:10px">'+thead+'<tbody>'+funnelBarsHtml_(fc1)+'</tbody></table>';
-  }
-  var SKIP={'platform.trysasha.ru':1,'sasha ai':1,'sasha ai krutyak':1,'sashaai':1,'off':1};
-  var SKIPPRE=['импорт_','wazzup','ооо '];
-  var tagForCards=Object.keys(allTagCounts).filter(function(t){if(SKIP[t.toLowerCase()])return false;for(var i=0;i<SKIPPRE.length;i++){if(t.toLowerCase().indexOf(SKIPPRE[i])===0)return false;}return allTagCounts[t]>=3;}).sort(function(a,b){return allTagCounts[b]-allTagCounts[a];}).slice(0,12);
-  var cards=tagForCards.map(function(tag){
-    var tl=deptLeads.filter(function(l){return(l.tags||'').split(',').some(function(t){return t.trim()===tag;});});
-    var paid=tl.filter(function(l){return l.status_id===142;});
-    var rev=paid.reduce(function(a,l){return a+(Number(l.price)||0);},0);
-    var conv=tl.length>0?r(paid.length/tl.length*100):0;
-    var active=S.fnTags.indexOf(tag)>=0;
-    return'<div class="ch-card'+(active?' on':'')+'" onclick="fnToggleTag('+esc(tag).replace(/'/g,"\\'")+')">'+
-      '<div class="ch-name">'+esc(tag)+'</div>'+
-      '<div class="ch-stat"><span>Лидов</span><b>'+tl.length+'</b></div>'+
-      '<div class="ch-stat"><span>Оплат</span><b>'+paid.length+'</b></div>'+
-      '<div class="ch-stat"><span>Выручка</span><b>'+fmtK_(rev)+'</b></div>'+
-      '<div class="ch-conv" style="color:'+grad(conv*3.3)+'">'+conv+'%</div>'+
-      '<div style="font-size:10px;color:var(--text-3)">конверсия</div>'+
-    '</div>';
-  }).join('');
-  var channelSection=cards?'<div class="panel" style="margin-top:14px"><div class="panel-title" style="margin-bottom:12px">Каналы по тегам — что приносит деньги</div><div class="ch-grid">'+cards+'</div></div>':'';
-  var headerRight=S.fnCompare?cmpToggle:(mgrMs('fnMgrs','mgrA','dept')+cmpToggle);
-  return tagBlock+
-    '<div class="panel"><div class="fn2-head"><div class="fn2-title">Воронка первички</div>'+headerRight+'</div>'+body+'</div>'+
-    channelSection;
-}
-S.fnPendingMgrs=null;S.fnPendingMgrsB=null;
-function applyFnPending(){
-  if(S.fnPendingMgrs!==null){S.fnMgrs=S.fnPendingMgrs;S.fnPendingMgrs=null;}
-  if(S.fnPendingMgrsB!==null){S.fnMgrsB=S.fnPendingMgrsB;S.fnPendingMgrsB=null;}
-  _hideBd();
-}
-function closeMsIfOpen(e){
-  if(S.msOpen&&!e.target.closest('.ms')){applyFnPending();S.msOpen=null;S.msSearch='';render();}
-}
-window.fnToggleMs=function(e,id){
-  e.stopPropagation();
-  if(S.msOpen===id){applyFnPending();S.msOpen=null;S.msSearch='';_hideBd();render();}
-  else{
-    applyFnPending();
-    S.msOpen=id;
-    S.fnPendingMgrs=S.fnMgrs.slice();
-    S.fnPendingMgrsB=S.fnMgrsB.slice();
-    S.msSearch='';
-    _showBd();render();
-  }
-};
-window.fnClearTags=function(){S.fnTags=[];render();};
-window.fnMsSearch=function(v){S.msSearch=v;render();setTimeout(function(){var el=document.querySelector('.ms-drop.on .ms-search');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}},0);};
-window.fnToggleTag=function(t){var i=S.fnTags.indexOf(t);if(i>=0)S.fnTags.splice(i,1);else S.fnTags.push(t);render();};
-window.fnRemoveTag=function(t){var i=S.fnTags.indexOf(t);if(i>=0)S.fnTags.splice(i,1);render();};
-window.fnClearMgrs=function(key){
-  if(key==='fnMgrs')S.fnPendingMgrs=[];else S.fnPendingMgrsB=[];
-  render();
-};
-window.fnSelectDept=function(key,deptId){
-  var dept=DB.depts.find(function(x){return x.id===deptId;});
-  if(!dept)return;
-  var ids=dept.staff.map(function(m){return m.supaId;});
-  var arr=(key==='fnMgrs'?S.fnPendingMgrs:S.fnPendingMgrsB)||[];
-  var allIn=ids.every(function(id){return arr.indexOf(id)>=0;});
-  if(allIn){arr=arr.filter(function(id){return ids.indexOf(id)<0;});}
-  else{ids.forEach(function(id){if(arr.indexOf(id)<0)arr.push(id);});}
-  if(key==='fnMgrs')S.fnPendingMgrs=arr;else S.fnPendingMgrsB=arr;
-  render();
-};
-window.fnToggleMgr=function(key,id){
-  var arr=(key==='fnMgrs'?S.fnPendingMgrs:S.fnPendingMgrsB)||[];
-  var i=arr.indexOf(id);if(i>=0)arr.splice(i,1);else arr.push(id);
-  if(key==='fnMgrs')S.fnPendingMgrs=arr;else S.fnPendingMgrsB=arr;
-  render();
-};
-window.fnRemoveMgr=function(key,id){var arr=S[key];var i=arr.indexOf(id);if(i>=0)arr.splice(i,1);S.fnPendingMgrs=null;S.fnPendingMgrsB=null;render();};
-window.fnApplyMgrs=function(){applyFnPending();S.msOpen=null;render();};
-window.toggleFnCompare=function(){applyFnPending();S.fnCompare=!S.fnCompare;S.msOpen=null;render();};
-document.addEventListener('click',function(e){if(S.msOpen&&e.target&&e.target.closest&&!e.target.closest('.ms')){applyFnPending();S.msOpen=null;S.msSearch='';render();}});
 function renderDept(){
   var d=DB.depts.find(function(x){return x.id===S.dept;});
   if(!d){S.dept=null;render();return;}
-  var p2=pct(d.fact,d.plan),rrv=rrPct(d.fact,d.plan);
+  var p2=pct(d.fact,d.plan);
   var dPaying=payingInPeriod(d.clients);if(dPaying===null)dPaying=d.paying;
   var dArpu=dPaying>0?r(d.fact/dPaying):0;
   var _mb2='<div class="mbar-wrap"><div class="mbar"></div></div>';
   var _mbF2=function(p){return'<div class="mbar-wrap"><div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div></div>';};
-  var prevRRd=rrPct(S.prevByDept[d.id]||0,d.plan);
-  var deltaRRd=(S.prevByDept[d.id]||0)>0?Math.max(-99,Math.min(99,Math.round(rrv-prevRRd))):null;
   var prevArpuD=S.prevPayingByDept[d.id]>0?r((S.prevByDept[d.id]||0)/S.prevPayingByDept[d.id]):0;
   var deltaArpuD=prevArpuD>0?r(dArpu-prevArpuD):null;
   var prevPayingD=S.prevPayingByDept[d.id]||0;
@@ -1700,7 +1326,7 @@ function renderDept(){
   var activeStaffD=d.staff.filter(function(m){return!m.fired;}).length;
   var kpis=[
     {l:'Выручка',dlt:deltaTag(d.fact,d.prevFact),v:fmt(d.fact),s:'план '+fmt(d.plan)+' · '+p2+'%',bar:p2,raw:true,rev:'d:'+d.id},
-    {l:'Ранрейт',dlt:deltaRRd!==null?deltaAbs(Math.round(deltaRRd),'%'):'',v:rrv+'%',s:'<span class="neu">'+(rrv>=100?'в темпе':rrv>=80?'близко к плану':'отстаём')+'</span>',raw:true},
+    {l:'Встречи',dlt:d.meet.prevTotal>0?deltaAbs(d.meet.total-d.meet.prevTotal,'встр.'):'',v:d.meet.total,s:'<span class="neu">'+meetSub_(d.meet)+'</span>',raw:true},
     {l:'ARPU',dlt:deltaArpuD!==null?deltaAbsCurrency(deltaArpuD):'',v:dArpu?fmt(dArpu):'—',s:'<span class="neu">платящий клиент</span>',raw:true},
     {l:'Платящих',dlt:deltaPayingD!==null?deltaAbs(deltaPayingD,'клиента'):'',v:dPaying,s:'<span class="neu">из '+d.clients.length+' в портфеле</span>',raw:true},
     {l:'Сотрудников',dlt:deltaAbs(deltaStaffD,'чел.'),v:activeStaffD,s:'<span class="neu">в отделе</span>',raw:true},
@@ -1715,14 +1341,14 @@ function renderDept(){
   var ct='';
   if(S.tab==='staff'){
     var staff=[].concat(d.staff);
-    staff.forEach(function(m){m._p=pct(m.fact,m.plan);m._r=rrPct(m.fact,m.plan);});
+    staff.forEach(function(m){m._p=pct(m.fact,m.plan);});
     staff.sort(function(a,b){
       var k=S.staffSortKey,va,vb;
-      if(k==='name'){va=a.name;vb=b.name;}else if(k==='pct'){va=a._p;vb=b._p;}else if(k==='rr'){va=a._r;vb=b._r;}else{va=a[k]||0;vb=b[k]||0;}
+      if(k==='name'){va=a.name;vb=b.name;}else if(k==='pct'){va=a._p;vb=b._p;}else{va=a[k]||0;vb=b[k]||0;}
       if(typeof va==='string')return S.staffSortDir*va.localeCompare(vb);
       return S.staffSortDir*(va-vb);
     });
-    var cols=[['name','Сотрудник',''],['fact','Факт','r'],['plan','План','r'],['pct','%','r'],['rr','Ранрейт','r'],['minutes','Минут','r'],['clients','Клиентов','r']];
+    var cols=[['name','Сотрудник',''],['fact','Факт','r'],['plan','План','r'],['pct','%','r'],['meet','Встречи','r'],['minutes','Минут','r'],['clients','Клиентов','r']];
     var th=cols.map(function(c){var a=S.staffSortKey===c[0];return'<th class="'+(c[2])+(a?' sorted':'')+'" onclick="sortStaff(\''+c[0]+'\')">'+c[1]+si(a,S.staffSortDir)+'</th>';}).join('')+'<th class="r">Δ период</th>';
     var rows=staff.length?staff.map(function(m){
       var c3=grad(m._p);
@@ -1732,7 +1358,7 @@ function renderDept(){
         '<td class="r strong num" style="color:var(--text)"'+revAttr('e:'+m.supaId)+'>'+fmt(m.fact)+'</td>'+
         '<td class="r muted num">'+fmt(m.plan)+'</td>'+
         '<td class="r"><span style="color:'+c3+';font-weight:600" class="num">'+m._p+'%</span><div class="inbar"><div class="inbar-f" style="width:'+Math.min(m._p,100)+'%;background:'+c3+'"></div></div></td>'+
-        '<td class="r"><span style="color:'+grad(m._r)+'" class="num">'+m._r+'%</span></td>'+
+        '<td class="r muted num" title="'+m.meetPrim+' первичных · '+m.meetRep+' повторных">'+m.meet+'</td>'+
         '<td class="r muted num">'+fmtNum(m.minutes)+'</td>'+
         '<td class="r muted num">'+m.clients+' <span style="color:var(--accent);font-size:10px">→</span></td>'+
         '<td class="r">'+deltaTag(m.fact,m.prevFact)+'</td>'+
@@ -1743,14 +1369,15 @@ function renderDept(){
   setApp('<div class="topbar"><div class="nav-left"><button class="back-btn" onclick="goUp()">‹ Дашборд</button><span class="crumb-title">'+esc(d.name)+'</span><button class="btn sm ghost" onclick="archiveDept(\''+d.id+'\')" style="margin-left:4px">В архив</button></div>'+calTrigger()+'</div><div class="dept-kpi k6">'+kH+'</div>'+tabs+ct);
 }
 /* ═══ EMPLOYEE VIEW ═══ */
-window.sortCli=function(k){if(S.cliSortKey===k)S.cliSortDir*=-1;else{S.cliSortKey=k;S.cliSortDir=1;}render();};
+window.sortCli=function(k){if(S.cliSortKey===k)S.cliSortDir*=-1;else{S.cliSortKey=k;S.cliSortDir=(k==='name'||k==='expiry')?1:-1;}render();};
 function renderEmpView(){
   var emp=RAW.employees.find(function(e){return e.id===S.empView;});
   if(!emp){S.empView=null;render();return;}
   var d=DB.depts.find(function(x){return x.id===S.dept;});
   var dealAgg=S.dealsByEmp[S.empView]||{fact:0,comm:0,count:0};
   var plan=S.planByEmp[S.empView]||0;
-  var mp=pct(dealAgg.fact,plan),mr=rrPct(dealAgg.fact,plan);
+  var mp=pct(dealAgg.fact,plan);
+  var em=meetAgg_(function(x){return x.employee_id===S.empView;});
   var empOrg=S.dealsByEmpOrg[S.empView]||{};
   var cliByOrg={};RAW.clients.forEach(function(c){cliByOrg[c.platform_org_id]=c;});
   var portfolioOrgs={};
@@ -1777,8 +1404,6 @@ function renderEmpView(){
   var _mbF3=function(p){return'<div class="mbar-wrap"><div class="mbar"><div class="mbar-fill" style="width:'+Math.min(p,100)+'%;background:'+grad(p)+'"></div></div></div>';};
   var _lbl3=function(txt,dlt){return'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><span class="kl" style="margin:0">'+txt+'</span>'+(dlt||'')+'</div>';};
   var prevFactE=S.prevByEmp[S.empView]||0;
-  var prevRRe=rrPct(prevFactE,plan);
-  var deltaRRe=prevFactE>0?Math.max(-99,Math.min(99,Math.round(mr-prevRRe))):null;
   var prevPayingE=S.prevPayingByEmp&&S.prevPayingByEmp[S.empView]||0;
   var prevArpuE=prevPayingE>0?r(prevFactE/prevPayingE):0;
   var deltaArpuE=prevArpuE>0?r(empArpu-prevArpuE):null;
@@ -1786,7 +1411,7 @@ function renderEmpView(){
   var empMin=minutesOfUser(emp.platform_user_id,S.periodStats),empMinPrev=minutesOfUser(emp.platform_user_id,S.prevPeriodStats);
   var kH=[
     '<div class="kcard">'+_lbl3('Выручка',deltaTag(dealAgg.fact,prevFactE))+'<div class="kv num"'+revAttr('e:'+S.empView)+'>'+fmt(dealAgg.fact)+'</div><div class="ks"><span class="neu">план '+fmt(plan)+' · '+mp+'%</span></div>'+_mbF3(mp)+'</div>',
-    '<div class="kcard">'+_lbl3('Ранрейт',deltaRRe!==null?deltaAbs(Math.round(deltaRRe),'%'):'')+'<div class="kv num">'+mr+'%</div><div class="ks"><span class="neu">'+(mr>=100?'в темпе':mr>=80?'близко к плану':'отстаём')+'</span></div>'+_mb3+'</div>',
+    '<div class="kcard">'+_lbl3('Встречи',em.prevTotal>0?deltaAbs(em.total-em.prevTotal,'встр.'):'')+'<div class="kv num">'+em.total+'</div><div class="ks"><span class="neu">'+meetSub_(em)+'</span></div>'+_mb3+'</div>',
     '<div class="kcard">'+_lbl3('ARPU',deltaArpuE!==null?deltaAbsCurrency(deltaArpuE):'')+'<div class="kv num">'+(empArpu?fmt(empArpu):'—')+'</div><div class="ks"><span class="neu">платящий клиент</span></div>'+_mb3+'</div>',
     '<div class="kcard">'+_lbl3('Платящих',deltaPayingE!==null?deltaAbs(deltaPayingE,'клиента'):'')+'<div class="kv num">'+empPaying+'</div><div class="ks"><span class="neu">из '+portfolioCount+' в портфеле</span></div>'+_mb3+'</div>',
     '<div class="kcard">'+_lbl3('Скручено минут',deltaTag(empMin.sum,empMinPrev.sum))+'<div class="kv num">'+fmtMin(empMin.sum)+'</div><div class="ks"><span class="neu">у '+empMin.n+' из '+portfolioCount+' клиентов</span></div>'+_mb3+'</div>',
@@ -1849,251 +1474,441 @@ function renderEmpView(){
     chartHtml+
     '<div class="panel"><div class="panel-title">Клиенты ('+myClients.length+')</div><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>'+archCliBlock+'</div>');
 }
-/* ═══ ВОРОНКА (менеджерская матрица + каналы по тегам) ═══
-   Модель — mockup voronka_mockup.html, согласованный с Ильёй: строки-метрики,
-   менеджеры-столбцы, колонка "Итого". "Распределено лидов" — это просто
-   S.amoLeads.length у менеджера (без status_id), остальные строки (кроме
-   Демо/Счёт, которых в матрице по мокапу нет) — из buildFunnelCounts. */
-function vDeptStaff_(){
-  if(S.vDept==='all')return DB.depts.reduce(function(a,d){return a.concat(d.staff);},[]);
-  var d=DB.depts.find(function(x){return x.id===S.vDept;});
-  return d?d.staff:[];
+/* ═══ ВСТРЕЧИ ═══
+   Лог в таблице meetings. Результат первичной встречи не хранится, а считается:
+   оплата (deals, payment) по привязанной организации в течение MEET_LATE дней
+   после встречи → «Оплата»; MEET_WINDOW дней ждём → «В работе»; дальше → «Нет оплаты».
+   Оплата пришла позже окна, но в пределах MEET_LATE — всё равно «Оплата» с пометкой «поздняя».
+   Повторные встречи результата не имеют — только тема и следующий шаг.
+   Встреча с компанией, которой ещё нет на платформе, хранится с platform_org_id=null
+   и привязывается: (1) при занесении первой оплаты — дашборд сам предложит встречу,
+   (2) вручную кнопкой «Привязать». */
+var MEET_WINDOW=21, MEET_LATE=90;
+var TOPICS={tech:'Тех. вопросы',upsell:'Апсейл',results:'Результаты',other:'Другое'};
+function isoAddDays(iso,n){var p=iso.split('-').map(Number);return dateISO(new Date(p[0],p[1]-1,p[2]+n));}
+function isoDiff(a,b){var pa=a.split('-').map(Number),pb=b.split('-').map(Number);return Math.round((new Date(pb[0],pb[1]-1,pb[2])-new Date(pa[0],pa[1]-1,pa[2]))/864e5);}
+function fmtDT(ts){if(!ts)return'—';var d=new Date(ts);if(isNaN(d))return'—';return d.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+function safeUrl(u){return /^https?:\/\//i.test(String(u||''))?u:'#';}
+var _orgIdx=null,_orgIdxSrc=null;
+function orgById_(id){
+  if(_orgIdxSrc!==RAW.allClients){_orgIdx={};(RAW.allClients||[]).forEach(function(c){_orgIdx[c.platform_org_id]=c;});_orgIdxSrc=RAW.allClients;}
+  return id?(_orgIdx[id]||null):null;
 }
-function vDeptLeads_(){return leadsForMgrs_([],vDeptStaff_());}
-function tagGroupTags_(g){return(RAW.tagGroupMembers||[]).filter(function(m){return m.group_id===g.id;}).map(function(m){return m.tag;});}
-function leadsHaveAnyTag_(l,tagSet){var tags=(l.tags||'').split(',').map(function(t){return t.trim();});return tags.some(function(t){return tagSet.indexOf(t)>=0;});}
-function renderVoronka(){
-  var deptPills='<button class="fn2-tag'+(S.vDept==='all'?' on':'')+'" onclick="setVDept(\'all\')">Вся компания</button>'+
-    DB.depts.map(function(d){return'<button class="fn2-tag'+(S.vDept===d.id?' on':'')+'" onclick="setVDept(\''+d.id+'\')">'+esc(d.name)+'</button>';}).join('');
-  var staffList=vDeptStaff_();
-  var deptLeads=leadsForMgrs_([],staffList);
-  var hasAmo=S.amoLeads.length>0;
-  var activeGroup=S.vChGroup?(RAW.tagGroups||[]).find(function(g){return g.id===S.vChGroup;}):null;
-  var chTags=activeGroup?tagGroupTags_(activeGroup):null;
-  var mgrTblHtml='';
-  /* "Вся компания" — колонки это ОТДЕЛЫ (сравнение конверсий между отделами).
-     Конкретный отдел выбран — колонки это менеджеры этого отдела (как раньше). */
-  var isAllView=S.vDept==='all';
-  var cols=isAllView?DB.depts.map(function(d){return{name:d.name,staff:d.staff,deptId:d.id};}):staffList.map(function(m){return{name:m.name,staff:[m]};});
-  if(!hasAmo){
-    mgrTblHtml='<div class="panel"><div class="fn-empty">🔒 Запусти <code>amoSyncAll()</code> в GAS — данные появятся здесь.</div></div>';
-  } else if(!cols.length){
-    mgrTblHtml='<div class="panel"><div class="empty-state">Нет данных для отображения.</div></div>';
-  } else {
-    /* ВСЁ в этой таблице — факт AmoCRM за выбранный период: лид перешёл
-       в этап (buildStageFactCounts_ по S.amoEvents) именно в эти даты,
-       независимо от того, когда лид создан. С БЭКФИЛЛОМ внутри периода:
-       если лид в периоде дошёл до этапа X, но не имеет своего события для
-       более раннего этапа (проскочил стадию в CRM), более ранний этап ему
-       всё равно засчитывается — иначе "Проведено" может быть больше
-       "Назначено", что бессмысленно. Благодаря этому CR% (прямое деление
-       соседних строк) почти всегда ≤100%; единственный оставшийся случай,
-       когда может быть выше — прошлый этап случился в ДРУГОМ периоде
-       (например, встреча в июне, оплата в июле: в июле у лида есть только
-       событие "оплата", бэкфилл в июле дотягивает ему и "встречу", но она
-       не попадёт в счётчик "Назначено" ИЮНЯ, откуда реально была — так что
-       сумма по месяцам не обязана биться с "за всё время").
-       Выручка — цена amo-лидов, получивших оплату в периоде (те же лиды,
-       что и в счётчике "Оплат получено"); допродажи и прочие deals сюда
-       не подмешиваются.
-       Если включён фильтр по тегам канала (chTags) — события ограничены
-       лидами из когорты периода с этим тегом (тег известен только у лидов,
-       загруженных в S.amoLeads, т.е. созданных в периоде) — осознанное
-       ограничение, не баг. */
-    var viewCols=cols.map(function(col){
-      var leads=leadsForMgrs_([],col.staff);
-      if(chTags)leads=leads.filter(function(l){return leadsHaveAnyTag_(l,chTags);});
-      var amoIds=deptAuids_(col.staff);
-      var events=S.amoEvents;
-      if(chTags){
-        var tagLeadIds={};leads.forEach(function(l){tagLeadIds[l.id]=1;});
-        events=events.filter(function(e){return tagLeadIds.hasOwnProperty(e.lead_id);});
-      }
-      var fc=buildStageFactCounts_(events,S.amoLeadOwners,amoIds);
-      var paidLeadIds=Object.keys(fc.seen.paid);
-      var revenue=paidLeadIds.reduce(function(a,id){return a+(Number(S.amoLeadPrices[id])||0);},0);
-      return{name:col.name,dist:leads.length,
-        qual:fc.counts.qual||0,mset:fc.counts.mset||0,mdone:fc.counts.mdone||0,paid:fc.counts.paid||0,
-        revenue:revenue};
+function empNameById_(id){var e=RAW.employees.find(function(x){return x.id===id;});return e?(e.display_name||e.name):'—';}
+function deptNameById_(id){var d=RAW.depts.find(function(x){return x.id===id;});return d?d.name:'—';}
+function meetOrgName(m){var c=orgById_(m.platform_org_id);return(c&&c.company_name)||m.company_name||'—';}
+/* нормализация названий: без ООО/ИП/кавычек — для подсказок при привязке */
+var LEGAL_=['ооо','оао','зао','пао','ао','ип','нко','ано','llc','ltd','inc'];
+function normName_(s){return String(s||'').toLowerCase().replace(/ё/g,'е').replace(/[«»"'`.,()\-–—_/\\]/g,' ').split(/\s+/).filter(function(w){return w&&LEGAL_.indexOf(w)<0;}).join(' ');}
+function nameScore_(a,b){
+  if(!a||!b)return 0;
+  if(a===b)return 100;
+  if(a.indexOf(b)>=0||b.indexOf(a)>=0)return 60;
+  var tb=b.split(' '),hit=0;a.split(' ').forEach(function(w){if(w.length>2&&tb.indexOf(w)>=0)hit++;});
+  return hit*15;
+}
+/* встречи текущего + предыдущего периода и оплаты по их организациям */
+function loadMeetings(){
+  var pr=prevRange(),from=dateISO(pr.from),to=dateISO(S.rangeTo);
+  return sbGetAll('meetings?select=*&held_at=gte.'+from+'&held_at=lte.'+to+'&order=held_at.desc,id').then(function(rows){
+    rows=rows||[];
+    var orgs={};rows.forEach(function(m){if(m.platform_org_id&&m.meeting_type==='primary')orgs[m.platform_org_id]=1;});
+    var keys=Object.keys(orgs);
+    if(!keys.length)return function(){S.meetings=rows;S.meetPays={};S.meetErr=null;};
+    var chunks=[];for(var i=0;i<keys.length;i+=60)chunks.push(keys.slice(i,i+60));
+    return Promise.all(chunks.map(function(c){
+      return sbGetAll('deals?select=id,platform_org_id,deal_date,amount,event_type&event_type=eq.payment&platform_org_id=in.('+c.map(encodeURIComponent).join(',')+')&deal_date=gte.'+from+'&order=deal_date.asc,id');
+    })).then(function(res){
+      var pays={};[].concat.apply([],res).forEach(function(d){(pays[d.platform_org_id]=pays[d.platform_org_id]||[]).push(d);});
+      return function(){S.meetings=rows;S.meetPays=pays;S.meetErr=null;};
     });
-    function sumF(k){return viewCols.reduce(function(a,c){return a+c[k];},0);}
-    var tot={dist:sumF('dist'),qual:sumF('qual'),mset:sumF('mset'),mdone:sumF('mdone'),paid:sumF('paid'),revenue:sumF('revenue')};
-    function pf(f,p){return p>0?(f/p*100).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+'%':'—';}
-    var headCells='<th>Метрика</th><th class="mtx-total-h">Итого</th>'+viewCols.map(function(c){return'<th>'+esc(c.name)+'</th>';}).join('');
-    function metricRow(label,totCellHtml,fn,cls){return'<tr class="'+(cls||'')+'"><td class="lbl">'+label+'</td><td class="mtx-total">'+totCellHtml+'</td>'+viewCols.map(function(c){return'<td>'+fn(c)+'</td>';}).join('')+'</tr>';}
-    var bodyRows=
-      metricRow('Распределено лидов',fmtNum(tot.dist),function(c){return fmtNum(c.dist);},'mtx-key')+
-      metricRow('CR в квал. лида',pf(tot.qual,tot.dist),function(c){return pf(c.qual,c.dist);})+
-      metricRow('Лидов квалифицированно',fmtNum(tot.qual),function(c){return fmtNum(c.qual);},'mtx-key')+
-      metricRow('CR во встречу',pf(tot.mset,tot.qual),function(c){return pf(c.mset,c.qual);})+
-      metricRow('Назначено встреч',fmtNum(tot.mset),function(c){return fmtNum(c.mset);},'mtx-key')+
-      metricRow('CR в проведённую',pf(tot.mdone,tot.mset),function(c){return pf(c.mdone,c.mset);})+
-      metricRow('Проведено встреч',fmtNum(tot.mdone),function(c){return fmtNum(c.mdone);},'mtx-key')+
-      metricRow('CR в оплату',pf(tot.paid,tot.mdone),function(c){return pf(c.paid,c.mdone);})+
-      metricRow('Оплат получено',fmtNum(tot.paid),function(c){return fmtNum(c.paid);},'mtx-key')+
-      metricRow('Средний чек',tot.paid>0?fmt(Math.round(tot.revenue/tot.paid)):'—',function(c){return c.paid>0?fmt(Math.round(c.revenue/c.paid)):'—';})+
-      metricRow('Выручка',fmt(tot.revenue),function(c){return fmt(c.revenue);},'mtx-key')+
-      '<tr class="mtx-spacer"><td colspan="'+(viewCols.length+2)+'"></td></tr>'+
-      metricRow('CR лид — оплата',pf(tot.paid,tot.dist),function(c){return pf(c.paid,c.dist);},'mtx-cr')+
-      metricRow('CR встреча — оплата',pf(tot.paid,tot.mdone),function(c){return pf(c.paid,c.mdone);},'mtx-cr');
-    var filterChip=activeGroup?'<span class="fn2-tag on" style="cursor:pointer" onclick="setVChGroup(null)">'+esc(activeGroup.name)+' ✕</span>':'';
-    mgrTblHtml='<div class="panel"><div class="adm-head" style="margin-bottom:12px"><div class="panel-title" style="margin:0">'+(isAllView?'Отделы · вся компания':'Менеджеры')+'</div>'+filterChip+'</div>'+
-      '<div class="mtx-wrap"><table class="mtx-tbl"><thead><tr>'+headCells+'</tr></thead><tbody>'+bodyRows+'</tbody></table></div>'+
-      '<div style="font-size:11px;color:var(--text-3);margin-top:10px;line-height:1.5">Все числа и CR% — факт AmoCRM за период, с бэкфиллом внутри периода (лид дошёл до этапа, но не имеет своего события для более раннего — более ранний всё равно засчитан, иначе "Проведено" может быть больше "Назначено"). Отдел — по текущему ответственному. Выручка/Средний чек — цена amo-лидов из «Первички», получивших оплату в периоде; допродажи и прочие deals сюда не входят.</div>'+
-    '</div>';
-  }
-  var allTagCounts=getTagCounts_(deptLeads);
-  var assignedTags={};
-  (RAW.tagGroups||[]).forEach(function(g){tagGroupTags_(g).forEach(function(t){assignedTags[t]=1;});});
-  var groupCards=(RAW.tagGroups||[]).map(function(g){
-    var tags=tagGroupTags_(g);
-    var gLeads=deptLeads.filter(function(l){return leadsHaveAnyTag_(l,tags);});
-    var paid=gLeads.filter(function(l){return l.status_id===142;});
-    var revenue=paid.reduce(function(a,l){return a+(Number(l.price)||0);},0);
-    var conv=gLeads.length>0?r(paid.length/gLeads.length*100):0;
-    return{id:g.id,name:g.name,leads:gLeads.length,paid:paid.length,revenue:revenue,conv:conv,on:S.vChGroup===g.id};
-  }).sort(function(a,b){return b.revenue-a.revenue;});
-  var groupCardsHtml=groupCards.map(function(g){
-    return'<div class="ch-card'+(g.on?' on':'')+'" onclick="setVChGroup(\''+g.id+'\')">'+
-      '<div class="ch-card-head"><div class="ch-name" style="margin-bottom:0">'+esc(g.name)+'</div>'+
-        '<div class="ch-actions"><button class="ch-icon-btn" title="Редактировать" onclick="event.stopPropagation();openTagGroupModal(\''+g.id+'\')">'+ICO.edit+'</button></div>'+
-      '</div>'+
-      '<div class="ch-stat"><span>Лидов</span><b>'+fmtNum(g.leads)+'</b></div>'+
-      '<div class="ch-stat"><span>Оплат</span><b>'+fmtNum(g.paid)+'</b></div>'+
-      '<div class="ch-stat"><span>Выручка</span><b>'+fmtK_(g.revenue)+'</b></div>'+
-      '<div class="ch-conv" style="color:'+grad(g.conv*3.3)+'">'+g.conv+'%</div>'+
-      '<div style="font-size:10px;color:var(--text-3)">конверсия</div>'+
-    '</div>';
-  }).join('');
-  var ungroupedTags=Object.keys(allTagCounts).filter(function(t){return!assignedTags[t];}).sort(function(a,b){return allTagCounts[b]-allTagCounts[a];});
-  var ungroupedChips=ungroupedTags.map(function(t){return'<span class="ungrouped-chip">'+esc(t)+'<span class="tc">'+allTagCounts[t]+'</span></span>';}).join('');
-  var channelsPanel='<div class="panel">'+
-    '<div class="adm-head" style="margin-bottom:12px"><div class="panel-title" style="margin:0">Каналы</div>'+
-      '<button class="btn primary sm" onclick="openTagGroupModal()">+ Группа</button></div>'+
-    '<div class="ch-grid">'+(groupCardsHtml||'<div class="empty-state">Пока нет групп тегов. Нажми «+ Группа», чтобы собрать теги в канал.</div>')+'</div>'+
-    (ungroupedTags.length?('<div class="arch-toggle'+(S.vUngroupedOpen?' open':'')+'" onclick="toggleVUngrouped()"><span class="arr">›</span> Без группы ('+ungroupedTags.length+')</div><div class="arch-block'+(S.vUngroupedOpen?' open':'')+'">'+ungroupedChips+'</div>'):'')+
-  '</div>';
-  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="a">AI</span> · Воронка</span></div>'+calTrigger()+'</div>'+
-    (S.loadErr?'<div class="err-banner">⚠ '+esc(S.loadErr)+'</div>':'')+
-    '<div class="fn2-tags">'+deptPills+'</div>'+mgrTblHtml+channelsPanel);
-}
-window.setVDept=function(id){S.vDept=id;S.vChGroup=null;render();};
-window.setVChGroup=function(id){S.vChGroup=(S.vChGroup===id)?null:id;render();};
-window.toggleVUngrouped=function(){S.vUngroupedOpen=!S.vUngroupedOpen;render();};
-/* ═══ группы тегов (каналы) — CRUD на amo_tag_groups / amo_tag_group_members ═══
-   ВНИМАНИЕ: схема этих двух таблиц не была подтверждена напрямую в Supabase —
-   предполагается amo_tag_groups(id,name,created_at) и
-   amo_tag_group_members(id,group_id,tag). Если названия колонок другие —
-   поправь тут и в loadData(). */
-window.openTagGroupModal=function(groupId){
-  var isEdit=groupId!==undefined&&groupId!==null;
-  var g=isEdit?(RAW.tagGroups||[]).find(function(x){return x.id===groupId;}):null;
-  var dLeads=vDeptLeads_();
-  var allTagCounts=getTagCounts_(dLeads);
-  var otherGroups={};
-  (RAW.tagGroups||[]).forEach(function(gg){
-    if(isEdit&&gg.id===groupId)return;
-    tagGroupTags_(gg).forEach(function(t){(otherGroups[t]=otherGroups[t]||[]).push(gg.name);});
+  }).catch(function(e){
+    console.error('loadMeetings',e);
+    return function(){S.meetings=[];S.meetPays={};S.meetErr=/meetings/.test(e.message)?'Таблица встреч не найдена — запусти SQL-миграцию migration_v1.sql':e.message;};
   });
-  var myTags=isEdit?tagGroupTags_(g):[];
-  var tagKeys=Object.keys(allTagCounts).sort(function(a,b){return allTagCounts[b]-allTagCounts[a];});
-  var rows=tagKeys.map(function(t){
-    var checked=myTags.indexOf(t)>=0;
-    var elsewhere=otherGroups[t];
-    return'<label class="tag-check"><input type="checkbox" data-tag="'+esc(t)+'" '+(checked?'checked':'')+'><span class="nm">'+esc(t)+'</span><span class="cnt">'+allTagCounts[t]+'</span>'+(elsewhere?'<span class="also-in">также в «'+esc(elsewhere.join('», «'))+'»</span>':'')+'</label>';
-  }).join('');
-  var body='<div class="modal-sub">Тег может входить сразу в несколько групп — при выборе он просто прибавится к обеим.</div>'+
-    '<div class="field"><label>Название группы</label><input id="tgm-name" placeholder="например, Партнёрка" value="'+(isEdit?esc(g.name):'')+'"></div>'+
-    '<div class="tag-check-list">'+(rows||'<div class="ms-empty">Тегов не найдено в текущем отделе</div>')+'</div>'+
-    (isEdit?'<div style="margin-bottom:4px"><button class="btn sm" style="color:var(--red)" onclick="deleteTagGroup(\''+groupId+'\')">Удалить группу</button></div>':'');
-  openModal(isEdit?'Группа тегов':'Новая группа тегов',body,function(){saveTagGroup(isEdit?groupId:null);});
-};
-window.saveTagGroup=function(groupId){
-  var name=(document.getElementById('tgm-name').value||'').trim();
-  var checked=[].slice.call(document.querySelectorAll('.tag-check input:checked')).map(function(i){return i.dataset.tag;});
-  if(!name||!checked.length){alert('Впиши название и выбери хотя бы один тег');return;}
-  if(groupId){
-    sbPatch('amo_tag_groups','id=eq.'+groupId,{name:name})
-      .then(function(){return sbDelete('amo_tag_group_members','group_id=eq.'+groupId);})
-      .then(function(){return Promise.all(checked.map(function(t){return sbPost('amo_tag_group_members',{group_id:groupId,tag:t});}));})
-      .then(function(){closeModal();reloadTagGroups();});
-  } else {
-    sbPost('amo_tag_groups',{name:name}).then(function(res){
-      var ng=Array.isArray(res)?res[0]:res;
-      if(!ng||!ng.id){closeModal();return null;}
-      return Promise.all(checked.map(function(t){return sbPost('amo_tag_group_members',{group_id:ng.id,tag:t});}));
-    }).then(function(){closeModal();reloadTagGroups();});
-  }
-};
-window.deleteTagGroup=function(groupId){
-  closeModal();
-  openModal('Удалить группу?','<p style="font-size:13px;color:var(--text-2);line-height:1.7">Теги вернутся в «Без группы».</p>',function(){
-    closeModal();
-    sbDelete('amo_tag_group_members','group_id=eq.'+groupId)
-      .then(function(){return sbDelete('amo_tag_groups','id=eq.'+groupId);})
-      .then(reloadTagGroups);
-  });
-};
-/* ═══ РОП / НАСТРОЙКИ ═══ */
-function tgDays_(arr){var N=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];return(arr||[]).slice().sort(function(a,b){return a-b;}).map(function(d){return N[d-1]||d;}).join(', ')||'—';}
-function tgIntegrationBlock_(){
-  var its=RAW.tgIntegrations||[];
-  var list=its.length?its.map(function(it){
-    var dept=DB.depts.find(function(d){return d.id===it.dept_id;});
-    var deptName=dept?esc(dept.name):'(отдел удалён)';
-    var tm=(it.send_time||'19:00').slice(0,5);
-    var dotColor=it.enabled?'var(--green)':'var(--text-3)';
-    var dotTitle=it.enabled?'включено':'выключено';
-    return'<div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:0.5px solid var(--border-soft)">'+
-      '<label class="tg-sw" title="'+dotTitle+'"><input type="checkbox"'+(it.enabled?' checked':'')+' onchange="tgToggle(\''+it.id+'\',this.checked)"><span class="tg-sw-track"></span></label>'+
-      '<div style="flex:1;min-width:0">'+
-        '<div style="font-size:13px;font-weight:600;color:var(--text)">'+deptName+'</div>'+
-        '<div style="font-size:11px;color:var(--text-3);margin-top:2px">'+
-          tm+' МСК · '+tgDays_(it.send_days)+
-          ' <span style="font-family:monospace">'+esc(String(it.chat_id))+'</span>'+
-        '</div>'+
-      '</div>'+
-      '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">'+
-        '<div style="display:flex;align-items:center;gap:5px;padding:0 8px;height:32px;border:1px solid var(--border);border-radius:9px;background:var(--surface-2)">'+
-          '<span style="font-size:11px;color:var(--text-2)">Тимлид</span>'+
-          '<label class="tg-sw" style="margin:0"><input type="checkbox"'+(it.include_lead?' checked':'')+' onchange="tgToggleLead(\''+it.id+'\',this.checked)"><span class="tg-sw-track"></span></label>'+
-        '</div>'+
-        '<button class="btn sm" onclick="tgTest(\''+it.dept_id+'\',\''+esc(String(it.chat_id))+'\',this)">Тест</button>'+
-        '<button class="btn sm ghost" style="color:var(--red)" onclick="tgDelete(\''+it.id+'\')">Удалить</button>'+
-      '</div>'+
-    '</div>';
-  }).join(''):'<div style="padding:16px 0;font-size:12px;color:var(--text-3)">Нет подключённых чатов. Добавь @SashaSpendBot в чат отдела — он пришлёт ID.</div>';
-  return'<div class="panel">'+
-    '<div class="adm-head" style="margin-bottom:4px">'+
-      '<div>'+
-        '<div class="panel-title" style="margin:0">Интеграции · Telegram</div>'+
-        '<div style="font-size:12px;color:var(--text-3);margin-top:3px">Ежедневные отчёты по менеджерам через @SashaSpendBot</div>'+
-      '</div>'+
-      '<button class="btn primary" onclick="tgAddModal()">+ Подключить чат</button>'+
-    '</div>'+
-    list+
-  '</div>';
 }
-function amoMappingBlock_(){
-  if(!(S.amoUsers||[]).length)return'<div class="panel"><div class="panel-title">AmoCRM · Синхронизация</div><p style="font-size:12px;color:var(--text-3)">Запусти <code>amoSyncAll()</code> в GAS — список пользователей загрузится.</p></div>';
-  var nonFired=RAW.employees.filter(function(e){return!e.fired_at&&!e.is_archived;});
-  var mapped=0;
-  var rows=nonFired.map(function(emp){
-    var auid=S.empAmoMap[emp.id];
-    var u=auid?(S.amoUsers||[]).find(function(x){return x.amo_user_id===auid;}):null;
-    if(u)mapped++;
-    var status=u?'<span style="color:var(--green);font-size:12px">✓ '+esc(u.name)+'</span>':'<span style="color:var(--amber);font-size:12px">— не сопоставлен</span>';
-    return'<tr>'+
-      '<td><span class="strong">'+esc(emp.name)+'</span><div style="font-size:11px;color:var(--text-3)">'+esc(emp.email||'почта не указана')+'</div></td>'+
-      '<td>'+status+'</td>'+
-      '<td class="r"><button class="btn sm" onclick="syncEmpModal(\''+emp.id+'\')">✉ Настроить</button></td>'+
+function meetStatus(m){
+  if(m.meeting_type!=='primary')return{k:'repeat'};
+  var pays=m.platform_org_id?((S.meetPays||{})[m.platform_org_id]||[]):[];
+  var lim=isoAddDays(m.held_at,MEET_LATE);
+  var p=null;for(var i=0;i<pays.length;i++){if(pays[i].deal_date>=m.held_at&&pays[i].deal_date<=lim){p=pays[i];break;}}
+  if(p){var lag=isoDiff(m.held_at,p.deal_date);return{k:'won',pay:p,lag:lag,late:lag>MEET_WINDOW};}
+  var age=isoDiff(m.held_at,dateISO(TODAY));
+  if(age<=MEET_WINDOW)return{k:'wait',left:MEET_WINDOW-age};
+  return{k:'lost'};
+}
+function meetCount_(list){
+  var a={total:0,prim:0,rep:0,won:0,wait:0,lost:0,unlinked:0,rev:0};
+  list.forEach(function(m){
+    a.total++;
+    if(m.meeting_type!=='primary'){a.rep++;return;}
+    a.prim++;if(!m.platform_org_id)a.unlinked++;
+    var st=meetStatus(m);a[st.k]++;if(st.k==='won')a.rev+=Number(st.pay.amount)||0;
+  });
+  return a;
+}
+/* агрегат за выбранный период + число встреч в предыдущем (для дельты) */
+function meetAgg_(pred){
+  var f=dateISO(S.rangeFrom),t=dateISO(S.rangeTo),pr=prevRange(),pf=dateISO(pr.from),pt=dateISO(pr.to);
+  var cur=[],prevN=0;
+  (S.meetings||[]).forEach(function(m){
+    if(pred&&!pred(m))return;
+    if(m.held_at>=f&&m.held_at<=t)cur.push(m);
+    else if(m.held_at>=pf&&m.held_at<=pt)prevN++;
+  });
+  var a=meetCount_(cur);a.prevTotal=prevN;return a;
+}
+function meetSub_(a){return a.prim+' перв.'+(a.prim?' ('+a.won+' оплатили)':'')+' · '+a.rep+' повт.';}
+function meetBadge_(m){
+  var st=meetStatus(m);
+  if(st.k==='repeat')return'<span class="mbadge mb-neu">'+(m.topic?esc(TOPICS[m.topic]||m.topic):'Повторная')+'</span>';
+  if(st.k==='won')return'<span class="mbadge mb-won" title="Оплата '+esc(fmt(st.pay.amount))+' через '+st.lag+' дн.">Оплата · '+fmtD(st.pay.deal_date).substring(0,5)+(st.late?' · поздняя':'')+'</span>';
+  if(st.k==='wait')return'<span class="mbadge mb-wait">В работе · ещё '+st.left+' дн</span>';
+  return'<span class="mbadge mb-lost">Нет оплаты</span>';
+}
+/* ═══ ИСТОРИЯ ВСТРЕЧ (вкладка) ═══ */
+function meetFiltered_(){
+  var f=dateISO(S.rangeFrom),t=dateISO(S.rangeTo),q=(S.mSearch||'').trim().toLowerCase();
+  return(S.meetings||[]).filter(function(m){
+    if(m.held_at<f||m.held_at>t)return false;
+    if(S.mDept!=='all'&&m.dept_id!==S.mDept)return false;
+    if(S.mEmp!=='all'&&m.employee_id!==S.mEmp)return false;
+    if(S.mType!=='all'&&m.meeting_type!==S.mType)return false;
+    if(S.mStatus==='unlinked'){if(!(m.meeting_type==='primary'&&!m.platform_org_id))return false;}
+    else if(S.mStatus!=='all'&&meetStatus(m).k!==S.mStatus)return false;
+    if(q&&meetOrgName(m).toLowerCase().indexOf(q)<0&&String(m.company_name||'').toLowerCase().indexOf(q)<0)return false;
+    return true;
+  }).sort(function(a,b){if(a.held_at!==b.held_at)return a.held_at<b.held_at?1:-1;return String(a.created_at)<String(b.created_at)?1:-1;});
+}
+window.setMF=function(k,v){S[k]=v;S.mLimit=50;if(k==='mDept')S.mEmp='all';render();};
+window.setMSearch=function(v){S.mSearch=v;S.mLimit=50;render();setTimeout(function(){var el=document.getElementById('m-srch');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}},0);};
+window.moreMeetings=function(){S.mLimit+=50;render();};
+function renderMeetings(){
+  var list=meetFiltered_(),a=meetCount_(list);
+  var decided=a.won+a.lost,conv=decided?r(a.won/decided*100):0;
+  var kH=[
+    '<div class="ck"><div class="ck-l">Проведено встреч</div><div class="ck-v num">'+a.total+'</div><div class="ck-s">'+a.prim+' первичных · '+a.rep+' повторных</div></div>',
+    '<div class="ck"><div class="ck-l">Оплатили после встречи</div><div class="ck-v num">'+a.won+'</div><div class="ck-s">'+(decided?'конверсия '+conv+'%':'пока нечего считать')+(a.wait?' · '+a.wait+' в работе':'')+'</div></div>',
+    '<div class="ck"><div class="ck-l">Выручка с первичных</div><div class="ck-v num">'+fmt(a.rev)+'</div><div class="ck-s">первая оплата до '+MEET_LATE+' дн. после встречи</div></div>',
+    '<div class="ck"><div class="ck-l">Без организации</div><div class="ck-v num"'+(a.unlinked?' style="color:var(--amber)"':'')+'>'+a.unlinked+'</div><div class="ck-s">компании нет на платформе</div></div>'
+  ].join('');
+  var deptOpts='<option value="all">Все отделы</option>'+RAW.depts.map(function(d){return'<option value="'+d.id+'"'+(S.mDept===d.id?' selected':'')+'>'+esc(d.name)+(d.is_archived?' (архив)':'')+'</option>';}).join('');
+  var emps=RAW.employees.filter(function(e){return S.mDept==='all'||e.dept_id===S.mDept;}).slice().sort(function(x,y){return(x.display_name||x.name).localeCompare(y.display_name||y.name);});
+  var empOpts='<option value="all">Все сотрудники</option>'+emps.map(function(e){return'<option value="'+e.id+'"'+(S.mEmp===e.id?' selected':'')+'>'+esc(e.display_name||e.name)+(e.fired_at?' (уволен)':'')+'</option>';}).join('');
+  var types=[['all','Все'],['primary','Первичные'],['repeat','Повторные']].map(function(t){return'<button class="pill'+(S.mType===t[0]?' on':'')+'" onclick="setMF(\'mType\',\''+t[0]+'\')">'+t[1]+'</button>';}).join('');
+  var stOpts=[['all','Любой результат'],['won','Оплата'],['wait','В работе'],['lost','Нет оплаты'],['unlinked','Без организации']].map(function(s){return'<option value="'+s[0]+'"'+(S.mStatus===s[0]?' selected':'')+'>'+s[1]+'</option>';}).join('');
+  var filters='<div class="m-filters">'+
+    '<select class="sel" onchange="setMF(\'mDept\',this.value)">'+deptOpts+'</select>'+
+    '<select class="sel" onchange="setMF(\'mEmp\',this.value)">'+empOpts+'</select>'+
+    '<div class="pill-row">'+types+'</div>'+
+    '<select class="sel" onchange="setMF(\'mStatus\',this.value)">'+stOpts+'</select>'+
+    '<input id="m-srch" class="search-inp" placeholder="Поиск по компании…" value="'+esc(S.mSearch)+'" oninput="setMSearch(this.value)">'+
+    '<span style="flex:1"></span><button class="btn primary" onclick="exportMeetings()">↓ XLSX</button>'+
+  '</div>';
+  var shown=list.slice(0,S.mLimit);
+  var rows=shown.map(function(m){
+    var unl=(m.meeting_type==='primary'&&!m.platform_org_id)?'<span class="unl">нет на платформе</span><button class="lnk-btn" onclick="event.stopPropagation();linkMeetingModal(\''+m.id+'\')">Привязать</button>':'';
+    var rec=m.recording_url?'<a class="rec-a" href="'+esc(safeUrl(m.recording_url))+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Открыть запись">'+ICO.link+'</a>':'<span class="muted">—</span>';
+    return'<tr class="clickable" onclick="openMeeting(\''+m.id+'\')">'+
+      '<td class="muted num">'+fmtD(m.held_at)+'</td>'+
+      '<td><span class="strong">'+esc(empNameById_(m.employee_id))+'</span><div style="font-size:11px;color:var(--text-3)">'+esc(deptNameById_(m.dept_id))+'</div></td>'+
+      '<td>'+esc(meetOrgName(m))+unl+'</td>'+
+      '<td class="muted">'+(m.meeting_type==='primary'?'Первичная':'Повторная')+'</td>'+
+      '<td>'+rec+'</td>'+
+      '<td class="r">'+meetBadge_(m)+'</td>'+
     '</tr>';
   }).join('');
-  return'<div class="panel"><div class="adm-head" style="margin-bottom:14px">'+
-    '<div class="panel-title" style="margin:0">AmoCRM · Синхронизация</div>'+
-    '<span style="font-size:11px;color:var(--text-3)">'+mapped+' из '+nonFired.length+' сопоставлено · ключ = email</span></div>'+
-    '<table class="tbl"><thead><tr><th>Сотрудник</th><th>Пользователь Amo</th><th class="r"></th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  var empty=S.meetErr?'<div class="err-banner">⚠ '+esc(S.meetErr)+'</div>':'<div class="empty-state">Встреч за период нет.<br>Добавь первую кнопкой <b>+ Встреча</b> сверху.</div>';
+  var table=shown.length?'<table class="tbl"><thead><tr><th>Дата</th><th>Сотрудник</th><th>Компания</th><th>Тип</th><th>Запись</th><th class="r">Результат</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+    (list.length>shown.length?'<div style="text-align:center;margin-top:14px"><button class="btn" onclick="moreMeetings()">Показать ещё ('+(list.length-shown.length)+')</button></div>':''):empty;
+  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="a">AI</span> · Встречи</span></div>'+calTrigger()+'</div>'+
+    (S.loadErr?'<div class="err-banner">⚠ '+esc(S.loadErr)+'</div>':'')+
+    '<div class="ckpi" style="grid-template-columns:repeat(4,1fr)">'+kH+'</div>'+
+    '<div class="panel">'+filters+table+'</div>');
 }
+window.exportMeetings=function(){
+  var list=meetFiltered_();
+  if(!list.length){toast('Нет встреч для выгрузки');return;}
+  var rows=list.map(function(m){var st=meetStatus(m);return{
+    'Дата':m.held_at,'Тип':m.meeting_type==='primary'?'Первичная':'Повторная','Тема':m.topic?(TOPICS[m.topic]||m.topic):'',
+    'Сотрудник':empNameById_(m.employee_id),'Отдел':deptNameById_(m.dept_id),'Компания':meetOrgName(m),'Как записали':m.company_name||'',
+    'На платформе':m.platform_org_id?'да':'нет','ИНН':m.inn||'',
+    'Результат':st.k==='won'?'Оплата':st.k==='wait'?'В работе':st.k==='lost'?'Нет оплаты':'',
+    'Дата оплаты':st.pay?st.pay.deal_date:'','Сумма оплаты':st.pay?(Number(st.pay.amount)||0):'',
+    'Запись':m.recording_url||'','Следующий шаг':m.next_step||'','Срок шага':m.next_step_date||'','Заметка':m.note||''};});
+  var by={};
+  list.forEach(function(m){
+    var k=m.employee_id;var e=by[k]||(by[k]={'Сотрудник':empNameById_(k),'Отдел':deptNameById_(m.dept_id),'Всего':0,'Первичных':0,'Повторных':0,'Оплатили':0,'В работе':0,'Нет оплаты':0,'Выручка с первичных':0});
+    e['Всего']++;
+    if(m.meeting_type!=='primary'){e['Повторных']++;return;}
+    e['Первичных']++;var st=meetStatus(m);
+    if(st.k==='won'){e['Оплатили']++;e['Выручка с первичных']+=Number(st.pay.amount)||0;}else if(st.k==='wait')e['В работе']++;else e['Нет оплаты']++;
+  });
+  var sum=Object.keys(by).map(function(k){return by[k];}).sort(function(x,y){return y['Всего']-x['Всего'];});
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(sum),'Свод');
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'Встречи');
+  XLSX.writeFile(wb,'Встречи_'+dateISO(S.rangeFrom)+'_'+dateISO(S.rangeTo)+'.xlsx');
+};
+/* ═══ + ВСТРЕЧА ═══ */
+var _mc=null;
+window.addMeeting=function(eid){
+  var pre=(eid&&eid!=='null')?eid:((CURRENT_USER&&CURRENT_USER.empId)||'');
+  openModalSimple('Новая встреча',
+    '<div class="mt-pick">'+
+      '<button class="mt-opt" onclick="meetingForm(\'primary\',null,\''+pre+'\')"><b>Первичная</b><span>Новый клиент, первая встреча. Результат — оплата.</span></button>'+
+      '<button class="mt-opt" onclick="meetingForm(\'repeat\',null,\''+pre+'\')"><b>Повторная</b><span>С текущим клиентом: тех. вопросы, апсейл, разбор результатов.</span></button>'+
+    '</div>');
+};
+function mval_(id){var el=document.getElementById(id);return el?String(el.value||''):'';}
+window.meetingForm=function(type,meetingId,preEmp){
+  var ex=meetingId?(S.meetings||[]).find(function(m){return m.id===meetingId;}):null;
+  if(ex)type=ex.meeting_type;
+  _mc={type:type,id:ex?ex.id:null,ex:ex,orgId:ex?ex.platform_org_id:null,name:ex?(ex.company_name||''):'',search:'',isNew:!!(ex&&!ex.platform_org_id)};
+  var emps=RAW.employees.filter(function(e){return(!e.fired_at&&!e.is_archived)||(ex&&e.id===ex.employee_id);})
+    .slice().sort(function(x,y){return(x.display_name||x.name).localeCompare(y.display_name||y.name);});
+  var empOpts=emps.map(function(e){return'<option value="'+e.id+'">'+esc(e.display_name||e.name)+'</option>';}).join('');
+  var body=
+    '<div style="display:flex;gap:10px"><div class="field" style="flex:1"><label>Дата встречи *</label><input id="mt-date" type="date" value="'+(ex?ex.held_at:dateISO(TODAY))+'" max="'+dateISO(TODAY)+'"></div>'+
+    '<div class="field" style="flex:1.4"><label>Кто провёл *</label><select id="mt-emp" class="sel" style="width:100%;border-radius:8px">'+empOpts+'</select></div></div>'+
+    '<div class="field"><label>Компания *</label><div id="mt-cwrap"></div></div>'+
+    (type==='primary'
+      ?'<div class="field"><label>ИНН</label><input id="mt-inn" inputmode="numeric" placeholder="10 или 12 цифр — поможет привязать оплату" value="'+esc(ex&&ex.inn||'')+'"></div>'
+      :'<div class="field"><label>Тема *</label><select id="mt-topic" class="sel" style="width:100%;border-radius:8px">'+Object.keys(TOPICS).map(function(k){return'<option value="'+k+'"'+(ex&&ex.topic===k?' selected':'')+'>'+TOPICS[k]+'</option>';}).join('')+'</select></div>')+
+    '<div class="field"><label>Ссылка на запись</label><input id="mt-url" type="url" placeholder="https://telemost.yandex.ru/…" value="'+esc(ex&&ex.recording_url||'')+'"></div>'+
+    '<div style="display:flex;gap:10px"><div class="field" style="flex:2"><label>Следующий шаг</label><input id="mt-next" placeholder="напр. прислать КП" value="'+esc(ex&&ex.next_step||'')+'"></div>'+
+    '<div class="field" style="flex:1"><label>Когда</label><input id="mt-nextd" type="date" value="'+(ex&&ex.next_step_date||'')+'"></div></div>'+
+    '<div class="field"><label>Заметка</label><input id="mt-note" value="'+esc(ex&&ex.note||'')+'"></div>'+
+    '<div id="mt-err" class="login-err" style="text-align:left;min-height:0"></div>';
+  openModal(ex?'Встреча · правка':(type==='primary'?'Первичная встреча':'Повторная встреча'),body,saveMeeting);
+  setTimeout(function(){
+    var es=document.getElementById('mt-emp');
+    if(es){
+      es.value=ex?ex.employee_id:(preEmp||(CURRENT_USER&&CURRENT_USER.empId)||'');
+      if(!es.value&&es.options.length)es.selectedIndex=0;
+      es.onchange=function(){if(!_mc.orgId&&!_mc.isNew)renderMeetCli();validateMeeting();};
+    }
+    ['mt-date','mt-url','mt-inn'].forEach(function(id){var el=document.getElementById(id);if(el){el.oninput=validateMeeting;el.onchange=validateMeeting;}});
+    renderMeetCli();
+  },0);
+};
+function renderMeetCli(){
+  var wrap=document.getElementById('mt-cwrap');if(!wrap)return;
+  if(_mc.orgId||_mc.isNew){
+    var label=_mc.orgId?esc((orgById_(_mc.orgId)||{}).company_name||_mc.name):esc(_mc.name)+' <span class="unl" style="margin-left:4px">нет на платформе</span>';
+    wrap.innerHTML='<div class="cli-selected"><span>'+label+'</span><button class="chg" onclick="clearMeetCli()">Изменить</button></div>';
+    validateMeeting();return;
+  }
+  var emp=RAW.employees.find(function(e){return e.id===mval_('mt-emp');});
+  var puid=emp?emp.platform_user_id:null;
+  var q=(_mc.search||'').trim(),ql=q.toLowerCase();
+  var all=(RAW.allClients||[]).filter(function(c){return!c.is_hidden;});
+  var list=ql?all.filter(function(c){return(c.company_name||'').toLowerCase().indexOf(ql)>=0;}):all;
+  var mine=list.filter(function(c){return puid&&c.responsible_platform_user_id===puid;});
+  var others=list.filter(function(c){return!(puid&&c.responsible_platform_user_id===puid);});
+  function opts(arr,sect){if(!arr.length)return'';return'<div class="cli-ds">'+sect+'</div>'+arr.slice(0,40).map(function(c){return'<div class="cli-do" data-orgid="'+esc(c.platform_org_id)+'" data-name="'+esc(c.company_name||'')+'">'+esc(c.company_name||'—')+'</div>';}).join('');}
+  var newOpt=(q&&_mc.type==='primary')?'<div class="cli-do cli-new" data-new="1">'+ICO.plus+' Новая компания «'+esc(q)+'» — ещё нет на платформе</div>':'';
+  var drop=newOpt+(ql?opts(mine,'Клиенты сотрудника')+opts(others,'Организации на платформе'):(_mc.type==='repeat'?opts(mine,'Клиенты сотрудника'):''));
+  if(!drop)drop='<div class="cli-empty">'+(_mc.type==='primary'?'Начни вводить название — найдём на платформе или добавим как новую':'Начни вводить название клиента')+'</div>';
+  wrap.innerHTML='<input id="mt-csearch" class="cli-search" placeholder="Название компании…" value="'+esc(_mc.search||'')+'" autocomplete="off"><div class="cli-drop" id="mt-cdrop">'+drop+'</div>';
+  var si=document.getElementById('mt-csearch');
+  si.oninput=function(){_mc.search=this.value;renderMeetCli();var x=document.getElementById('mt-csearch');if(x){x.focus();x.setSelectionRange(x.value.length,x.value.length);}};
+  document.getElementById('mt-cdrop').addEventListener('click',function(e){
+    var o=e.target.closest('.cli-do');if(!o)return;
+    if(o.dataset.new){_mc.isNew=true;_mc.orgId=null;_mc.name=(_mc.search||'').trim();}
+    else{_mc.orgId=o.dataset.orgid;_mc.name=o.dataset.name;_mc.isNew=false;}
+    renderMeetCli();
+  });
+  validateMeeting();
+}
+window.clearMeetCli=function(){_mc.orgId=null;_mc.isNew=false;_mc.name='';renderMeetCli();setTimeout(function(){var x=document.getElementById('mt-csearch');if(x)x.focus();},0);};
+function validateMeeting(){
+  var btn=document.getElementById('msave');if(!btn||!_mc)return;
+  var err='',inn=mval_('mt-inn').replace(/\s/g,''),url=mval_('mt-url').trim();
+  if(inn&&!/^\d{10}(\d{2})?$/.test(inn))err='ИНН — 10 или 12 цифр';
+  else if(url&&!/^https?:\/\//i.test(url))err='Ссылка должна начинаться с https://';
+  var ok=!err&&mval_('mt-date')&&mval_('mt-emp')&&(_mc.orgId||(_mc.isNew&&_mc.name));
+  btn.disabled=!ok;
+  var e=document.getElementById('mt-err');if(e)e.textContent=err;
+}
+function saveMeeting(){
+  var btn=document.getElementById('msave');if(!btn||btn.disabled)return;
+  var ex=_mc.ex,empId=mval_('mt-emp');
+  var emp=RAW.employees.find(function(e){return e.id===empId;});
+  var org=orgById_(_mc.orgId);
+  var row={
+    meeting_type:_mc.type,held_at:mval_('mt-date'),employee_id:empId,
+    dept_id:(ex&&ex.employee_id===empId)?ex.dept_id:(emp?emp.dept_id:null),
+    platform_org_id:_mc.orgId||null,
+    company_name:((org&&org.company_name)||_mc.name||'').trim(),
+    inn:_mc.type==='primary'?(mval_('mt-inn').replace(/\D/g,'')||null):null,
+    recording_url:mval_('mt-url').trim()||null,
+    topic:_mc.type==='repeat'?(mval_('mt-topic')||'other'):null,
+    next_step:mval_('mt-next').trim()||null,next_step_date:mval_('mt-nextd')||null,
+    note:mval_('mt-note').trim()||null
+  };
+  if(!row.platform_org_id){row.linked_at=null;row.link_method=null;}
+  else if(!ex||ex.platform_org_id!==row.platform_org_id){row.linked_at=new Date().toISOString();row.link_method=ex?'manual':'created';}
+  if(ex&&!row.platform_org_id&&_mc.isNew)row.company_name=_mc.name.trim();
+  btn.disabled=true;btn.textContent='Сохраняю…';
+  var req=_mc.id?sbPatch('meetings','id=eq.'+_mc.id,row)
+    :sbPost('meetings',row).then(function(res){if(res&&res.code)throw new Error(res.message||res.code);return res;});
+  var wasEdit=!!_mc.id;
+  req.then(function(){closeModal();toast(wasEdit?'Встреча обновлена':'Встреча добавлена','ok');refreshMeetings();})
+    .catch(function(e){btn.disabled=false;btn.textContent='Сохранить';toast('Не сохранилось: '+e.message,'err');});
+}
+/* ═══ КАРТОЧКА ВСТРЕЧИ ═══ */
+window.openMeeting=function(id){
+  var m=(S.meetings||[]).find(function(x){return x.id===id;});if(!m)return;
+  var st=meetStatus(m),ai=m.ai||{};
+  function sec(title,content,soon){return'<div class="mc-sec"><div class="mc-sec-t">'+title+(soon?' <span class="mc-soon">скоро</span>':'')+'</div>'+content+'</div>';}
+  var head='<div class="mc-head"><div><div class="mc-title">'+esc(meetOrgName(m))+'</div><div class="mc-meta">'+
+    (m.meeting_type==='primary'?'Первичная':'Повторная'+(m.topic?' · '+esc(TOPICS[m.topic]||m.topic):''))+' · '+fmtD(m.held_at)+' · '+esc(empNameById_(m.employee_id))+' · '+esc(deptNameById_(m.dept_id))+
+    '</div></div>'+meetBadge_(m)+'</div>';
+  var unl=(m.meeting_type==='primary'&&!m.platform_org_id)?'<div class="mc-warn"><span>Компании «'+esc(m.company_name)+'» нет на платформе. Оплата засчитается встрече, когда привяжешь её к организации.</span><button class="btn sm" onclick="linkMeetingModal(\''+m.id+'\')">Привязать</button></div>':'';
+  var won=st.k==='won'?'<div class="mc-ok">Оплата '+esc(fmt(st.pay.amount))+' · '+fmtD(st.pay.deal_date)+' · через '+st.lag+' дн. после встречи'+(st.late?' (позже окна в '+MEET_WINDOW+' дн.)':'')+'</div>':'';
+  var video='<div class="mc-video"><div class="mc-play">▶</div><div class="mc-video-t">Плеер появится после подключения Телемоста</div></div>'+
+    '<div class="mc-row-btns">'+(m.recording_url?'<a class="btn sm" href="'+esc(safeUrl(m.recording_url))+'" target="_blank" rel="noopener">'+ICO.link+' Открыть запись</a>':'<span class="mc-muted">Ссылка на запись не указана</span>')+
+    '<button class="btn sm" disabled title="После подключения Телемоста">↓ Скачать</button></div>';
+  var transcript=ai.transcript?'<div class="mc-text">'+esc(ai.transcript)+'</div>':'<div class="mc-stub">AI-транскрипт появится автоматически после встречи</div>';
+  var agreements=(ai.agreements?'<div class="mc-text">'+esc(ai.agreements)+'</div>':'<div class="mc-stub">AI выделит договорённости из записи</div>')+
+    (m.next_step?'<div class="mc-next">Следующий шаг: <b>'+esc(m.next_step)+'</b>'+(m.next_step_date?' · до '+fmtD(m.next_step_date):'')+'</div>':'');
+  var fu=ai.follow_up
+    ?'<textarea class="mc-fu" id="mc-fu" readonly>'+esc(ai.follow_up)+'</textarea><button class="btn sm primary" onclick="copyFollowUp()">'+ICO.clipboard+' Скопировать</button>'
+    :'<div class="mc-stub">Письмо клиенту по итогам встречи сгенерируется автоматически — скопируешь и отправишь</div><button class="btn sm" disabled>'+ICO.clipboard+' Скопировать</button>';
+  var extra='<div class="mc-chips">'+
+    '<span class="mc-chip">Оценка по скрипту'+(ai.score!=null?': <b>'+esc(String(ai.score))+'</b>':'')+'</span>'+
+    '<span class="mc-chip">Возражения клиента'+(ai.objections?': '+esc(ai.objections):'')+'</span>'+
+    '<span class="mc-chip">ЛПР на встрече'+(ai.decision_maker!=null?': <b>'+(ai.decision_maker?'да':'нет')+'</b>':'')+'</span>'+
+    '<span class="mc-chip">Колл-бюджет / объём минут'+(ai.budget?': '+esc(ai.budget):'')+'</span>'+
+    '<span class="mc-chip">Сигналы апсейла и риски'+(ai.signals?': '+esc(ai.signals):'')+'</span>'+
+  '</div>';
+  var details='<div class="mc-details">'+
+    (m.inn?'<div>ИНН: <b>'+esc(m.inn)+'</b></div>':'')+
+    (m.note?'<div>Заметка: '+esc(m.note)+'</div>':'')+
+    (m.platform_org_id&&m.company_name&&m.company_name!==meetOrgName(m)?'<div>Записали как: '+esc(m.company_name)+'</div>':'')+
+    '<div class="mc-muted">Добавлено '+fmtDT(m.created_at)+'</div></div>';
+  var actions='<div class="modal-actions"><button class="btn danger" onclick="deleteMeeting(\''+m.id+'\')">Удалить</button><span style="flex:1"></span>'+
+    '<button class="btn" onclick="meetingForm(null,\''+m.id+'\')">Редактировать</button><button class="btn primary" onclick="closeModal()">Закрыть</button></div>';
+  var md=document.getElementById('modal');
+  md.innerHTML='<div class="modal wide">'+head+unl+won+sec('Запись встречи',video)+
+    '<div class="mc-grid">'+sec('Транскрипция',transcript,!ai.transcript)+sec('Договорённости',agreements,!ai.agreements)+'</div>'+
+    sec('Follow-up клиенту',fu,!ai.follow_up)+sec('AI-разбор встречи',extra,true)+details+actions+'</div>';
+  md.classList.add('open');
+};
+window.copyFollowUp=function(){
+  var el=document.getElementById('mc-fu');if(!el)return;
+  (navigator.clipboard?navigator.clipboard.writeText(el.value):Promise.reject()).then(function(){toast('Скопировано','ok');},function(){el.select();document.execCommand('copy');toast('Скопировано','ok');});
+};
+window.deleteMeeting=function(id){
+  var m=(S.meetings||[]).find(function(x){return x.id===id;});
+  openModal('Удалить встречу?','<p style="font-size:13px;color:var(--text-2);line-height:1.7">'+(m?esc(meetOrgName(m))+' · '+fmtD(m.held_at):'')+'<br>Это нельзя отменить.</p>',function(){
+    sbDelete('meetings','id=eq.'+id).then(function(){closeModal();toast('Встреча удалена');refreshMeetings();})
+      .catch(function(e){toast('Не удалилось: '+e.message,'err');});
+  });
+};
+/* ═══ ПРИВЯЗКА ВСТРЕЧИ К ОРГАНИЗАЦИИ ═══ */
+var _lk=null;
+window.linkMeetingModal=function(id){
+  var m=(S.meetings||[]).find(function(x){return x.id===id;});if(!m)return;
+  _lk={id:id,search:m.company_name||''};
+  openModalSimple('Привязать к организации','<p class="modal-sub">Встреча с «'+esc(m.company_name)+'» от '+fmtD(m.held_at)+'. Выбери организацию на платформе — её оплаты засчитаются этой встрече.</p><div id="lk-wrap"></div>');
+  renderLinkSearch();
+};
+function renderLinkSearch(){
+  var wrap=document.getElementById('lk-wrap');if(!wrap||!_lk)return;
+  var nq=normName_(_lk.search);
+  var scored=(RAW.allClients||[]).filter(function(c){return!c.is_hidden;}).map(function(c){
+    return{c:c,s:nq?nameScore_(normName_(c.company_name),nq):1};
+  }).filter(function(x){return x.s>0;}).sort(function(a,b){return b.s-a.s;}).slice(0,30);
+  var items=scored.length?scored.map(function(x){return'<div class="cli-do" onclick="doLinkMeeting(\''+_lk.id+'\',\''+esc(x.c.platform_org_id)+'\',\'manual\')">'+esc(x.c.company_name||'—')+'</div>';}).join('')
+    :'<div class="cli-empty">Не нашли. Если организацию только что создали на платформе — нажми «Обновить» сверху, она подтянется.</div>';
+  wrap.innerHTML='<input id="lk-search" class="cli-search" value="'+esc(_lk.search)+'" placeholder="Название организации…" autocomplete="off"><div class="cli-drop">'+items+'</div>';
+  var si=document.getElementById('lk-search');
+  si.oninput=function(){_lk.search=this.value;renderLinkSearch();var x=document.getElementById('lk-search');if(x){x.focus();x.setSelectionRange(x.value.length,x.value.length);}};
+}
+window.doLinkMeeting=function(id,orgId,method){
+  sbPatch('meetings','id=eq.'+id,{platform_org_id:orgId,linked_at:new Date().toISOString(),link_method:method})
+    .then(function(){closeModal();toast('Встреча привязана к организации','ok');refreshMeetings();})
+    .catch(function(e){toast('Не привязалось: '+e.message,'err');});
+};
+/* После первой оплаты по организации: у сотрудника есть первичные встречи
+   «без организации» за последние MEET_LATE дней? Предлагаем выбрать. */
+function offerMeetingLink_(empId,orgId,dealDate){
+  var org=orgById_(orgId),orgNm=org?org.company_name:'';
+  Promise.all([
+    sbGet('meetings?select=id,held_at,company_name&employee_id=eq.'+empId+'&meeting_type=eq.primary&platform_org_id=is.null&held_at=gte.'+isoAddDays(dealDate,-MEET_LATE)+'&held_at=lte.'+dealDate+'&order=held_at.desc&limit=30'),
+    sbGet('meetings?select=id&meeting_type=eq.primary&platform_org_id=eq.'+encodeURIComponent(orgId)+'&limit=1')
+  ]).then(function(res){
+    var cand=res[0]||[];
+    if(!cand.length||(res[1]||[]).length)return;
+    var nq=normName_(orgNm);
+    cand.forEach(function(m){m._s=nameScore_(normName_(m.company_name),nq);});
+    cand.sort(function(a,b){return(b._s-a._s)||(a.held_at<b.held_at?1:-1);});
+    var list=cand.map(function(m,i){
+      return'<button class="de-pick" onclick="doLinkMeeting(\''+m.id+'\',\''+esc(orgId)+'\',\'deal\')"><span>'+esc(m.company_name)+
+        (i===0&&m._s>=60?' <span class="mbadge mb-won" style="margin-left:6px">похоже</span>':'')+'</span><span class="muted num">'+fmtD(m.held_at)+'</span></button>';
+    }).join('');
+    openModalSimple('Это клиент с одной из встреч?','<p class="modal-sub">Оплата от «'+esc(orgNm)+'». У сотрудника есть первичные встречи с компаниями, которых не было на платформе. Если оплата по одной из них — выбери, встреча засчитается в конверсию. Если нет — просто закрой.</p><div class="de-list">'+list+'</div>');
+  }).catch(function(e){console.error('offerMeetingLink_',e);});
+}
+/* ═══ ДОСТУПЫ В ДАШБОРД (только админ) ═══
+   Логин = рабочая почта, стартовый пароль 12345678, при первом входе — обязательная смена.
+   Создание/сброс/блокировка — через Edge Function admin-users. */
+function loadAuthUsers_(){
+  if(!CURRENT_USER||!CURRENT_USER.isAdmin||S._authLoading)return;
+  S._authLoading=true;
+  adminCall('list').then(function(d){
+    var m={};(d.users||[]).forEach(function(u){m[u.email]=u;});S.authUsers=m;S.authErr=null;
+  }).catch(function(e){S.authUsers={};S.authErr=e.message;}).then(function(){S._authLoading=false;if(S.role==='rop')render();});
+}
+function accessCell_(emp){
+  if(!CURRENT_USER||!CURRENT_USER.isAdmin)return'';
+  if(!emp)return'<td></td>';
+  if(!emp.email)return'<td><span class="acc acc-no" title="Сначала укажи почту: Редактировать → Email для входа">нет почты</span></td>';
+  if(S.authErr)return'<td><span class="acc" title="'+esc(S.authErr)+'">?</span></td>';
+  if(S.authUsers===null)return'<td><span class="acc">…</span></td>';
+  var u=S.authUsers[String(emp.email).toLowerCase()];
+  if(!u)return'<td><button class="btn sm primary" onclick="grantAccess(\''+emp.id+'\')">Выдать доступ</button></td>';
+  if(u.must_change_password)return'<td><span class="acc acc-wait" title="Ещё не вошёл со стартовым паролем">ждёт входа</span></td>';
+  return'<td><span class="acc acc-ok" title="'+(u.last_sign_in_at?'Последний вход '+esc(fmtDT(u.last_sign_in_at)):'')+'">есть</span></td>';
+}
+function accessAction_(empId,action,title,okMsg){
+  var e=RAW.employees.find(function(x){return x.id===empId;});if(!e)return;
+  if(!e.email){toast('Сначала укажи почту: Редактировать → Email для входа','err');return;}
+  openModal(title,'<p style="font-size:13px;color:var(--text-2);line-height:1.8"><b>'+esc(e.display_name||e.name)+'</b><br>Логин: <b>'+esc(e.email)+'</b><br>Пароль: <b>'+DEFAULT_PASSWORD+'</b><br><span style="color:var(--text-3)">При первом входе дашборд заставит поставить свой пароль.</span></p>',function(){
+    var b=document.getElementById('msave');b.disabled=true;b.textContent='Секунду…';
+    adminCall(action,{email:e.email,name:e.display_name||e.name}).then(function(d){
+      closeModal();
+      if(d.status==='exists')toast('Аккаунт уже есть. Нужен новый пароль — «Сбросить пароль» в редактировании.');
+      else if(d.status==='not_found')toast('Аккаунта ещё нет — нажми «Выдать доступ»','err');
+      else toast(okMsg+': '+e.email+' / '+DEFAULT_PASSWORD,'ok');
+      S.authUsers=null;loadAuthUsers_();
+    }).catch(function(er){b.disabled=false;b.textContent='Подтвердить';toast('Не получилось: '+er.message,'err');});
+  });
+  var b=document.getElementById('msave');if(b)b.textContent='Подтвердить';
+}
+window.grantAccess=function(empId){accessAction_(empId,'create','Выдать доступ','Доступ выдан');};
+window.resetAccess=function(empId){closeModal();accessAction_(empId,'reset','Сбросить пароль','Пароль сброшен');};
+function setAccessBan_(email,ban){
+  if(!CURRENT_USER||!CURRENT_USER.isAdmin||!email)return;
+  adminCall(ban?'ban':'unban',{email:email}).then(function(d){
+    if(d.status==='banned')toast('Вход в дашборд закрыт');
+    if(d.status==='unbanned')toast('Вход в дашборд снова открыт','ok');
+  }).catch(function(e){toast('Доступ не изменился: '+e.message,'err');});
+}
+window.loginEmailModal=function(supaId){
+  var emp=RAW.employees.find(function(e){return e.id===supaId;});if(!emp)return;
+  openModal('Email для входа · '+esc(emp.display_name||emp.name),
+    '<p class="modal-sub">По этой почте сотрудник входит в дашборд, и по ней же логин связывается с его карточкой.</p>'+
+    '<div class="field"><label>Рабочая почта</label><input id="em-in" type="email" value="'+esc(emp.email||'')+'" placeholder="i.ivanov@trysasha.ru"></div>',
+    function(){
+      var em=(document.getElementById('em-in').value||'').trim().toLowerCase()||null;
+      if(em&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){toast('Некорректная почта','err');return;}
+      closeModal();patchEmpSync(supaId,{email:em},{email:em});
+    });
+};
+/* ═══ РОП / НАСТРОЙКИ ═══ */
 function renderRop(){
   if(!DB){setApp('<div class="topbar"><span class="brand">⚙ Настройки</span></div>');return;}
   var email=CURRENT_USER?CURRENT_USER.email:'';
@@ -2112,18 +1927,20 @@ function renderRop(){
   if(!d&&DB.depts.length)d=DB.depts[0];
   if(d&&!S.ropDept)S.ropDept=d.id;
   var deptOpts=DB.depts.map(function(x){return'<option value="'+x.id+'"'+(x.id===S.ropDept?' selected':'')+'>'+esc(x.name)+'</option>';}).join('');
+  if(CURRENT_USER&&CURRENT_USER.isAdmin&&S.authUsers===null)loadAuthUsers_();
+  var isAdm=!!(CURRENT_USER&&CURRENT_USER.isAdmin);
   var staffRows=d&&d.staff.length?d.staff.map(function(m){
     var isLead=m.role==='Тимлид';
+    var empRow=RAW.employees.find(function(x){return x.id===m.supaId;});
     return'<tr>'+
       '<td><span class="strong">'+esc(m.name)+'</span>'+(m.hideLb?' <span class="tag-once" title="Скрыт из лидерборда">скрыт из ЛБ</span>':'')+'</td>'+
       '<td><select class="role-sel'+(isLead?' lead':'')+'" onchange="changeEmpRole(\''+m.supaId+'\',this.value)"><option value="manager"'+(isLead?'':' selected')+'>Менеджер</option><option value="lead"'+(isLead?' selected':'')+'>Тимлид</option></select></td>'+
       '<td class="muted num">'+fmtD(m.hired)+'</td>'+
       '<td style="text-align:center"><span class="status-dot-only" style="background:var(--green)" title="активен"></span></td>'+
-      '<td style="text-align:center"><span class="status-dot-only '+(S.empAmoMap[m.supaId]?'':'dim')+'" style="background:'+(S.empAmoMap[m.supaId]?'var(--green)':'var(--amber)')+';cursor:pointer" title="'+(S.empAmoMap[m.supaId]?'Синхронизирован с AmoCRM':'Не синхронизирован — нажми для настройки')+'" onclick="syncEmpModal(\''+m.supaId+'\')"></span></td>'+
-      '<td class="r muted num">'+m.clients+'</td>'+
+      '<td class="r muted num">'+m.clients+'</td>'+accessCell_(empRow)+
       '<td class="r"><button class="btn sm" onclick="editEmpModal(\''+m.supaId+'\')">Редактировать</button></td>'+
     '</tr>';
-  }).join(''):'<tr><td colspan="7"><div class="empty-state">Нет сотрудников</div></td></tr>';
+  }).join(''):'<tr><td colspan="8"><div class="empty-state">Нет сотрудников</div></td></tr>';
   var firedInDept=(d&&d.fired)||[];
   var firedBlock='';
   if(firedInDept.length){
@@ -2147,11 +1964,10 @@ function renderRop(){
       '<div style="display:flex;align-items:center;gap:10px"><div class="panel-title" style="margin:0">Состав отдела</div>'+
         '<select class="sel" onchange="setRopDept(this.value)">'+deptOpts+'</select></div>'+
       '<button class="btn" onclick="loadData()">'+ICO.refresh+' Синхронизировать</button></div>'+
-      '<table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th>Нанят</th><th style="text-align:center">Статус</th><th style="text-align:center">AMO</th><th class="r">Клиентов</th><th class="r">Действие</th></tr></thead><tbody>'+staffRows+'</tbody></table>'+
+      '<table class="tbl"><thead><tr><th>Имя</th><th>Роль</th><th>Нанят</th><th style="text-align:center">Статус</th><th class="r">Клиентов</th>'+(isAdm?'<th>Доступ</th>':'')+'<th class="r">Действие</th></tr></thead><tbody>'+staffRows+'</tbody></table>'+
       firedBlock+'</div>'+
     unaBlock+
-    '<div class="panel"><div class="adm-head"><div class="panel-title" style="margin:0">Все отделы</div><button class="btn primary" onclick="createDept()">+ Создать отдел</button></div>'+deptCards+archDeptBlock+'</div>'+
-    tgIntegrationBlock_());
+    '<div class="panel"><div class="adm-head"><div class="panel-title" style="margin:0">Все отделы</div><button class="btn primary" onclick="createDept()">+ Создать отдел</button></div>'+deptCards+archDeptBlock+'</div>');
 }
 window.setRopDept=function(id){S.ropDept=id;render();};
 window.toggleRopFired=function(){S.ropShowFired=!S.ropShowFired;render();};
@@ -2165,33 +1981,12 @@ window.editEmpModal=function(supaId){
     '<button class="btn mi" style="text-align:left;padding:12px 16px;border-radius:12px;font-size:13px;justify-content:flex-start" onclick="closeModal();reassignEmp(\''+supaId+'\')">'+ICO.move+' Перевести в другой отдел</button>'+
     '<button class="btn mi" style="text-align:left;padding:12px 16px;border-radius:12px;font-size:13px;justify-content:flex-start" onclick="renameEmpModal(\''+supaId+'\')">'+ICO.rename+' Переименовать</button>'+
     '<button class="btn mi" style="text-align:left;padding:12px 16px;border-radius:12px;font-size:13px;justify-content:flex-start" onclick="changeHireModal(\''+supaId+'\')">'+ICO.calendar+' Изменить дату найма</button>'+
-    '<button class="btn mi" style="text-align:left;padding:12px 16px;border-radius:12px;font-size:13px;justify-content:flex-start" onclick="syncEmpModal(\''+supaId+'\')">'+ICO.link+' Синхронизация Amo</button>'+
+    '<button class="btn mi" style="text-align:left;padding:12px 16px;border-radius:12px;font-size:13px;justify-content:flex-start" onclick="loginEmailModal(\''+supaId+'\')">'+ICO.link+' Email для входа</button>'+
+    ((CURRENT_USER&&CURRENT_USER.isAdmin)?'<button class="btn mi" style="text-align:left;padding:12px 16px;border-radius:12px;font-size:13px;justify-content:flex-start" onclick="resetAccess(\''+supaId+'\')">'+ICO.refresh+' Сбросить пароль на '+DEFAULT_PASSWORD+'</button>':'')+
     '<button class="btn mi" style="text-align:left;padding:12px 16px;border-radius:12px;font-size:13px;justify-content:flex-start" onclick="closeModal();toggleLbHidden(\''+supaId+'\','+(isHidden?'false':'true')+')">'+(isHidden?ICO.eye+' Показать в лидерборде':ICO.eyeOff+' Скрыть из лидерборда')+'</button>'+
     '<button class="btn danger mi" style="text-align:left;padding:12px 16px;border-radius:12px;font-size:13px;justify-content:flex-start" onclick="closeModal();fireEmp(\''+supaId+'\')">'+ICO.fire+' Уволить</button>'+
   '</div>';
   openModalSimple(esc(emp.name),body);
-};
-window.syncEmpModal=function(supaId){
-  var emp=RAW.employees.find(function(e){return e.id===supaId;});
-  if(!emp)return;
-  function matchInfo(email){
-    if(!email)return'<span style="color:var(--text-3)">введите почту для поиска в Amo</span>';
-    var u=(S.amoUsers||[]).find(function(x){return x.email&&x.email.toLowerCase().trim()===email.toLowerCase().trim();});
-    if(u)return'<span style="color:var(--green)">✓ Найден в Amo: '+esc(u.name)+'</span>';
-    return'<span style="color:var(--red)">✕ Не найден в Amo с такой почтой</span>';
-  }
-  var body='<p style="font-size:12px;color:var(--text-3);line-height:1.6;margin-bottom:12px">Почта связывает сотрудника с пользователем AmoCRM (и trysasha). По ней подтягивается воронка.</p>'+
-    '<div class="field"><label>Email (как в Amo)</label><input id="sync-em" value="'+esc(emp.email||'')+'" placeholder="i.ivanov@trysasha.ru"></div>'+
-    '<div id="sync-match" style="font-size:12px;margin-top:-6px;margin-bottom:6px">'+matchInfo(emp.email)+'</div>';
-  openModal('Синхронизация · '+esc(emp.name),body,function(){
-    var em=document.getElementById('sync-em').value.trim()||null;
-    var u=em?(S.amoUsers||[]).find(function(x){return x.email&&x.email.toLowerCase().trim()===em.toLowerCase().trim();}):null;
-    var patch={email:em,amo_user_id:u?u.amo_user_id:null};
-    sbPatch('employees','id=eq.'+supaId,patch);
-    RAW.employees.forEach(function(e){if(e.id===supaId){e.email=em;e.amo_user_id=u?u.amo_user_id:null;}});
-    buildDB();closeModal();render();
-  });
-  setTimeout(function(){var inp=document.getElementById('sync-em');if(inp)inp.oninput=function(){var m=document.getElementById('sync-match');if(m)m.innerHTML=matchInfo(this.value);};},0);
 };
 window.renameEmpModal=function(supaId){
   var emp=RAW.employees.find(function(e){return e.id===supaId;});
@@ -2200,47 +1995,6 @@ window.renameEmpModal=function(supaId){
 window.changeHireModal=function(supaId){
   var emp=RAW.employees.find(function(e){return e.id===supaId;});
   openModal('Дата найма','<div class="field"><label>Дата найма</label><input id="hire-d" type="date" value="'+(emp&&emp.hired_at?emp.hired_at.substring(0,10):todayISO())+'"></div>',function(){var dt=document.getElementById('hire-d').value;sbPatch('employees','id=eq.'+supaId,{hired_at:dt});RAW.employees.forEach(function(e){if(e.id===supaId)e.hired_at=dt;});buildDB();closeModal();render();});
-};
-window.tgAddModal=function(){
-  var deptOpts=DB.depts.map(function(d){return'<option value="'+d.id+'">'+esc(d.name)+'</option>';}).join('');
-  var dayBtns=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(function(n,i){var on=i<5;return'<button type="button" class="tg-day'+(on?' on':'')+'" data-d="'+(i+1)+'" onclick="this.classList.toggle(\'on\')">'+n+'</button>';}).join('');
-  var body=
-    '<div style="background:var(--surface-2);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:var(--text-2);line-height:1.7">'+
-      '<b style="color:var(--text)">Как подключить:</b><br>'+
-      '1. Добавь <b>@SashaSpendBot</b> в нужный Telegram-чат как участника<br>'+
-      '2. Бот пришлёт ID чата (выглядит как <code style="background:var(--surface-3);padding:1px 5px;border-radius:4px">-1002185486219</code>)<br>'+
-      '3. Скопируй ID сюда и выбери отдел'+
-    '</div>'+
-    '<div class="field"><label>ID чата</label><input id="tg-chatman" style="width:100%" placeholder="-5122585816"></div>'+
-    '<div class="field"><label>Отдел</label><select id="tg-dept" class="sel" style="width:100%">'+deptOpts+'</select></div>'+
-    '<div class="field"><label>Время отправки (МСК)</label><input id="tg-time" type="time" class="sel" value="19:00" style="width:100%"></div>'+
-    '<div class="field"><label>Дни недели</label><div class="tg-days">'+dayBtns+'</div></div>';
-  openModal('Подключить Telegram-чат',body,tgSave);
-};
-window.tgSave=function(){
-  var chatId=(document.getElementById('tg-chatman').value||'').trim();
-  if(!chatId){openModalSimple('Нужен ID чата','<p style="font-size:13px;color:var(--text-2)">Впиши ID чата — бот присылает его при добавлении в чат.</p>');return;}
-  var deptId=document.getElementById('tg-dept').value;
-  var time=document.getElementById('tg-time').value||'19:00';
-  var days=[].slice.call(document.querySelectorAll('.tg-day.on')).map(function(b){return parseInt(b.dataset.d,10);});
-  if(!days.length)days=[1,2,3,4,5];
-  closeModal();
-  sbPost('telegram_integrations',{dept_id:deptId,chat_id:String(chatId),enabled:true,send_time:time,send_days:days}).then(function(res){
-    if(res&&res.code)openModalSimple('Не получилось','<p style="font-size:13px;color:var(--text-2)">'+esc(res.message||'Возможно, этот чат уже подключён к отделу.')+'</p>');
-    return reloadTg();
-  });
-};
-window.tgToggle=function(id,en){sbPatch('telegram_integrations','id=eq.'+id,{enabled:en}).then(reloadTg);};
-window.tgToggleLead=function(id,en){sbPatch('telegram_integrations','id=eq.'+id,{include_lead:en}).then(reloadTg);};
-window.tgDelete=function(id){openModal('Удалить интеграцию?','<p style="font-size:13px;color:var(--text-2)">Чат перестанет получать ежедневные отчёты.</p>',function(){closeModal();sbDelete('telegram_integrations','id=eq.'+id).then(reloadTg);});};
-window.tgTest=function(deptId,chatId,btn){
-  if(btn){btn.disabled=true;btn.textContent='…';}
-  fetch(SB_URL+'/functions/v1/daily-report',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY},body:JSON.stringify({mode:'test',dept_id:deptId,chat_id:String(chatId)})})
-    .then(function(r){return r.json();}).then(function(j){
-      if(btn){btn.disabled=false;btn.textContent='Тест';}
-      if(j&&j.ok)openModalSimple('Отправлено','<p style="font-size:13px;color:var(--text-2)">Тестовый отчёт ушёл в чат: '+(j.sent||0)+' сообщ. (по числу менеджеров отдела).</p>');
-      else openModalSimple('Ошибка','<p style="font-size:13px;color:var(--text-2)">'+esc((j&&(j.error||j.message))||'Функция daily-report недоступна. Проверь, что она задеплоена и Verify JWT выключен.')+'</p>');
-    }).catch(function(e){if(btn){btn.disabled=false;btn.textContent='Тест';}openModalSimple('Ошибка','<p style="font-size:13px;color:var(--text-2)">'+esc(String(e))+'</p>');});
 };
 window.reassignEmp=function(supaId){
   var emp=RAW.employees.find(function(e){return e.id===supaId;});
@@ -2264,10 +2018,10 @@ window.createDept=function(){
 window.archiveDept=function(id){openModal('В архив отдел?','<p style="font-size:13px;color:var(--text-2);line-height:1.7">Отдел исчезнет с главного экрана.</p>',function(){sbPatch('departments','id=eq.'+id,{is_archived:true});RAW.depts.forEach(function(d){if(d.id===id)d.is_archived=true;});buildDB();closeModal();render();});};
 window.unarchiveDept=function(id){sbPatch('departments','id=eq.'+id,{is_archived:false});RAW.depts.forEach(function(d){if(d.id===id)d.is_archived=false;});buildDB();render();};
 window.fireEmp=function(supaId){
-  openModal('Уволить сотрудника','<div class="field"><label>Дата увольнения</label><input id="f-d" type="date" value="'+todayISO()+'"></div><p style="font-size:12px;color:var(--text-2);margin-top:4px;line-height:1.6">История выручки сохранится. Разархивировать можно в любой момент.</p>',
-    function(){var dt=document.getElementById('f-d').value||todayISO();closeModal();patchEmpSync(supaId,{fired_at:dt,is_archived:true},{fired_at:dt,is_archived:true});});
+  openModal('Уволить сотрудника','<div class="field"><label>Дата увольнения</label><input id="f-d" type="date" value="'+todayISO()+'"></div><p style="font-size:12px;color:var(--text-2);margin-top:4px;line-height:1.6">История выручки и встреч сохранится'+((CURRENT_USER&&CURRENT_USER.isAdmin)?', вход в дашборд закроется':'')+'. Разархивировать можно в любой момент.</p>',
+    function(){var dt=document.getElementById('f-d').value||todayISO();closeModal();patchEmpSync(supaId,{fired_at:dt,is_archived:true},{fired_at:dt,is_archived:true});var fe=RAW.employees.find(function(x){return x.id===supaId;});if(fe)setAccessBan_(fe.email,true);});
 };
-window.rehireEmp=function(supaId){openModal('Вернуть сотрудника?','<p style="font-size:13px;color:var(--text-2)">Сотрудник вернётся в активный список.</p>',function(){closeModal();patchEmpSync(supaId,{fired_at:null,is_archived:false},{fired_at:null,is_archived:false});});};
+window.rehireEmp=function(supaId){openModal('Вернуть сотрудника?','<p style="font-size:13px;color:var(--text-2)">Сотрудник вернётся в активный список.</p>',function(){closeModal();patchEmpSync(supaId,{fired_at:null,is_archived:false},{fired_at:null,is_archived:false});var fe=RAW.employees.find(function(x){return x.id===supaId;});if(fe)setAccessBan_(fe.email,false);});};
 window.hideClient=function(orgId,name){
   openModal('Убрать в архив?','<p style="font-size:13px;color:var(--text-2);line-height:1.7"><b>'+esc(name)+'</b> исчезнет из портфеля. Вернуть можно через «Архив».</p>',
     function(){sbPatch('clients','platform_org_id=eq.'+orgId,{is_hidden:true});RAW.clients.forEach(function(c){if(c.platform_org_id===orgId)c.is_hidden=true;});buildDB();closeModal();render();});
@@ -2319,67 +2073,7 @@ window.openPlanModal=function(supaId,empName){
     });
 };
 /* ═══ МЕНЕДЖЕР ═══ */
-window.setMgrAs=function(id){S.mgrAs=id;render();};
-window.setMgrTab=function(t){S.mgrTab=t;render();};
 window.toggleArchClients=function(){S.showArchivedClients=!S.showArchivedClients;render();};
-function renderMgr(){
-  var allMgrs=[];DB.depts.forEach(function(dd){dd.staff.forEach(function(m){allMgrs.push({id:m.id,supaId:m.supaId,name:m.name,dept:dd.name});});});
-  if(!allMgrs.length){setApp('<div class="topbar"><span class="brand">Кабинет менеджера</span></div><div class="empty-state">Нет менеджеров. Зайди в <b>⚙ Настройки</b>.</div>');return;}
-  if(!S.mgrAs||!allMgrs.find(function(m){return m.id===S.mgrAs;}))S.mgrAs=allMgrs[0].id;
-  var d=DB.depts.find(function(x){return x.staff.some(function(m){return m.id===S.mgrAs;});});
-  if(!d){S.mgrAs=allMgrs[0].id;d=DB.depts.find(function(x){return x.staff.some(function(m){return m.id===S.mgrAs;});});}
-  var myClients=d?d.clients.filter(function(c){return c.mgr===S.mgrAs;}):[];
-  var me=d?d.staff.find(function(m){return m.id===S.mgrAs;}):null;
-  var meSupaId=me?me.supaId:null;
-  var totalFact=me?me.fact:0,totalPlan=me?me.plan:0,myDeals=me?me.deals:0;
-  var mp=pct(totalFact,totalPlan),mr=rrPct(totalFact,totalPlan);
-  var asSel='<select class="sel" onchange="setMgrAs(this.value)">'+allMgrs.map(function(m){return'<option value="'+m.id+'"'+(m.id===S.mgrAs?' selected':'')+'>'+esc(m.name)+'</option>';}).join('')+'</select>';
-  var kH='<div class="kcard"><div class="kl">Мой план</div><div class="kv num">'+fmt(totalPlan)+'</div><div class="ks"><span class="neu">факт '+fmt(totalFact)+' · '+mp+'%</span></div>'+(deltaTag(totalFact,me?me.prevFact:0)?'<div class="ck-delta">'+deltaTag(totalFact,me?me.prevFact:0)+'<span>к пред. периоду</span></div>':'')+'<div class="pbar"><div class="pfill" style="width:'+Math.min(mp,100)+'%;background:'+grad(mp)+'"></div></div></div>'+
-    '<div class="kcard"><div class="kl">Сделок за период</div><div class="kv num">'+myDeals+'</div><div class="ks"><span class="neu">'+myClients.length+' клиентов</span></div></div>'+
-    '<div class="kcard"><div class="kl">Ранрейт</div><div class="kv num">'+mr+'%</div><div class="ks"><span class="neu">'+(mr>=100?'в темпе':mr>=80?'близко к плану':'отстаём')+'</span></div></div>';
-  var tabs='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">'+
-    '<div class="tab-row" style="margin-bottom:0">'+[['clients','Клиенты']].map(function(t){return'<button class="tab'+(S.mgrTab===t[0]?' on':'')+'" onclick="setMgrTab(\''+t[0]+'\')">'+t[1]+'</button>';}).join('')+'</div>'+
-    (meSupaId?'<button class="btn sm primary" onclick="openPlanModal(\''+meSupaId+'\',\''+esc(me?me.name:'')+'\')">Редактировать план</button>':'')+'</div>';
-  var content='';
-  if(S.mgrTab==='clients'){
-    myClients.forEach(function(c){c._min=S.periodStats[c.platform_org_id];c._d=daysTo(c.expiry);});
-    myClients.sort(function(a,b){
-      var k=S.cliSortKey;
-      var va=k==='expiry'?a._d:k==='_min'?a._min:(a[k]||0);
-      var vb=k==='expiry'?b._d:k==='_min'?b._min:(b[k]||0);
-      return S.cliSortDir*((va||0)-(vb||0));
-    });
-    var colDefs=[['name','Компания',''],['fact','Факт','r'],['_min','Мин исп.','r'],['minLeft','Мин ост.','r'],['expiry','Продление','r'],['','','r']];
-    var th=colDefs.map(function(c){if(!c[0])return'<th></th>';var a=S.cliSortKey===c[0];return'<th class="'+(c[2])+(a?' sorted':'')+'" onclick="sortCli(\''+c[0]+'\')">'+c[1]+si(a,S.cliSortDir)+'</th>';}).join('');
-    var rows=myClients.map(function(c){
-      var c3=c.fact>0?grad(100):c.fact<0?'var(--red)':'var(--text-3)';
-      var minCell=S.periodLoading?'<span style="color:var(--text-3)">···</span>':(c._min!=null?fmtMin(c._min):'<span style="color:var(--text-3)">—</span>');
-      return'<tr>'+
-        '<td><a class="ext-link" href="'+esc(c.url)+'" target="_blank">'+esc(c.name)+'</a></td>'+
-        '<td class="r strong num" style="color:'+c3+'">'+fmt(c.fact)+'</td>'+
-        '<td class="r muted num">'+minCell+'</td>'+
-        '<td class="r muted num">'+fmtMin(c.minLeft)+'</td>'+
-        '<td class="r">'+expiryBadge(c.expiry)+'</td>'+
-        '<td class="r"><div class="rm-wrap"><button class="rm-dot" onclick="toggleRowMenu(event,\'rm-mgr-'+c.platform_org_id+'\')">'+ICO.dots+'</button>'+
-          '<div class="rm-pop" id="rm-mgr-'+c.platform_org_id+'" data-org="'+c.platform_org_id+'" data-name="'+esc(c.name)+'">'+
-            '<button class="mi" onclick="rmEditEvent(this)">'+ICO.edit+' Редактировать событие</button>'+
-            '<button class="mi" onclick="rmRename(this)">'+ICO.rename+' Переименовать компанию</button>'+
-            '<button class="mi danger" onclick="rmArchive(this)">'+ICO.archive+' В архив</button>'+
-          '</div></div></td>'+
-      '</tr>';
-    }).join('');
-    if(!myClients.length)rows='<tr><td colspan="6"><div class="empty-state">Нет клиентов.</div></td></tr>';
-    var myHidden=DB.hiddenClients?DB.hiddenClients.filter(function(c){return c.responsible_platform_user_id===S.mgrAs;}):[];
-    var archCliBlock='';
-    if(myHidden.length){
-      var archRows=myHidden.map(function(c){return'<tr><td class="muted">'+esc(c.company_name)+'</td><td class="r"><button class="btn sm" onclick="unhideClient('+c.platform_org_id+')">Вернуть</button></td></tr>';}).join('');
-      archCliBlock='<div class="arch-toggle'+(S.showArchivedClients?' open':'')+'" onclick="toggleArchClients()"><span class="arr">›</span> Архив клиентов ('+myHidden.length+')</div><div class="arch-block'+(S.showArchivedClients?' open':'')+'"><table class="tbl" style="margin-top:8px"><tbody>'+archRows+'</tbody></table></div>';
-    }
-    content='<div class="panel"><table class="tbl"><thead><tr>'+th+'</tr></thead><tbody>'+rows+'</tbody></table>'+archCliBlock+'</div>';
-  }
-  setApp('<div class="topbar"><div class="nav-left"><span class="brand">Кабинет менеджера</span>'+asSel+'</div>'+calTrigger()+'</div>'+
-    '<div class="dept-kpi" style="grid-template-columns:repeat(3,1fr)">'+kH+'</div>'+tabs+content);
-}
 /* ═══ СДЕЛКИ ═══ */
 var _dc={orgId:null,name:'',search:''};
 window.addDeal=function(eid,did){openDealModal(null,eid==='null'?null:eid,did==='null'?null:did);};
@@ -2387,7 +2081,7 @@ window.editDeal=function(id){var dl=S.dealsRaw.find(function(d){return d.id===id
 window.deleteDeal=function(id){
   var dl=S.dealsRaw.find(function(d){return d.id===id;});
   openModal('Удалить сделку?','<p style="font-size:13px;color:var(--text-2);line-height:1.7">'+(dl?esc(dl.client_name||'—')+' · '+fmt(dl.amount):'')+'<br>Это нельзя отменить.</p>',
-    function(){fetch(SB_URL+'/rest/v1/deals?id=eq.'+id,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'}}).then(function(){closeModal();refreshPeriod(true);});});
+    function(){sbDelete('deals','id=eq.'+id).then(function(){closeModal();refreshPeriod(true);}).catch(function(e){toast('Не удалилось: '+e.message,'err');});});
 };
 function openDealModal(existing,preEmpId,preDeptId){
   var emps=RAW.employees.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
@@ -2478,8 +2172,8 @@ function saveDeal(existing,preDeptId){
   var deptId=emp?emp.dept_id:(preDeptId||null);
   var dept=RAW.depts.find(function(x){return x.id===deptId;});
   var row={event_type:type,employee_id:empId,employee_name:emp?emp.name:'',platform_org_id:orgId,client_name:clientName,dept_id:deptId,dept_name:dept?dept.name:'',amount:amount,motivation_pct:pct2,deal_date:date,note:note};
-  var req=existing?sbPatch('deals','id=eq.'+existing.id,row):sbPost('deals',row);
-  req.then(function(){closeModal();refreshPeriod(true);flashSave();}).catch(function(e){
+  var req=existing?sbPatch('deals','id=eq.'+existing.id,row):sbPost('deals',row).then(function(res){if(res&&res.code)throw new Error(res.message||res.code);return res;});
+  req.then(function(){closeModal();refreshPeriod(true);flashSave();if(!existing&&type==='payment')offerMeetingLink_(empId,orgId,date);}).catch(function(e){
     if(btn){btn.disabled=false;delete btn.dataset.saving;btn.textContent='Сохранить';}
     alert('Не удалось сохранить сделку, попробуй ещё раз.'+(e&&e.message?'\n'+e.message:''));
   });
@@ -2926,7 +2620,7 @@ window.doForgot=async function(){
   try{
     var r=await fetch(SB_URL+'/auth/v1/recover',{
       method:'POST',
-      headers:{'apikey':SB_ANON,'Content-Type':'application/json'},
+      headers:{'apikey':SB_PUB,'Content-Type':'application/json'},
       body:JSON.stringify({email:email})
     });
     var card=document.querySelector('#login-screen .login-card');
@@ -2968,8 +2662,8 @@ window.doResetPassword=async function(token){
   try{
     var r=await fetch(SB_URL+'/auth/v1/user',{
       method:'PUT',
-      headers:{'apikey':SB_ANON,'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-      body:JSON.stringify({password:p1})
+      headers:{'apikey':SB_PUB,'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body:JSON.stringify({password:p1,data:{must_change_password:false}})
     });
     var d=await r.json();
     if(d.error){err.textContent=d.error_description||'Ошибка. Попробуй снова.';btn.disabled=false;btn.textContent='Сохранить пароль';return;}
@@ -2993,9 +2687,14 @@ function checkRecoveryHash(){
 }
 /* ═══ BOOT ═══ */
 (function(){
+  if(/[?&]v=\d/.test(location.search)&&history.replaceState)history.replaceState(null,'',location.pathname+location.hash);
   if(checkRecoveryHash()){return;}
+  startVersionWatch();
   if(authLoad()){
-    loadPreferences().then(function(){loadCurrentEmployee().then(function(){loadData();});});
+    ensureToken().then(function(){
+      if(CURRENT_USER.mustChange){showForceChange();return;}
+      return afterLogin_();
+    }).catch(function(){authClear();showLogin();});
   } else {
     showLogin();
   }
