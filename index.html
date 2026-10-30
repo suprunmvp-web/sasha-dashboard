@@ -937,6 +937,13 @@ button:focus-visible,a:focus-visible,.cb-trig:focus-visible,.seg-b:focus-visible
 .lb-cli .mgr{white-space:nowrap;font-size:12px;color:var(--text-2);}
 .form-row>.field{min-width:0;}.form-row .field input{width:100%;min-width:0;box-sizing:border-box;}
 [data-theme="light"]{--s8:#64748b;}[data-theme="dark"]{--s8:#8a94a8;}
+
+/* ═══ v14 · даты продления и раскладка «Клиенты» ═══ */
+.exp-pill{display:inline-block;padding:3px 9px;border-radius:7px;border:1px solid var(--border);font-size:12px;color:var(--text-2);font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.4;}
+.exp-pill.past{border-color:color-mix(in oklab,var(--red) 45%,var(--border));color:color-mix(in oklab,var(--red) 70%,var(--text-2));}
+.lb-cli th:nth-child(n+2),.lb-cli td:nth-child(n+2){padding-left:40px;}
+.lb-cli .mgr{font-weight:600;color:var(--text);font-size:13px;}
+.lb-cli td:last-child,.lb-cli th:last-child{padding-left:32px;}
 </style>
 </head>
 <body>
@@ -951,7 +958,7 @@ window.togglePw=function(id,btn){var inp=document.getElementById(id);if(!inp)ret
    Безопасность: в браузере только publishable-ключ (публичный по определению)
    + токен залогиненного сотрудника. Без логина RLS не отдаёт ничего.
    Сервисный ключ живёт только в GAS и Edge Functions. */
-var APP_VERSION='2026-10-31.9';
+var APP_VERSION='2026-10-31.10';
 var SB_URL='https://qhpyrlhugpqgojwmarrw.supabase.co';
 var SB_PUB='sb_publishable_0YlWIjJNZqw0pIv3vV4ifQ_X9pCRaHc';
 /* URL веб-приложения GAS (Код.gs → doPost). Пусто — «Обновить» просто перезагружает страницу. */
@@ -1306,8 +1313,9 @@ function expiryBadge(ds){
   var dn=Math.round((d-new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate()))/864e5);
   var lbl=String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
   /* важное выделяется весом шрифта, а не цветом: скоро — жирная дата + «через N дн», истекла — бледная */
-  var cls=dn<0?'past':dn<=7?'soon':'',sub=dn<0?'истекла':dn===0?'сегодня':dn<=7?'через '+dn+' '+plural_(dn,'день','дня','дней'):'';
-  return'<span class="exp '+cls+'"><b>'+lbl+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</span>';
+  /* одна строка: истекла — тускло-красная обводка, сегодня и позже — светло-серая; детали — в подсказке */
+  var tip=dn<0?'истекла '+(-dn)+' '+plural_(-dn,'день','дня','дней')+' назад':dn===0?'истекает сегодня':'через '+dn+' '+plural_(dn,'день','дня','дней');
+  return'<span class="exp-pill'+(dn<0?' past':'')+'" title="'+tip+'">'+lbl+'</span>';
 }
 function si(active,dir){return'<span class="si">'+(active?(dir>0?ICO.chevUp:ICO.chevDown):ICO.sortBoth)+'</span>';}
 function todayISO(){return TODAY.toISOString().substring(0,10);}
