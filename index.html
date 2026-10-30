@@ -936,6 +936,7 @@ button:focus-visible,a:focus-visible,.cb-trig:focus-visible,.seg-b:focus-visible
 .lb-cli td{vertical-align:middle;}
 .lb-cli .mgr{white-space:nowrap;font-size:12px;color:var(--text-2);}
 .form-row>.field{min-width:0;}.form-row .field input{width:100%;min-width:0;box-sizing:border-box;}
+[data-theme="light"]{--s8:#64748b;}[data-theme="dark"]{--s8:#8a94a8;}
 </style>
 </head>
 <body>
@@ -950,7 +951,7 @@ window.togglePw=function(id,btn){var inp=document.getElementById(id);if(!inp)ret
    Безопасность: в браузере только publishable-ключ (публичный по определению)
    + токен залогиненного сотрудника. Без логина RLS не отдаёт ничего.
    Сервисный ключ живёт только в GAS и Edge Functions. */
-var APP_VERSION='2026-10-31.8';
+var APP_VERSION='2026-10-31.9';
 var SB_URL='https://qhpyrlhugpqgojwmarrw.supabase.co';
 var SB_PUB='sb_publishable_0YlWIjJNZqw0pIv3vV4ifQ_X9pCRaHc';
 /* URL веб-приложения GAS (Код.gs → doPost). Пусто — «Обновить» просто перезагружает страницу. */
@@ -2331,7 +2332,8 @@ var SOURCES=[
   {k:'contractor',l:'Подрядчик',i:'briefcase'},
   {k:'referral',l:'Рекомендация',i:'users'},
   {k:'self',l:'Самостоятельный поиск',i:'search'},
-  {k:'seeding',l:'Наши посевы',i:'sprout'}
+  {k:'seeding',l:'Наши посевы',i:'sprout'},
+  {k:'other',l:'Другое',i:'dots'}
 ];
 var SRC_BY={};SOURCES.forEach(function(s,i){s.n=i+1;s.c='var(--s'+(i+1)+')';SRC_BY[s.k]=s;});
 var SRC_NONE={k:'none',l:'Не указан',i:'alert',c:'var(--s0)',n:0};
