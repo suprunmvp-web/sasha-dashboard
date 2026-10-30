@@ -944,6 +944,19 @@ button:focus-visible,a:focus-visible,.cb-trig:focus-visible,.seg-b:focus-visible
 .lb-cli th:nth-child(n+2),.lb-cli td:nth-child(n+2){padding-left:40px;}
 .lb-cli .mgr{font-weight:600;color:var(--text);font-size:13px;}
 .lb-cli td:last-child,.lb-cli th:last-child{padding-left:32px;}
+
+/* ═══ v15 · приглушённая палитра данных (как красный в датах продления) ═══
+   кнопки и активные вкладки остаются в ярком фирменном синем — это действия, а не данные */
+[data-theme]{--red-m:color-mix(in oklab,var(--red) 70%,var(--text-2));--green-m:color-mix(in oklab,var(--green) 70%,var(--text-2));--blue-m:color-mix(in oklab,var(--accent) 70%,var(--text-2));--amber-m:color-mix(in oklab,var(--amber) 70%,var(--text-2));}
+.rate-bar .g,.mbar.split .g,.sa-fill .g,.sa-lg i.g{background:var(--green-m)!important;}
+.rate-bar .b,.mbar.split .b,.sa-fill .b,.sa-lg i.b{background:var(--red-m)!important;}
+.mb-won .ico{color:var(--green-m)!important;} .mb-lost .ico{color:var(--red-m)!important;}
+.sg-A,.sg-B,.sg-C{color:var(--blue-m)!important;}
+.sg-A-f,.sg-B-f,.sg-C-f,.mo-tr .trk span{background:var(--blue-m)!important;}
+.mch-dot{border-color:var(--blue-m)!important;}
+.seg-b.good.on{color:var(--green-m)!important;border-color:var(--green-m)!important;}
+.seg-b.bad.on{color:var(--red-m)!important;border-color:var(--red-m)!important;}
+.exp-pill.past{border-color:color-mix(in oklab,var(--red) 45%,var(--border));color:var(--red-m);}
 </style>
 </head>
 <body>
@@ -958,7 +971,7 @@ window.togglePw=function(id,btn){var inp=document.getElementById(id);if(!inp)ret
    Безопасность: в браузере только publishable-ключ (публичный по определению)
    + токен залогиненного сотрудника. Без логина RLS не отдаёт ничего.
    Сервисный ключ живёт только в GAS и Edge Functions. */
-var APP_VERSION='2026-10-31.10';
+var APP_VERSION='2026-10-31.11';
 var SB_URL='https://qhpyrlhugpqgojwmarrw.supabase.co';
 var SB_PUB='sb_publishable_0YlWIjJNZqw0pIv3vV4ifQ_X9pCRaHc';
 /* URL веб-приложения GAS (Код.gs → doPost). Пусто — «Обновить» просто перезагружает страницу. */
@@ -1300,7 +1313,7 @@ function fmtNum(n){n=r(n);var s=String(Math.abs(n)),res='';for(var i=0;i<s.lengt
 function fmt(n){return fmtNum(n)+' ₽';}
 function fmtMin(n){return fmtNum(r(n))+' мин';}
 function pct(f,p){return p>0?r(f/p*100):0;}
-function grad(p){var k=Math.max(0,Math.min(100,r(p||0)));var c=k<50?'color-mix(in oklch,var(--amber) '+(k*2)+'%,var(--red))':'color-mix(in oklch,var(--green) '+((k-50)*2)+'%,var(--amber))';return'color-mix(in oklab,'+c+' 72%,var(--surface))';}
+function grad(p){var k=Math.max(0,Math.min(100,r(p||0)));var c=k<50?'color-mix(in oklch,var(--amber-m) '+(k*2)+'%,var(--red-m))':'color-mix(in oklch,var(--green-m) '+((k-50)*2)+'%,var(--amber-m))';return'color-mix(in oklab,'+c+' 85%,var(--surface))';}
 function gradLegacy_(p){p=Math.max(0,Math.min(100,p))/100;var s=[[251,110,91],[245,181,68],[46,211,167]];var g=p<.5?0:1,t=p<.5?p/.5:(p-.5)/.5,a=s[g],b=s[g+1];return'rgb('+r(a[0]+(b[0]-a[0])*t)+','+r(a[1]+(b[1]-a[1])*t)+','+r(a[2]+(b[2]-a[2])*t)+')';}
 function daysTo(ds){if(!ds)return null;return Math.max(0,r((new Date(ds)-TODAY)/86400e3));}
 function fmtD(ds){if(!ds)return'—';var p=ds.substring(0,10).split('-');return p[2]+'.'+p[1]+'.'+p[0];}
@@ -2220,9 +2233,9 @@ function meetChart_(list){
       (max?'<span class="mch-peak">пик <b>'+max+'</b> · '+dayLbl_(days[peakI])+'</span>':'')+'</div>'+
     '<div class="mch-plot" role="img" aria-label="'+esc(summary)+'" onmousemove="mchMove(event,this)" onmouseleave="mchLeave(this)">'+
       '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">'+
-        '<defs><linearGradient id="mchg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" style="stop-color:var(--accent);stop-opacity:.22"/><stop offset="100%" style="stop-color:var(--accent);stop-opacity:0"/></linearGradient></defs>'+
+        '<defs><linearGradient id="mchg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" style="stop-color:var(--blue-m);stop-opacity:.22"/><stop offset="100%" style="stop-color:var(--accent);stop-opacity:0"/></linearGradient></defs>'+
         '<path d="'+area+'" style="fill:url(#mchg)"/>'+
-        '<path d="'+line+'" style="fill:none;stroke:var(--accent);stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round" vector-effect="non-scaling-stroke"/>'+
+        '<path d="'+line+'" style="fill:none;stroke:var(--blue-m);stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round" vector-effect="non-scaling-stroke"/>'+
       '</svg>'+
       (total?'':'<div class="mch-empty">Встреч за период нет</div>')+
       '<div class="mch-guide"></div><div class="mch-dot"></div><div class="mch-tip"></div>'+
