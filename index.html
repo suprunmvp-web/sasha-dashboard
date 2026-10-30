@@ -530,8 +530,23 @@ button:focus-visible,a:focus-visible,.cb-trig:focus-visible,.seg-b:focus-visible
 @media(max-width:760px){.k4{grid-template-columns:1fr 1fr!important;}.form-row{flex-direction:column;gap:0;}.sbox{min-width:0;width:100%;}.cb{min-width:0;width:100%;}}
 /* ═══ v3: встречи — график по дням, карточка встречи ═══ */
 .mk-grid{display:grid;grid-template-columns:1fr 1fr 2fr;gap:12px;margin-bottom:1.5rem;}
-.rate-bar{height:4px;border-radius:2px;background:var(--red-bg);overflow:hidden;margin-top:10px;}
-.rate-bar span{display:block;height:100%;background:var(--green);border-radius:2px;}
+.rate-bar{display:flex;gap:3px;height:6px;margin-top:12px;}
+.rate-bar span{display:block;height:100%;border-radius:3px;min-width:6px;}
+.rate-bar .g{background:var(--green);}
+.rate-bar .b{background:var(--red);}
+.mk-grid{grid-template-columns:1fr 1fr 1fr 2fr!important;}
+.seg-stat{display:flex;flex-direction:column;gap:7px;margin-top:4px;}
+.seg-row{display:grid;grid-template-columns:22px 1fr 26px;align-items:center;gap:8px;font-size:12px;color:var(--text-2);}
+.seg-row b{font-variant-numeric:tabular-nums;text-align:right;color:var(--text);font-weight:600;}
+.seg-row .trk{height:6px;border-radius:3px;background:var(--surface-3);overflow:hidden;}
+.seg-row .trk span{display:block;height:100%;border-radius:3px;}
+.sgb{display:inline-flex;align-items:center;justify-content:center;width:22px;height:20px;border-radius:6px;font-size:11px;font-weight:700;}
+.sg-A{background:var(--accent-bg);color:var(--accent);} .sg-A-f{background:var(--accent);}
+.sg-B{background:var(--green-bg);color:var(--green);} .sg-B-f{background:var(--green);}
+.sg-C{background:var(--surface-3);color:var(--text-2);} .sg-C-f{background:var(--text-3);}
+.seg-b .sgb{margin-right:2px;}
+@media(max-width:1100px){.mk-grid{grid-template-columns:1fr 1fr 1fr!important;}.mk-grid .mch{grid-column:1/-1;}}
+@media(max-width:760px){.mk-grid{grid-template-columns:1fr 1fr!important;}}
 .mch{padding:16px 18px 12px!important;display:flex;flex-direction:column;}
 .mch-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;}
 .mch-peak{font-size:11px;color:var(--text-3);}
@@ -605,6 +620,12 @@ button:focus-visible,a:focus-visible,.cb-trig:focus-visible,.seg-b:focus-visible
 .mc-vlink .ico{width:13px;height:13px;}
 .mc-vnote{font-size:11px;color:var(--text-3);margin-bottom:14px;}
 @media(max-width:760px){.mc-ava{width:44px;height:44px;font-size:16px;}}
+.refresh-btn{position:relative;overflow:hidden;}
+.refresh-btn.syncing{cursor:wait;color:var(--accent);border-color:var(--accent);opacity:1;}
+.rb-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--accent-bg);box-shadow:inset -2px 0 0 var(--accent);}
+.rb-lbl{position:relative;display:inline-flex;align-items:center;gap:6px;}
+.refresh-btn.syncing .ico{animation:spin 1s linear infinite;}
+@media(prefers-reduced-motion:reduce){.refresh-btn.syncing .ico{animation:none;}}
 </style>
 </head>
 <body>
@@ -619,7 +640,7 @@ window.togglePw=function(id,btn){var inp=document.getElementById(id);if(!inp)ret
    Безопасность: в браузере только publishable-ключ (публичный по определению)
    + токен залогиненного сотрудника. Без логина RLS не отдаёт ничего.
    Сервисный ключ живёт только в GAS и Edge Functions. */
-var APP_VERSION='2026-10-30.3';
+var APP_VERSION='2026-10-30.4';
 var SB_URL='https://qhpyrlhugpqgojwmarrw.supabase.co';
 var SB_PUB='sb_publishable_0YlWIjJNZqw0pIv3vV4ifQ_X9pCRaHc';
 /* URL веб-приложения GAS (Код.gs → doPost). Пусто — «Обновить» просто перезагружает страницу. */
@@ -758,19 +779,44 @@ function startVersionWatch(){
   },5*60*1000);
 }
 /* «Обновить»: синк организаций с платформы (GAS) → перезагрузка мимо кэша */
+/* Ожидаемая длительность = среднее последних 5 синков (храним в браузере), по умолчанию 15 сек */
+function syncExpected_(){try{var a=JSON.parse(localStorage.getItem('sasha_sync_ms')||'[]');if(a.length)return Math.round(a.reduce(function(x,y){return x+y;},0)/a.length);}catch(e){}return 15000;}
+function syncRemember_(ms){try{var a=JSON.parse(localStorage.getItem('sasha_sync_ms')||'[]');a.push(ms);localStorage.setItem('sasha_sync_ms',JSON.stringify(a.slice(-5)));}catch(e){}}
+function syncBtnHtml_(){
+  if(!S.sync)return'<button class="refresh-btn" onclick="syncAndReload(this)" title="Подтянуть новых сотрудников и организации с платформы и перезагрузить">'+ICO.refresh+' Обновить</button>';
+  var el=Date.now()-S.sync.t0,left=Math.max(300,S.sync.exp-el),p=S.sync.done?92:Math.min(92,el/S.sync.exp*92);
+  return'<button class="refresh-btn syncing" disabled aria-busy="true"><span class="rb-fill" data-left="'+left+'" style="width:'+p+'%"></span><span class="rb-lbl">'+ICO.refresh+' '+(S.sync.done?'Готово':'Обновляю…')+'</span></button>';
+}
+/* шкала идёт до 92% за ожидаемое время, последние 8% — когда синк реально закончился */
+function syncKick_(){
+  var f=document.querySelector('.refresh-btn.syncing .rb-fill');if(!f||!S.sync)return;
+  var done=S.sync.done,left=+f.dataset.left;
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+    f.style.transition=done?'width .3s ease-out':'width '+left+'ms cubic-bezier(.25,.6,.35,1)';
+    f.style.width=done?'100%':'92%';
+  });});
+}
 window.syncAndReload=function(btn){
   if(!SYNC_URL){hardReload();return;}
-  if(btn){btn.disabled=true;btn.innerHTML=ICO.refresh+' Синхронизирую…';}
-  var done=false,guard=setTimeout(function(){if(!done)hardReload();},45000);
+  if(S.sync)return;
+  S.sync={t0:Date.now(),exp:syncExpected_(),done:false};
+  if(btn)btn.outerHTML=syncBtnHtml_();
+  syncKick_();
+  var fin=false,guard=setTimeout(function(){if(!fin)hardReload();},60000);
   ensureToken().then(function(tok){
     /* без своих заголовков → «простой» запрос, без CORS-preflight к Google */
     return fetch(SYNC_URL,{method:'POST',body:JSON.stringify({access_token:tok})});
   }).then(function(r){return r.json();}).catch(function(){return null;}).then(function(res){
-    done=true;clearTimeout(guard);
+    fin=true;clearTimeout(guard);
+    syncRemember_(Date.now()-S.sync.t0);
+    S.sync.done=true;
+    var b=document.querySelector('.refresh-btn.syncing');if(b)b.outerHTML=syncBtnHtml_();
+    syncKick_();
     if(res&&res.status==='error')toast('Синк не прошёл: '+(res.message||''),'err');
-    setTimeout(hardReload,res&&res.status==='error'?1500:0);
+    setTimeout(hardReload,res&&res.status==='error'?1500:400);
   });
 };
+
 function showLogin(err){
   var el=document.getElementById('login-screen');
   el.style.display='flex';
@@ -926,7 +972,7 @@ var S={
   cliSortKey:'fact',cliSortDir:-1,
   sumSort:'fact',sumSortDir:-1,
   meetings:[],
-  mDept:'all',mEmp:'all',mRating:'all',mSearch:'',mLimit:50,
+  mDept:'all',mEmp:'all',mRating:'all',mSeg:'all',mSearch:'',mLimit:50,
   authUsers:null,
 };
 /* ═══ UTILS ═══ */
@@ -1268,7 +1314,7 @@ function roleBar(){
   var seg=tabs.map(function(t){return'<button class="role-btn'+(S.role===t[0]?' on':'')+'" onclick="setRole(\''+t[0]+'\')">'+t[1]+'</button>';}).join('');
   var eid=ctxEmpId(),did=ctxDeptId();
   return'<div class="rolebar"><div class="role-seg">'+seg+'</div><div class="bar-right">'+
-    '<button class="refresh-btn" onclick="syncAndReload(this)" title="Подтянуть новые организации с платформы и перезагрузить">'+ICO.refresh+' Обновить</button>'+
+    syncBtnHtml_()+
     '<button class="deal-btn" onclick="addDeal(\''+eid+'\',\''+did+'\')">'+ICO.plus+' Сделка</button>'+
     '<button class="deal-btn ghost-acc" onclick="addMeeting(\''+eid+'\')">'+ICO.plus+' Встреча</button>'+
     '<button class="icon-btn" onclick="toggleTheme()">'+(S.theme==='dark'?ICO.sun:ICO.moon)+'</button>'+
@@ -1284,6 +1330,7 @@ function setApp(h){
   var app=document.getElementById('app');
   var k=_viewKey(),nav=k!==_lastViewKey;_lastViewKey=k;
   app.innerHTML=roleBar()+h;
+  if(S.sync)syncKick_();
   if(typeof _tip!=='undefined'&&_tip)_tip.style.display='none';
   app.classList.toggle('busy',!S.periodReady);
   clearTimeout(_animTimer);
@@ -1733,6 +1780,15 @@ function searchBox_(id,ph,val,oninput,full){
    Менеджер ставит оценку (good/bad). Компания — текстом, как назвал менеджер.
    Результата у встречи нет: только факт, оценка и запись. */
 var RATING={good:'Хорошая',bad:'Плохая'};
+var SEGMENTS={A:'Крупный',B:'Средний',C:'Мелкий'};
+function segBadge_(s){return s&&SEGMENTS[s]?'<span class="sgb sg-'+s+'" title="'+SEGMENTS[s]+'">'+s+'</span>':'<span class="muted">—</span>';}
+function segStat_(list){
+  var c={A:0,B:0,C:0};list.forEach(function(m){if(c[m.segment]!=null)c[m.segment]++;});
+  var mx=Math.max(1,c.A,c.B,c.C);
+  return'<div class="seg-stat">'+['A','B','C'].map(function(k){
+    return'<div class="seg-row" title="'+SEGMENTS[k]+'">'+segBadge_(k)+'<div class="trk"><span class="sg-'+k+'-f" style="width:'+(c[k]/mx*100)+'%"></span></div><b>'+c[k]+'</b></div>';
+  }).join('')+'</div>';
+}
 function fmtDT(ts){if(!ts)return'—';var d=new Date(ts);if(isNaN(d))return'—';return d.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
 function safeUrl(u){return /^https?:\/\//i.test(String(u||''))?u:'#';}
 var _orgIdx=null,_orgIdxSrc=null;
@@ -1857,6 +1913,7 @@ function meetFiltered_(){
     if(S.mDept!=='all'&&m.dept_id!==S.mDept)return false;
     if(S.mEmp!=='all'&&m.employee_id!==S.mEmp)return false;
     if(S.mRating!=='all'&&m.rating!==S.mRating)return false;
+    if(S.mSeg!=='all'&&m.segment!==S.mSeg)return false;
     if(q&&meetOrgName(m).toLowerCase().indexOf(q)<0&&String(m.company_name||'').toLowerCase().indexOf(q)<0)return false;
     return true;
   }).sort(function(a,b){if(a.held_at!==b.held_at)return a.held_at<b.held_at?1:-1;return String(a.created_at)<String(b.created_at)?1:-1;});
@@ -1882,15 +1939,17 @@ function renderMeetings(){
   var kH=
     '<div class="ck"><div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><span class="ck-l" style="margin:0">Проведено встреч</span>'+(prev>0?deltaTag(a.total,prev):'')+'</div>'+
       '<div class="ck-v num">'+a.total+'</div><div class="ck-s">'+(a.empN?a.empN+' '+plural_(a.empN,'менеджер','менеджера','менеджеров')+' · ≈ '+(Math.round(a.total/a.empN*10)/10)+' на каждого':'—')+'</div></div>'+
-    '<div class="ck"><div class="ck-l">Хорошие встречи</div><div class="ck-v num" style="color:'+(rated?grad(a.good/rated*100):'var(--text)')+'">'+(rated?r(a.good/rated*100)+'%':'—')+'</div>'+
-      '<div class="ck-s">'+a.good+' хороших · '+a.bad+' плохих</div>'+
-      (rated?'<div class="rate-bar"><span style="width:'+(a.good/rated*100)+'%"></span></div>':'')+'</div>'+
+    '<div class="ck"><div class="ck-l">Хорошие встречи</div><div class="ck-v num">'+(rated?r(a.good/rated*100)+'%':'—')+'</div>'+
+      '<div class="ck-s">'+a.good+' '+plural_(a.good,'хорошая','хороших','хороших')+' · '+a.bad+' '+plural_(a.bad,'плохая','плохих','плохих')+'</div>'+
+      (rated?'<div class="rate-bar">'+(a.good?'<span class="g" style="flex:'+a.good+'"></span>':'')+(a.bad?'<span class="b" style="flex:'+a.bad+'"></span>':'')+'</div>':'')+'</div>'+
+    '<div class="ck"><div class="ck-l">Сегменты клиентов</div>'+segStat_(list)+'</div>'+
     meetChart_(list);
   var ratings=[['all','Все'],['good','Хорошие'],['bad','Плохие']].map(function(t){return'<button class="pill'+(S.mRating===t[0]?' on':'')+'" onclick="setMF(\'mRating\',\''+t[0]+'\')">'+t[1]+'</button>';}).join('');
   var filters='<div class="m-filters">'+
     combo({id:'mf-dept',opts:deptComboOpts_('Все отделы'),value:S.mDept,onChange:function(v){setMF('mDept',v);}})+
     combo({id:'mf-emp',opts:empComboOpts_(S.mDept,'Все сотрудники'),value:S.mEmp,searchPh:'Поиск по ФИО…',onChange:function(v){setMF('mEmp',v);}})+
     '<div class="pill-row">'+ratings+'</div>'+
+    combo({id:'mf-seg',opts:[{v:'all',l:'Все сегменты'},{v:'A',l:'A · Крупный'},{v:'B',l:'B · Средний'},{v:'C',l:'C · Мелкий'}],value:S.mSeg,search:false,onChange:function(v){setMF('mSeg',v);}})+
     searchBox_('m-srch','Поиск по компании…',S.mSearch,'setMSearch(this.value)')+
     '<span style="flex:1"></span><button class="btn primary mi" onclick="exportMeetings()">'+ICO.download+' XLSX</button>'+
   '</div>';
@@ -1901,12 +1960,13 @@ function renderMeetings(){
       '<td class="muted num nw">'+fmtD(m.held_at)+'</td>'+
       '<td><div class="cell2"><span class="strong">'+esc(empNameById_(m.employee_id))+'</span><span>'+esc(deptNameById_(m.dept_id))+'</span></div></td>'+
       '<td class="wrap">'+esc(meetOrgName(m))+'</td>'+
+      '<td class="c">'+segBadge_(m.segment)+'</td>'+
       '<td class="nw">'+ratingBadge_(m)+'</td>'+
       '<td class="c">'+rec+'</td>'+
     '</tr>';
   }).join('');
   var empty=S.meetErr?'<div class="err-banner">'+ICO.alert+' '+esc(S.meetErr)+'</div>':'<div class="empty-state">Встреч за период нет.<br>Добавь первую кнопкой <b>+ Встреча</b> сверху.</div>';
-  var table=shown.length?'<table class="tbl"><thead><tr><th>Дата</th><th>Сотрудник</th><th>Компания</th><th>Оценка</th><th class="c">Запись</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+  var table=shown.length?'<table class="tbl"><thead><tr><th>Дата</th><th>Сотрудник</th><th>Компания</th><th class="c">Сегмент</th><th>Оценка</th><th class="c">Запись</th></tr></thead><tbody>'+rows+'</tbody></table>'+
     (list.length>shown.length?'<div style="text-align:center;margin-top:14px"><button class="btn" onclick="moreMeetings()">Показать ещё ('+(list.length-shown.length)+')</button></div>':''):empty;
   setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="a">AI</span> · Встречи</span></div>'+calTrigger()+'</div>'+
     (S.loadErr?'<div class="err-banner">'+ICO.alert+' '+esc(S.loadErr)+'</div>':'')+
@@ -1918,11 +1978,11 @@ window.exportMeetings=function(){
   if(!list.length){toast('Нет встреч для выгрузки');return;}
   var rows=list.map(function(m){return{
     'Дата':m.held_at,'Сотрудник':empNameById_(m.employee_id),'Отдел':deptNameById_(m.dept_id),
-    'Компания':meetOrgName(m),'Оценка':RATING[m.rating]||'','Запись':m.recording_url||''};});
+    'Компания':meetOrgName(m),'Сегмент':m.segment?m.segment+' · '+SEGMENTS[m.segment]:'','Оценка':RATING[m.rating]||'','Запись':m.recording_url||''};});
   var by={};
   list.forEach(function(m){
-    var k=m.employee_id;var e=by[k]||(by[k]={'Сотрудник':empNameById_(k),'Отдел':deptNameById_(m.dept_id),'Всего':0,'Хорошие':0,'Плохие':0,'Хороших, %':0});
-    e['Всего']++;if(m.rating==='good')e['Хорошие']++;if(m.rating==='bad')e['Плохие']++;
+    var k=m.employee_id;var e=by[k]||(by[k]={'Сотрудник':empNameById_(k),'Отдел':deptNameById_(m.dept_id),'Всего':0,'A':0,'B':0,'C':0,'Хорошие':0,'Плохие':0,'Хороших, %':0});
+    e['Всего']++;if(e[m.segment]!=null)e[m.segment]++;if(m.rating==='good')e['Хорошие']++;if(m.rating==='bad')e['Плохие']++;
   });
   var sum=Object.keys(by).map(function(k){var e=by[k],d=e['Хорошие']+e['Плохие'];e['Хороших, %']=d?r(e['Хорошие']/d*100):'';return e;}).sort(function(x,y){return y['Всего']-x['Всего'];});
   var wb=XLSX.utils.book_new();
@@ -1945,6 +2005,7 @@ window.meetingForm=function(meetingId,preEmp){
     '<div class="field" style="flex:1.5"><label>Кто провёл *</label>'+combo({id:'mt-emp',opts:opts,value:empId,cls:'full',searchPh:'Поиск по ФИО…',onChange:function(){validateMeeting();}})+'</div></div>'+
     '<div class="field"><label for="mt-company">Компания *</label><input id="mt-company" placeholder="Название компании клиента" value="'+esc(ex?ex.company_name:'')+'" autocomplete="off"></div>'+
     '<div class="field"><label for="mt-url">Ссылка на запись</label><input id="mt-url" type="url" placeholder="https://telemost.yandex.ru/…" value="'+esc(ex&&ex.recording_url||'')+'"></div>'+
+    '<div class="field"><label>Сегмент клиента *</label>'+segHtml('mt-seg',[{v:'A',l:'<span class="sgb sg-A">A</span>Крупный'},{v:'B',l:'<span class="sgb sg-B">B</span>Средний'},{v:'C',l:'<span class="sgb sg-C">C</span>Мелкий'}],ex?ex.segment:'',function(){validateMeeting();})+'</div>'+
     '<div class="field"><label>Как прошла встреча *</label>'+segHtml('mt-rating',[{v:'good',l:ICO.thumbUp+' Хорошая',cls:'good'},{v:'bad',l:ICO.thumbDown+' Плохая',cls:'bad'}],ex?ex.rating:'',function(){validateMeeting();})+'</div>'+
     '<div id="mt-err" class="field-err" role="alert"></div>';
   openModal(ex?'Встреча · правка':'Новая встреча',body,saveMeeting);
@@ -1958,7 +2019,7 @@ function validateMeeting(){
   var btn=document.getElementById('msave');if(!btn||!_mc)return;
   var err='',url=mval_('mt-url').trim();
   if(url&&!/^https?:\/\//i.test(url))err='Ссылка должна начинаться с https://';
-  var ok=!err&&mval_('mt-date')&&mval_('mt-emp')&&mval_('mt-company').trim()&&mval_('mt-rating');
+  var ok=!err&&mval_('mt-date')&&mval_('mt-emp')&&mval_('mt-company').trim()&&mval_('mt-rating')&&mval_('mt-seg');
   btn.disabled=!ok;
   var e=document.getElementById('mt-err');if(e)e.textContent=err;
 }
@@ -1971,7 +2032,8 @@ function saveMeeting(){
     dept_id:(ex&&ex.employee_id===empId)?ex.dept_id:(emp?emp.dept_id:null),
     company_name:mval_('mt-company').trim(),
     recording_url:mval_('mt-url').trim()||null,
-    rating:mval_('mt-rating')||null
+    rating:mval_('mt-rating')||null,
+    segment:mval_('mt-seg')||null
   };
   btn.disabled=true;btn.textContent='Сохраняю…';
   var req=_mc.id?sbPatch('meetings','id=eq.'+_mc.id,row)
@@ -2013,7 +2075,7 @@ window.openMeeting=function(id,tab){
   var mgrName=empNameById_(m.employee_id);
   var head='<div class="mc-head"><div><div class="mc-title">'+esc(meetOrgName(m))+'</div>'+
     '<div class="mc-meta">'+ICO.calendar+' '+fmtD(m.held_at)+'<span class="mc-sep"></span>'+esc(mgrName)+'<span class="mc-sep"></span>'+esc(deptNameById_(m.dept_id))+'</div></div>'+
-    '<div class="mc-badges">'+ratingBadge_(m)+'</div><button class="icon-act mc-x" onclick="closeModal()" aria-label="Закрыть">'+ICO.fire+'</button></div>';
+    '<div class="mc-badges">'+(m.segment?'<span class="mbadge mb-neu">'+segBadge_(m.segment)+' '+SEGMENTS[m.segment]+'</span>':'')+ratingBadge_(m)+'</div><button class="icon-act mc-x" onclick="closeModal()" aria-label="Закрыть">'+ICO.fire+'</button></div>';
   var ini=function(n){return String(n||'?').split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase();};
   var recOpen=m.recording_url?'onclick="window.open(\''+esc(safeUrl(m.recording_url))+'\',\'_blank\')"':'';
   var player='<div class="mc-video'+(m.recording_url?' has':'')+'" '+recOpen+' role="button" aria-label="Видео встречи">'+
