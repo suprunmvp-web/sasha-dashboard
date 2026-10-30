@@ -912,6 +912,30 @@ button:focus-visible,a:focus-visible,.cb-trig:focus-visible,.seg-b:focus-visible
   .bar-right .rb-t{display:none;}
   .bar-right .save-hint:not(.show){display:none;}
 }
+/* ═══ v12 ═══ */
+/* поля форм — белые */
+.field input,.field select,.field textarea,.cli-search{background:var(--surface)!important;}
+/* выбранный вариант (источник, сегмент, тип события по умолчанию) — светлый, без тёмной заливки */
+.seg-b.on,.seg-b.sa.on,.seg-b.sb.on,.seg-b.sc.on,.seg-b.src-chip.on{background:var(--accent-bg)!important;border-color:var(--accent)!important;color:var(--text)!important;}
+.seg-b.src-chip.on .ico{color:var(--accent)!important;}
+.seg-b.good.on{background:var(--green-bg)!important;border-color:var(--green)!important;color:var(--green)!important;}
+.seg-b.bad.on{background:var(--red-bg)!important;border-color:var(--red)!important;color:var(--red)!important;}
+/* сегменты — фирменный синий */
+.sg-A,.sg-B,.sg-C{background:var(--accent-bg)!important;color:var(--accent)!important;}
+.sg-A-f,.sg-B-f,.sg-C-f{background:var(--accent)!important;}
+/* стрелки динамики — всегда чёрные */
+.dlt-ico,.dlt-up .dlt-ico,.dlt-down .dlt-ico,.delta-badge svg,.delta-badge .dlt-ico,.delta-badge.db-up svg,.delta-badge.db-down svg{color:var(--text)!important;stroke:var(--text)!important;}
+/* продление подписки — без светофора: дата + подпись */
+.exp{display:inline-flex;flex-direction:column;align-items:flex-end;line-height:1.25;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.exp b{font-weight:500;color:var(--text-2);font-size:13px;}
+.exp small{font-size:11px;color:var(--text-3);}
+.exp.soon b{color:var(--text);font-weight:600;}
+.exp.past b{color:var(--text-3);font-weight:400;}
+.days-badge.db-red,.days-badge.db-amb,.days-badge.db-grn{background:var(--surface-2)!important;color:var(--text-2)!important;}
+/* лидерборд → клиенты */
+.lb-cli td{vertical-align:middle;}
+.lb-cli .mgr{white-space:nowrap;font-size:12px;color:var(--text-2);}
+.form-row>.field{min-width:0;}.form-row .field input{width:100%;min-width:0;box-sizing:border-box;}
 </style>
 </head>
 <body>
@@ -926,7 +950,7 @@ window.togglePw=function(id,btn){var inp=document.getElementById(id);if(!inp)ret
    Безопасность: в браузере только publishable-ключ (публичный по определению)
    + токен залогиненного сотрудника. Без логина RLS не отдаёт ничего.
    Сервисный ключ живёт только в GAS и Edge Functions. */
-var APP_VERSION='2026-10-31.7';
+var APP_VERSION='2026-10-31.8';
 var SB_URL='https://qhpyrlhugpqgojwmarrw.supabase.co';
 var SB_PUB='sb_publishable_0YlWIjJNZqw0pIv3vV4ifQ_X9pCRaHc';
 /* URL веб-приложения GAS (Код.gs → doPost). Пусто — «Обновить» просто перезагружает страницу. */
@@ -1276,13 +1300,13 @@ function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b
 function calLabel(){var f=S.rangeFrom,t=S.rangeTo;if(f.getFullYear()===t.getFullYear()&&f.getMonth()===t.getMonth()&&f.getDate()===t.getDate())return MN[f.getMonth()]+' '+f.getDate()+', '+f.getFullYear();return MN[f.getMonth()]+' '+f.getDate()+' — '+MN[t.getMonth()]+' '+t.getDate()+', '+t.getFullYear();}
 function daysBadge(dn){if(dn===null)return'<span class="days-badge db-neu">—</span>';if(dn<=3)return'<span class="days-badge db-red">'+dn+'д</span>';if(dn<=7)return'<span class="days-badge db-amb">'+dn+'д</span>';if(dn<=14)return'<span class="days-badge db-neu">'+dn+'д</span>';return'<span class="days-badge db-grn">'+dn+'д</span>';}
 function expiryBadge(ds){
-  if(!ds)return'<span class="days-badge db-neu">—</span>';
-  var d=new Date(ds.substring(0,10)+'T00:00:00');if(isNaN(d))return'<span class="days-badge db-neu">—</span>';
+  if(!ds)return'<span class="muted">—</span>';
+  var d=new Date(ds.substring(0,10)+'T00:00:00');if(isNaN(d))return'<span class="muted">—</span>';
   var dn=Math.round((d-new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate()))/864e5);
-  var lbl=d.getDate().toString().padStart(2,'0')+'.'+(d.getMonth()+1).toString().padStart(2,'0')+'.'+d.getFullYear();
-  var cls=dn<0?'db-red':dn<=3?'db-red':dn<=7?'db-amb':dn<=14?'db-neu':'db-grn';
-  var suffix=dn<0?' <span style="opacity:.8"></span>':'';
-  return'<span class="days-badge '+cls+'" title="'+(dn<0?''+Math.abs(dn)+' дн':'через '+dn+' дн')+'">'+lbl+suffix+'</span>';
+  var lbl=String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
+  /* важное выделяется весом шрифта, а не цветом: скоро — жирная дата + «через N дн», истекла — бледная */
+  var cls=dn<0?'past':dn<=7?'soon':'',sub=dn<0?'истекла':dn===0?'сегодня':dn<=7?'через '+dn+' '+plural_(dn,'день','дня','дней'):'';
+  return'<span class="exp '+cls+'"><b>'+lbl+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</span>';
 }
 function si(active,dir){return'<span class="si">'+(active?(dir>0?ICO.chevUp:ICO.chevDown):ICO.sortBoth)+'</span>';}
 function todayISO(){return TODAY.toISOString().substring(0,10);}
@@ -1748,13 +1772,13 @@ function renderLb(){
       var barW=Math.min(100,c.fact/maxFact*100);
       return'<tr>'+
         '<td><span style="font-size:12px;font-weight:500;color:var(--text-3);margin-right:10px">'+(i+1)+'</span><a class="ext-link" href="'+esc(c.url)+'" target="_blank">'+esc(c.name)+'</a></td>'+
-        '<td style="font-size:12px;color:var(--text-2)">'+esc(c.mgr)+'</td>'+
-        '<td class="r"><span class="strong num">'+fmt(c.fact)+'</span><div class="inbar" style="width:80px"><div class="inbar-f" style="width:'+barW+'%;background:var(--accent)"></div></div></td>'+
+        '<td class="mgr">'+esc(c.mgr)+'</td>'+
+        '<td class="r nw"><span class="strong num">'+fmt(c.fact)+'</span></td>'+
         '<td class="r muted num">'+fmtMin(c.minLeft)+'</td>'+
         '<td class="r">'+expiryBadge(c.expiry)+'</td>'+
       '</tr>';
     }).join(''):'<tr><td colspan="5"><div class="empty-state">Нет данных за период</div></td></tr>';
-    html='<div class="panel"><table class="tbl lb-tbl"><thead><tr>'+cth+'</tr></thead><tbody>'+crows+'</tbody></table></div>';
+    html='<div class="panel"><table class="tbl lb-tbl lb-cli"><thead><tr>'+cth+'</tr></thead><tbody>'+crows+'</tbody></table></div>';
   }
   setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="a">AI</span></span></div>'+calTrigger()+'</div>'+
     (S.loadErr?'<div class="err-banner">'+ICO.alert+' '+esc(S.loadErr)+'</div>':'')+tabBar+html);
@@ -2360,7 +2384,6 @@ function srcCard_(list){
   }).join('');
   return'<div class="panel sa-card'+(pin?' pinned':'')+'">'+head+
     '<div class="sa-row sa-head" aria-hidden="true"><span>Канал</span><span></span><span>Встреч</span><span>Хороших</span></div>'+body+
-    (empty.length?'<div class="sa-empty">Без встреч: '+empty.map(function(s){return esc(s.l);}).join(', ')+'</div>':'')+
   '</div>';
 }
 window.srcHi=function(){};
@@ -2801,7 +2824,8 @@ window.changeHireModal=function(supaId){
 };
 window.reassignEmp=function(supaId){
   var emp=RAW.employees.find(function(e){return e.id===supaId;});
-  var opts=[{v:'',l:'— без отдела —'}].concat(DB.depts.map(function(x){return{v:x.id,l:x.name};}));
+  var opts=[{v:'',l:'— без отдела —'}].concat(DB.depts.map(function(x){return{v:x.id,l:x.name,grp:(DB.archivedDepts||[]).length?'Отделы':''};}))
+    .concat((DB.archivedDepts||[]).map(function(x){return{v:x.id,l:x.name,sub:'архив',grp:'Архивные отделы'};}));
   openModal('Назначить в отдел','<p style="font-size:13px;color:var(--text-2);margin-bottom:14px">'+esc(emp?emp.name:'')+'</p><div class="field"><label>Отдел</label>'+combo({id:'re-d',opts:opts,value:emp&&emp.dept_id||'',cls:'full'})+'</div>',function(){var deptId=document.getElementById('re-d').value||null;closeModal();patchEmpSync(supaId,{dept_id:deptId||null},{dept_id:deptId||null});});
 };
 window.addEmpModal=function(){openModal('Добавить сотрудника','<p style="font-size:12px;color:var(--text-3);line-height:1.6">Сотрудники появляются после синка GAS syncAll. Ручное добавление — для тестирования.</p><div class="field" style="margin-top:12px"><label>Имя</label><input id="ae-n" placeholder="Иван Иванов"></div>',function(){closeModal();});};
@@ -2890,10 +2914,10 @@ function openDealModal(existing,preEmpId,preDeptId){
   var emps=RAW.employees.slice().sort(function(a,b){return a.name.localeCompare(b.name);});
   var initEmp=existing?existing.employee_id:(preEmpId||(CURRENT_USER&&CURRENT_USER.empId)||(emps[0]&&emps[0].id));
   var body=
-    '<div class="field"><label>Событие *</label>'+segHtml('dl-type',[{v:'payment',l:'Оплата'},{v:'refund',l:'Возврат'}],existing?(existing.event_type||'payment'):'payment',function(){validateDeal();})+'</div>'+
+    '<div class="field"><label>Событие *</label>'+segHtml('dl-type',[{v:'payment',l:'Оплата',cls:'good'},{v:'refund',l:'Возврат',cls:'bad'}],existing?(existing.event_type||'payment'):'payment',function(){validateDeal();})+'</div>'+
     '<div class="field"><label>Сотрудник *</label>'+combo({id:'dl-emp',opts:empComboOpts_(null,null),value:initEmp,cls:'full',searchPh:'Поиск по ФИО…',onChange:function(){dealEmpChanged();}})+'</div>'+
     '<div class="field"><label>Клиент *</label><div id="dl-cwrap"></div></div>'+
-    '<div style="display:flex;gap:10px"><div class="field" style="flex:1"><label>Сумма ₽ *</label><input id="dl-amt" type="number" placeholder="0"></div><div class="field" style="flex:1"><label>Мотивация % *</label><input id="dl-pct" type="number" placeholder="10" step="0.5"></div></div>'+
+    '<div class="form-row" style="display:flex;gap:10px"><div class="field" style="flex:1"><label>Сумма ₽ *</label><input id="dl-amt" type="number" placeholder="0"></div><div class="field" style="flex:1"><label>Мотивация % *</label><input id="dl-pct" type="number" placeholder="10" step="0.5"></div></div>'+
     '<div class="field"><label>Дата *</label><input id="dl-date" type="date" value="'+dateISO(TODAY)+'"></div>'+
     '<div class="field"><label>Комментарий</label><input id="dl-note" placeholder="—"></div>';
   _dc={orgId:null,name:'',search:''};
