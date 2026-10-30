@@ -589,6 +589,22 @@ button:focus-visible,a:focus-visible,.cb-trig:focus-visible,.seg-b:focus-visible
 .mc-foot .mc-muted{margin-right:8px;}
 @media(max-width:760px){.mk-grid{grid-template-columns:1fr 1fr;}.mk-grid .mch{grid-column:span 2;min-height:170px;}.mc-foot .mc-muted{display:none;}}
 
+.mc-video{position:relative;aspect-ratio:16/9;max-height:340px;width:100%;border-radius:12px;overflow:hidden;background:#0E1118;margin-bottom:6px;}
+.mc-video.has{cursor:pointer;}
+.mc-tiles{position:absolute;inset:0;display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:6px;}
+.mc-tile{position:relative;border-radius:8px;background:#1A1F2B;display:flex;align-items:center;justify-content:center;}
+.mc-ava{width:64px;height:64px;border-radius:50%;background:#3D6BF5;color:#fff;font-size:22px;font-weight:600;display:flex;align-items:center;justify-content:center;}
+.mc-ava.c{background:#2E7D6B;}
+.mc-tn{position:absolute;left:10px;bottom:10px;font-size:12px;color:#fff;background:rgba(0,0,0,.45);padding:3px 8px;border-radius:6px;max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mc-vplay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,.92);color:#0E1118;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 24px rgba(0,0,0,.35);transition:transform .15s ease-out;}
+.mc-video.has:hover .mc-vplay{transform:translate(-50%,-50%) scale(1.06);}
+.mc-vplay .ico{width:22px;height:22px;fill:currentColor;stroke:none;margin-left:3px;}
+.mc-vbar{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:10px;padding:22px 14px 10px;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;font-size:11px;font-variant-numeric:tabular-nums;}
+.mc-vtrack{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.3);}
+.mc-vlink{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;white-space:nowrap;}
+.mc-vlink .ico{width:13px;height:13px;}
+.mc-vnote{font-size:11px;color:var(--text-3);margin-bottom:14px;}
+@media(max-width:760px){.mc-ava{width:44px;height:44px;font-size:16px;}}
 </style>
 </head>
 <body>
@@ -1998,10 +2014,16 @@ window.openMeeting=function(id,tab){
   var head='<div class="mc-head"><div><div class="mc-title">'+esc(meetOrgName(m))+'</div>'+
     '<div class="mc-meta">'+ICO.calendar+' '+fmtD(m.held_at)+'<span class="mc-sep"></span>'+esc(mgrName)+'<span class="mc-sep"></span>'+esc(deptNameById_(m.dept_id))+'</div></div>'+
     '<div class="mc-badges">'+ratingBadge_(m)+'</div><button class="icon-act mc-x" onclick="closeModal()" aria-label="Закрыть">'+ICO.fire+'</button></div>';
-  var player='<div class="mc-player"><button class="mc-pbtn" '+(m.recording_url?'onclick="window.open(\''+esc(safeUrl(m.recording_url))+'\',\'_blank\')" title="Открыть запись"':'disabled')+' aria-label="Воспроизвести">'+ICO.play+'</button>'+
-    '<div class="mc-ptrack"><div class="mc-pbar"><span style="width:0%"></span></div><div class="mc-ptime"><span>00:00</span><span>'+(demo?'42:17':'—')+'</span></div></div>'+
-    (m.recording_url?'<a class="btn sm mi" href="'+esc(safeUrl(m.recording_url))+'" target="_blank" rel="noopener">'+ICO.link+' Открыть</a>':'')+
-    '<button class="btn sm mi" disabled title="Появится после подключения Телемоста">'+ICO.download+'</button></div>';
+  var ini=function(n){return String(n||'?').split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase();};
+  var recOpen=m.recording_url?'onclick="window.open(\''+esc(safeUrl(m.recording_url))+'\',\'_blank\')"':'';
+  var player='<div class="mc-video'+(m.recording_url?' has':'')+'" '+recOpen+' role="button" aria-label="Видео встречи">'+
+    '<div class="mc-tiles"><div class="mc-tile"><span class="mc-ava">'+esc(ini(mgrName))+'</span><span class="mc-tn">'+esc(mgrName)+'</span></div>'+
+      '<div class="mc-tile"><span class="mc-ava c">'+esc(ini(meetOrgName(m)))+'</span><span class="mc-tn">'+esc(meetOrgName(m))+'</span></div></div>'+
+    '<div class="mc-vplay">'+ICO.play+'</div>'+
+    '<div class="mc-vbar"><span class="mc-vtime">00:00</span><div class="mc-vtrack"><span></span></div><span class="mc-vtime">'+(demo?'42:17':'—')+'</span>'+
+      (m.recording_url?'<span class="mc-vlink">'+ICO.link+' Открыть в Телемосте</span>':'')+'</div>'+
+  '</div>'+
+  '<div class="mc-vnote">'+(m.recording_url?'Видео откроется по ссылке. Встроенный плеер и скачивание — после подключения Телемоста.':'Ссылка на запись не указана. Встроенный плеер появится после подключения Телемоста.')+'</div>';
   var tabs=[['tr','Транскрипт'],['sum','Итоги'],['fu','Письмо клиенту']].map(function(t){
     return'<button class="mc-tab'+(_mtab===t[0]?' on':'')+'" role="tab" aria-selected="'+(_mtab===t[0])+'" onclick="openMeeting(\''+m.id+'\',\''+t[0]+'\')">'+t[1]+'</button>';}).join('');
   var body='';
