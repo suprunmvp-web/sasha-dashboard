@@ -709,6 +709,42 @@ button:focus-visible,a:focus-visible,.cb-trig:focus-visible,.seg-b:focus-visible
 .ps-ln.neg b{color:var(--red);}
 .ps-warn{display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.5;color:var(--text);background:var(--amber-bg);border-radius:8px;padding:8px 10px;margin-top:10px;}
 .ps-warn .ico{color:var(--amber);flex-shrink:0;margin-top:2px;}
+/* ═══ v6 · «сухая» палитра: нейтральные + один акцент. Зелёный/красный — только у дельт и оценки встречи ═══ */
+[data-theme="light"]{--sl:#D9DEE7;}
+[data-theme="dark"]{--sl:#2A3142;}
+/* прогресс — всегда акцент, без светофора */
+.progress-fill,.inbar-f,.mbar-fill,.pfill{background:var(--accent)!important;}
+/* дельты и бейджи «к пред.» — цветной только текст, без заливки */
+.dlt-up,.dlt-down,.dlt-neu{background:none!important;padding-left:0!important;padding-right:0!important;}
+.db-red,.db-amb,.db-grn{background:var(--surface-2)!important;}
+/* оценка встречи — нейтральный бейдж, цвет только у иконки */
+.mbadge.mb-won,.mbadge.mb-lost,.mbadge.mb-neu{background:none;color:var(--text-2);padding-left:0;padding-right:0;font-weight:500;}
+.mb-won .ico{color:var(--green);} .mb-lost .ico{color:var(--red);}
+/* доля хороших — одна полоса акцента на сером треке */
+.rate-bar{gap:0!important;background:var(--surface-3);border-radius:3px;overflow:hidden;}
+.rate-bar span{border-radius:0!important;min-width:0!important;}
+.rate-bar .g,.mbar.split .g{background:var(--accent)!important;}
+.rate-bar .b,.mbar.split .b{background:transparent!important;}
+.mbar.split{gap:0!important;background:var(--surface-3)!important;overflow:hidden!important;}
+.mbar.split span{border-radius:0!important;}
+.pbar{height:6px;border-radius:3px;background:var(--surface-3);overflow:hidden;margin-top:10px;}
+.pbar span{display:block;height:100%;background:var(--accent);}
+/* сегменты — монохром */
+.sg-A,.sg-B,.sg-C{background:var(--surface-3)!important;color:var(--text-2)!important;}
+.sg-A-f,.sg-B-f,.sg-C-f{background:var(--text-3)!important;}
+.seg-b.sa.on,.seg-b.sb.on,.seg-b.sc.on,.seg-b.src-chip.on{background:var(--surface-2)!important;border-color:var(--text)!important;color:var(--text)!important;}
+/* источники — иконки серые, выбранный канал — акцент */
+.src-chip .ico,.src-tag .ico,.src-nm .ico{color:var(--text-3);}
+.seg-b.src-chip.on .ico{color:var(--text);}
+.src-nm .ico{width:15px;height:15px;flex-shrink:0;transition:color .15s;}
+.src-row.on .src-nm .ico{color:var(--accent);}
+.src-row{grid-template-columns:minmax(0,1fr) 56px 52px 64px!important;}
+.sl{fill:var(--sl);transition:fill .15s ease-out;}
+.sl.on{fill:var(--accent);}
+.src-card.hl .sl:not(.on){opacity:1!important;}
+.src-dt .ico{width:16px;height:16px;color:var(--accent);}
+.src-br .trk span{background:var(--accent);}
+.ps-note{font-size:12px;color:var(--text-2);background:var(--surface-3);border-radius:8px;padding:8px 10px;margin-top:10px;}
 </style>
 </head>
 <body>
@@ -723,7 +759,7 @@ window.togglePw=function(id,btn){var inp=document.getElementById(id);if(!inp)ret
    Безопасность: в браузере только publishable-ключ (публичный по определению)
    + токен залогиненного сотрудника. Без логина RLS не отдаёт ничего.
    Сервисный ключ живёт только в GAS и Edge Functions. */
-var APP_VERSION='2026-10-31.1';
+var APP_VERSION='2026-10-31.2';
 var SB_URL='https://qhpyrlhugpqgojwmarrw.supabase.co';
 var SB_PUB='sb_publishable_0YlWIjJNZqw0pIv3vV4ifQ_X9pCRaHc';
 /* URL веб-приложения GAS (Код.gs → doPost). Пусто — «Обновить» просто перезагружает страницу. */
@@ -1065,7 +1101,8 @@ function fmtNum(n){n=r(n);var s=String(Math.abs(n)),res='';for(var i=0;i<s.lengt
 function fmt(n){return fmtNum(n)+' ₽';}
 function fmtMin(n){return fmtNum(r(n))+' мин';}
 function pct(f,p){return p>0?r(f/p*100):0;}
-function grad(p){p=Math.max(0,Math.min(100,p))/100;var s=[[251,110,91],[245,181,68],[46,211,167]];var g=p<.5?0:1,t=p<.5?p/.5:(p-.5)/.5,a=s[g],b=s[g+1];return'rgb('+r(a[0]+(b[0]-a[0])*t)+','+r(a[1]+(b[1]-a[1])*t)+','+r(a[2]+(b[2]-a[2])*t)+')';}
+function grad(p){return'var(--text)';}
+function gradOld_(p){p=Math.max(0,Math.min(100,p))/100;var s=[[251,110,91],[245,181,68],[46,211,167]];var g=p<.5?0:1,t=p<.5?p/.5:(p-.5)/.5,a=s[g],b=s[g+1];return'rgb('+r(a[0]+(b[0]-a[0])*t)+','+r(a[1]+(b[1]-a[1])*t)+','+r(a[2]+(b[2]-a[2])*t)+')';}
 function daysTo(ds){if(!ds)return null;return Math.max(0,r((new Date(ds)-TODAY)/86400e3));}
 function fmtD(ds){if(!ds)return'—';var p=ds.substring(0,10).split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
@@ -2111,14 +2148,14 @@ var SRC_NONE={k:'none',l:'Не указан',i:'alert',c:'var(--s0)',n:0};
 function srcOf_(m){return SRC_BY[m.source]||SRC_NONE;}
 function srcBadge_(m){
   if(!m.source||!SRC_BY[m.source])return'<span class="muted">—</span>';
-  var s=SRC_BY[m.source];return'<span class="src-tag" style="--c:'+s.c+'">'+ICO[s.i]+esc(s.l)+'</span>';
+  var s=SRC_BY[m.source];return'<span class="src-tag">'+ICO[s.i]+esc(s.l)+'</span>';
 }
 /* выбор источника в форме — «чипы» с иконкой в цвете канала */
 function srcPicker_(id,value,onChange){
   SG[id]={onChange:onChange};
   return'<div class="src-pick" id="sg-'+id+'" role="radiogroup" aria-label="Источник трафика"><input type="hidden" id="'+id+'" value="'+esc(value||'')+'">'+
     SOURCES.map(function(s){var on=s.k===value;
-      return'<button type="button" role="radio" aria-checked="'+on+'" class="seg-b src-chip'+(on?' on':'')+'" style="--c:'+s.c+'" data-v="'+s.k+'" onclick="segPick(\''+id+'\',this)">'+ICO[s.i]+'<span>'+s.l+'</span></button>';
+      return'<button type="button" role="radio" aria-checked="'+on+'" class="seg-b src-chip'+(on?' on':'')+'" data-v="'+s.k+'" onclick="segPick(\''+id+'\',this)">'+ICO[s.i]+'<span>'+s.l+'</span></button>';
     }).join('')+'</div>';
 }
 /* ── Кольцевая диаграмма каналов ── */
@@ -2148,16 +2185,16 @@ function srcCard_(list){
     var sw=x.n/total*Math.PI*2,d;
     if(filled.length===1)d=srcArc_(cx,cy,R,r0,0,Math.PI)+' '+srcArc_(cx,cy,R,r0,Math.PI,Math.PI*2-1e-4);
     else d=srcArc_(cx,cy,R,r0,a,a+sw);
-    paths+='<path class="sl" data-k="'+x.s.k+'" d="'+d+'" style="fill:'+x.s.c+'" onmouseenter="srcHi(\''+x.s.k+'\')" onclick="srcPin(\''+x.s.k+'\')"><title>'+esc(x.s.l)+': '+x.n+'</title></path>';
+    paths+='<path class="sl" data-k="'+x.s.k+'" d="'+d+'" onmouseenter="srcHi(\''+x.s.k+'\')" onclick="srcPin(\''+x.s.k+'\')"><title>'+esc(x.s.l)+': '+x.n+'</title></path>';
     a+=sw;
   });
   var legend=rows.map(function(x){
     var rated=x.good+x.bad,gp=rated?r(x.good/rated*100):null;
     return'<div class="src-row'+(x.n?'':' zero')+'" data-k="'+x.s.k+'"'+(x.n?' tabindex="0" onmouseenter="srcHi(\''+x.s.k+'\')" onfocus="srcHi(\''+x.s.k+'\')" onclick="srcPin(\''+x.s.k+'\')"':'')+'>'+
-      '<span class="src-nm"><i style="background:'+x.s.c+'"></i>'+esc(x.s.l)+'</span>'+
+      '<span class="src-nm">'+ICO[x.s.i]+esc(x.s.l)+'</span>'+
       '<span class="num">'+x.n+'</span>'+
       '<span class="num muted">'+(x.n?r(x.n/total*100)+'%':'—')+'</span>'+
-      '<span class="src-gp">'+(gp==null?'<span class="muted">—</span>':'<span class="num">'+gp+'%</span><span class="src-mini"><span style="width:'+gp+'%"></span></span>')+'</span>'+
+      '<span class="num'+(gp==null?' muted':'')+'">'+(gp==null?'—':gp+'%')+'</span>'+
     '</div>';
   }).join('');
   var noneN=g.none?g.none.n:0;
@@ -2178,14 +2215,14 @@ function srcDetail_(k){
   function bars(obj,nameFn,limit){
     var arr=Object.keys(obj).map(function(id){return{id:id,n:obj[id]};}).sort(function(a,b){return b.n-a.n;});
     var mx=arr.length?arr[0].n:1,more=arr.length-limit;
-    return arr.slice(0,limit).map(function(e){return'<div class="src-br"><span class="nm">'+esc(nameFn(e.id))+'</span><span class="trk"><span style="width:'+(e.n/mx*100)+'%;background:'+x.s.c+'"></span></span><b class="num">'+e.n+'</b></div>';}).join('')+
+    return arr.slice(0,limit).map(function(e){return'<div class="src-br"><span class="nm">'+esc(nameFn(e.id))+'</span><span class="trk"><span style="width:'+(e.n/mx*100)+'%"></span></span><b class="num">'+e.n+'</b></div>';}).join('')+
       (more>0?'<div class="src-more">и ещё '+more+'</div>':'');
   }
   var depts=Object.keys(x.dept).length;
-  return'<div class="src-dt"><i style="background:'+x.s.c+'"></i>'+esc(x.s.l)+'</div>'+
+  return'<div class="src-dt">'+ICO[x.s.i]+esc(x.s.l)+'</div>'+
     '<div class="src-ds">'+x.n+' '+meetWord_(x.n)+' · '+r(x.n/_src.total*100)+'% от всех</div>'+
     (rated?'<div class="src-q"><span>Хороших</span><b class="num">'+r(x.good/rated*100)+'%</b></div>'+
-      '<div class="rate-bar">'+(x.good?'<span class="g" style="flex:'+x.good+'"></span>':'')+(x.bad?'<span class="b" style="flex:'+x.bad+'"></span>':'')+'</div>':'')+
+      '<div class="pbar"><span style="width:'+(x.good/rated*100)+'%"></span></div>':'')+
     (depts>1?'<div class="mc-h" style="margin:16px 0 8px">По отделам</div>'+bars(x.dept,function(id){return id==='—'?'Без отдела':deptNameById_(id);},4):'')+
     '<div class="mc-h" style="margin:16px 0 8px">По менеджерам</div>'+bars(x.emp,empNameById_,5);
 }
@@ -2277,6 +2314,13 @@ function psMonthOpts_(){
 function psNum_(id){var v=String(mval_(id)).replace(/\s/g,'').replace(',','.');var n=parseFloat(v);return isFinite(n)?n:0;}
 function psLegalGuess_(name){var p=String(name||'').trim().split(/\s+/);return p.length===2?p[1]+' '+p[0]:String(name||'');}
 var _ps=null;
+/* из «Логов»: сначала выбрать сотрудника */
+window.openPayslipPick=function(){
+  if(!CURRENT_USER||!CURRENT_USER.isAdmin){toast('Расчёт премии доступен только админу','err');return;}
+  var opts=empComboOpts_(null,null).filter(function(o){return o.grp!=='Уволенные';});
+  openModal('Расчёт премии','<div class="field"><label>Сотрудник</label>'+combo({id:'ps-emp',opts:opts,value:'',placeholder:'Выбери сотрудника',cls:'full',searchPh:'Поиск по ФИО…',onChange:function(){var b=document.getElementById('msave');if(b)b.disabled=false;}})+'</div>',function(){var id=mval_('ps-emp');if(id)openPayslip(id);});
+  var b=document.getElementById('msave');if(b){b.textContent='Дальше';b.disabled=true;}
+};
 window.openPayslip=function(supaId){
   if(!CURRENT_USER||!CURRENT_USER.isAdmin){toast('Расчёт премии доступен только админу','err');return;}
   var emp=RAW.employees.find(function(e){return e.id===supaId;});if(!emp)return;
@@ -2334,7 +2378,8 @@ function psCalc_(){
   var t={lo:0,loB:0,hi:0,hiB:0};rows.forEach(function(x){t.lo+=x.lo;t.loB+=x.loB;t.hi+=x.hi;t.hiB+=x.hiB;});
   var cand=psNum_('ps-cand'),one=psNum_('ps-one'),sal=psNum_('ps-sal');
   var total=t.loB+t.hiB+cand+one;
-  return{rows:rows,t:t,cand:cand,one:one,sal:sal,total:total,prem:total-sal,odd:odd,n:(_ps.deals||[]).length};
+  /* мотивация — это %, но не меньше оклада: к выплате max(оклад, начислено), премия сверх оклада = max(0, начислено − оклад) */
+  return{rows:rows,t:t,cand:cand,one:one,sal:sal,total:total,prem:Math.max(0,total-sal),pay:Math.max(sal,total),odd:odd,n:(_ps.deals||[]).length};
 }
 function psPreview_(){
   var el=document.getElementById('ps-prev');if(!el||!_ps)return;
@@ -2345,10 +2390,11 @@ function psPreview_(){
     ln('Выручка по цене до 14 ₽/мин',c.t.lo,'sub')+ln('Надбавка 10%',c.t.loB)+
     ln('Выручка по цене от 14 ₽/мин',c.t.hi,'sub')+ln('Надбавка 20%',c.t.hiB)+
     ln('Привлечение кандидата',c.cand)+ln('Разовая премия',c.one)+
-    ln('Итого начислено',c.total,'tot')+ln('Оклад',-c.sal)+
-    ln('Премия к выплате',c.prem,'fin'+(c.prem<0?' neg':''))+
+    ln('Начислено по мотивации',c.total,'tot')+ln('Оклад (гарантированный минимум)',c.sal,'sub')+
+    ln('Премия сверх оклада',c.prem)+
+    ln('К выплате, гросс',c.pay,'fin')+
     (c.odd?'<div class="ps-warn">'+ICO.alert+' У '+c.odd+' '+plural_(c.odd,'оплаты','оплат','оплат')+' мотивация не 10/20% — посчитано по факту, проверь в логах</div>':'')+
-    (c.prem<0?'<div class="ps-warn">'+ICO.alert+' Надбавки меньше оклада — премия по формуле шаблона отрицательная</div>':'');
+    (c.sal&&c.total<c.sal?'<div class="ps-note">Мотивация не перекрыла оклад — выплачивается оклад, премия 0</div>':'');
   el.innerHTML=html;
   var b=document.getElementById('msave');
   if(b)b.disabled=!!_ps.err||!mval_('ps-fio').trim();
@@ -2388,11 +2434,11 @@ function psBuildXlsx_(ExcelJS,c,fio,pos,month){
     var rn=R0+i,row=ws.getRow(rn),first=i===0;row.height=42;
     var h=first?c.cand:0,o=first?c.one:0,j=x.loB+x.hiB+h+o;
     var vals={B:fio,C:x.client,D:x.lo||null,E:x.loB||null,F:x.hi||null,G:x.hiB||null,H:first?c.cand:null,I:first?c.one:null,
-      J:{formula:'E'+rn+'+G'+rn+'+H'+rn+'+I'+rn,result:j},K:first?c.sal:null,L:first?{formula:'J'+RT+'-K'+RT,result:sumJ-sumK}:null};
+      J:{formula:'E'+rn+'+G'+rn+'+H'+rn+'+I'+rn,result:j},K:first?c.sal:null,L:first?{formula:'MAX(0,J'+RT+'-K'+RT+')',result:Math.max(0,sumJ-sumK)}:null};
     Object.keys(vals).forEach(function(col){var cl=ws.getCell(col+rn);cl.value=vals[col];cl.font=F;cl.border=B;cl.alignment={wrapText:true,vertical:'middle'};if(col>='D')cl.numFmt=NF;});
   });
   var tr=ws.getRow(RT);tr.getCell(2).value='ИТОГО';
-  var tots={D:c.t.lo,E:c.t.loB,F:c.t.hi,G:c.t.hiB,H:c.cand,I:c.one,J:sumJ,K:sumK,L:sumJ-sumK};
+  var tots={D:c.t.lo,E:c.t.loB,F:c.t.hi,G:c.t.hiB,H:c.cand,I:c.one,J:sumJ,K:sumK,L:Math.max(0,sumJ-sumK)};
   Object.keys(tots).forEach(function(col){var cl=ws.getCell(col+RT);cl.value={formula:'SUM('+rng(col)+')',result:tots[col]};cl.numFmt=NF;});
   ['B','C','D','E','F','G','H','I','J','K','L'].forEach(function(col){var cl=ws.getCell(col+RT);cl.font={name:F.name,size:11,bold:true};cl.border=B;});
   return wb.xlsx.writeBuffer();
@@ -2879,6 +2925,7 @@ function renderPayroll(){
       combo({id:'pf-emp',opts:empComboOpts_(S.payDept,'Все сотрудники'),value:S.payEmp,searchPh:'Поиск по ФИО…',onChange:function(v){setPayEmp(v);}})+
       searchBox_('pay-srch','Поиск по компании…',S.paySearch,'setPaySearch(this.value)')+
     '</div>'+
+    (CURRENT_USER&&CURRENT_USER.isAdmin?'<button class="btn mi" onclick="openPayslipPick()">'+ICO.fileText+' Расчёт премии</button>':'')+
     '<button class="btn primary mi" onclick="exportPayroll()">'+ICO.download+' XLSX</button>'+
   '</div>';
   setApp('<div class="topbar"><div class="nav-left"><span class="brand">Логи оплат</span></div>'+calTrigger()+'</div>'+
