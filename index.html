@@ -768,6 +768,12 @@ button:focus-visible,a:focus-visible,.cb-trig:focus-visible,.seg-b:focus-visible
 /* дельты в KPI — так же: число серое, цветная только стрелка */
 .dlt-up,.dlt-down{color:var(--text-2)!important;font-weight:500!important;}
 .dlt-up .dlt-ico{color:var(--green);} .dlt-down .dlt-ico{color:var(--red);}
+
+/* ═══ v8 · единая система цвета ═══
+   нейтральные — всё по умолчанию · синий бренда — данные и «в процессе» · зелёный/красный — только смысл (план выполнен/провален, хорошая/плохая, рост/падение)
+   каналы — одна палитра с равной светлотой и насыщенностью (OKLCH), без зелёного и красного, чтобы не спорить со статусами */
+[data-theme="light"]{--s0:#C3C9D4;--s1:#3c6ae2;--s2:#00b5b5;--s3:#8b5dce;--s4:#e1a447;--s5:#48a1db;--s6:#355695;--s7:#cc81bc;}
+[data-theme="dark"]{--s0:#3A4256;--s1:#507ef1;--s2:#00a0a1;--s3:#9065d0;--s4:#c28621;--s5:#40a0c6;--s6:#4167ad;--s7:#bf75af;}
 </style>
 </head>
 <body>
@@ -782,7 +788,7 @@ window.togglePw=function(id,btn){var inp=document.getElementById(id);if(!inp)ret
    Безопасность: в браузере только publishable-ключ (публичный по определению)
    + токен залогиненного сотрудника. Без логина RLS не отдаёт ничего.
    Сервисный ключ живёт только в GAS и Edge Functions. */
-var APP_VERSION='2026-10-31.3';
+var APP_VERSION='2026-10-31.4';
 var SB_URL='https://qhpyrlhugpqgojwmarrw.supabase.co';
 var SB_PUB='sb_publishable_0YlWIjJNZqw0pIv3vV4ifQ_X9pCRaHc';
 /* URL веб-приложения GAS (Код.gs → doPost). Пусто — «Обновить» просто перезагружает страницу. */
@@ -1124,7 +1130,8 @@ function fmtNum(n){n=r(n);var s=String(Math.abs(n)),res='';for(var i=0;i<s.lengt
 function fmt(n){return fmtNum(n)+' ₽';}
 function fmtMin(n){return fmtNum(r(n))+' мин';}
 function pct(f,p){return p>0?r(f/p*100):0;}
-function grad(p){p=Math.max(0,Math.min(100,p))/100;var s=[[251,110,91],[245,181,68],[46,211,167]];var g=p<.5?0:1,t=p<.5?p/.5:(p-.5)/.5,a=s[g],b=s[g+1];return'rgb('+r(a[0]+(b[0]-a[0])*t)+','+r(a[1]+(b[1]-a[1])*t)+','+r(a[2]+(b[2]-a[2])*t)+')';}
+function grad(p){return p>=100?'var(--green)':p>=50?'var(--accent)':'var(--red)';}
+function gradLegacy_(p){p=Math.max(0,Math.min(100,p))/100;var s=[[251,110,91],[245,181,68],[46,211,167]];var g=p<.5?0:1,t=p<.5?p/.5:(p-.5)/.5,a=s[g],b=s[g+1];return'rgb('+r(a[0]+(b[0]-a[0])*t)+','+r(a[1]+(b[1]-a[1])*t)+','+r(a[2]+(b[2]-a[2])*t)+')';}
 function daysTo(ds){if(!ds)return null;return Math.max(0,r((new Date(ds)-TODAY)/86400e3));}
 function fmtD(ds){if(!ds)return'—';var p=ds.substring(0,10).split('-');return p[2]+'.'+p[1]+'.'+p[0];}
 function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
