@@ -847,6 +847,71 @@ button:focus-visible,a:focus-visible,.cb-trig:focus-visible,.seg-b:focus-visible
 .src-center b{font-size:20px!important;}
 .src-nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block!important;}
 .src-nm i{display:inline-block;vertical-align:1px;margin-right:8px;}
+/* ═══ v11 · встречи: 4 блока + адаптив ═══ */
+.mt-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,2fr);gap:12px;margin-bottom:12px;}
+.mt-grid>.ck{min-width:0;}
+.mt-grid .mch{min-height:150px;}
+.mt-count .ck-l{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.mt-count .ck-v{font-size:28px;}
+.mt-count .rate-bar{margin-top:16px;height:6px;}
+.mt-count .mt-q{font-size:12px;color:var(--text-2);margin-top:8px;}
+.mt-count .mt-q b{color:var(--text);font-weight:600;}
+.seg-row{grid-template-columns:22px 64px minmax(0,1fr) 26px!important;}
+.seg-row .sl-l{color:var(--text-2);font-size:12px;white-space:nowrap;}
+.sa-card{padding:18px 20px!important;margin-bottom:1.5rem;}
+.sa-h{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:10px;}
+.sa-lg{display:flex;gap:12px;font-size:11px;color:var(--text-3);margin-left:auto;}
+.sa-lg span{display:inline-flex;align-items:center;gap:5px;}
+.sa-lg i{width:8px;height:8px;border-radius:2px;}
+.sa-lg i.g,.sa-fill .g{background:var(--green);}
+.sa-lg i.b,.sa-fill .b{background:var(--red);}
+.sa-lg i.u,.sa-fill .u{background:var(--surface-3);}
+.sa-reset{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--border);background:var(--surface);color:var(--text-2);font:inherit;font-size:12px;height:26px;padding:0 10px;border-radius:999px;cursor:pointer;}
+.sa-reset:hover{color:var(--text);border-color:var(--text-3);}
+.sa-reset .ico{width:12px;height:12px;}
+.sa-row{display:grid;grid-template-columns:minmax(140px,210px) minmax(0,1fr) 52px 64px;align-items:center;gap:16px;width:100%;border:none;background:none;padding:9px 10px;border-radius:8px;font:inherit;font-size:13px;color:var(--text);text-align:left;cursor:pointer;transition:background .12s,opacity .15s;}
+.sa-row:hover{background:var(--surface-2);}
+.sa-row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;}
+.sa-row.on{background:var(--accent-bg);}
+.sa-card.pinned .sa-row:not(.on):not(.sa-head){opacity:.45;}
+.sa-head{cursor:default;padding-top:0;padding-bottom:4px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3);}
+.sa-head:hover{background:none;}
+.sa-row>span:nth-child(3),.sa-row>span:nth-child(4){text-align:right;}
+.sa-nm{display:flex;align-items:center;gap:9px;min-width:0;}
+.sa-nm span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sa-nm .ico{width:15px;height:15px;color:var(--text-3);flex-shrink:0;}
+.sa-bar{display:block;height:10px;}
+.sa-fill{display:flex;gap:2px;height:100%;min-width:6px;transition:width .3s ease-out;}
+.sa-fill span{display:block;height:100%;border-radius:3px;min-width:3px;}
+.sa-n{font-weight:600;}
+.sa-empty{font-size:12px;color:var(--text-3);margin-top:10px;padding:0 10px;}
+@media(max-width:1100px){.mt-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);}.mt-grid .mch{grid-column:1/-1;}}
+@media(max-width:640px){
+  .mt-grid{grid-template-columns:minmax(0,1fr);}
+  .sa-lg{margin-left:0;width:100%;}
+  .sa-row{grid-template-columns:minmax(0,1fr) 40px 56px;row-gap:8px;gap:10px;padding:10px 8px;}
+  .sa-row .sa-bar{grid-column:1/-1;grid-row:2;}
+  .sa-head>span:nth-child(2){display:none;}
+}
+/* мобилка: таблица встреч — карточками, шапка — в одну строку */
+@media(max-width:640px){
+  .m-tbl thead{display:none;}
+  .m-tbl,.m-tbl tbody{display:block;width:100%;min-width:0!important;}
+  .m-tbl td.wrap{min-width:0!important;}
+  .m-tbl tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"emp emp rate" "co seg rec" "src src date";gap:6px 10px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--border-soft);}
+  .m-tbl td{display:block;padding:0!important;border:none!important;text-align:left!important;}
+  .m-tbl td:nth-child(1){grid-area:date;font-size:12px;text-align:right!important;}
+  .m-tbl td:nth-child(2){grid-area:emp;}
+  .m-tbl td:nth-child(3){grid-area:co;font-weight:500;}
+  .m-tbl td:nth-child(4){grid-area:seg;}
+  .m-tbl td:nth-child(5){grid-area:src;}
+  .m-tbl td:nth-child(6){grid-area:rate;justify-self:end;}
+  .m-tbl td:nth-child(7){grid-area:rec;justify-self:end;}
+  .bar-right{width:100%;flex-wrap:nowrap!important;gap:6px!important;}
+  .bar-right .deal-btn{flex:1;justify-content:center;padding-left:8px!important;padding-right:8px!important;}
+  .bar-right .rb-t{display:none;}
+  .bar-right .save-hint:not(.show){display:none;}
+}
 </style>
 </head>
 <body>
@@ -861,7 +926,7 @@ window.togglePw=function(id,btn){var inp=document.getElementById(id);if(!inp)ret
    Безопасность: в браузере только publishable-ключ (публичный по определению)
    + токен залогиненного сотрудника. Без логина RLS не отдаёт ничего.
    Сервисный ключ живёт только в GAS и Edge Functions. */
-var APP_VERSION='2026-10-31.6';
+var APP_VERSION='2026-10-31.7';
 var SB_URL='https://qhpyrlhugpqgojwmarrw.supabase.co';
 var SB_PUB='sb_publishable_0YlWIjJNZqw0pIv3vV4ifQ_X9pCRaHc';
 /* URL веб-приложения GAS (Код.gs → doPost). Пусто — «Обновить» просто перезагружает страницу. */
@@ -1004,7 +1069,7 @@ function startVersionWatch(){
 function syncExpected_(){try{var a=JSON.parse(localStorage.getItem('sasha_sync_ms')||'[]');if(a.length)return Math.round(a.reduce(function(x,y){return x+y;},0)/a.length);}catch(e){}return 15000;}
 function syncRemember_(ms){try{var a=JSON.parse(localStorage.getItem('sasha_sync_ms')||'[]');a.push(ms);localStorage.setItem('sasha_sync_ms',JSON.stringify(a.slice(-5)));}catch(e){}}
 function syncBtnHtml_(){
-  if(!S.sync)return'<button class="refresh-btn" onclick="syncAndReload(this)" title="Подтянуть новых сотрудников и организации с платформы и перезагрузить">'+ICO.refresh+' Обновить</button>';
+  if(!S.sync)return'<button class="refresh-btn" onclick="syncAndReload(this)" title="Подтянуть новых сотрудников и организации с платформы и перезагрузить">'+ICO.refresh+'<span class="rb-t"> Обновить</span></button>';
   var el=Date.now()-S.sync.t0,left=Math.max(300,S.sync.exp-el),p=S.sync.done?92:Math.min(92,el/S.sync.exp*92);
   return'<button class="refresh-btn syncing" disabled aria-busy="true"><span class="rb-fill" data-left="'+left+'" style="width:'+p+'%"></span><span class="rb-lbl">'+ICO.refresh+' '+(S.sync.done?'Готово':'Обновляю…')+'</span></button>';
 }
@@ -2021,7 +2086,7 @@ function segStat_(list){
   var c={A:0,B:0,C:0};list.forEach(function(m){if(c[m.segment]!=null)c[m.segment]++;});
   var mx=Math.max(1,c.A,c.B,c.C);
   return'<div class="seg-stat">'+['A','B','C'].map(function(k){
-    return'<div class="seg-row" title="'+SEGMENTS[k]+'">'+segBadge_(k)+'<div class="trk"><span class="sg-'+k+'-f" style="width:'+(c[k]/mx*100)+'%"></span></div><b>'+c[k]+'</b></div>';
+    return'<div class="seg-row" title="'+SEGMENTS[k]+'">'+segBadge_(k)+'<span class="sl-l">'+SEGMENTS[k]+'</span><div class="trk"><span class="sg-'+k+'-f" style="width:'+(c[k]/mx*100)+'%"></span></div><b>'+c[k]+'</b></div>';
   }).join('')+'</div>';
 }
 function fmtDT(ts){if(!ts)return'—';var d=new Date(ts);if(isNaN(d))return'—';return d.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
@@ -2178,7 +2243,12 @@ function renderMeetings(){
   var list=meetFiltered_(),a=meetCount_(list),rated=a.good+a.bad;
   var prev=meetAgg_(function(m){return(S.mDept==='all'||m.dept_id===S.mDept)&&(S.mEmp==='all'||m.employee_id===S.mEmp);}).prevTotal;
   var _ks=S.mSrc;S.mSrc='all';var listAllSrc=meetFiltered_();S.mSrc=_ks;
-  var kH='<div class="ck mo-main" id="mo-main">'+moBody_(list,_ks!=='all'?(SRC_BY[_ks]||SRC_NONE):null,_ks!=='all')+'</div>';
+  var kH='<div class="ck mt-count"><div class="ck-l">Проведено встреч'+(prev>0?deltaTag(a.total,prev):'')+'</div>'+
+      '<div class="ck-v num">'+a.total+'</div>'+
+      (rated?'<div class="rate-bar" title="Хороших '+a.good+', плохих '+a.bad+'">'+(a.good?'<span class="g" style="flex:'+a.good+'"></span>':'')+(a.bad?'<span class="b" style="flex:'+a.bad+'"></span>':'')+'</div>'+
+        '<div class="mt-q"><b>'+r(a.good/rated*100)+'%</b> хороших</div>':'<div class="mt-q">оценок нет</div>')+'</div>'+
+    '<div class="ck"><div class="ck-l">Сегменты клиентов</div>'+segStat_(list)+'</div>'+
+    meetChart_(list);
   var ratings=[['all','Все'],['good','Хорошие'],['bad','Плохие']].map(function(t){return'<button class="pill'+(S.mRating===t[0]?' on':'')+'" onclick="setMF(\'mRating\',\''+t[0]+'\')">'+t[1]+'</button>';}).join('');
   var filters='<div class="m-filters">'+
     combo({id:'mf-dept',opts:deptComboOpts_('Все отделы'),value:S.mDept,onChange:function(v){setMF('mDept',v);}})+
@@ -2203,11 +2273,11 @@ function renderMeetings(){
     '</tr>';
   }).join('');
   var empty=S.meetErr?'<div class="err-banner">'+ICO.alert+' '+esc(S.meetErr)+'</div>':'<div class="empty-state">Встреч за период нет.<br>Добавь первую кнопкой <b>+ Встреча</b> сверху.</div>';
-  var table=shown.length?'<table class="tbl"><thead><tr><th>Дата</th><th>Сотрудник</th><th>Компания</th><th class="c">Сегмент</th><th>Источник</th><th>Оценка</th><th class="c">Запись</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+  var table=shown.length?'<table class="tbl m-tbl"><thead><tr><th>Дата</th><th>Сотрудник</th><th>Компания</th><th class="c">Сегмент</th><th>Источник</th><th>Оценка</th><th class="c">Запись</th></tr></thead><tbody>'+rows+'</tbody></table>'+
     (list.length>shown.length?'<div style="text-align:center;margin-top:14px"><button class="btn" onclick="moreMeetings()">Показать ещё ('+(list.length-shown.length)+')</button></div>':''):empty;
   setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="a">AI</span> · Встречи</span></div>'+calTrigger()+'</div>'+
     (S.loadErr?'<div class="err-banner">'+ICO.alert+' '+esc(S.loadErr)+'</div>':'')+
-    '<div class="mo-grid">'+kH+srcCard_(listAllSrc)+'</div>'+
+    '<div class="mt-grid">'+kH+'</div>'+srcCard_(listAllSrc)+
     '<div class="panel">'+filters+table+'</div>');
   srcHi(null);
 }
@@ -2261,83 +2331,39 @@ function srcArc_(cx,cy,R,r0,a0,a1){
   function p(rad,a){return(cx+rad*Math.sin(a)).toFixed(2)+','+(cy-rad*Math.cos(a)).toFixed(2);}
   return'M'+p(R,a0)+' A'+R+','+R+' 0 '+big+' 1 '+p(R,a1)+' L'+p(r0,a1)+' A'+r0+','+r0+' 0 '+big+' 0 '+p(r0,a0)+' Z';
 }
+/* ═══ АНАЛИЗ ИСТОЧНИКОВ: длина бара = сколько встреч, состав бара = качество ═══ */
 function srcCard_(list){
-  var g={},total=list.length;
+  var g={},mx=0;
   list.forEach(function(m){
     var s=srcOf_(m),x=g[s.k]||(g[s.k]={s:s,n:0,good:0,bad:0});
     x.n++;if(m.rating==='good')x.good++;else if(m.rating==='bad')x.bad++;
   });
-  var order=SOURCES.concat(g.none?[SRC_NONE]:[]);
-  var rows=order.map(function(s){return g[s.k]||{s:s,n:0,good:0,bad:0};});
-  var filled=rows.filter(function(x){return x.n>0;});
-  _src=Object.assign(_src||{},{rows:rows,total:total,all:list,pin:S.mSrc!=='all'?S.mSrc:null});
-  var head='<div class="src-h"><span class="ck-l" style="margin:0">Источники</span>'+(_src.pin?'':'<span class="mch-peak">клик — отфильтровать</span>')+'</div>';
-  if(!total)return'<div class="ck src-card">'+head+'<div class="src-empty">Встреч за период нет</div></div>';
-  var cx=100,cy=100,R=92,r0=64,a=0,paths='';
-  filled.forEach(function(x){
-    var sw=x.n/total*Math.PI*2,d;
-    if(filled.length===1)d=srcArc_(cx,cy,R,r0,0,Math.PI)+' '+srcArc_(cx,cy,R,r0,Math.PI,Math.PI*2-1e-4);
-    else d=srcArc_(cx,cy,R,r0,a,a+sw);
-    paths+='<path class="sl" data-k="'+x.s.k+'" d="'+d+'" style="--c:'+x.s.c+'" onmouseenter="srcHi(\''+x.s.k+'\')" onclick="srcPin(\''+x.s.k+'\')"><title>'+esc(x.s.l)+': '+x.n+'</title></path>';
-    a+=sw;
-  });
-  var legend=filled.slice().sort(function(p,q){return q.n-p.n;}).map(function(x){
-    var rated=x.good+x.bad;
-    return'<div class="src-row" data-k="'+x.s.k+'" tabindex="0" role="button" onmouseenter="srcHi(\''+x.s.k+'\')" onfocus="srcHi(\''+x.s.k+'\')" onclick="srcPin(\''+x.s.k+'\')" onkeydown="if(event.key===\'Enter\')srcPin(\''+x.s.k+'\')">'+
-      '<span class="src-nm" style="--c:'+x.s.c+'" title="'+esc(x.s.l)+'"><i></i>'+esc(x.s.l)+'</span>'+
-      '<span class="num">'+x.n+'</span>'+
-      '<span class="num muted">'+(rated?r(x.good/rated*100)+'%':'—')+'</span>'+
-    '</div>';
+  var rows=Object.keys(g).map(function(k){return g[k];}).sort(function(a,b){return b.n-a.n||((b.good/(b.good+b.bad||1))-(a.good/(a.good+a.bad||1)));});
+  rows.forEach(function(x){if(x.n>mx)mx=x.n;});
+  var empty=SOURCES.filter(function(s){return!g[s.k];});
+  var pin=S.mSrc!=='all'?S.mSrc:null;
+  var head='<div class="sa-h"><span class="ck-l" style="margin:0">Источники встреч</span>'+
+    '<span class="sa-lg"><span><i class="g"></i>хорошие</span><span><i class="b"></i>плохие</span><span><i class="u"></i>без оценки</span></span>'+
+    (pin?'<button type="button" class="sa-reset" onclick="srcPin(\''+pin+'\')">'+ICO.x+' Сбросить</button>':'')+'</div>';
+  if(!rows.length)return'<div class="panel sa-card">'+head+'<div class="src-empty">Встреч за период нет</div></div>';
+  var body=rows.map(function(x){
+    var rated=x.good+x.bad,un=x.n-rated,on=pin===x.s.k;
+    var tip=x.s.l+': '+x.n+' '+meetWord_(x.n)+(rated?', хороших '+x.good+', плохих '+x.bad:'')+(un?', без оценки '+un:'');
+    return'<button type="button" class="sa-row'+(on?' on':'')+'" onclick="srcPin(\''+x.s.k+'\')" title="'+esc(tip)+'" aria-pressed="'+on+'">'+
+      '<span class="sa-nm">'+ICO[x.s.i]+'<span>'+esc(x.s.l)+'</span></span>'+
+      '<span class="sa-bar"><span class="sa-fill" style="width:'+(x.n/mx*100)+'%">'+
+        (x.good?'<span class="g" style="flex:'+x.good+'"></span>':'')+(x.bad?'<span class="b" style="flex:'+x.bad+'"></span>':'')+(un?'<span class="u" style="flex:'+un+'"></span>':'')+
+      '</span></span>'+
+      '<span class="sa-n num">'+x.n+'</span>'+
+      '<span class="sa-q num'+(rated?'':' muted')+'">'+(rated?r(x.good/rated*100)+'%':'—')+'</span>'+
+    '</button>';
   }).join('');
-  return'<div class="ck src-card" onmouseleave="srcHi(null)">'+head+
-    '<div class="src-grid">'+
-      '<div class="src-donut"><svg viewBox="0 0 200 200" role="img" aria-label="Доли каналов среди '+total+' встреч">'+paths+'</svg>'+
-        '<div class="src-center"><b class="num" id="src-cv">'+total+'</b><span id="src-cl">'+meetWord_(total)+'</span></div></div>'+
-      '<div class="src-legend"><div class="src-row head"><span>Канал</span><span>Встреч</span><span>Хор.</span></div>'+legend+'</div>'+
-    '</div></div>';
+  return'<div class="panel sa-card'+(pin?' pinned':'')+'">'+head+
+    '<div class="sa-row sa-head" aria-hidden="true"><span>Канал</span><span></span><span>Встреч</span><span>Хороших</span></div>'+body+
+    (empty.length?'<div class="sa-empty">Без встреч: '+empty.map(function(s){return esc(s.l);}).join(', ')+'</div>':'')+
+  '</div>';
 }
-/* ── Левая карточка «Обзор»: при наведении на канал показывает срез по нему ── */
-function moBody_(list,src,pinned){
-  var a=meetCount_(list),rated=a.good+a.bad,sk=src?src.k:null;
-  var prev=meetAgg_(function(m){return(S.mDept==='all'||m.dept_id===S.mDept)&&(S.mEmp==='all'||m.employee_id===S.mEmp)&&(!sk||(m.source||'none')===sk);}).prevTotal;
-  var segC={A:0,B:0,C:0};list.forEach(function(m){if(segC[m.segment]!=null)segC[m.segment]++;});
-  var by={};list.forEach(function(m){var e=by[m.employee_id]||(by[m.employee_id]={id:m.employee_id,n:0,good:0,bad:0});e.n++;if(m.rating==='good')e.good++;else if(m.rating==='bad')e.bad++;});
-  var top=Object.keys(by).map(function(k){return by[k];}).sort(function(x,y){return y.n-x.n||y.good-x.good;});
-  var mx=top.length?top[0].n:1,more=top.length-5;
-  var chip=src?'<span class="mo-chip"><i style="background:'+src.c+'"></i>'+esc(src.l)+(pinned?'<button type="button" onclick="setMF(\'mSrc\',\'all\')" aria-label="Сбросить канал">'+ICO.x+'</button>':'')+'</span>':'<span class="mo-chip ghost">все каналы</span>';
-  return'<div class="mo-head"><span class="ck-l" style="margin:0">Обзор</span>'+chip+'</div>'+
-    '<div class="mo-stats">'+
-      '<div class="mo-st"><div class="ck-l">Встречи'+(prev>0?deltaTag(a.total,prev):'')+'</div><div class="ck-v num">'+a.total+'</div></div>'+
-      '<div class="mo-st"><div class="ck-l">Хорошие</div><div class="ck-v num">'+(rated?r(a.good/rated*100)+'%':'—')+'</div>'+
-        '<div class="rate-bar" title="Хороших '+a.good+', плохих '+a.bad+'">'+(a.good?'<span class="g" style="flex:'+a.good+'"></span>':'')+(a.bad?'<span class="b" style="flex:'+a.bad+'"></span>':'')+'</div></div>'+
-      '<div class="mo-st"><div class="ck-l">Сегменты</div><div class="mo-seg">'+['A','B','C'].map(function(k){return'<span title="'+SEGMENTS[k]+'"><b class="sgb sg-'+k+'">'+k+'</b>'+segC[k]+'</span>';}).join('')+'</div></div>'+
-      '<div class="mo-st"><div class="ck-l">Провели</div><div class="ck-v num">'+a.empN+'</div><div class="mo-sub">'+plural_(a.empN,'сотрудник','сотрудника','сотрудников')+'</div></div>'+
-    '</div>'+
-    '<div class="mo-body">'+meetChart_(list)+
-      '<div class="mo-top"><div class="mo-top-h"><span>Больше всего встреч</span><span>Хор.</span></div>'+
-        (top.length?top.slice(0,5).map(function(e){var rt=e.good+e.bad;
-          return'<div class="mo-tr"><span class="nm">'+esc(empNameById_(e.id))+'</span><span class="trk"><span style="width:'+(e.n/mx*100)+'%"></span></span><b class="num">'+e.n+'</b><span class="num muted">'+(rt?r(e.good/rt*100)+'%':'—')+'</span></div>';}).join('')+
-          (more>0?'<div class="src-more">и ещё '+more+'</div>':'')
-        :'<div class="src-more">—</div>')+
-      '</div>'+
-    '</div>';
-}
-window.srcHi=function(k){
-  if(!_src)return;
-  var card=document.querySelector('.src-card');if(!card)return;
-  var key=k||_src.pin,x=key&&_src.rows.find(function(y){return y.s.k===key;});
-  card.classList.toggle('hl',!!key);
-  card.querySelectorAll('.sl,.src-row[data-k]').forEach(function(el){el.classList.toggle('on',el.dataset.k===key);});
-  var cv=document.getElementById('src-cv'),cl=document.getElementById('src-cl');
-  if(x&&_src.total){cv.textContent=r(x.n/_src.total*100)+'%';cl.textContent=x.s.l;}
-  else{cv.textContent=_src.total;cl.textContent=meetWord_(_src.total);}
-  /* левая карточка: превью канала при наведении, иначе — текущий фильтр */
-  var mo=document.getElementById('mo-main');if(!mo)return;
-  var sk=k||_src.pin,src=sk?(SRC_BY[sk]||SRC_NONE):null;
-  var lst=sk?(_src.all||[]).filter(function(m){return(m.source||'none')===sk;}):(_src.all||[]);
-  mo.classList.toggle('preview',!!k&&k!==_src.pin);
-  mo.innerHTML=moBody_(lst,src,!!_src.pin&&sk===_src.pin);
-};
+window.srcHi=function(){};
 window.srcPin=function(k){setMF('mSrc',S.mSrc===k?'all':k);};
 /* ═══ + ВСТРЕЧА ═══ */
 var _mc=null;
