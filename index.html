@@ -528,6 +528,67 @@ button:focus-visible,a:focus-visible,.cb-trig:focus-visible,.seg-b:focus-visible
 .dept-card,.ck,.kcard{transition:border-color .15s ease-out,box-shadow .15s ease-out;}
 .dept-card:hover{border-color:var(--accent);box-shadow:0 2px 10px rgba(30,40,80,.06);}
 @media(max-width:760px){.k4{grid-template-columns:1fr 1fr!important;}.form-row{flex-direction:column;gap:0;}.sbox{min-width:0;width:100%;}.cb{min-width:0;width:100%;}}
+/* ═══ v3: встречи — график по дням, карточка встречи ═══ */
+.mk-grid{display:grid;grid-template-columns:1fr 1fr 2fr;gap:12px;margin-bottom:1.5rem;}
+.rate-bar{height:4px;border-radius:2px;background:var(--red-bg);overflow:hidden;margin-top:10px;}
+.rate-bar span{display:block;height:100%;background:var(--green);border-radius:2px;}
+.mch{padding:16px 18px 12px!important;display:flex;flex-direction:column;}
+.mch-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.mch-peak{font-size:11px;color:var(--text-3);}
+.mch-peak b{color:var(--text-2);font-weight:600;}
+.mch-plot{position:relative;flex:1;min-height:84px;cursor:crosshair;}
+.mch-plot svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;}
+.mch-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text-3);}
+.mch-guide{position:absolute;top:0;bottom:0;width:1px;background:var(--border);opacity:0;pointer-events:none;transform:translateX(-.5px);}
+.mch-dot{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2.5px solid var(--accent);transform:translate(-50%,-50%);opacity:0;pointer-events:none;box-shadow:0 0 0 4px var(--accent-bg);}
+.mch-tip{position:absolute;top:-6px;transform:translateY(-100%);background:var(--text);color:var(--bg);border-radius:8px;padding:6px 10px;font-size:11px;white-space:nowrap;opacity:0;pointer-events:none;display:flex;flex-direction:column;gap:1px;box-shadow:var(--shadow);}
+.mch-tip b{font-size:12px;font-weight:600;}
+.mch-tip span{opacity:.75;}
+.mch-plot.hov .mch-guide,.mch-plot.hov .mch-dot,.mch-plot.hov .mch-tip{opacity:1;}
+.mch-guide,.mch-dot,.mch-tip{transition:opacity .12s ease-out;}
+.mch-x{display:flex;justify-content:space-between;font-size:10px;color:var(--text-3);margin-top:6px;font-variant-numeric:tabular-nums;}
+/* карточка встречи */
+.mc-wrap{padding:22px 24px 18px;}
+.mc-wrap.no-anim{animation:none!important;}
+.mc-head{align-items:flex-start;}
+.mc-head .mc-badges{margin-left:auto;padding-top:4px;}
+.mc-x{margin:-4px -8px 0 4px;}
+.mc-meta{display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
+.mc-meta .ico{width:13px;height:13px;}
+.mc-sep{width:3px;height:3px;border-radius:50%;background:var(--text-3);display:inline-block;}
+.mc-demo{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.5;color:var(--text-2);background:var(--accent-bg);border-radius:10px;padding:10px 12px;margin-bottom:12px;}
+.mc-demo .ico{width:14px;height:14px;color:var(--accent);flex-shrink:0;margin-top:2px;}
+.mc-player{display:flex;align-items:center;gap:12px;border:1px solid var(--border-soft);border-radius:12px;padding:10px 12px;margin-bottom:14px;}
+.mc-pbtn{width:40px;height:40px;border-radius:50%;border:none;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.mc-pbtn:disabled{background:var(--surface-3);color:var(--text-3);cursor:not-allowed;}
+.mc-pbtn .ico{width:16px;height:16px;fill:currentColor;stroke:none;margin-left:2px;}
+.mc-ptrack{flex:1;min-width:0;}
+.mc-pbar{height:4px;border-radius:2px;background:var(--surface-3);overflow:hidden;}
+.mc-pbar span{display:block;height:100%;background:var(--accent);}
+.mc-ptime{display:flex;justify-content:space-between;font-size:11px;color:var(--text-3);margin-top:5px;font-variant-numeric:tabular-nums;}
+.mc-tabs{display:flex;gap:2px;border-bottom:1px solid var(--border-soft);margin-bottom:12px;}
+.mc-tab{border:none;background:none;font-family:inherit;font-size:13px;font-weight:500;color:var(--text-2);padding:9px 12px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;}
+.mc-tab:hover{color:var(--text);}
+.mc-tab.on{color:var(--accent);border-bottom-color:var(--accent);}
+.mc-pane{min-height:300px;}
+.mc-pane-h{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;color:var(--text-3);margin-bottom:10px;}
+.mc-tr{max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding-right:6px;user-select:text;}
+.mc-line{display:grid;grid-template-columns:44px 1fr;gap:10px;}
+.mc-ts{font-size:11px;color:var(--text-3);font-variant-numeric:tabular-nums;padding-top:2px;}
+.mc-who{font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:2px;}
+.mc-line.me .mc-who{color:var(--accent);}
+.mc-say{font-size:14px;line-height:1.55;color:var(--text);}
+.mc-sum{font-size:14px;line-height:1.6;color:var(--text);max-height:340px;overflow-y:auto;user-select:text;}
+.mc-sum p{margin-bottom:16px;}
+.mc-h{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.mc-sum ul{list-style:none;display:flex;flex-direction:column;gap:8px;}
+.mc-sum li{display:flex;gap:10px;align-items:flex-start;}
+.mc-sum li .ico{width:16px;height:16px;color:var(--green);flex-shrink:0;margin-top:3px;}
+.mc-fu{min-height:300px;font-size:14px;line-height:1.6;}
+.mc-foot{align-items:center;border-top:1px solid var(--border-soft);padding-top:14px;}
+.mc-foot .mc-muted{margin-right:8px;}
+@media(max-width:760px){.mk-grid{grid-template-columns:1fr 1fr;}.mk-grid .mch{grid-column:span 2;min-height:170px;}.mc-foot .mc-muted{display:none;}}
+
 </style>
 </head>
 <body>
@@ -542,7 +603,7 @@ window.togglePw=function(id,btn){var inp=document.getElementById(id);if(!inp)ret
    Безопасность: в браузере только publishable-ключ (публичный по определению)
    + токен залогиненного сотрудника. Без логина RLS не отдаёт ничего.
    Сервисный ключ живёт только в GAS и Edge Functions. */
-var APP_VERSION='2026-10-30.2';
+var APP_VERSION='2026-10-30.3';
 var SB_URL='https://qhpyrlhugpqgojwmarrw.supabase.co';
 var SB_PUB='sb_publishable_0YlWIjJNZqw0pIv3vV4ifQ_X9pCRaHc';
 /* URL веб-приложения GAS (Код.gs → doPost). Пусто — «Обновить» просто перезагружает страницу. */
@@ -848,8 +909,8 @@ var S={
   staffSortKey:'fact',staffSortDir:-1,
   cliSortKey:'fact',cliSortDir:-1,
   sumSort:'fact',sumSortDir:-1,
-  meetings:[],meetPays:{},
-  mDept:'all',mEmp:'all',mRating:'all',mStatus:'all',mSearch:'',mLimit:50,
+  meetings:[],
+  mDept:'all',mEmp:'all',mRating:'all',mSearch:'',mLimit:50,
   authUsers:null,
 };
 /* ═══ UTILS ═══ */
@@ -1627,7 +1688,7 @@ function cbClose(){
 }
 document.addEventListener('click',function(e){if(_cbOpen&&!e.target.closest('#cb-'+_cbOpen))cbClose();});
 document.addEventListener('keydown',function(e){
-  if(!_cbOpen)return;var c=CB[_cbOpen];if(!c)return;
+  if(!_cbOpen){if(e.key==='Escape'){var md=document.getElementById('modal');if(md&&md.classList.contains('open'))closeModal();}return;}var c=CB[_cbOpen];if(!c)return;
   if(e.key==='Escape'){var id=_cbOpen;cbClose();var w=document.getElementById('cb-'+id);if(w)w.querySelector('.cb-trig').focus();e.preventDefault();return;}
   if(e.key==='ArrowDown'){c._hi=Math.min((c._view||[]).length-1,c._hi+1);cbList_(_cbOpen);e.preventDefault();}
   else if(e.key==='ArrowUp'){c._hi=Math.max(0,c._hi-1);cbList_(_cbOpen);e.preventDefault();}
@@ -1652,16 +1713,10 @@ function searchBox_(id,ph,val,oninput,full){
   return'<div class="sbox'+(full?' full':'')+'">'+ICO.search+'<input id="'+id+'" placeholder="'+esc(ph)+'" value="'+esc(val||'')+'"'+(oninput?' oninput="'+oninput+'"':'')+' autocomplete="off"></div>';
 }
 /* ═══ ВСТРЕЧИ ═══
-   Только первичные встречи с новыми клиентами. Лог в таблице meetings.
-   Оценка встречи (good/bad) ставит менеджер. Результат не хранится, а считается:
-   оплата (deals, payment) по привязанной организации в течение MEET_LATE дней
-   после встречи → «Оплата»; первые MEET_WINDOW дней → «В работе»; дальше → «Нет оплаты».
-   Компания вписывается текстом. С организацией на платформе встреча связывается
-   при занесении первой оплаты (дашборд сам предложит встречу) или вручную. */
-var MEET_WINDOW=21, MEET_LATE=90;
+   Первичные встречи с новыми клиентами. Лог в таблице meetings.
+   Менеджер ставит оценку (good/bad). Компания — текстом, как назвал менеджер.
+   Результата у встречи нет: только факт, оценка и запись. */
 var RATING={good:'Хорошая',bad:'Плохая'};
-function isoAddDays(iso,n){var p=iso.split('-').map(Number);return dateISO(new Date(p[0],p[1]-1,p[2]+n));}
-function isoDiff(a,b){var pa=a.split('-').map(Number),pb=b.split('-').map(Number);return Math.round((new Date(pb[0],pb[1]-1,pb[2])-new Date(pa[0],pa[1]-1,pa[2]))/864e5);}
 function fmtDT(ts){if(!ts)return'—';var d=new Date(ts);if(isNaN(d))return'—';return d.toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
 function safeUrl(u){return /^https?:\/\//i.test(String(u||''))?u:'#';}
 var _orgIdx=null,_orgIdxSrc=null;
@@ -1672,56 +1727,24 @@ function orgById_(id){
 function empNameById_(id){var e=RAW.employees.find(function(x){return x.id===id;});return e?(e.display_name||e.name):'—';}
 function deptNameById_(id){var d=RAW.depts.find(function(x){return x.id===id;});return d?d.name:'—';}
 function meetOrgName(m){var c=orgById_(m.platform_org_id);return(c&&c.company_name)||m.company_name||'—';}
-/* нормализация названий: без ООО/ИП/кавычек — для подсказок при привязке */
-var LEGAL_=['ооо','оао','зао','пао','ао','ип','нко','ано','llc','ltd','inc'];
-function normName_(s){return String(s||'').toLowerCase().replace(/ё/g,'е').replace(/[«»"'`.,()\-–—_/\\]/g,' ').split(/\s+/).filter(function(w){return w&&LEGAL_.indexOf(w)<0;}).join(' ');}
-function nameScore_(a,b){
-  if(!a||!b)return 0;
-  if(a===b)return 100;
-  if(a.indexOf(b)>=0||b.indexOf(a)>=0)return 60;
-  var tb=b.split(' '),hit=0;a.split(' ').forEach(function(w){if(w.length>2&&tb.indexOf(w)>=0)hit++;});
-  return hit*15;
-}
-/* встречи текущего + предыдущего периода и оплаты по их организациям */
+function plural_(n,a,b,c){var m10=n%10,m100=n%100;if(m10===1&&m100!==11)return a;if(m10>=2&&m10<=4&&(m100<12||m100>14))return b;return c;}
+function meetWord_(n){return plural_(n,'встреча','встречи','встреч');}
+/* встречи текущего + предыдущего периода (предыдущий — для дельты на дашборде) */
 function loadMeetings(){
   var pr=prevRange(),from=dateISO(pr.from),to=dateISO(S.rangeTo);
   return sbGetAll('meetings?select=*&meeting_type=eq.primary&held_at=gte.'+from+'&held_at=lte.'+to+'&order=held_at.desc,id').then(function(rows){
-    rows=rows||[];
-    var orgs={};rows.forEach(function(m){if(m.platform_org_id)orgs[m.platform_org_id]=1;});
-    var keys=Object.keys(orgs);
-    if(!keys.length)return function(){S.meetings=rows;S.meetPays={};S.meetErr=null;};
-    var chunks=[];for(var i=0;i<keys.length;i+=60)chunks.push(keys.slice(i,i+60));
-    return Promise.all(chunks.map(function(c){
-      return sbGetAll('deals?select=id,platform_org_id,deal_date,amount,event_type&event_type=eq.payment&platform_org_id=in.('+c.map(encodeURIComponent).join(',')+')&deal_date=gte.'+from+'&order=deal_date.asc,id');
-    })).then(function(res){
-      var pays={};[].concat.apply([],res).forEach(function(d){(pays[d.platform_org_id]=pays[d.platform_org_id]||[]).push(d);});
-      return function(){S.meetings=rows;S.meetPays=pays;S.meetErr=null;};
-    });
+    return function(){S.meetings=rows||[];S.meetErr=null;};
   }).catch(function(e){
     console.error('loadMeetings',e);
-    return function(){S.meetings=[];S.meetPays={};S.meetErr=/meetings|rating/.test(e.message)?'Таблица встреч не готова — запусти SQL-миграцию migration_v2.sql':e.message;};
+    return function(){S.meetings=[];S.meetErr=/meetings|rating/.test(e.message)?'Таблица встреч не готова — запусти SQL-миграцию migration_v2.sql':e.message;};
   });
-}
-function meetStatus(m){
-  var pays=m.platform_org_id?((S.meetPays||{})[m.platform_org_id]||[]):[];
-  var lim=isoAddDays(m.held_at,MEET_LATE);
-  var p=null;for(var i=0;i<pays.length;i++){if(pays[i].deal_date>=m.held_at&&pays[i].deal_date<=lim){p=pays[i];break;}}
-  if(p){var lag=isoDiff(m.held_at,p.deal_date);return{k:'won',pay:p,lag:lag,late:lag>MEET_WINDOW};}
-  var age=isoDiff(m.held_at,dateISO(TODAY));
-  if(age<=MEET_WINDOW)return{k:'wait',left:MEET_WINDOW-age};
-  return{k:'lost'};
 }
 function meetCount_(list){
-  var a={total:0,good:0,bad:0,won:0,wait:0,lost:0,emps:{}};
-  list.forEach(function(m){
-    a.total++;a.emps[m.employee_id]=1;
-    if(m.rating==='good')a.good++;else if(m.rating==='bad')a.bad++;
-    a[meetStatus(m).k]++;
-  });
+  var a={total:0,good:0,bad:0,emps:{}};
+  list.forEach(function(m){a.total++;a.emps[m.employee_id]=1;if(m.rating==='good')a.good++;else if(m.rating==='bad')a.bad++;});
   a.empN=Object.keys(a.emps).length;
   return a;
 }
-/* агрегат за выбранный период + число встреч в предыдущем (для дельты) */
 function meetAgg_(pred){
   var f=dateISO(S.rangeFrom),t=dateISO(S.rangeTo),pr=prevRange(),pf=dateISO(pr.from),pt=dateISO(pr.to);
   var cur=[],prevN=0;
@@ -1734,20 +1757,82 @@ function meetAgg_(pred){
 }
 function meetSub_(a){
   if(!a.total)return'встреч не было';
-  var dec=a.won+a.lost;
-  return a.good+' хор. · '+a.bad+' плох.'+(dec?' · конв. '+r(a.won/dec*100)+'%':'');
+  var rated=a.good+a.bad;
+  return a.good+' хор. · '+a.bad+' плох.'+(rated?' · '+r(a.good/rated*100)+'% хороших':'');
 }
 function ratingBadge_(m){
   if(m.rating==='good')return'<span class="mbadge mb-won">'+ICO.thumbUp+' Хорошая</span>';
   if(m.rating==='bad')return'<span class="mbadge mb-lost">'+ICO.thumbDown+' Плохая</span>';
   return'<span class="mbadge mb-neu">Без оценки</span>';
 }
-function meetBadge_(m){
-  var st=meetStatus(m);
-  if(st.k==='won')return'<span class="mbadge mb-won" title="Оплата '+esc(fmt(st.pay.amount))+' через '+st.lag+' дн.">Оплата · '+fmtD(st.pay.deal_date).substring(0,5)+(st.late?' · поздняя':'')+'</span>';
-  if(st.k==='wait')return'<span class="mbadge mb-wait">В работе · '+st.left+' дн</span>';
-  return'<span class="mbadge mb-neu">Нет оплаты</span>';
+/* ═══ ГРАФИК ВСТРЕЧ ПО ДНЯМ — мягкая волна (монотонный кубический сплайн) ═══ */
+var _mch=null;
+function smoothPath_(pts){
+  var n=pts.length;if(!n)return'';if(n===1)return'M'+pts[0][0]+','+pts[0][1];
+  var dx=[],dy=[],m=[],t=[];
+  for(var i=0;i<n-1;i++){dx[i]=pts[i+1][0]-pts[i][0];dy[i]=pts[i+1][1]-pts[i][1];m[i]=dy[i]/dx[i];}
+  t[0]=m[0];t[n-1]=m[n-2];
+  for(i=1;i<n-1;i++)t[i]=(m[i-1]*m[i]<=0)?0:(m[i-1]+m[i])/2;
+  /* Фриц—Карлсон: без выбросов ниже нуля и выше пиков */
+  for(i=0;i<n-1;i++){
+    if(m[i]===0){t[i]=0;t[i+1]=0;continue;}
+    var a=t[i]/m[i],b=t[i+1]/m[i],s=a*a+b*b;
+    if(s>9){var k=3/Math.sqrt(s);t[i]=k*a*m[i];t[i+1]=k*b*m[i];}
+  }
+  var d='M'+pts[0][0].toFixed(2)+','+pts[0][1].toFixed(2);
+  for(i=0;i<n-1;i++){
+    var h=dx[i]/3;
+    d+=' C'+(pts[i][0]+h).toFixed(2)+','+(pts[i][1]+t[i]*h).toFixed(2)+' '+(pts[i+1][0]-h).toFixed(2)+','+(pts[i+1][1]-t[i+1]*h).toFixed(2)+' '+pts[i+1][0].toFixed(2)+','+pts[i+1][1].toFixed(2);
+  }
+  return d;
 }
+var DOW_S=['вс','пн','вт','ср','чт','пт','сб'];
+function dayLbl_(iso,withDow){var p=iso.split('-').map(Number),d=new Date(p[0],p[1]-1,p[2]);return p[2]+' '+MNS[p[1]-1]+(withDow?', '+DOW_S[d.getDay()]:'');}
+function meetChart_(list){
+  var end=S.rangeTo>TODAY?new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate()):S.rangeTo;
+  var days=[],cur=new Date(S.rangeFrom.getFullYear(),S.rangeFrom.getMonth(),S.rangeFrom.getDate());
+  while(cur<=end&&days.length<400){days.push(dateISO(cur));cur=new Date(cur.getFullYear(),cur.getMonth(),cur.getDate()+1);}
+  if(!days.length)days=[dateISO(S.rangeFrom)];
+  var cnt={};list.forEach(function(m){cnt[m.held_at]=(cnt[m.held_at]||0)+1;});
+  var vals=days.map(function(d){return cnt[d]||0;});
+  var max=Math.max.apply(null,vals),top=Math.max(2,max),W=600,H=120,PT=12,PB=4;
+  var n=days.length;
+  var pts=vals.map(function(v,i){return[n>1?i/(n-1)*W:W/2,H-PB-(v/top)*(H-PT-PB)];});
+  var line=smoothPath_(n>1?pts:[[0,pts[0][1]],[W,pts[0][1]]]);
+  var area=line+' L'+W+','+H+' L0,'+H+' Z';
+  var peakI=vals.indexOf(max),total=vals.reduce(function(a,b){return a+b;},0);
+  _mch={days:days,vals:vals,pts:pts,W:W,H:H};
+  var mid=Math.floor((n-1)/2);
+  var axis='<div class="mch-x"><span>'+dayLbl_(days[0])+'</span>'+(n>2?'<span>'+dayLbl_(days[mid])+'</span>':'')+(n>1?'<span>'+dayLbl_(days[n-1])+'</span>':'')+'</div>';
+  var summary='Встречи по дням: всего '+total+(max?', пик '+max+' — '+dayLbl_(days[peakI]):'');
+  return'<div class="ck mch">'+
+    '<div class="mch-head"><span class="ck-l" style="margin:0">Встречи по дням</span>'+
+      (max?'<span class="mch-peak">пик <b>'+max+'</b> · '+dayLbl_(days[peakI])+'</span>':'')+'</div>'+
+    '<div class="mch-plot" role="img" aria-label="'+esc(summary)+'" onmousemove="mchMove(event,this)" onmouseleave="mchLeave(this)">'+
+      '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">'+
+        '<defs><linearGradient id="mchg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" style="stop-color:var(--accent);stop-opacity:.22"/><stop offset="100%" style="stop-color:var(--accent);stop-opacity:0"/></linearGradient></defs>'+
+        '<path d="'+area+'" style="fill:url(#mchg)"/>'+
+        '<path d="'+line+'" style="fill:none;stroke:var(--accent);stroke-width:2.25;stroke-linecap:round;stroke-linejoin:round" vector-effect="non-scaling-stroke"/>'+
+      '</svg>'+
+      (total?'':'<div class="mch-empty">Встреч за период нет</div>')+
+      '<div class="mch-guide"></div><div class="mch-dot"></div><div class="mch-tip"></div>'+
+    '</div>'+axis+'</div>';
+}
+window.mchMove=function(e,el){
+  if(!_mch)return;
+  var rc=el.getBoundingClientRect(),n=_mch.days.length;
+  var x=Math.min(1,Math.max(0,(e.clientX-rc.left)/rc.width));
+  var i=n>1?Math.round(x*(n-1)):0;
+  var lx=(n>1?i/(n-1):.5)*100,ly=_mch.pts[i][1]/_mch.H*100,v=_mch.vals[i];
+  el.classList.add('hov');
+  el.querySelector('.mch-guide').style.left=lx+'%';
+  var dot=el.querySelector('.mch-dot');dot.style.left=lx+'%';dot.style.top=ly+'%';
+  var tip=el.querySelector('.mch-tip');
+  tip.innerHTML='<b>'+v+' '+meetWord_(v)+'</b><span>'+dayLbl_(_mch.days[i],true)+'</span>';
+  var tw=tip.offsetWidth||110,px=lx/100*rc.width;
+  tip.style.left=Math.min(rc.width-tw,Math.max(0,px-tw/2))+'px';
+};
+window.mchLeave=function(el){el.classList.remove('hov');};
 /* ═══ ИСТОРИЯ ВСТРЕЧ (вкладка) ═══ */
 function meetFiltered_(){
   var f=dateISO(S.rangeFrom),t=dateISO(S.rangeTo),q=(S.mSearch||'').trim().toLowerCase();
@@ -1756,7 +1841,6 @@ function meetFiltered_(){
     if(S.mDept!=='all'&&m.dept_id!==S.mDept)return false;
     if(S.mEmp!=='all'&&m.employee_id!==S.mEmp)return false;
     if(S.mRating!=='all'&&m.rating!==S.mRating)return false;
-    if(S.mStatus!=='all'&&meetStatus(m).k!==S.mStatus)return false;
     if(q&&meetOrgName(m).toLowerCase().indexOf(q)<0&&String(m.company_name||'').toLowerCase().indexOf(q)<0)return false;
     return true;
   }).sort(function(a,b){if(a.held_at!==b.held_at)return a.held_at<b.held_at?1:-1;return String(a.created_at)<String(b.created_at)?1:-1;});
@@ -1777,21 +1861,19 @@ function empComboOpts_(deptId,allLabel){
   return out.concat(act.sort(byName).map(function(e){return o(e,allLabel?'Сотрудники':'');})).concat(fired.sort(byName).map(function(e){return o(e,'Уволенные');}));
 }
 function renderMeetings(){
-  var list=meetFiltered_(),a=meetCount_(list);
-  var decided=a.won+a.lost,conv=decided?r(a.won/decided*100):0,rated=a.good+a.bad;
-  var deptEmps=RAW.employees.filter(function(e){return!e.fired_at&&!e.is_archived&&(S.mDept==='all'||e.dept_id===S.mDept);});
-  var idle=deptEmps.filter(function(e){return!a.emps[e.id];}).length;
-  var kH=[
-    '<div class="ck"><div class="ck-l">Проведено встреч</div><div class="ck-v num">'+a.total+'</div><div class="ck-s">'+(a.empN?'≈ '+(Math.round(a.total/a.empN*10)/10)+' на менеджера':'—')+'</div></div>',
-    '<div class="ck"><div class="ck-l">Хорошие встречи</div><div class="ck-v num">'+(rated?r(a.good/rated*100)+'%':'—')+'</div><div class="ck-s">'+a.good+' хороших · '+a.bad+' плохих</div></div>',
-    '<div class="ck"><div class="ck-l">Конверсия в оплату</div><div class="ck-v num">'+(decided?conv+'%':'—')+'</div><div class="ck-s">'+(decided?'из '+decided+' завершённых':'пока нечего считать')+(a.wait?' · '+a.wait+' в работе':'')+'</div></div>',
-    '<div class="ck"><div class="ck-l">Менеджеров со встречами</div><div class="ck-v num">'+a.empN+'</div><div class="ck-s">'+(idle?idle+' без встреч за период':'все проводили встречи')+'</div></div>'
-  ].join('');
+  var list=meetFiltered_(),a=meetCount_(list),rated=a.good+a.bad;
+  var prev=meetAgg_(function(m){return(S.mDept==='all'||m.dept_id===S.mDept)&&(S.mEmp==='all'||m.employee_id===S.mEmp);}).prevTotal;
+  var kH=
+    '<div class="ck"><div style="display:flex;align-items:center;gap:6px;margin-bottom:8px"><span class="ck-l" style="margin:0">Проведено встреч</span>'+(prev>0?deltaTag(a.total,prev):'')+'</div>'+
+      '<div class="ck-v num">'+a.total+'</div><div class="ck-s">'+(a.empN?a.empN+' '+plural_(a.empN,'менеджер','менеджера','менеджеров')+' · ≈ '+(Math.round(a.total/a.empN*10)/10)+' на каждого':'—')+'</div></div>'+
+    '<div class="ck"><div class="ck-l">Хорошие встречи</div><div class="ck-v num" style="color:'+(rated?grad(a.good/rated*100):'var(--text)')+'">'+(rated?r(a.good/rated*100)+'%':'—')+'</div>'+
+      '<div class="ck-s">'+a.good+' хороших · '+a.bad+' плохих</div>'+
+      (rated?'<div class="rate-bar"><span style="width:'+(a.good/rated*100)+'%"></span></div>':'')+'</div>'+
+    meetChart_(list);
   var ratings=[['all','Все'],['good','Хорошие'],['bad','Плохие']].map(function(t){return'<button class="pill'+(S.mRating===t[0]?' on':'')+'" onclick="setMF(\'mRating\',\''+t[0]+'\')">'+t[1]+'</button>';}).join('');
   var filters='<div class="m-filters">'+
     combo({id:'mf-dept',opts:deptComboOpts_('Все отделы'),value:S.mDept,onChange:function(v){setMF('mDept',v);}})+
     combo({id:'mf-emp',opts:empComboOpts_(S.mDept,'Все сотрудники'),value:S.mEmp,searchPh:'Поиск по ФИО…',onChange:function(v){setMF('mEmp',v);}})+
-    combo({id:'mf-st',opts:[{v:'all',l:'Любой результат'},{v:'won',l:'Оплата'},{v:'wait',l:'В работе'},{v:'lost',l:'Нет оплаты'}],value:S.mStatus,search:false,onChange:function(v){setMF('mStatus',v);}})+
     '<div class="pill-row">'+ratings+'</div>'+
     searchBox_('m-srch','Поиск по компании…',S.mSearch,'setMSearch(this.value)')+
     '<span style="flex:1"></span><button class="btn primary mi" onclick="exportMeetings()">'+ICO.download+' XLSX</button>'+
@@ -1799,42 +1881,34 @@ function renderMeetings(){
   var shown=list.slice(0,S.mLimit);
   var rows=shown.map(function(m){
     var rec=m.recording_url?'<a class="icon-act" href="'+esc(safeUrl(m.recording_url))+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Открыть запись" aria-label="Открыть запись">'+ICO.play+'</a>':'<span class="muted">—</span>';
-    var link=!m.platform_org_id?'<button class="icon-act" onclick="event.stopPropagation();linkMeetingModal(\''+m.id+'\')" title="Привязать к организации на платформе" aria-label="Привязать к организации">'+ICO.link+'</button>':'';
     return'<tr class="clickable" onclick="openMeeting(\''+m.id+'\')">'+
       '<td class="muted num nw">'+fmtD(m.held_at)+'</td>'+
       '<td><div class="cell2"><span class="strong">'+esc(empNameById_(m.employee_id))+'</span><span>'+esc(deptNameById_(m.dept_id))+'</span></div></td>'+
       '<td class="wrap">'+esc(meetOrgName(m))+'</td>'+
       '<td class="nw">'+ratingBadge_(m)+'</td>'+
       '<td class="c">'+rec+'</td>'+
-      '<td class="r nw">'+meetBadge_(m)+'</td>'+
-      '<td class="r nw act-col">'+link+'</td>'+
     '</tr>';
   }).join('');
   var empty=S.meetErr?'<div class="err-banner">'+ICO.alert+' '+esc(S.meetErr)+'</div>':'<div class="empty-state">Встреч за период нет.<br>Добавь первую кнопкой <b>+ Встреча</b> сверху.</div>';
-  var table=shown.length?'<table class="tbl"><thead><tr><th>Дата</th><th>Сотрудник</th><th>Компания</th><th>Оценка</th><th class="c">Запись</th><th class="r">Результат</th><th></th></tr></thead><tbody>'+rows+'</tbody></table>'+
+  var table=shown.length?'<table class="tbl"><thead><tr><th>Дата</th><th>Сотрудник</th><th>Компания</th><th>Оценка</th><th class="c">Запись</th></tr></thead><tbody>'+rows+'</tbody></table>'+
     (list.length>shown.length?'<div style="text-align:center;margin-top:14px"><button class="btn" onclick="moreMeetings()">Показать ещё ('+(list.length-shown.length)+')</button></div>':''):empty;
   setApp('<div class="topbar"><div class="nav-left"><span class="brand">Sasha<span class="a">AI</span> · Встречи</span></div>'+calTrigger()+'</div>'+
     (S.loadErr?'<div class="err-banner">'+ICO.alert+' '+esc(S.loadErr)+'</div>':'')+
-    '<div class="ckpi k4">'+kH+'</div>'+
+    '<div class="mk-grid">'+kH+'</div>'+
     '<div class="panel">'+filters+table+'</div>');
 }
 window.exportMeetings=function(){
   var list=meetFiltered_();
   if(!list.length){toast('Нет встреч для выгрузки');return;}
-  var rows=list.map(function(m){var st=meetStatus(m);return{
+  var rows=list.map(function(m){return{
     'Дата':m.held_at,'Сотрудник':empNameById_(m.employee_id),'Отдел':deptNameById_(m.dept_id),
-    'Компания':meetOrgName(m),'Как записали':m.company_name||'','Оценка':RATING[m.rating]||'',
-    'На платформе':m.platform_org_id?'да':'нет',
-    'Результат':st.k==='won'?'Оплата':st.k==='wait'?'В работе':'Нет оплаты',
-    'Дата оплаты':st.pay?st.pay.deal_date:'','Сумма оплаты':st.pay?(Number(st.pay.amount)||0):'',
-    'Запись':m.recording_url||''};});
+    'Компания':meetOrgName(m),'Оценка':RATING[m.rating]||'','Запись':m.recording_url||''};});
   var by={};
   list.forEach(function(m){
-    var k=m.employee_id;var e=by[k]||(by[k]={'Сотрудник':empNameById_(k),'Отдел':deptNameById_(m.dept_id),'Всего':0,'Хорошие':0,'Плохие':0,'Оплата':0,'В работе':0,'Нет оплаты':0,'Конверсия, %':0});
+    var k=m.employee_id;var e=by[k]||(by[k]={'Сотрудник':empNameById_(k),'Отдел':deptNameById_(m.dept_id),'Всего':0,'Хорошие':0,'Плохие':0,'Хороших, %':0});
     e['Всего']++;if(m.rating==='good')e['Хорошие']++;if(m.rating==='bad')e['Плохие']++;
-    var st=meetStatus(m);e[st.k==='won'?'Оплата':st.k==='wait'?'В работе':'Нет оплаты']++;
   });
-  var sum=Object.keys(by).map(function(k){var e=by[k],d=e['Оплата']+e['Нет оплаты'];e['Конверсия, %']=d?r(e['Оплата']/d*100):'';return e;}).sort(function(x,y){return y['Всего']-x['Всего'];});
+  var sum=Object.keys(by).map(function(k){var e=by[k],d=e['Хорошие']+e['Плохие'];e['Хороших, %']=d?r(e['Хорошие']/d*100):'';return e;}).sort(function(x,y){return y['Всего']-x['Всего'];});
   var wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(sum),'Свод');
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'Встречи');
@@ -1890,45 +1964,77 @@ function saveMeeting(){
   req.then(function(){closeModal();toast(wasEdit?'Встреча обновлена':'Встреча добавлена','ok');refreshMeetings();})
     .catch(function(e){btn.disabled=false;btn.textContent='Сохранить';toast('Не сохранилось: '+e.message,'err');});
 }
-/* ═══ КАРТОЧКА ВСТРЕЧИ ═══ */
-window.openMeeting=function(id){
+/* ═══ КАРТОЧКА ВСТРЕЧИ ═══
+   Пока Телемост не подключён — показываем демо-содержимое на реальных именах,
+   чтобы было видно, как это будет работать. Реальные данные лягут в meetings.ai. */
+function meetDemo_(m){
+  var mgr=empNameById_(m.employee_id).split(' ')[0]||'Менеджер',co=meetOrgName(m);
+  var T=[
+    ['00:12',mgr,'Добрый день! Спасибо, что нашли время. Расскажите в двух словах, как сейчас устроены звонки клиентам в '+co+'?'],
+    ['00:41','Клиент','Здравствуйте. У нас колл-центр на пять операторов, обзваниваем базу после заявок с сайта. Дозвон слабый, многие заявки остывают.'],
+    ['01:28',mgr,'Сколько заявок в день и за какое время сейчас успеваете перезвонить?'],
+    ['01:46','Клиент','Около 300 в день. Перезваниваем в среднем через 2–3 часа, вечерние — уже утром.'],
+    ['02:30',mgr,'Понял. Наш голосовой агент звонит в первую минуту после заявки, квалифицирует и передаёт тёплого клиента оператору. Операторы занимаются только теми, кто готов говорить.'],
+    ['03:15','Клиент','А как он справляется с возражениями? У нас аудитория непростая.'],
+    ['03:38',mgr,'Сценарий собираем под ваши возражения, первые две недели дорабатываем по записям. Покажу пример звонка из похожей ниши.'],
+    ['09:02','Клиент','Звучит живо. Сколько это стоит на нашем объёме?'],
+    ['09:20',mgr,'На 300 заявок в день — пакет около 25 тысяч минут в месяц. Пришлю расчёт и кейс сегодня.'],
+    ['10:05','Клиент','Хорошо. Давайте тест на неделю, решение примет директор по продажам.']
+  ];
+  return{
+    transcript:T,
+    summary:'Колл-центр из 5 операторов, ~300 заявок в день, перезвон через 2–3 часа — заявки остывают. Боль: скорость первого контакта и нагрузка на операторов. Интерес к тесту на неделю, решение за директором по продажам.',
+    agreements:['Отправить расчёт на пакет ~25 000 минут и кейс из похожей ниши — сегодня','Собрать сценарий под возражения клиента до тестового запуска','Созвониться с директором по продажам после недели теста'],
+    follow_up:'Добрый день!\n\nСпасибо за встречу. Коротко, о чём договорились:\n\n— Запускаем тест голосового агента на неделю: звонок в первую минуту после заявки, квалификация и передача тёплых клиентов операторам.\n— Сценарий соберём под ваши возражения до старта.\n— На ваш объём (~300 заявок в день) расчёт пакета и кейс из похожей ниши во вложении.\n\nПредлагаю после теста созвониться вместе с директором по продажам и разобрать цифры.\n\nС уважением,\n'+empNameById_(m.employee_id)+'\nSashaAI'
+  };
+}
+var _mtab='tr';
+window.openMeeting=function(id,tab){
   var m=(S.meetings||[]).find(function(x){return x.id===id;});if(!m)return;
-  var st=meetStatus(m),ai=m.ai||{};
-  function sec(title,content,soon){return'<div class="mc-sec"><div class="mc-sec-t">'+title+(soon?' <span class="mc-soon">скоро</span>':'')+'</div>'+content+'</div>';}
-  var head='<div class="mc-head"><div><div class="mc-title">'+esc(meetOrgName(m))+'</div><div class="mc-meta">'+
-    fmtD(m.held_at)+' · '+esc(empNameById_(m.employee_id))+' · '+esc(deptNameById_(m.dept_id))+
-    '</div></div><div class="mc-badges">'+ratingBadge_(m)+meetBadge_(m)+'</div></div>';
-  var unl=!m.platform_org_id?'<div class="mc-warn"><span>Встреча пока не привязана к организации на платформе. Привяжется сама, когда занесёшь первую оплату, или вручную.</span><button class="btn sm mi" onclick="linkMeetingModal(\''+m.id+'\')">'+ICO.link+' Привязать</button></div>':'';
-  var won=st.k==='won'?'<div class="mc-ok">'+ICO.check+' Оплата '+esc(fmt(st.pay.amount))+' · '+fmtD(st.pay.deal_date)+' · через '+st.lag+' дн. после встречи'+(st.late?' (позже окна в '+MEET_WINDOW+' дн.)':'')+'</div>':'';
-  var video='<div class="mc-video"><div class="mc-play">'+ICO.play+'</div><div class="mc-video-t">Плеер появится после подключения Телемоста</div></div>'+
-    '<div class="mc-row-btns">'+(m.recording_url?'<a class="btn sm mi" href="'+esc(safeUrl(m.recording_url))+'" target="_blank" rel="noopener">'+ICO.link+' Открыть запись</a>':'<span class="mc-muted">Ссылка на запись не указана</span>')+
-    '<button class="btn sm mi" disabled title="После подключения Телемоста">'+ICO.download+' Скачать</button></div>';
-  var transcript=ai.transcript?'<div class="mc-text">'+esc(ai.transcript)+'</div>':'<div class="mc-stub">AI-транскрипт появится автоматически после встречи</div>';
-  var agreements=ai.agreements?'<div class="mc-text">'+esc(ai.agreements)+'</div>':'<div class="mc-stub">AI выделит договорённости из записи</div>';
-  var fu=ai.follow_up
-    ?'<textarea class="mc-fu" id="mc-fu" readonly>'+esc(ai.follow_up)+'</textarea><button class="btn sm primary mi" onclick="copyFollowUp()">'+ICO.clipboard+' Скопировать</button>'
-    :'<div class="mc-stub">Письмо клиенту по итогам встречи сгенерируется автоматически — скопируешь и отправишь</div><button class="btn sm mi" disabled>'+ICO.clipboard+' Скопировать</button>';
-  var extra='<div class="mc-chips">'+
-    '<span class="mc-chip">Оценка по скрипту'+(ai.score!=null?': <b>'+esc(String(ai.score))+'</b>':'')+'</span>'+
-    '<span class="mc-chip">Возражения клиента'+(ai.objections?': '+esc(ai.objections):'')+'</span>'+
-    '<span class="mc-chip">ЛПР на встрече'+(ai.decision_maker!=null?': <b>'+(ai.decision_maker?'да':'нет')+'</b>':'')+'</span>'+
-    '<span class="mc-chip">Колл-бюджет / объём минут'+(ai.budget?': '+esc(ai.budget):'')+'</span>'+
-    '<span class="mc-chip">Сигналы апсейла и риски'+(ai.signals?': '+esc(ai.signals):'')+'</span>'+
-  '</div>';
-  var details='<div class="mc-details">'+
-    (m.platform_org_id&&m.company_name&&m.company_name!==meetOrgName(m)?'<div>Записали как: '+esc(m.company_name)+'</div>':'')+
-    '<div class="mc-muted">Добавлено '+fmtDT(m.created_at)+'</div></div>';
-  var actions='<div class="modal-actions"><button class="btn danger mi" onclick="deleteMeeting(\''+m.id+'\')">'+ICO.trash+' Удалить</button><span style="flex:1"></span>'+
-    '<button class="btn mi" onclick="meetingForm(\''+m.id+'\')">'+ICO.edit+' Редактировать</button><button class="btn primary" onclick="closeModal()">Закрыть</button></div>';
+  if(tab)_mtab=tab;
+  var ai=m.ai||{},demo=!ai.transcript&&!ai.summary&&!ai.follow_up;
+  var d=demo?meetDemo_(m):{transcript:ai.transcript||[],summary:ai.summary||'',agreements:ai.agreements||[],follow_up:ai.follow_up||''};
+  var mgrName=empNameById_(m.employee_id);
+  var head='<div class="mc-head"><div><div class="mc-title">'+esc(meetOrgName(m))+'</div>'+
+    '<div class="mc-meta">'+ICO.calendar+' '+fmtD(m.held_at)+'<span class="mc-sep"></span>'+esc(mgrName)+'<span class="mc-sep"></span>'+esc(deptNameById_(m.dept_id))+'</div></div>'+
+    '<div class="mc-badges">'+ratingBadge_(m)+'</div><button class="icon-act mc-x" onclick="closeModal()" aria-label="Закрыть">'+ICO.fire+'</button></div>';
+  var player='<div class="mc-player"><button class="mc-pbtn" '+(m.recording_url?'onclick="window.open(\''+esc(safeUrl(m.recording_url))+'\',\'_blank\')" title="Открыть запись"':'disabled')+' aria-label="Воспроизвести">'+ICO.play+'</button>'+
+    '<div class="mc-ptrack"><div class="mc-pbar"><span style="width:0%"></span></div><div class="mc-ptime"><span>00:00</span><span>'+(demo?'42:17':'—')+'</span></div></div>'+
+    (m.recording_url?'<a class="btn sm mi" href="'+esc(safeUrl(m.recording_url))+'" target="_blank" rel="noopener">'+ICO.link+' Открыть</a>':'')+
+    '<button class="btn sm mi" disabled title="Появится после подключения Телемоста">'+ICO.download+'</button></div>';
+  var tabs=[['tr','Транскрипт'],['sum','Итоги'],['fu','Письмо клиенту']].map(function(t){
+    return'<button class="mc-tab'+(_mtab===t[0]?' on':'')+'" role="tab" aria-selected="'+(_mtab===t[0])+'" onclick="openMeeting(\''+m.id+'\',\''+t[0]+'\')">'+t[1]+'</button>';}).join('');
+  var body='';
+  if(_mtab==='tr'){
+    body='<div class="mc-pane-h"><span>'+(d.transcript.length?d.transcript.length+' реплик':'')+'</span><button class="btn sm mi" onclick="copyMeet(\'tr\')">'+ICO.clipboard+' Скопировать</button></div>'+
+      '<div class="mc-tr" id="mc-copy-tr">'+(d.transcript.length?d.transcript.map(function(x){
+        var me=x[1]!=='Клиент';
+        return'<div class="mc-line'+(me?' me':'')+'"><span class="mc-ts">'+esc(x[0])+'</span><div><div class="mc-who">'+esc(x[1])+'</div><div class="mc-say">'+esc(x[2])+'</div></div></div>';
+      }).join(''):'<div class="mc-stub">Транскрипта пока нет</div>')+'</div>';
+  } else if(_mtab==='sum'){
+    body='<div class="mc-pane-h"><span></span><button class="btn sm mi" onclick="copyMeet(\'sum\')">'+ICO.clipboard+' Скопировать</button></div>'+
+      '<div class="mc-sum" id="mc-copy-sum"><div class="mc-h">Коротко</div><p>'+esc(d.summary||'—')+'</p>'+
+      '<div class="mc-h">Договорились</div><ul>'+(d.agreements||[]).map(function(x){return'<li>'+ICO.check+'<span>'+esc(x)+'</span></li>';}).join('')+'</ul></div>';
+  } else {
+    body='<div class="mc-pane-h"><span>Можно поправить текст перед отправкой</span><button class="btn sm primary mi" onclick="copyMeet(\'fu\')">'+ICO.clipboard+' Скопировать письмо</button></div>'+
+      '<textarea class="mc-fu" id="mc-copy-fu" spellcheck="true">'+esc(d.follow_up||'')+'</textarea>';
+  }
+  var demoNote=demo?'<div class="mc-demo">'+ICO.alert+'<span>Пример: так карточка будет выглядеть после подключения Телемоста — транскрипт, итоги и письмо будут собираться сами.</span></div>':'';
+  var actions='<div class="modal-actions mc-foot"><button class="btn danger mi" onclick="deleteMeeting(\''+m.id+'\')">'+ICO.trash+' Удалить</button><span style="flex:1"></span>'+
+    '<span class="mc-muted">Добавлено '+fmtDT(m.created_at)+'</span>'+
+    '<button class="btn mi" onclick="meetingForm(\''+m.id+'\')">'+ICO.edit+' Редактировать</button></div>';
   var md=document.getElementById('modal');
-  md.innerHTML='<div class="modal wide" role="dialog" aria-modal="true">'+head+unl+won+sec('Запись встречи',video)+
-    '<div class="mc-grid">'+sec('Транскрипция',transcript,!ai.transcript)+sec('Договорённости',agreements,!ai.agreements)+'</div>'+
-    sec('Follow-up клиенту',fu,!ai.follow_up)+sec('AI-разбор встречи',extra,true)+details+actions+'</div>';
+  var wasOpen=md.classList.contains('open')&&md.querySelector('.mc-wrap');
+  md.innerHTML='<div class="modal wide mc-wrap'+(wasOpen?' no-anim':'')+'" role="dialog" aria-modal="true" aria-label="Встреча">'+head+demoNote+player+
+    '<div class="mc-tabs" role="tablist">'+tabs+'</div><div class="mc-pane">'+body+'</div>'+actions+'</div>';
   md.classList.add('open');
 };
-window.copyFollowUp=function(){
-  var el=document.getElementById('mc-fu');if(!el)return;
-  (navigator.clipboard?navigator.clipboard.writeText(el.value):Promise.reject()).then(function(){toast('Скопировано','ok');},function(){el.select();document.execCommand('copy');toast('Скопировано','ok');});
+window.copyMeet=function(k){
+  var el=document.getElementById('mc-copy-'+k);if(!el)return;
+  var txt=k==='fu'?el.value:k==='tr'?[].map.call(el.querySelectorAll('.mc-line'),function(l){return l.querySelector('.mc-ts').textContent+' '+l.querySelector('.mc-who').textContent+': '+l.querySelector('.mc-say').textContent;}).join('\n'):el.innerText;
+  (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(function(){toast('Скопировано','ok');},function(){
+    var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Скопировано','ok');}catch(e){}ta.remove();
+  });
 };
 window.deleteMeeting=function(id){
   var m=(S.meetings||[]).find(function(x){return x.id===id;});
@@ -1937,51 +2043,7 @@ window.deleteMeeting=function(id){
       .catch(function(e){toast('Не удалилось: '+e.message,'err');});
   });
 };
-/* ═══ ПРИВЯЗКА ВСТРЕЧИ К ОРГАНИЗАЦИИ ═══ */
-var _lk=null;
-window.linkMeetingModal=function(id){
-  var m=(S.meetings||[]).find(function(x){return x.id===id;});if(!m)return;
-  _lk={id:id,search:m.company_name||''};
-  openModalSimple('Привязать к организации','<p class="modal-sub">Встреча с «'+esc(m.company_name)+'» от '+fmtD(m.held_at)+'. Выбери организацию на платформе — её оплаты засчитаются этой встрече.</p><div id="lk-wrap"></div>');
-  renderLinkSearch();
-};
-function renderLinkSearch(){
-  var wrap=document.getElementById('lk-wrap');if(!wrap||!_lk)return;
-  var nq=normName_(_lk.search);
-  var scored=(RAW.allClients||[]).filter(function(c){return!c.is_hidden;}).map(function(c){
-    return{c:c,s:nq?nameScore_(normName_(c.company_name),nq):1};
-  }).filter(function(x){return x.s>0;}).sort(function(a,b){return b.s-a.s;}).slice(0,30);
-  var items=scored.length?scored.map(function(x){return'<div class="cli-do" onclick="doLinkMeeting(\''+_lk.id+'\',\''+esc(x.c.platform_org_id)+'\',\'manual\')">'+esc(x.c.company_name||'—')+'</div>';}).join('')
-    :'<div class="cli-empty">Не нашли. Если организацию только что создали на платформе — нажми «Обновить» сверху, она подтянется.</div>';
-  wrap.innerHTML=searchBox_('lk-search','Название организации…',_lk.search,'',true)+'<div class="cli-drop">'+items+'</div>';
-  var si=document.getElementById('lk-search');
-  si.oninput=function(){_lk.search=this.value;renderLinkSearch();var x=document.getElementById('lk-search');if(x){x.focus();x.setSelectionRange(x.value.length,x.value.length);}};
-}
-window.doLinkMeeting=function(id,orgId,method){
-  sbPatch('meetings','id=eq.'+id,{platform_org_id:orgId,linked_at:new Date().toISOString(),link_method:method})
-    .then(function(){closeModal();toast('Встреча привязана к организации','ok');refreshMeetings();})
-    .catch(function(e){toast('Не привязалось: '+e.message,'err');});
-};
-/* После первой оплаты по организации: у сотрудника есть встречи «без организации»
-   за последние MEET_LATE дней? Предлагаем выбрать, похожие по названию — первыми. */
-function offerMeetingLink_(empId,orgId,dealDate){
-  var org=orgById_(orgId),orgNm=org?org.company_name:'';
-  Promise.all([
-    sbGet('meetings?select=id,held_at,company_name&employee_id=eq.'+empId+'&meeting_type=eq.primary&platform_org_id=is.null&held_at=gte.'+isoAddDays(dealDate,-MEET_LATE)+'&held_at=lte.'+dealDate+'&order=held_at.desc&limit=30'),
-    sbGet('meetings?select=id&meeting_type=eq.primary&platform_org_id=eq.'+encodeURIComponent(orgId)+'&limit=1')
-  ]).then(function(res){
-    var cand=res[0]||[];
-    if(!cand.length||(res[1]||[]).length)return;
-    var nq=normName_(orgNm);
-    cand.forEach(function(m){m._s=nameScore_(normName_(m.company_name),nq);});
-    cand.sort(function(a,b){return(b._s-a._s)||(a.held_at<b.held_at?1:-1);});
-    var list=cand.map(function(m,i){
-      return'<button class="de-pick" onclick="doLinkMeeting(\''+m.id+'\',\''+esc(orgId)+'\',\'deal\')"><span>'+esc(m.company_name)+
-        (i===0&&m._s>=60?' <span class="mbadge mb-won" style="margin-left:6px">похоже</span>':'')+'</span><span class="muted num">'+fmtD(m.held_at)+'</span></button>';
-    }).join('');
-    openModalSimple('Это клиент с одной из встреч?','<p class="modal-sub">Оплата от «'+esc(orgNm)+'». Если она по одной из встреч менеджера — выбери, встреча засчитается в конверсию. Если нет — просто закрой.</p><div class="de-list">'+list+'</div>');
-  }).catch(function(e){console.error('offerMeetingLink_',e);});
-}
+
 /* ═══ ДОСТУПЫ В ДАШБОРД (только админ) ═══
    Логин = рабочая почта, стартовый пароль 12345678, при первом входе — обязательная смена.
    Создание/сброс/блокировка — через Edge Function admin-users. */
@@ -2299,7 +2361,7 @@ function saveDeal(existing,preDeptId){
   var dept=RAW.depts.find(function(x){return x.id===deptId;});
   var row={event_type:type,employee_id:empId,employee_name:emp?emp.name:'',platform_org_id:orgId,client_name:clientName,dept_id:deptId,dept_name:dept?dept.name:'',amount:amount,motivation_pct:pct2,deal_date:date,note:note};
   var req=existing?sbPatch('deals','id=eq.'+existing.id,row):sbPost('deals',row).then(function(res){if(res&&res.code)throw new Error(res.message||res.code);return res;});
-  req.then(function(){closeModal();refreshPeriod(true);flashSave();if(!existing&&type==='payment')offerMeetingLink_(empId,orgId,date);}).catch(function(e){
+  req.then(function(){closeModal();refreshPeriod(true);flashSave();}).catch(function(e){
     if(btn){btn.disabled=false;delete btn.dataset.saving;btn.textContent='Сохранить';}
     alert('Не удалось сохранить сделку, попробуй ещё раз.'+(e&&e.message?'\n'+e.message:''));
   });
