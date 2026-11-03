@@ -971,7 +971,7 @@ window.togglePw=function(id,btn){var inp=document.getElementById(id);if(!inp)ret
    Безопасность: в браузере только publishable-ключ (публичный по определению)
    + токен залогиненного сотрудника. Без логина RLS не отдаёт ничего.
    Сервисный ключ живёт только в GAS и Edge Functions. */
-var APP_VERSION='2026-10-31.11';
+var APP_VERSION='2026-11-03.1';
 var SB_URL='https://qhpyrlhugpqgojwmarrw.supabase.co';
 var SB_PUB='sb_publishable_0YlWIjJNZqw0pIv3vV4ifQ_X9pCRaHc';
 /* URL веб-приложения GAS (Код.gs → doPost). Пусто — «Обновить» просто перезагружает страницу. */
@@ -1024,9 +1024,13 @@ function sbFetch(url,opts,_retried){
     return fetch(url,Object.assign({},opts,{headers:h}));
   }).then(function(r){
     if(r.status===401&&!_retried)return refreshSession_().then(function(){return sbFetch(url,opts,true);});
+    if(r.status===403&&!_retried&&/\/auth\/v1\//.test(url))return r.clone().text().then(function(t){
+      if(isSessionGone_(t))return refreshSession_().then(function(){return sbFetch(url,opts,true);});
+      return r;
+    });
     return r;
   }).catch(function(e){
-    if(e&&(e.message==='no_session'||e.message==='session_expired'))sessionLost_();
+    if(e&&(e.message==='no_session'||e.message==='session_expired')&&!_loginPw)sessionLost_();
     throw e;
   });
 }
@@ -1186,7 +1190,7 @@ window.doLogin=async function(){
   }
   _sessionLostShown=false;
   authSave(sessionFromAuth_(d));
-  if(CURRENT_USER.mustChange){showForceChange();return;}
+  if(CURRENT_USER.mustChange){_loginPw=pass;showForceChange();return;}
   hideLogin();
   afterLogin_();
 };
@@ -1203,6 +1207,16 @@ window.doLogout=async function(){
   document.getElementById('app').innerHTML='';
   showLogin();
 };
+var _loginPw=null;
+function isSessionGone_(m){return/session[^]*(does not exist|not found)|session_not_found|refresh token not found|invalid refresh token/i.test(String(m||''));}
+function reLogin_(){
+  if(!_loginPw||!CURRENT_USER||!CURRENT_USER.email)return Promise.reject(new Error('relogin_impossible'));
+  return fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SB_PUB,'Content-Type':'application/json'},
+    body:JSON.stringify({email:CURRENT_USER.email,password:_loginPw})}).then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.access_token)throw new Error('relogin_failed');
+    authSave(Object.assign({},CURRENT_USER,sessionFromAuth_(d)));
+  });
+}
 function pwProblem_(p1,p2){
   if(!p1||p1.length<8)return'Минимум 8 символов';
   if(p1===DEFAULT_PASSWORD)return'Стартовый пароль не подойдёт — придумай свой';
@@ -1239,7 +1253,16 @@ window.doForceChange=async function(){
   var err=document.getElementById('fc-err'),btn=document.getElementById('fc-btn');
   var bad=pwProblem_(p1,p2);if(bad){err.textContent=bad;return;}
   btn.disabled=true;btn.textContent='Сохраняю…';
-  try{await setPassword_(p1);}catch(e){err.textContent=e.message;btn.disabled=false;btn.textContent='Сохранить и войти';return;}
+  try{await setPassword_(p1);}
+  catch(e){
+    var ok=false;
+    if(isSessionGone_(e.message)||/session_expired|no_session/.test(e.message)){
+      try{await reLogin_();await setPassword_(p1);ok=true;}catch(e2){}
+      if(!ok){_loginPw=null;authClear();showLogin('Сессия устарела. Войди ещё раз со стартовым паролем 12345678 — и сразу поставишь свой.');return;}
+    }
+    if(!ok){err.textContent=e.message;btn.disabled=false;btn.textContent='Сохранить и войти';return;}
+  }
+  _loginPw=null;
   CURRENT_USER.mustChange=false;authSave(CURRENT_USER);
   hideLogin();
   afterLogin_();
@@ -3534,8 +3557,8 @@ function checkRecoveryHash(){
   if(checkRecoveryHash()){return;}
   startVersionWatch();
   if(authLoad()){
+    if(CURRENT_USER&&CURRENT_USER.mustChange){authClear();showLogin('Войди со стартовым паролем 12345678 и поставь свой');return;}
     ensureToken().then(function(){
-      if(CURRENT_USER.mustChange){showForceChange();return;}
       return afterLogin_();
     }).catch(function(){authClear();showLogin();});
   } else {
